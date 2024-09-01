@@ -1,0 +1,11 @@
+{
+  "preset": "laravel",
+  "rules" : {
+    "declare_strict_types"            : true,
+    "no_superfluous_phpdoc_tags"      : false,
+    "concat_space"                    : false,
+    "Laravel/laravel_phpdoc_alignment": false,
+    "phpdoc_separation"               : false,
+    "binary_operator_spaces"          : false
+  }
+}

@@ -1,3 +1,3 @@
 <?php
 
-namespace Tenanted;
+namespace Sprout;

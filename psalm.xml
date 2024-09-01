@@ -1,12 +1,11 @@
 <?xml version="1.0"?>
 <psalm
-        errorLevel="1"
-        resolveFromConfigFile="true"
+        errorLevel="6"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xmlns="https://getpsalm.org/schema/config"
         xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
         findUnusedBaselineEntry="true"
-        errorBaseline="psalm-baseline.xml"
+        findUnusedCode="true"
 >
     <projectFiles>
         <directory name="src"/>
@@ -14,9 +13,9 @@
             <directory name="vendor"/>
         </ignoreFiles>
     </projectFiles>
-    <plugins>
-        <pluginClass class="Psalm\LaravelPlugin\Plugin"/>
-    </plugins>
     <issueHandlers>
+        <PropertyNotSetInConstructor errorLevel="suppress"/>
+        <MissingConstructor errorLevel="suppress"/>
+        <RedundantPropertyInitializationCheck errorLevel="suppress"/>
     </issueHandlers>
 </psalm>

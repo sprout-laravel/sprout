@@ -1,23 +1,8 @@
 includes:
-  - ./vendor/nunomaduro/larastan/extension.neon
+  - phpstan-baseline.neon
 
 parameters:
-
+  level: max
   paths:
-    - src/
-
-  level: 9
-
+    - src
   ignoreErrors:
-
-  excludePaths:
-
-  checkGenericClassInNonGenericObjectType: false
-
-  #    ignoreErrors:
-  #        - '#PHPDoc tag @var#'
-  #
-  #    excludePaths:
-  #        - ./*/*/FileToBeExcluded.php
-  #
-  #    checkMissingIterableValueType: false
