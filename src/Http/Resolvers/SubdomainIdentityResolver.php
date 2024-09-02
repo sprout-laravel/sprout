@@ -5,63 +5,31 @@ namespace Sprout\Http\Resolvers;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Routing\Route;
 use Illuminate\Routing\Router;
 use Illuminate\Routing\RouteRegistrar;
 use Sprout\Concerns\FindsIdentityInRouteParameter;
-use Sprout\Contracts\IdentityResolver;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\UsesRouteParameters;
+use Sprout\Http\Middleware\TenantRoutes;
+use Sprout\Support\BaseIdentityResolver;
 
-final class SubdomainIdentityResolver implements IdentityResolver, UsesRouteParameters
+final class SubdomainIdentityResolver extends BaseIdentityResolver implements UsesRouteParameters
 {
     use FindsIdentityInRouteParameter;
 
-    /**
-     * @var string
-     */
-    private string $name;
-
     private string $domain;
-
-    private string $pattern;
-
-    private string $parameter;
 
     public function __construct(string $name, string $domain, ?string $pattern = null, ?string $parameter = null)
     {
-        $this->name      = $name;
-        $this->domain    = $domain;
-        $this->pattern   = $pattern ?? '.*';
-        $this->parameter = $parameter ?? '{tenancy}_{resolver}';
-    }
+        parent::__construct($name);
 
-    /**
-     * Get the registered name of the resolver
-     *
-     * @return string
-     */
-    public function getName(): string
-    {
-        return $this->name;
-    }
+        $this->domain = $domain;
 
-    /**
-     * Get the name of the route parameter
-     *
-     * @template TenantClass of \Sprout\Contracts\Tenant
-     *
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     *
-     * @return string
-     */
-    public function getRouteParameterName(Tenancy $tenancy): string
-    {
-        return str_replace(
-            ['{tenancy}', '{resolver}'],
-            [$tenancy->getName(), $this->getName()],
-            $this->parameter
-        );
+        $this->setPattern($pattern ?? '.*');
+
+        if ($parameter !== null) {
+            $this->setParameter($parameter);
+        }
     }
 
     /**
@@ -76,14 +44,8 @@ final class SubdomainIdentityResolver implements IdentityResolver, UsesRoutePara
      *
      * @return string|null
      */
-    public function resolve(Request $request, Tenancy $tenancy): ?string
+    public function resolveFromRequest(Request $request, Tenancy $tenancy): ?string
     {
-        $route = $request->route();
-
-        if ($route instanceof Route) {
-            return $this->resolveFromRoute($route, $tenancy);
-        }
-
         $requestDomain = $request->getHost();
 
         if (($position = strpos($requestDomain, '.' . $this->domain)) !== false) {
@@ -91,6 +53,20 @@ final class SubdomainIdentityResolver implements IdentityResolver, UsesRoutePara
         }
 
         return null;
+    }
+
+    /**
+     * @template TenantClass of \Sprout\Contracts\Tenant
+     *
+     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
+     *
+     * @return string
+     */
+    protected function getDomainParameter(Tenancy $tenancy): string
+    {
+        return '{' . $this->getRouteParameterName($tenancy) . '}'
+               . '.'
+               . $this->domain;
     }
 
     /**
@@ -109,14 +85,11 @@ final class SubdomainIdentityResolver implements IdentityResolver, UsesRoutePara
      */
     public function routes(Router $router, Closure $groupRoutes, Tenancy $tenancy): RouteRegistrar
     {
-        return $router->domain(
-            '{' . $this->getRouteParameterName($tenancy) . '}'
-            . '.'
-            . $this->domain
-        )->where(
-            [
-                $this->getRouteParameterName($tenancy) => $this->pattern,
-            ]
-        )->middleware([])->group($groupRoutes);
+        return $this->applyParameterPattern(
+            $router->domain($this->getDomainParameter($tenancy))
+                   ->middleware([TenantRoutes::ALIAS . ':' . $this->getName() . ',' . $tenancy->getName()])
+                   ->group($groupRoutes),
+            $tenancy
+        );
     }
 }

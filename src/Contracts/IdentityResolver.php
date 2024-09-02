@@ -4,6 +4,7 @@ namespace Sprout\Contracts;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Route;
 use Illuminate\Routing\Router;
 use Illuminate\Routing\RouteRegistrar;
 
@@ -37,7 +38,22 @@ interface IdentityResolver
      *
      * @return string|null
      */
-    public function resolve(Request $request, Tenancy $tenancy): ?string;
+    public function resolveFromRequest(Request $request, Tenancy $tenancy): ?string;
+
+    /**
+     * Get an identifier from the route
+     *
+     * Locates a tenant identifier within the provided route and returns it.
+     *
+     * @template TenantClass of \Sprout\Contracts\Tenant
+     *
+     * @param \Illuminate\Routing\Route              $route
+     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Illuminate\Http\Request               $request
+     *
+     * @return string|null
+     */
+    public function resolveFromRoute(Route $route, Tenancy $tenancy, Request $request): ?string;
 
     /**
      * Create a route group for the resolver

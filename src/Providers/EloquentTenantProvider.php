@@ -6,6 +6,7 @@ namespace Sprout\Providers;
 use Illuminate\Database\Eloquent\Model;
 use Sprout\Contracts\Tenant;
 use Sprout\Contracts\TenantProvider;
+use Sprout\Support\BaseTenantProvider;
 
 /**
  * Eloquent Tenant Provider
@@ -16,25 +17,19 @@ use Sprout\Contracts\TenantProvider;
  *
  * @template TenantModel of \Illuminate\Database\Eloquent\Model&\Sprout\Contracts\Tenant
  *
- * @implements \Sprout\Contracts\TenantProvider<TenantModel>
+ * @extends \Sprout\Support\BaseTenantProvider<TenantModel>
  *
  * @package  Providers
  *
  * @internal New instances are created with {@see \Sprout\Managers\ProviderManager::createEloquentProvider()}, and shouldn't be created manually
  */
-final class EloquentTenantProvider implements TenantProvider
+final class EloquentTenantProvider extends BaseTenantProvider
 {
-    /**
-     * @var string
-     */
-    private string $name;
-
     /**
      * The model class
      *
      * @var class-string
      *
-     * @psalm-var class-string<TenantModel>
      * @phpstan-var class-string<TenantModel>
      */
     private string $modelClass;
@@ -44,7 +39,6 @@ final class EloquentTenantProvider implements TenantProvider
      *
      * @var \Illuminate\Database\Eloquent\Model
      *
-     * @psalm-var TenantModel
      * @phpstan-var TenantModel
      */
     private Model $model;
@@ -55,23 +49,13 @@ final class EloquentTenantProvider implements TenantProvider
      * @param string                            $name
      * @param class-string                      $modelClass
      *
-     * @psalm-param class-string<TenantModel>   $modelClass
      * @phpstan-param class-string<TenantModel> $modelClass
      */
     public function __construct(string $name, string $modelClass)
     {
-        $this->name       = $name;
-        $this->modelClass = $modelClass;
-    }
+        parent::__construct($name);
 
-    /**
-     * Get the registered name of the provider
-     *
-     * @return string
-     */
-    public function getName(): string
-    {
-        return $this->name;
+        $this->modelClass = $modelClass;
     }
 
     /**
@@ -79,7 +63,6 @@ final class EloquentTenantProvider implements TenantProvider
      *
      * @return string
      *
-     * @psalm-return class-string<TenantModel>
      * @phpstan-return class-string<TenantModel>
      */
     public function getModelClass(): string
@@ -92,7 +75,6 @@ final class EloquentTenantProvider implements TenantProvider
      *
      * @return \Illuminate\Database\Eloquent\Model&\Sprout\Contracts\Tenant
      *
-     * @psalm-return TenantModel
      * @phpstan-return TenantModel
      */
     private function getModel(): Model&Tenant
@@ -117,7 +99,6 @@ final class EloquentTenantProvider implements TenantProvider
      * @see \Sprout\Contracts\Tenant::getTenantIdentifier()
      * @see \Sprout\Contracts\Tenant::getTenantIdentifierName()
      *
-     * @psalm-return TenantModel|null
      * @phpstan-return TenantModel|null
      */
     public function retrieveByIdentifier(string $identifier): ?Tenant
@@ -142,7 +123,6 @@ final class EloquentTenantProvider implements TenantProvider
      * @see \Sprout\Contracts\Tenant::getTenantKey()
      * @see \Sprout\Contracts\Tenant::getTenantKeyName()
      *
-     * @psalm-return TenantModel|null
      * @phpstan-return TenantModel|null
      */
     public function retrieveByKey(int|string $key): ?Tenant

@@ -30,8 +30,6 @@ interface Tenancy
      * tenant.
      *
      * @return bool
-     *
-     * @psalm-mutation-free
      */
     public function check(): bool;
 
@@ -44,7 +42,6 @@ interface Tenancy
      *
      * @return \Sprout\Contracts\Tenant|null
      *
-     * @psalm-return TenantClass|null
      * @phpstan-return TenantClass|null
      */
     public function tenant(): ?Tenant;
@@ -55,7 +52,7 @@ interface Tenancy
      * Get the tenant key for the current tenant if there is one.
      *
      * @return int|string|null
-     *@see \Sprout\Contracts\Tenant::getTenantKey()
+     * @see \Sprout\Contracts\Tenant::getTenantKey()
      *
      */
     public function key(): int|string|null;
@@ -66,8 +63,73 @@ interface Tenancy
      * Get the tenant identifier for the current tenant if there is one.
      *
      * @return string|null
-     *@see \Sprout\Contracts\Tenant::getTenantIdentifier()
+     * @see \Sprout\Contracts\Tenant::getTenantIdentifier()
      *
      */
     public function identifier(): ?string;
+
+    /**
+     * Identity a tenant
+     *
+     * Retrieve and set the current tenant based on an identifier.
+     *
+     * @param string $identifier
+     *
+     * @return bool
+     */
+    public function identify(string $identifier): bool;
+
+    /**
+     * Load a tenant
+     *
+     * Retrieve and set the current tenant based on a key.
+     *
+     * @param int|string $key
+     *
+     * @return bool
+     */
+    public function load(int|string $key): bool;
+
+    /**
+     * Get the tenant provider
+     *
+     * Get the tenant provider used by this tenancy.
+     *
+     * @return \Sprout\Contracts\TenantProvider<TenantClass>
+     */
+    public function provider(): TenantProvider;
+
+    /**
+     * Set the identity resolved used
+     *
+     * @param \Sprout\Contracts\IdentityResolver $resolver
+     *
+     * @return static
+     */
+    public function resolvedVia(IdentityResolver $resolver): static;
+
+    /**
+     * Get the used identity resolver
+     *
+     * @return \Sprout\Contracts\IdentityResolver|null
+     */
+    public function resolver(): ?IdentityResolver;
+
+    /**
+     * Check if the current tenant was resolved
+     *
+     * @return bool
+     */
+    public function wasResolved(): bool;
+
+    /**
+     * Set the current tenant
+     *
+     * @param \Sprout\Contracts\Tenant|null $tenant
+     *
+     * @phpstan-param TenantClass|null      $tenant
+     *
+     * @return static
+     */
+    public function setTenant(?Tenant $tenant): static;
 }

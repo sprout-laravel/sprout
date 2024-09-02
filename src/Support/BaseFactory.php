@@ -35,7 +35,6 @@ abstract class BaseFactory
      *
      * @var array<string, object>
      *
-     * @psalm-var array<string, FactoryClass>
      * @phpstan-var array<string, FactoryClass>
      */
     protected array $objects = [];
@@ -74,7 +73,7 @@ abstract class BaseFactory
     protected function getDefaultName(): string
     {
         /** @phpstan-ignore-next-line */
-        return $this->app['config']->get('tenanted.defaults.' . $this->getFactoryName());
+        return $this->app['config']->get('sprout.defaults.' . $this->getFactoryName());
     }
 
     /**
@@ -101,7 +100,6 @@ abstract class BaseFactory
      *
      * @return object
      *
-     * @psalm-return FactoryClass
      * @phpstan-return FactoryClass
      */
     protected function callCustomCreator(string $name, array $config): object
@@ -124,7 +122,6 @@ abstract class BaseFactory
      *
      * @return object
      *
-     * @psalm-return FactoryClass
      * @phpstan-return FactoryClass
      */
     protected function resolve(string $name): object
@@ -180,7 +177,6 @@ abstract class BaseFactory
      *
      * @return object
      *
-     * @psalm-return FactoryClass
      * @phpstan-return FactoryClass
      */
     public function get(?string $name = null): object

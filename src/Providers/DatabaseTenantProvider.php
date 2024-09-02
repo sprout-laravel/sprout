@@ -6,20 +6,16 @@ namespace Sprout\Providers;
 use Illuminate\Database\ConnectionInterface;
 use Sprout\Contracts\Tenant;
 use Sprout\Contracts\TenantProvider;
+use Sprout\Support\BaseTenantProvider;
 use Sprout\Support\GenericTenant;
 
 /**
  * @template EntityClass of \Sprout\Contracts\Tenant
  *
- * @implements \Sprout\Contracts\TenantProvider<EntityClass>
+ * @extends \Sprout\Support\BaseTenantProvider<EntityClass>
  */
-final class DatabaseTenantProvider implements TenantProvider
+final class DatabaseTenantProvider extends BaseTenantProvider
 {
-    /**
-     * @var string
-     */
-    private string $name;
-
     /**
      * @var \Illuminate\Database\ConnectionInterface
      */
@@ -33,7 +29,6 @@ final class DatabaseTenantProvider implements TenantProvider
     /**
      * @var class-string<\Sprout\Contracts\Tenant>
      *
-     * @psalm-var class-string<EntityClass>
      * @phpstan-var class-string<EntityClass>
      */
     private string $entityClass;
@@ -41,7 +36,6 @@ final class DatabaseTenantProvider implements TenantProvider
     /**
      * @var \Sprout\Contracts\Tenant
      *
-     * @psalm-var EntityClass
      * @phpstan-var EntityClass
      */
     private Tenant $entity;
@@ -54,25 +48,15 @@ final class DatabaseTenantProvider implements TenantProvider
      * @param string                                   $table
      * @param class-string<\Sprout\Contracts\Tenant>   $entityClass
      *
-     * @psalm-param class-string<EntityClass>          $entityClass
      * @phpstan-param class-string<EntityClass>        $entityClass
      */
     public function __construct(string $name, ConnectionInterface $connection, string $table, string $entityClass = GenericTenant::class)
     {
-        $this->name        = $name;
+        parent::__construct($name);
+
         $this->connection  = $connection;
         $this->table       = $table;
         $this->entityClass = $entityClass;
-    }
-
-    /**
-     * Get the registered name of the provider
-     *
-     * @return string
-     */
-    public function getName(): string
-    {
-        return $this->name;
     }
 
     /**
@@ -80,7 +64,6 @@ final class DatabaseTenantProvider implements TenantProvider
      *
      * @return class-string
      *
-     * @psalm-return class-string<EntityClass>
      * @phpstan-return class-string<EntityClass>
      */
     public function getEntityClass(): string
@@ -93,7 +76,6 @@ final class DatabaseTenantProvider implements TenantProvider
      *
      * @return \Sprout\Contracts\Tenant
      *
-     * @psalm-return EntityClass
      * @phpstan-return EntityClass
      */
     private function getEntity(): Tenant
@@ -112,7 +94,6 @@ final class DatabaseTenantProvider implements TenantProvider
      *
      * @return object
      *
-     * @psalm-return EntityClass
      * @phpstan-return EntityClass
      */
     private function makeEntity(array|object $attributes): object
@@ -133,7 +114,6 @@ final class DatabaseTenantProvider implements TenantProvider
      * @see \Sprout\Contracts\Tenant::getTenantIdentifier()
      * @see \Sprout\Contracts\Tenant::getTenantIdentifierName()
      *
-     * @psalm-return Tenant|null
      * @phpstan-return Tenant|null
      */
     public function retrieveByIdentifier(string $identifier): ?Tenant
@@ -163,7 +143,6 @@ final class DatabaseTenantProvider implements TenantProvider
      * @see \Sprout\Contracts\Tenant::getTenantKey()
      * @see \Sprout\Contracts\Tenant::getTenantKeyName()
      *
-     * @psalm-return Tenant|null
      * @phpstan-return Tenant|null
      */
     public function retrieveByKey(int|string $key): ?Tenant

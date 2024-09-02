@@ -1,11 +1,16 @@
 <?php
+/** @noinspection PhpUnnecessaryStaticReferenceInspection */
 declare(strict_types=1);
 
 namespace Sprout\Support;
 
+use Sprout\Contracts\IdentityResolver;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 use Sprout\Contracts\TenantProvider;
+use Sprout\Events\CurrentTenantChanged;
+use Sprout\Events\TenantIdentified;
+use Sprout\Events\TenantLoaded;
 
 /**
  * @template TenantClass of \Sprout\Contracts\Tenant
@@ -22,9 +27,13 @@ final class DefaultTenancy implements Tenancy
     private TenantProvider $provider;
 
     /**
+     * @var \Sprout\Contracts\IdentityResolver|null
+     */
+    private ?IdentityResolver $resolver;
+
+    /**
      * @var \Sprout\Contracts\Tenant|null
      *
-     * @psalm-var TenantClass|null
      * @phpstan-var TenantClass|null
      */
     private ?Tenant $tenant = null;
@@ -58,8 +67,6 @@ final class DefaultTenancy implements Tenancy
      * tenant.
      *
      * @return bool
-     *
-     * @psalm-mutation-free
      */
     public function check(): bool
     {
@@ -75,11 +82,156 @@ final class DefaultTenancy implements Tenancy
      *
      * @return \Sprout\Contracts\Tenant|null
      *
-     * @psalm-return TenantClass|null
      * @phpstan-return TenantClass|null
      */
     public function tenant(): ?Tenant
     {
         return $this->tenant;
+    }
+
+    /**
+     * Get the tenants key
+     *
+     * Get the tenant key for the current tenant if there is one.
+     *
+     * @return int|string|null
+     *
+     * @see \Sprout\Contracts\Tenant::getTenantKey()
+     */
+    public function key(): int|string|null
+    {
+        return $this->tenant()?->getTenantKey();
+    }
+
+    /**
+     * Get the tenants' identifier
+     *
+     * Get the tenant identifier for the current tenant if there is one.
+     *
+     * @return string|null
+     *
+     * @see \Sprout\Contracts\Tenant::getTenantIdentifier()
+     */
+    public function identifier(): ?string
+    {
+        return $this->tenant()?->getTenantIdentifier();
+    }
+
+    /**
+     * Identity a tenant
+     *
+     * Retrieve and set the current tenant based on an identifier.
+     *
+     * @param string $identifier
+     *
+     * @return bool
+     */
+    public function identify(string $identifier): bool
+    {
+        $tenant = $this->provider()->retrieveByIdentifier($identifier);
+
+        if ($tenant === null) {
+            $this->resolver = null;
+
+            return false;
+        }
+
+        $this->setTenant($tenant);
+
+        TenantIdentified::dispatch($tenant, $this);
+
+        return true;
+    }
+
+    /**
+     * Load a tenant
+     *
+     * Retrieve and set the current tenant based on a key.
+     *
+     * @param int|string $key
+     *
+     * @return bool
+     */
+    public function load(int|string $key): bool
+    {
+        $tenant = $this->provider()->retrieveByKey($key);
+
+        if ($tenant === null) {
+            return false;
+        }
+
+        $this->setTenant($tenant);
+
+        TenantLoaded::dispatch($tenant, $this);
+
+        return true;
+    }
+
+    /**
+     * Get the tenant provider
+     *
+     * Get the tenant provider used by this tenancy.
+     *
+     * @return \Sprout\Contracts\TenantProvider<TenantClass>
+     */
+    public function provider(): TenantProvider
+    {
+        return $this->provider;
+    }
+
+    /**
+     * Set the identity resolved used
+     *
+     * @param \Sprout\Contracts\IdentityResolver $resolver
+     *
+     * @return static
+     */
+    public function resolvedVia(IdentityResolver $resolver): static
+    {
+        $this->resolver = $resolver;
+
+        return $this;
+    }
+
+    /**
+     * Get the used identity resolver
+     *
+     * @return \Sprout\Contracts\IdentityResolver|null
+     */
+    public function resolver(): ?IdentityResolver
+    {
+        return $this->resolver;
+    }
+
+    /**
+     * Check if the current tenant was resolved
+     *
+     * @return bool
+     */
+    public function wasResolved(): bool
+    {
+        return $this->check() && $this->resolver() !== null;
+    }
+
+    /**
+     * Set the current tenant
+     *
+     * @param \Sprout\Contracts\Tenant|null $tenant
+     *
+     * @phpstan-param TenantClass|null      $tenant
+     *
+     * @return static
+     */
+    public function setTenant(?Tenant $tenant): static
+    {
+        $previousTenant = $this->tenant();
+
+        if ($previousTenant !== $tenant) {
+            $this->tenant = $tenant;
+
+            CurrentTenantChanged::dispatch($previousTenant, $tenant);
+        }
+
+        return $this;
     }
 }

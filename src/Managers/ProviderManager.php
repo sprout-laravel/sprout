@@ -37,7 +37,7 @@ final class ProviderManager extends BaseFactory
      */
     protected function getConfigKey(string $name): string
     {
-        return 'tenanted.providers.' . $name;
+        return 'multitenancy.providers.' . $name;
     }
 
     /**
@@ -50,10 +50,8 @@ final class ProviderManager extends BaseFactory
      *
      * @template TenantModel of \Illuminate\Database\Eloquent\Model&\Sprout\Contracts\Tenant
      *
-     * @psalm-param array{model?: class-string<TenantModel>}   $config
      * @phpstan-param array{model?: class-string<TenantModel>} $config
      *
-     * @psalm-return \Sprout\Providers\EloquentTenantProvider<TenantModel>
      * @phpstan-return \Sprout\Providers\EloquentTenantProvider<TenantModel>
      */
     protected function createEloquentProvider(array $config, string $name): EloquentTenantProvider
@@ -87,10 +85,8 @@ final class ProviderManager extends BaseFactory
      *
      * @template TenantEntity of \Sprout\Contracts\Tenant
      *
-     * @psalm-param array{entity?: class-string<TenantEntity>, table?: string|class-string<\Illuminate\Database\Eloquent\Model>, connection?: string}   $config
      * @phpstan-param array{entity?: class-string<TenantEntity>, table?: string|class-string<\Illuminate\Database\Eloquent\Model>, connection?: string} $config
      *
-     * @psalm-return \Sprout\Providers\DatabaseTenantProvider<TenantEntity>
      * @phpstan-return \Sprout\Providers\DatabaseTenantProvider<TenantEntity>
      */
     protected function createDatabaseProvider(array $config, string $name): DatabaseTenantProvider

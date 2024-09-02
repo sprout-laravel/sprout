@@ -3,7 +3,7 @@
   "description"      : "A flexible, seamless and easy to use multitenancy solution for Laravel",
   "type"             : "library",
   "require"          : {
-    "php"              : "^8.1",
+    "php"              : "^8.2",
     "laravel/framework": "^11.0"
   },
   "require-dev"      : {

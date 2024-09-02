@@ -44,17 +44,16 @@ final class TenancyManager extends BaseFactory
      */
     protected function getConfigKey(string $name): string
     {
-        return 'tenanted.tenancies.' . $name;
+        return 'multitenancy.tenancies.' . $name;
     }
 
     /**
      * @param array<string, mixed>                  $config
      * @param string                                $name
      *
-     * @psalm-param array{provider?: string|null}   $config
      * @phpstan-param array{provider?: string|null} $config
      *
-     * @return \Sprout\Support\DefaultTenancy
+     * @return \Sprout\Support\DefaultTenancy<\Sprout\Contracts\Tenant>
      */
     protected function createDefaultTenancy(array $config, string $name): DefaultTenancy
     {

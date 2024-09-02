@@ -35,7 +35,6 @@ interface TenantProvider
      * @see \Sprout\Contracts\Tenant::getTenantIdentifier()
      * @see \Sprout\Contracts\Tenant::getTenantIdentifierName()
      *
-     * @psalm-return TenantClass|null
      * @phpstan-return TenantClass|null
      */
     public function retrieveByIdentifier(string $identifier): ?Tenant;
@@ -53,7 +52,6 @@ interface TenantProvider
      * @see \Sprout\Contracts\Tenant::getTenantKey()
      * @see \Sprout\Contracts\Tenant::getTenantKeyName()
      *
-     * @psalm-return TenantClass|null
      * @phpstan-return TenantClass|null
      */
     public function retrieveByKey(int|string $key): ?Tenant;

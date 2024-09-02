@@ -15,7 +15,6 @@ trait HasCustomCreators
      *
      * @var array<string, \Closure>
      *
-     * @psalm-var array<string, \Closure(Application, array<string, mixed>, string): FactoryClass>
      * @phpstan-var array<string, \Closure(Application, array<string, mixed>, string): FactoryClass>
      */
     protected static array $customCreators = [];
@@ -24,7 +23,6 @@ trait HasCustomCreators
      * @param string                                                                    $name
      * @param \Closure                                                                  $callback
      *
-     * @psalm-param \Closure(Application, array<string, mixed>, string): FactoryClass   $callback
      * @phpstan-param \Closure(Application, array<string, mixed>, string): FactoryClass $callback
      *
      * @return void
