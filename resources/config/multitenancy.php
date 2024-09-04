@@ -14,6 +14,7 @@ return [
 
         'tenants' => [
             'provider' => 'tenants',
+            'options'  => [],
         ],
 
     ],
