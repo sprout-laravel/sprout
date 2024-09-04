@@ -60,9 +60,7 @@ final class SubdomainIdentityResolver extends BaseIdentityResolver implements Us
      */
     protected function getDomainParameter(Tenancy $tenancy): string
     {
-        return '{' . $this->getRouteParameterName($tenancy) . '}'
-               . '.'
-               . $this->domain;
+        return $this->getRouteParameter($tenancy) . '.' . $this->domain;
     }
 
     /**

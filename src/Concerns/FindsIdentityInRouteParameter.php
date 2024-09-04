@@ -59,6 +59,18 @@ trait FindsIdentityInRouteParameter
         );
     }
 
+    /**
+     * Get the route parameter with braces
+     *
+     * @param \Sprout\Contracts\Tenancy $tenancy
+     *
+     * @return string
+     */
+    public function getRouteParameter(Tenancy $tenancy): string
+    {
+        return '{' . $this->getRouteParameterName($tenancy) . '}';
+    }
+
     public function getPattern(): ?string
     {
         return $this->pattern;
