@@ -25,11 +25,7 @@ final class SubdomainIdentityResolver extends BaseIdentityResolver implements Us
 
         $this->domain = $domain;
 
-        $this->setPattern($pattern ?? '.*');
-
-        if ($parameter !== null) {
-            $this->setParameter($parameter);
-        }
+        $this->initialiseRouteParameter($pattern, $parameter);
     }
 
     /**

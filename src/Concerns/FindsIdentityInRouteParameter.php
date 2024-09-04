@@ -22,6 +22,15 @@ trait FindsIdentityInRouteParameter
 
     private string $parameter = '{tenancy}_{resolver}';
 
+    protected function initialiseRouteParameter(?string $pattern = null, ?string $parameter = null): void
+    {
+        $this->setPattern($pattern);
+
+        if ($parameter !== null) {
+            $this->setParameter($parameter);
+        }
+    }
+
     public function setPattern(?string $pattern): void
     {
         $this->pattern = $pattern;
