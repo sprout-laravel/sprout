@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Sprout\Managers;
 
 use InvalidArgumentException;
+use Sprout\Http\Resolvers\PathIdentityResolver;
 use Sprout\Http\Resolvers\SubdomainIdentityResolver;
 use Sprout\Support\BaseFactory;
 
@@ -55,6 +56,34 @@ final class IdentityResolverManager extends BaseFactory
         return new SubdomainIdentityResolver(
             $name,
             $config['domain'],
+            $config['pattern'] ?? null,
+            $config['parameter'] ?? null
+        );
+    }
+
+    /**
+     * Create the path identity resolver
+     *
+     * @param array<string, mixed>                                                              $config
+     * @param string                                                                            $name
+     *
+     * @phpstan-param array{segment?: int|null, pattern?: string|null, parameter?: string|null} $config
+     *
+     * @return \Sprout\Http\Resolvers\PathIdentityResolver
+     */
+    protected function createPathResolver(array $config, string $name): PathIdentityResolver
+    {
+        $segment = $config['segment'] ?? 1;
+
+        if ($segment < 1) {
+            throw new InvalidArgumentException(
+                'Invalid path segment [' . $segment . '], path segments should be 1 indexed'
+            );
+        }
+
+        return new PathIdentityResolver(
+            $name,
+            $segment,
             $config['pattern'] ?? null,
             $config['parameter'] ?? null
         );
