@@ -39,13 +39,20 @@ final class DefaultTenancy implements Tenancy
     private ?Tenant $tenant = null;
 
     /**
+     * @var array<string, mixed>
+     */
+    private array $options;
+
+    /**
      * @param string                                        $name
      * @param \Sprout\Contracts\TenantProvider<TenantClass> $provider
+     * @param array<string, mixed>                          $options
      */
-    public function __construct(string $name, TenantProvider $provider)
+    public function __construct(string $name, TenantProvider $provider, array $options)
     {
         $this->name     = $name;
         $this->provider = $provider;
+        $this->options  = $options;
     }
 
     /**
@@ -229,9 +236,32 @@ final class DefaultTenancy implements Tenancy
         if ($previousTenant !== $tenant) {
             $this->tenant = $tenant;
 
-            CurrentTenantChanged::dispatch($previousTenant, $tenant);
+            CurrentTenantChanged::dispatch($this, $previousTenant, $tenant);
         }
 
         return $this;
+    }
+
+    /**
+     * Get all tenant options
+     *
+     * @return array<string, mixed>
+     */
+    public function options(): array
+    {
+        return $this->options;
+    }
+
+    /**
+     * Get a tenant option
+     *
+     * @param string     $key
+     * @param mixed|null $default
+     *
+     * @return mixed
+     */
+    public function option(string $key, mixed $default = null): mixed
+    {
+        return $this->options()[$key] ?? $default;
     }
 }

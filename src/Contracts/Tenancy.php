@@ -119,6 +119,9 @@ interface Tenancy
      * Check if the current tenant was resolved
      *
      * @return bool
+     *
+     * @phpstan-assert-if-true \Sprout\Contracts\IdentityResolver $this->resolver()
+     * @phpstan-assert-if-false null $this->resolver()
      */
     public function wasResolved(): bool;
 
@@ -132,4 +135,21 @@ interface Tenancy
      * @return static
      */
     public function setTenant(?Tenant $tenant): static;
+
+    /**
+     * Get all tenant options
+     *
+     * @return array<string, mixed>
+     */
+    public function options(): array;
+
+    /**
+     * Get a tenant option
+     *
+     * @param string     $key
+     * @param mixed|null $default
+     *
+     * @return mixed
+     */
+    public function option(string $key, mixed $default = null): mixed;
 }

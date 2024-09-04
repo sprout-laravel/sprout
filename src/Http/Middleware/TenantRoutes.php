@@ -67,12 +67,11 @@ final class TenantRoutes
             throw NoTenantFound::make($resolver->getName(), $tenancy->getName());
         }
 
+        // TODO: Decide whether to do anything with the following conditions
         //if (! $tenancy->wasResolved()) {
-        //    // TODO: Think about what to do in this situation
         //}
-
+        //
         //if ($tenancy->resolver() !== $resolver) {
-        //    // TODO: Think about what to do in this situation
         //}
 
         return $next($request);

@@ -6,7 +6,9 @@ namespace Sprout\Concerns;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
 use Illuminate\Routing\RouteRegistrar;
+use Illuminate\Support\Facades\URL;
 use Sprout\Contracts\Tenancy;
+use Sprout\Contracts\Tenant;
 
 /**
  * @package Resolvers
@@ -48,9 +50,20 @@ trait FindsIdentityInRouteParameter
         );
     }
 
-    public function getPattern(): string
+    public function getPattern(): ?string
     {
         return $this->pattern;
+    }
+
+    /**
+     * @return bool
+     *
+     * @phpstan-assert-if-true string $this->getPattern()
+     * @phpstan-assert-if-false null $this->getPattern()
+     */
+    public function hasPattern(): bool
+    {
+        return $this->pattern !== null;
     }
 
     public function getParameter(): string
@@ -63,10 +76,14 @@ trait FindsIdentityInRouteParameter
      *
      * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
      *
-     * @return array
+     * @return array<string, string>
      */
     protected function getParameterPattern(Tenancy $tenancy): array
     {
+        if (! $this->hasPattern()) {
+            return [];
+        }
+
         return [
             $this->getRouteParameterName($tenancy) => $this->getPattern(),
         ];
@@ -75,14 +92,14 @@ trait FindsIdentityInRouteParameter
     /**
      * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Illuminate\Routing\RouteRegistrar $registrar
+     * @param \Illuminate\Routing\RouteRegistrar     $registrar
      * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
      *
      * @return \Illuminate\Routing\RouteRegistrar
      */
     protected function applyParameterPattern(RouteRegistrar $registrar, Tenancy $tenancy): RouteRegistrar
     {
-        if ($this->pattern === null) {
+        if ($this->hasPattern()) {
             return $registrar;
         }
 
@@ -111,5 +128,32 @@ trait FindsIdentityInRouteParameter
         }
 
         return null;
+    }
+
+    /**
+     * Perform setup actions for the tenant
+     *
+     * When a tenant is marked as the current tenant within a tenancy, this
+     * method will be called to perform any necessary setup actions.
+     * This method is also called if there is no current tenant, as there may
+     * be actions needed.
+     *
+     * @template TenantClass of \Sprout\Contracts\Tenant
+     *
+     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Sprout\Contracts\Tenant|null          $tenant
+     *
+     * @phpstan-param Tenant|null                    $tenant
+     *
+     * @return void
+     */
+    public function setup(Tenancy $tenancy, ?Tenant $tenant): void
+    {
+        // Set the default value of the parameter
+        URL::defaults(
+            [
+                $this->getRouteParameterName($tenancy) => $tenant?->getTenantIdentifier(),
+            ]
+        );
     }
 }

@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace Sprout\Managers;
 
 use Illuminate\Contracts\Foundation\Application;
-use InvalidArgumentException;
 use Sprout\Support\BaseFactory;
 use Sprout\Support\DefaultTenancy;
 
@@ -48,10 +47,10 @@ final class TenancyManager extends BaseFactory
     }
 
     /**
-     * @param array<string, mixed>                  $config
-     * @param string                                $name
+     * @param array<string, mixed>                                                  $config
+     * @param string                                                                $name
      *
-     * @phpstan-param array{provider?: string|null} $config
+     * @phpstan-param array{provider?: string|null, options?: array<string, mixed>} $config
      *
      * @return \Sprout\Support\DefaultTenancy<\Sprout\Contracts\Tenant>
      */
@@ -59,7 +58,8 @@ final class TenancyManager extends BaseFactory
     {
         return new DefaultTenancy(
             $name,
-            $this->providerManager->get($config['provider'] ?? null)
+            $this->providerManager->get($config['provider'] ?? null),
+            $config['options'] ?? []
         );
     }
 }

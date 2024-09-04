@@ -4,7 +4,6 @@ namespace Sprout\Contracts;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Routing\Route;
 use Illuminate\Routing\Router;
 use Illuminate\Routing\RouteRegistrar;
 
@@ -41,21 +40,6 @@ interface IdentityResolver
     public function resolveFromRequest(Request $request, Tenancy $tenancy): ?string;
 
     /**
-     * Get an identifier from the route
-     *
-     * Locates a tenant identifier within the provided route and returns it.
-     *
-     * @template TenantClass of \Sprout\Contracts\Tenant
-     *
-     * @param \Illuminate\Routing\Route              $route
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Illuminate\Http\Request               $request
-     *
-     * @return string|null
-     */
-    public function resolveFromRoute(Route $route, Tenancy $tenancy, Request $request): ?string;
-
-    /**
      * Create a route group for the resolver
      *
      * Creates and configures a route group with the necessary settings to
@@ -70,4 +54,23 @@ interface IdentityResolver
      * @return \Illuminate\Routing\RouteRegistrar
      */
     public function routes(Router $router, Closure $groupRoutes, Tenancy $tenancy): RouteRegistrar;
+
+    /**
+     * Perform setup actions for the tenant
+     *
+     * When a tenant is marked as the current tenant within a tenancy, this
+     * method will be called to perform any necessary setup actions.
+     * This method is also called if there is no current tenant, as there may
+     * be actions needed.
+     *
+     * @template TenantClass of \Sprout\Contracts\Tenant
+     *
+     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Sprout\Contracts\Tenant|null          $tenant
+     *
+     * @phpstan-param TenantClass|null               $tenant
+     *
+     * @return void
+     */
+    public function setup(Tenancy $tenancy, ?Tenant $tenant): void;
 }
