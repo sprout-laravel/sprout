@@ -46,10 +46,8 @@ return [
             'segment' => 1,
         ],
 
-        'domain' => [
-            'driver'   => 'domain',
-            'exclude'  => [],
-            'fallback' => 'subdomain',
+        'header' => [
+            'driver'   => 'header',
         ],
 
     ],

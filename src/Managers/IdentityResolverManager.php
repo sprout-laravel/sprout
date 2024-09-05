@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Sprout\Managers;
 
 use InvalidArgumentException;
+use Sprout\Http\Resolvers\HeaderIdentityResolver;
 use Sprout\Http\Resolvers\PathIdentityResolver;
 use Sprout\Http\Resolvers\SubdomainIdentityResolver;
 use Sprout\Support\BaseFactory;
@@ -86,6 +87,24 @@ final class IdentityResolverManager extends BaseFactory
             $segment,
             $config['pattern'] ?? null,
             $config['parameter'] ?? null
+        );
+    }
+
+    /**
+     * Create the header identity resolver
+     *
+     * @param array<string, mixed>                $config
+     * @param string                              $name
+     *
+     * @phpstan-param array{header?: string|null} $config
+     *
+     * @return \Sprout\Http\Resolvers\HeaderIdentityResolver
+     */
+    protected function createHeaderResolver(array $config, string $name): HeaderIdentityResolver
+    {
+        return new HeaderIdentityResolver(
+            $name,
+            $config['header'] ?? null
         );
     }
 }
