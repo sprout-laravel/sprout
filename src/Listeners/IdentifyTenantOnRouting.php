@@ -7,7 +7,7 @@ use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Routing\Route;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
-use Sprout\Contracts\UsesRouteParameters;
+use Sprout\Contracts\IdentityResolverUsesParameters;
 use Sprout\Exceptions\NoTenantFound;
 use Sprout\Http\Middleware\TenantRoutes;
 use Sprout\Managers\IdentityResolverManager;
@@ -65,11 +65,9 @@ final class IdentifyTenantOnRouting
          * @var \Sprout\Contracts\Tenancy<\Sprout\Contracts\Tenant> $tenancy
          */
 
-        $identity = null;
-
         // Is the resolver using a parameter, and is the parameter present?
         if (
-            $resolver instanceof UsesRouteParameters
+            $resolver instanceof IdentityResolverUsesParameters
             && $event->route->hasParameter($resolver->getRouteParameterName($tenancy))
         ) {
             // Use the route to resolve the identity from the parameter

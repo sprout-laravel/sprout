@@ -13,7 +13,7 @@ use Sprout\Contracts\Tenant;
 /**
  * @package Resolvers
  *
- * @phpstan-require-implements \Sprout\Contracts\UsesRouteParameters
+ * @phpstan-require-implements \Sprout\Contracts\IdentityResolverUsesParameters
  */
 trait FindsIdentityInRouteParameter
 {

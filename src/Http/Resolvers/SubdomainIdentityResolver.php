@@ -9,11 +9,11 @@ use Illuminate\Routing\Router;
 use Illuminate\Routing\RouteRegistrar;
 use Sprout\Concerns\FindsIdentityInRouteParameter;
 use Sprout\Contracts\Tenancy;
-use Sprout\Contracts\UsesRouteParameters;
+use Sprout\Contracts\IdentityResolverUsesParameters;
 use Sprout\Http\Middleware\TenantRoutes;
 use Sprout\Support\BaseIdentityResolver;
 
-final class SubdomainIdentityResolver extends BaseIdentityResolver implements UsesRouteParameters
+final class SubdomainIdentityResolver extends BaseIdentityResolver implements IdentityResolverUsesParameters
 {
     use FindsIdentityInRouteParameter;
 

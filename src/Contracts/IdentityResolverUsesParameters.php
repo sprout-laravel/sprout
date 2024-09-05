@@ -8,7 +8,7 @@ use Illuminate\Routing\Route;
 /**
  * @package Resolvers
  */
-interface UsesRouteParameters
+interface IdentityResolverUsesParameters
 {
     /**
      * Get the name of the route parameter
