@@ -11,7 +11,7 @@ use Sprout\Events\CurrentTenantChanged;
 use Sprout\Http\Middleware\TenantRoutes;
 use Sprout\Listeners\HandleTenantContext;
 use Sprout\Listeners\PerformIdentityResolverSetup;
-use Sprout\Listeners\IdentityTenantOnRouting;
+use Sprout\Listeners\IdentifyTenantOnRouting;
 use Sprout\Managers\IdentityResolverManager;
 use Sprout\Managers\ProviderManager;
 
@@ -76,7 +76,7 @@ class SproutServiceProvider extends ServiceProvider
 
         // If we should be listening for routing
         if ($this->sprout->shouldListenForRouting()) {
-            $events->listen(RouteMatched::class, IdentityTenantOnRouting::class);
+            $events->listen(RouteMatched::class, IdentifyTenantOnRouting::class);
         }
 
         $events->listen(CurrentTenantChanged::class, HandleTenantContext::class);

@@ -14,7 +14,7 @@ use Sprout\Managers\IdentityResolverManager;
 use Sprout\Managers\TenancyManager;
 use Sprout\Sprout;
 
-final class IdentityTenantOnRouting
+final class IdentifyTenantOnRouting
 {
     /**
      * @var \Sprout\Sprout
