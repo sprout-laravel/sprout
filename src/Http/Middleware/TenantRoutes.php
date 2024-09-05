@@ -6,9 +6,11 @@ namespace Sprout\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Sprout\Contracts\IdentityResolverTerminates;
 use Sprout\Exceptions\NoTenantFound;
 use Sprout\Managers\IdentityResolverManager;
 use Sprout\Managers\TenancyManager;
+use Sprout\Sprout;
 
 /**
  * Tenant Routes Middleware
@@ -20,19 +22,13 @@ final class TenantRoutes
     public const ALIAS = 'sprout.tenanted';
 
     /**
-     * @var \Sprout\Managers\IdentityResolverManager
+     * @var \Sprout\Sprout
      */
-    private IdentityResolverManager $resolverManager;
+    private Sprout $sprout;
 
-    /**
-     * @var \Sprout\Managers\TenancyManager
-     */
-    private TenancyManager $tenancyManager;
-
-    public function __construct(IdentityResolverManager $resolverManager, TenancyManager $tenancyManager)
+    public function __construct(Sprout $sprout)
     {
-        $this->resolverManager = $resolverManager;
-        $this->tenancyManager  = $tenancyManager;
+        $this->sprout = $sprout;
     }
 
     /**
@@ -55,8 +51,8 @@ final class TenantRoutes
             $resolverName = $tenancyName = null;
         }
 
-        $resolver = $this->resolverManager->get($resolverName);
-        $tenancy  = $this->tenancyManager->get($tenancyName);
+        $resolver = $this->sprout->resolvers()->get($resolverName);
+        $tenancy  = $this->sprout->tenancies()->get($tenancyName);
 
         /**
          * @var \Sprout\Contracts\IdentityResolver                  $resolver
@@ -75,5 +71,21 @@ final class TenantRoutes
         //}
 
         return $next($request);
+    }
+
+    public function terminate(Request $request, Response $response): void
+    {
+        if ($this->sprout->hasCurrentTenancy()) {
+            /** @var \Sprout\Contracts\Tenancy<\Sprout\Contracts\Tenant> $tenancy */
+            $tenancy = $this->sprout->getCurrentTenancy();
+
+            if ($tenancy->wasResolved()) {
+                $resolver = $tenancy->resolver();
+
+                if ($resolver instanceof IdentityResolverTerminates) {
+                    $resolver->terminate($tenancy, $response);
+                }
+            }
+        }
     }
 }
