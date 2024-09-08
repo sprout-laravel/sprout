@@ -22,7 +22,10 @@
   },
   "autoload-dev"     : {
     "psr-4": {
-      "Sprout\\Tests\\": "tests"
+      "Sprout\\Tests\\"                 : "tests",
+      "Workbench\\App\\"                : "workbench/app/",
+      "Workbench\\Database\\Factories\\": "workbench/database/factories/",
+      "Workbench\\Database\\Seeders\\"  : "workbench/database/seeders/"
     }
   },
   "authors"          : [
@@ -33,7 +36,11 @@
   ],
   "minimum-stability": "stable",
   "scripts"          : {
-    "post-autoload-dump": "@php vendor/bin/testbench package:discover --ansi",
+    "post-autoload-dump": [
+      "@clear",
+      "@prepare",
+      "@php vendor/bin/testbench package:discover --ansi"
+    ],
     "changelog"         : "conventional-changelog",
     "release"           : "conventional-changelog --commit",
     "release:patch"     : "conventional-changelog --patch --commit",
@@ -44,6 +51,21 @@
     "static"            : [
       "psalm",
       "phpstan"
+    ],
+    "clear"             : "@php vendor/bin/testbench package:purge-skeleton --ansi",
+    "prepare"           : "@php vendor/bin/testbench package:discover --ansi",
+    "build"             : "@php vendor/bin/testbench workbench:build --ansi",
+    "serve"             : [
+      "Composer\\Config::disableProcessTimeout",
+      "@build",
+      "@php vendor/bin/testbench serve --ansi"
+    ],
+    "lint"              : [
+      "pint",
+      "@php vendor/bin/phpstan analyse --verbose --ansi"
+    ],
+    "test"              : [
+      "@php vendor/bin/phpunit"
     ]
   },
   "extra"            : {
