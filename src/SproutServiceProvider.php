@@ -10,8 +10,8 @@ use Illuminate\Support\ServiceProvider;
 use Sprout\Events\CurrentTenantChanged;
 use Sprout\Http\Middleware\TenantRoutes;
 use Sprout\Listeners\HandleTenantContext;
-use Sprout\Listeners\PerformIdentityResolverSetup;
 use Sprout\Listeners\IdentifyTenantOnRouting;
+use Sprout\Listeners\PerformIdentityResolverSetup;
 use Sprout\Managers\IdentityResolverManager;
 use Sprout\Managers\ProviderManager;
 
@@ -90,6 +90,6 @@ class SproutServiceProvider extends ServiceProvider
 
     private function publishConfig(): void
     {
-        $this->publishes([__DIR__.'/../resources/config/multitenancy.php'], 'config');
+        $this->publishes([__DIR__ . '/../resources/config/multitenancy.php' => config_path('multitenancy.php')], 'config');
     }
 }
