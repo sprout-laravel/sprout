@@ -7,7 +7,7 @@
     "laravel/framework": "^11.0"
   },
   "require-dev"      : {
-    "phpunit/phpunit"    : "^11.3",
+    "phpunit/phpunit"    : "^11.0.1",
     "orchestra/testbench": "^9.4",
     "larastan/larastan"  : "^2.9"
   },
@@ -46,12 +46,7 @@
     "release:patch"     : "conventional-changelog --patch --commit",
     "release:minor"     : "conventional-changelog --minor --commit",
     "release:major"     : "conventional-changelog --major --commit",
-    "psalm"             : "@php vendor/bin/psalm --no-cache --no-reflection-cache",
-    "phpstan"           : "@php vendor/bin/phpstan --memory-limit=2G",
-    "static"            : [
-      "psalm",
-      "phpstan"
-    ],
+    "phpstan"           : "@php vendor/bin/phpstan analyse --memory-limit=2G --verbose --ansi",
     "clear"             : "@php vendor/bin/testbench package:purge-skeleton --ansi",
     "prepare"           : "@php vendor/bin/testbench package:discover --ansi",
     "build"             : "@php vendor/bin/testbench workbench:build --ansi",
@@ -60,9 +55,8 @@
       "@build",
       "@php vendor/bin/testbench serve --ansi"
     ],
-    "lint"              : [
-      "pint",
-      "@php vendor/bin/phpstan analyse --verbose --ansi"
+    "analyse"           : [
+      "phpstan"
     ],
     "test"              : [
       "@php vendor/bin/phpunit"

@@ -29,7 +29,6 @@ final class Sprout
 
     public function config(string $key, mixed $default): mixed
     {
-        /** @phpstan-ignore-next-line */
         return $this->app->make('config')->get('sprout.' . $key, $default);
     }
 

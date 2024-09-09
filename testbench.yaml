@@ -18,8 +18,8 @@ workbench:
     components: false
     views: false
   build:
+    - vendor:publish --provider="Sprout\\SproutServiceProvider"
     - crete-sqlite-db
     - migrate:refresh
-    - vendor:publish --provider="Sprout\\SproutServiceProvider"
   assets: []
   sync: []
