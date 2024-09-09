@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Sprout\Managers;
 
 use InvalidArgumentException;
+use Sprout\Http\Resolvers\CookieIdentityResolver;
 use Sprout\Http\Resolvers\HeaderIdentityResolver;
 use Sprout\Http\Resolvers\PathIdentityResolver;
 use Sprout\Http\Resolvers\SubdomainIdentityResolver;
@@ -105,6 +106,25 @@ final class IdentityResolverManager extends BaseFactory
         return new HeaderIdentityResolver(
             $name,
             $config['header'] ?? null
+        );
+    }
+
+    /**
+     * Create the cookie identity resolver
+     *
+     * @param array<string, mixed>                                      $config
+     * @param string                                                    $name
+     *
+     * @phpstan-param array{cookie?: string|null, options?: array|null} $config
+     *
+     * @return \Sprout\Http\Resolvers\CookieIdentityResolver
+     */
+    protected function createCookieResolver(array $config, string $name): CookieIdentityResolver
+    {
+        return new CookieIdentityResolver(
+            $name,
+            $config['cookie'] ?? null,
+            $config['options'] ?? []
         );
     }
 }

@@ -47,7 +47,11 @@ return [
         ],
 
         'header' => [
-            'driver'   => 'header',
+            'driver' => 'header',
+        ],
+
+        'cookie' => [
+            'driver' => 'cookie',
         ],
 
     ],
