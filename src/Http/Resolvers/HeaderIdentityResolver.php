@@ -38,9 +38,9 @@ class HeaderIdentityResolver extends BaseIdentityResolver
     public function getRequestHeaderName(Tenancy $tenancy): string
     {
         return str_replace(
-            ['{tenancy}', '{resolver}'],
-            [$tenancy->getName(), $this->getName()],
-            $this->header
+            ['{tenancy}', '{resolver}', '{Tenancy}', '{Resolver}'],
+            [$tenancy->getName(), $this->getName(), ucfirst($tenancy->getName()), ucfirst($this->getName())],
+            $this->getHeader()
         );
     }
 
