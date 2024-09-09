@@ -9,6 +9,7 @@ use Illuminate\Routing\Router;
 use Illuminate\Support\ServiceProvider;
 use Sprout\Events\CurrentTenantChanged;
 use Sprout\Http\Middleware\TenantRoutes;
+use Sprout\Http\RouterMethods;
 use Sprout\Listeners\HandleTenantContext;
 use Sprout\Listeners\IdentifyTenantOnRouting;
 use Sprout\Listeners\PerformIdentityResolverSetup;
@@ -29,6 +30,7 @@ class SproutServiceProvider extends ServiceProvider
         $this->booting(function () {
             $this->registerEventListeners();
         });
+        $this->registerRouteMixin();
     }
 
     private function handleCoreConfig(): void
@@ -88,6 +90,11 @@ class SproutServiceProvider extends ServiceProvider
 
         $events->listen(CurrentTenantChanged::class, HandleTenantContext::class);
         $events->listen(CurrentTenantChanged::class, PerformIdentityResolverSetup::class);
+    }
+
+    protected function registerRouteMixin(): void
+    {
+        Router::mixin(new RouterMethods);
     }
 
     public function boot(): void

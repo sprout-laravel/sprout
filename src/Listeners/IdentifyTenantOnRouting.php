@@ -83,7 +83,7 @@ final class IdentifyTenantOnRouting
         // Make sure the tenancy knows which resolver resolved it
         $tenancy->resolvedVia($resolver);
 
-        if ($identity === null || ! $tenancy->identify($identity)) {
+        if ($identity === null || $tenancy->identify($identity) === false) {
             throw NoTenantFound::make($resolver->getName(), $tenancy->getName());
         }
 
@@ -99,10 +99,18 @@ final class IdentifyTenantOnRouting
     {
         foreach (Arr::wrap($route->middleware()) as $item) {
             if ($item === TenantRoutes::ALIAS || Str::startsWith($item, TenantRoutes::ALIAS . ':')) {
-                return array_merge(
-                    [null, null],
-                    explode(',', Str::after($item, ':'))
-                );
+                if (! Str::startsWith($item, TenantRoutes::ALIAS . ':')) {
+                    return [null, null];
+                }
+
+                if (Str::contains($item, ',')) {
+                    return explode(',', Str::after($item, ':'), 2);
+                }
+
+                return [
+                    Str::after($item, ':'),
+                    null,
+                ];
             }
         }
 
