@@ -127,7 +127,7 @@ final class CookieIdentityResolver extends BaseIdentityResolver implements Ident
      *
      * @return array<string, mixed>
      *
-     * @codeCoverageIgnore 
+     * @codeCoverageIgnore
      */
     private function getCookieDetails(array $details): array
     {
