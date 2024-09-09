@@ -14,6 +14,7 @@ use Sprout\Listeners\IdentifyTenantOnRouting;
 use Sprout\Listeners\PerformIdentityResolverSetup;
 use Sprout\Managers\IdentityResolverManager;
 use Sprout\Managers\ProviderManager;
+use Sprout\Managers\TenancyManager;
 
 class SproutServiceProvider extends ServiceProvider
 {
@@ -55,9 +56,15 @@ class SproutServiceProvider extends ServiceProvider
             return new IdentityResolverManager($app);
         });
 
+        // Register the tenancy manager
+        $this->app->singleton(TenancyManager::class, function ($app) {
+            return new TenancyManager($app, $app->make(ProviderManager::class));
+        });
+
         // Alias the managers with simple names
         $this->app->alias(ProviderManager::class, 'sprout.providers');
         $this->app->alias(IdentityResolverManager::class, 'sprout.resolvers');
+        $this->app->alias(TenancyManager::class, 'sprout.tenancies');
     }
 
     private function registerMiddleware(): void

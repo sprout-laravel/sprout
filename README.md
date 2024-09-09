@@ -3,20 +3,12 @@
 ![Packagist Version](https://img.shields.io/packagist/v/sprout/sprout)
 ![Packagist PHP Version Support](https://img.shields.io/packagist/php-v/sprout/sprout)
 ![GitHub](https://img.shields.io/github/license/sprout-laravel/sprout)
-![Psalm Level](https://shepherd.dev/github/sprout-laravel/sprout/level.svg)
 ![Laravel](https://img.shields.io/badge/laravel-10.x-red.svg)
 
 Main:
 
 [![codecov](https://codecov.io/gh/sprout-laravel/sprout/branch/main/graph/badge.svg?token=FHJ41NQMTA)](https://codecov.io/gh/sprout-laravel/sprout)
-[![CircleCI](https://circleci.com/gh/sprout-laravel/sprout/tree/main.svg?style=shield)](https://circleci.com/gh/sprout-laravel/sprout/tree/main)
 [![Mutation testing badge](https://img.shields.io/endpoint?style=flat&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2Fgithub.com%2Fsmplphp%2Fcore%2Fmain)](https://dashboard.stryker-mutator.io/reports/github.com/sprout-laravel/sprout/main)
-
-Develop:
-
-[![codecov](https://codecov.io/gh/sprout-laravel/sprout/branch/develop/graph/badge.svg?token=FHJ41NQMTA)](https://codecov.io/gh/sprout-laravel/sprout)
-[![CircleCI](https://circleci.com/gh/sprout-laravel/sprout/tree/develop.svg?style=shield)](https://circleci.com/gh/sprout-laravel/sprout/tree/develop)
-[![Mutation testing badge](https://img.shields.io/endpoint?style=flat&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2Fgithub.com%2Fsmplphp%2Fcore%2Fdevelop)](https://dashboard.stryker-mutator.io/reports/github.com/sprout-laravel/sprout/develop)
 
 # Sprout for Laravel
 ### A flexible, seamless and easy to use multitenancy solution for Laravel

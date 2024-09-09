@@ -27,7 +27,7 @@ final class Sprout
         $this->app = $app;
     }
 
-    public function config(string $key, mixed $default): mixed
+    public function config(string $key, mixed $default = null): mixed
     {
         return $this->app->make('config')->get('sprout.' . $key, $default);
     }
@@ -89,7 +89,7 @@ final class Sprout
 
     public function contextValue(Tenant $tenant): int|string
     {
-        return $this->config('context.user', 'key') === 'key'
+        return $this->config('context.use', 'key') === 'key'
             ? $tenant->getTenantKey()
             : $tenant->getTenantIdentifier();
     }

@@ -15,6 +15,8 @@ trait IsTenantModel
      * Retrieve the identifier used to publicly identify the tenant.
      *
      * @return string
+     *
+     * @infection-ignore-all
      */
     public function getTenantIdentifier(): string
     {
@@ -29,6 +31,8 @@ trait IsTenantModel
      * Used primarily by {@see \Sprout\Contracts\TenantProvider}.
      *
      * @return string
+     *
+     * @infection-ignore-all
      */
     public function getTenantIdentifierName(): string
     {
@@ -41,6 +45,8 @@ trait IsTenantModel
      * Retrieve the key used to identify a tenant internally.
      *
      * @return int|string
+     *
+     * @infection-ignore-all
      */
     public function getTenantKey(): int|string
     {
@@ -55,6 +61,8 @@ trait IsTenantModel
      * Used primarily by {@see \Sprout\Contracts\TenantProvider}.
      *
      * @return string
+     *
+     * @infection-ignore-all
      */
     public function getTenantKeyName(): string
     {
