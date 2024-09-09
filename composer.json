@@ -60,8 +60,7 @@
       "@build",
       "@php vendor/bin/testbench serve --ansi"
     ],
-    "lint"              : [
-      "pint",
+    "analyse"              : [
       "@php vendor/bin/phpstan analyse --verbose --ansi"
     ],
     "test"              : [
