@@ -145,7 +145,7 @@ final class DefaultTenancy implements Tenancy
 
         $this->setTenant($tenant);
 
-        TenantIdentified::dispatch($tenant, $this);
+        event(new TenantIdentified($tenant, $this));
 
         return true;
     }
@@ -169,7 +169,7 @@ final class DefaultTenancy implements Tenancy
 
         $this->setTenant($tenant);
 
-        TenantLoaded::dispatch($tenant, $this);
+        event( new TenantLoaded($tenant, $this));
 
         return true;
     }
@@ -236,7 +236,7 @@ final class DefaultTenancy implements Tenancy
         if ($previousTenant !== $tenant) {
             $this->tenant = $tenant;
 
-            CurrentTenantChanged::dispatch($this, $previousTenant, $tenant);
+            event(new CurrentTenantChanged($this, $previousTenant, $tenant));
         }
 
         return $this;

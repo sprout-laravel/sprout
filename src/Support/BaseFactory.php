@@ -73,7 +73,7 @@ abstract class BaseFactory
     protected function getDefaultName(): string
     {
         /** @phpstan-ignore-next-line */
-        return $this->app['config']->get('sprout.defaults.' . $this->getFactoryName());
+        return $this->app['config']->get('multitenancy.defaults.' . $this->getFactoryName());
     }
 
     /**
