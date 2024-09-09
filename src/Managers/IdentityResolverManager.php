@@ -112,10 +112,10 @@ final class IdentityResolverManager extends BaseFactory
     /**
      * Create the cookie identity resolver
      *
-     * @param array<string, mixed>                                      $config
-     * @param string                                                    $name
+     * @param array<string, mixed>                                                     $config
+     * @param string                                                                   $name
      *
-     * @phpstan-param array{cookie?: string|null, options?: array|null} $config
+     * @phpstan-param array{cookie?: string|null, options?: array<string, mixed>|null} $config
      *
      * @return \Sprout\Http\Resolvers\CookieIdentityResolver
      */
