@@ -60,6 +60,16 @@ final class DatabaseTenantProvider extends BaseTenantProvider
     }
 
     /**
+     * Get the database table name
+     *
+     * @return string
+     */
+    public function getTable(): string
+    {
+        return $this->table;
+    }
+
+    /**
      * Get the entity class
      *
      * @return class-string

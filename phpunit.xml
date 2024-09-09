@@ -12,6 +12,7 @@
         failOnRisky="true"
         failOnEmptyTestSuite="true"
         beStrictAboutOutputDuringTests="true"
+        testdox="true"
 >
     <testsuites>
         <testsuite name="Tenanted Laravel Test Suite">
