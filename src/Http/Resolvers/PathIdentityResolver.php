@@ -44,7 +44,7 @@ final class PathIdentityResolver extends BaseIdentityResolver implements Identit
      */
     public function resolveFromRequest(Request $request, Tenancy $tenancy): ?string
     {
-        return $request->segment($this->segment);
+        return $request->segment($this->getSegment());
     }
 
     /**
