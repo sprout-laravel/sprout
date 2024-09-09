@@ -62,7 +62,7 @@ trait FindsIdentityInRouteParameter
     /**
      * Get the route parameter with braces
      *
-     * @param \Sprout\Contracts\Tenancy $tenancy
+     * @param \Sprout\Contracts\Tenancy<\Sprout\Contracts\Tenant> $tenancy
      *
      * @return string
      */
