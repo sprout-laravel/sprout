@@ -14,7 +14,13 @@ return [
 
         'tenants' => [
             'provider' => 'tenants',
-            'options'  => [],
+            'options'  => [
+                'hydration' => [
+                    'enabled' => true,
+                    'check'   => true,
+                    'strict'  => false,
+                ],
+            ],
         ],
 
     ],
