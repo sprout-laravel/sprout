@@ -21,13 +21,11 @@ final readonly class CurrentTenant implements ContextualAttribute
 
     public function resolve(CurrentTenant $tenant, Container $container): ?Tenant
     {
-        $manager = $container->make(TenancyManager::class);
-
-        if (! ($manager instanceof TenancyManager)) {
-            // We'll fail silently here...for reasons
-            return null;
-        }
-
-        return $manager->get($this->tenancy)->tenant();
+        /**
+         * It's not nullable, it'll be an exception
+         *
+         * @noinspection NullPointerExceptionInspection
+         */
+        return $container->make(TenancyManager::class)->get($this->tenancy)->tenant();
     }
 }
