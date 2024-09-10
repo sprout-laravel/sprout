@@ -15,9 +15,9 @@ class HeaderIdentityResolver extends BaseIdentityResolver
 {
     private string $header;
 
-    public function __construct(string $name, ?string $header = null)
+    public function __construct(string $name, ?string $header = null, array $hooks = [])
     {
-        parent::__construct($name);
+        parent::__construct($name, $hooks);
 
         $this->header = $header ?? '{Tenancy}-Identifier';
     }

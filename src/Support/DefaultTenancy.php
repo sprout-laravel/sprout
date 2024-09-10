@@ -44,6 +44,11 @@ final class DefaultTenancy implements Tenancy
     private array $options;
 
     /**
+     * @var \Sprout\Support\ResolutionHook|null
+     */
+    private ?ResolutionHook $hook = null;
+
+    /**
      * @param string                                        $name
      * @param \Sprout\Contracts\TenantProvider<TenantClass> $provider
      * @param array<string, mixed>                          $options
@@ -139,6 +144,7 @@ final class DefaultTenancy implements Tenancy
 
         if ($tenant === null) {
             $this->resolver = null;
+            $this->hook     = null;
 
             return false;
         }
@@ -164,12 +170,15 @@ final class DefaultTenancy implements Tenancy
         $tenant = $this->provider()->retrieveByKey($key);
 
         if ($tenant === null) {
+            $this->resolver = null;
+            $this->hook     = null;
+
             return false;
         }
 
         $this->setTenant($tenant);
 
-        event( new TenantLoaded($tenant, $this));
+        event(new TenantLoaded($tenant, $this));
 
         return true;
     }
@@ -263,5 +272,29 @@ final class DefaultTenancy implements Tenancy
     public function option(string $key, mixed $default = null): mixed
     {
         return $this->options()[$key] ?? $default;
+    }
+
+    /**
+     * Set the hook where the tenant was resolved
+     *
+     * @param \Sprout\Support\ResolutionHook $hook
+     *
+     * @return $this
+     */
+    public function resolvedAt(ResolutionHook $hook): static
+    {
+        $this->hook = $hook;
+
+        return $this;
+    }
+
+    /**
+     * Get the hook where the tenant was resolved
+     *
+     * @return \Sprout\Support\ResolutionHook|null
+     */
+    public function hook(): ?ResolutionHook
+    {
+        return $this->hook;
     }
 }

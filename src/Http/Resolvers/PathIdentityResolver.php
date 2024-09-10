@@ -19,9 +19,9 @@ final class PathIdentityResolver extends BaseIdentityResolver implements Identit
 
     private int $segment = 1;
 
-    public function __construct(string $name, ?int $segment = null, ?string $pattern = null, ?string $parameter = null)
+    public function __construct(string $name, ?int $segment = null, ?string $pattern = null, ?string $parameter = null, array $hooks = [])
     {
-        parent::__construct($name);
+        parent::__construct($name, $hooks);
 
         if ($segment !== null) {
             $this->segment = max(1, $segment);

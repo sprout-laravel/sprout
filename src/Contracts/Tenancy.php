@@ -2,6 +2,8 @@
 
 namespace Sprout\Contracts;
 
+use Sprout\Support\ResolutionHook;
+
 /**
  * Tenancy Contract
  *
@@ -109,11 +111,27 @@ interface Tenancy
     public function resolvedVia(IdentityResolver $resolver): static;
 
     /**
+     * Set the hook where the tenant was resolved
+     *
+     * @param \Sprout\Support\ResolutionHook $hook
+     *
+     * @return $this
+     */
+    public function resolvedAt(ResolutionHook $hook): static;
+
+    /**
      * Get the used identity resolver
      *
      * @return \Sprout\Contracts\IdentityResolver|null
      */
     public function resolver(): ?IdentityResolver;
+
+    /**
+     * Get the hook where the tenant was resolved
+     *
+     * @return \Sprout\Support\ResolutionHook|null
+     */
+    public function hook(): ?ResolutionHook;
 
     /**
      * Check if the current tenant was resolved

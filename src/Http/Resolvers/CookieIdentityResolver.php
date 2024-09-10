@@ -24,13 +24,14 @@ final class CookieIdentityResolver extends BaseIdentityResolver implements Ident
     private array $options;
 
     /**
-     * @param string               $name
-     * @param string|null          $cookie
-     * @param array<string, mixed> $options
+     * @param string                                $name
+     * @param string|null                           $cookie
+     * @param array<string, mixed>                  $options
+     * @param array<\Sprout\Support\ResolutionHook> $hooks
      */
-    public function __construct(string $name, ?string $cookie = null, array $options = [])
+    public function __construct(string $name, ?string $cookie = null, array $options = [], array $hooks = [])
     {
-        parent::__construct($name);
+        parent::__construct($name, $hooks);
 
         $this->cookie  = $cookie ?? '{Tenancy}-Identifier';
         $this->options = $options;

@@ -19,9 +19,9 @@ final class SubdomainIdentityResolver extends BaseIdentityResolver implements Id
 
     private string $domain;
 
-    public function __construct(string $name, string $domain, ?string $pattern = null, ?string $parameter = null)
+    public function __construct(string $name, string $domain, ?string $pattern = null, ?string $parameter = null, array $hooks = [])
     {
-        parent::__construct($name);
+        parent::__construct($name, $hooks);
 
         $this->domain = $domain;
 
