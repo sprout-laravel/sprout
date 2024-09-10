@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model as ParentModel;
 use RuntimeException;
 use Sprout\Contracts\Tenancy;
 use Sprout\Support\BaseTenantRelationHandler;
+use Sprout\TenancyOptions;
 
 /**
  * @template ParentModel of \Illuminate\Database\Eloquent\Model
@@ -112,7 +113,7 @@ class BelongsToManyTenants extends BaseTenantRelationHandler
 
         // If the tenancy is configured to do a hydration check, we'll need to run
         // a query to see if this model IS related to the tenant
-        if ($tenancy->option('hydration.check', true)) {
+        if (TenancyOptions::shouldCheckForRelationWithTenant($tenancy)) {
             // Run the query
             $exists = $model->newQuery()->whereHas($this->getRelationName(), function (Builder $query) use ($tenant) {
                 $query->whereKey($tenant->getTenantKey());
@@ -122,7 +123,7 @@ class BelongsToManyTenants extends BaseTenantRelationHandler
             if (! $exists) {
                 // If the hydration is set to be strict for the current tenancy,
                 // we'll need an exception
-                if ($tenancy->option('hydration.strict', false)) {
+                if (TenancyOptions::shouldThrowIfNotRelated($tenancy)) {
                     // TODO: Abstract out to specific exception
                     throw new RuntimeException(
                         'Child model [' . $model::class . '::' . $model->getKey()
