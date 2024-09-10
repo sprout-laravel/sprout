@@ -6,11 +6,11 @@ namespace Workbench\App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Sprout\Contracts\Tenant;
-use Sprout\Database\Eloquent\Concerns\IsTenantModel;
+use Sprout\Database\Eloquent\Concerns\IsTenant;
 
 class TenantModel extends Model implements Tenant
 {
-    use IsTenantModel, HasFactory;
+    use IsTenant, HasFactory;
 
     protected $table = 'tenants';
 
