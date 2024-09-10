@@ -11,6 +11,8 @@ use Sprout\Exceptions\NoTenantFound;
 use Sprout\Managers\IdentityResolverManager;
 use Sprout\Managers\TenancyManager;
 use Sprout\Sprout;
+use Sprout\Support\ResolutionHelper;
+use Sprout\Support\ResolutionHook;
 
 /**
  * Tenant Routes Middleware
@@ -51,17 +53,12 @@ final class TenantRoutes
             $resolverName = $tenancyName = null;
         }
 
-        $resolver = $this->sprout->resolvers()->get($resolverName);
-        $tenancy  = $this->sprout->tenancies()->get($tenancyName);
-
-        /**
-         * @var \Sprout\Contracts\IdentityResolver                  $resolver
-         * @var \Sprout\Contracts\Tenancy<\Sprout\Contracts\Tenant> $tenancy
-         */
-
-        if (! $tenancy->check()) {
-            throw NoTenantFound::make($resolver->getName(), $tenancy->getName());
-        }
+        ResolutionHelper::handleResolution(
+            $request,
+            ResolutionHook::Middleware,
+            $resolverName,
+            $tenancyName
+        );
 
         // TODO: Decide whether to do anything with the following conditions
         //if (! $tenancy->wasResolved()) {
