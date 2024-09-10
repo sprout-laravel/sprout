@@ -29,7 +29,7 @@ final class DefaultTenancy implements Tenancy
     /**
      * @var \Sprout\Contracts\IdentityResolver|null
      */
-    private ?IdentityResolver $resolver;
+    private ?IdentityResolver $resolver = null;
 
     /**
      * @var \Sprout\Contracts\Tenant|null
