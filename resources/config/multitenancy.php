@@ -54,6 +54,11 @@ return [
             'driver' => 'cookie',
         ],
 
+        'session' => [
+            'driver'  => 'session',
+            'session' => 'multitenancy.{tenancy}',
+        ],
+
     ],
 
 ];

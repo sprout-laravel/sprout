@@ -132,4 +132,23 @@ final class IdentityResolverManager extends BaseFactory
             $config['hooks'] ?? []
         );
     }
+
+    /**
+     * Create the session identity resolver
+     *
+     * @param array<string, mixed>                                                                $config
+     * @param string                                                                              $name
+     *
+     * @phpstan-param array{session?: string|null, hooks?: array<\Sprout\Support\ResolutionHook>} $config
+     *
+     * @return \Sprout\Http\Resolvers\SessionIdentityResolver
+     */
+    protected function createSessionResolver(array $config, string $name): SessionIdentityResolver
+    {
+
+        return new SessionIdentityResolver(
+            $name,
+            $config['session'] ?? null
+        );
+    }
 }
