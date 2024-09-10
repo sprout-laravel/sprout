@@ -6,6 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Router;
 use Illuminate\Routing\RouteRegistrar;
+use Sprout\Support\ResolutionHook;
 
 /**
  * Identity Resolver Contract
@@ -73,4 +74,20 @@ interface IdentityResolver
      * @return void
      */
     public function setup(Tenancy $tenancy, ?Tenant $tenant): void;
+
+    /**
+     * Can the resolver run on the request
+     *
+     * This method allows a resolver to prevent resolution with the request in
+     * its current state, whether that means it's too early, or too late.
+     *
+     * @template TenantClass of \Sprout\Contracts\Tenant
+     *
+     * @param \Illuminate\Http\Request               $request
+     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Sprout\Support\ResolutionHook         $hook
+     *
+     * @return bool
+     */
+    public function canResolve(Request $request, Tenancy $tenancy, ResolutionHook $hook): bool;
 }

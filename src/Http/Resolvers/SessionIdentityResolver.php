@@ -10,24 +10,26 @@ use Illuminate\Routing\RouteRegistrar;
 use Sprout\Contracts\Tenancy;
 use Sprout\Http\Middleware\TenantRoutes;
 use Sprout\Support\BaseIdentityResolver;
+use Sprout\Support\ResolutionHook;
 
-class HeaderIdentityResolver extends BaseIdentityResolver
+final class SessionIdentityResolver extends BaseIdentityResolver
 {
-    private string $header;
-
-    public function __construct(string $name, ?string $header = null, array $hooks = [])
-    {
-        parent::__construct($name, $hooks);
-
-        $this->header = $header ?? '{Tenancy}-Identifier';
-    }
+    private string $session;
 
     /**
-     * @return string
+     * @param string      $name
+     * @param string|null $session
      */
-    public function getHeader(): string
+    public function __construct(string $name, ?string $session = null)
     {
-        return $this->header;
+        parent::__construct($name, [ResolutionHook::Middleware]);
+
+        $this->session = $session ?? 'multitenancy.{tenancy}';
+    }
+
+    public function getSession(): string
+    {
+        return $this->session;
     }
 
     /**
@@ -35,12 +37,12 @@ class HeaderIdentityResolver extends BaseIdentityResolver
      *
      * @return string
      */
-    public function getRequestHeaderName(Tenancy $tenancy): string
+    public function getRequestSessionName(Tenancy $tenancy): string
     {
         return str_replace(
             ['{tenancy}', '{resolver}', '{Tenancy}', '{Resolver}'],
             [$tenancy->getName(), $this->getName(), ucfirst($tenancy->getName()), ucfirst($this->getName())],
-            $this->getHeader()
+            $this->getSession()
         );
     }
 
@@ -58,7 +60,14 @@ class HeaderIdentityResolver extends BaseIdentityResolver
      */
     public function resolveFromRequest(Request $request, Tenancy $tenancy): ?string
     {
-        return $request->header($this->getRequestHeaderName($tenancy));
+        /**
+         * This is unfortunately here because of the ludicrous return type
+         *
+         * @var string|null $identity
+         */
+        $identity = $request->session()->get($this->getRequestSessionName($tenancy));
+
+        return $identity;
     }
 
     /**
@@ -79,5 +88,24 @@ class HeaderIdentityResolver extends BaseIdentityResolver
     {
         return $router->middleware([TenantRoutes::ALIAS . ':' . $this->getName() . ',' . $tenancy->getName()])
                       ->group($groupRoutes);
+    }
+
+    /**
+     * Can the resolver run on the request
+     *
+     * This method allows a resolver to prevent resolution with the request in
+     * its current state, whether that means it's too early, or too late.
+     *
+     * @template TenantClass of \Sprout\Contracts\Tenant
+     *
+     * @param \Illuminate\Http\Request               $request
+     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Sprout\Support\ResolutionHook         $hook
+     *
+     * @return bool
+     */
+    public function canResolve(Request $request, Tenancy $tenancy, ResolutionHook $hook): bool
+    {
+        return $request->hasSession() && $hook === ResolutionHook::Middleware;
     }
 }

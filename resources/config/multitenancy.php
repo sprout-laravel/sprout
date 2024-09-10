@@ -47,7 +47,16 @@ return [
         ],
 
         'header' => [
-            'driver'   => 'header',
+            'driver' => 'header',
+        ],
+
+        'cookie' => [
+            'driver' => 'cookie',
+        ],
+
+        'session' => [
+            'driver'  => 'session',
+            'session' => 'multitenancy.{tenancy}',
         ],
 
     ],
