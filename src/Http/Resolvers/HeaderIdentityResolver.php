@@ -11,7 +11,7 @@ use Sprout\Contracts\Tenancy;
 use Sprout\Http\Middleware\TenantRoutes;
 use Sprout\Support\BaseIdentityResolver;
 
-class HeaderIdentityResolver extends BaseIdentityResolver
+final class HeaderIdentityResolver extends BaseIdentityResolver
 {
     private string $header;
 
