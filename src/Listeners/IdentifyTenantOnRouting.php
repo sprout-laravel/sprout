@@ -17,28 +17,6 @@ use Sprout\Support\ResolutionHook;
 final class IdentifyTenantOnRouting
 {
     /**
-     * @var \Sprout\Sprout
-     */
-    private Sprout $sprout;
-
-    /**
-     * @var \Sprout\Managers\IdentityResolverManager
-     */
-    private IdentityResolverManager $resolverManager;
-
-    /**
-     * @var \Sprout\Managers\TenancyManager
-     */
-    private TenancyManager $tenancyManager;
-
-    public function __construct(Sprout $sprout, IdentityResolverManager $resolverManager, TenancyManager $tenancyManager)
-    {
-        $this->sprout          = $sprout;
-        $this->resolverManager = $resolverManager;
-        $this->tenancyManager  = $tenancyManager;
-    }
-
-    /**
      * @param \Illuminate\Routing\Events\RouteMatched $event
      *
      * @return void
