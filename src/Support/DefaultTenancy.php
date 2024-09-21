@@ -39,7 +39,7 @@ final class DefaultTenancy implements Tenancy
     private ?Tenant $tenant = null;
 
     /**
-     * @var array<string, mixed>
+     * @var list<string>
      */
     private array $options;
 
@@ -51,7 +51,7 @@ final class DefaultTenancy implements Tenancy
     /**
      * @param string                                        $name
      * @param \Sprout\Contracts\TenantProvider<TenantClass> $provider
-     * @param array<string, mixed>                          $options
+     * @param list<string>                                  $options
      */
     public function __construct(string $name, TenantProvider $provider, array $options)
     {
@@ -254,7 +254,7 @@ final class DefaultTenancy implements Tenancy
     /**
      * Get all tenant options
      *
-     * @return array<string, mixed>
+     * @return list<string>
      */
     public function options(): array
     {
@@ -264,14 +264,45 @@ final class DefaultTenancy implements Tenancy
     /**
      * Get a tenant option
      *
-     * @param string     $key
-     * @param mixed|null $default
+     * @param string $option
      *
-     * @return mixed
+     * @return bool
      */
-    public function option(string $key, mixed $default = null): mixed
+    public function hasOption(string $option): bool
     {
-        return $this->options()[$key] ?? $default;
+        return in_array($option, $this->options(), true);
+    }
+
+    /**
+     * Add an option to the tenancy
+     *
+     * @param string $option
+     *
+     * @return static
+     */
+    public function addOption(string $option): static
+    {
+        if (! $this->hasOption($option)) {
+            $this->options[] = $option;
+        }
+
+        return $this;
+    }
+
+    /**
+     * Remove an option from the tenancy
+     *
+     * @param string $option
+     *
+     * @return static
+     */
+    public function removeOption(string $option): static
+    {
+        if ($this->hasOption($option)) {
+            unset($this->options[array_search($option, $this->options(), true)]);
+        }
+
+        return $this;
     }
 
     /**

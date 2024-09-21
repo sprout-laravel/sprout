@@ -44,7 +44,7 @@ class TenancyOptions
      */
     public static function shouldHydrateTenantRelation(Tenancy $tenancy): bool
     {
-        return (bool)$tenancy->option(static::hydrateTenantRelation(), true);
+        return $tenancy->hasOption(static::hydrateTenantRelation());
     }
 
     /**
@@ -54,7 +54,7 @@ class TenancyOptions
      */
     public static function shouldCheckForRelationWithTenant(Tenancy $tenancy): bool
     {
-        return (bool)$tenancy->option(static::checkForRelationWithTenant(), true);
+        return $tenancy->hasOption(static::checkForRelationWithTenant());
     }
 
     /**
@@ -64,6 +64,6 @@ class TenancyOptions
      */
     public static function shouldThrowIfNotRelated(Tenancy $tenancy): bool
     {
-        return (bool)$tenancy->option(static::throwIfNotRelated(), false);
+        return $tenancy->hasOption(static::throwIfNotRelated());
     }
 }
