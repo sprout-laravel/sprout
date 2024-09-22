@@ -3,22 +3,18 @@ declare(strict_types=1);
 
 namespace Workbench\App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Sprout\Attributes\TenantRelation;
 use Sprout\Database\Eloquent\Concerns\BelongsToTenant;
-use Sprout\Database\Eloquent\Concerns\IsTenantChild;
-use Workbench\Database\Factories\TenantChildFactory;
 
-class TenantChild extends Model
+class TooManyTenantRelationModel extends Model
 {
     /** @use \Illuminate\Database\Eloquent\Factories\HasFactory<\Workbench\Database\Factories\TenantChildFactory> */
-    use HasFactory, BelongsToTenant;
+    use BelongsToTenant;
 
     protected $table = 'tenant_child1';
-
-    protected static string $factory = TenantChildFactory::class;
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\Workbench\App\Models\TenantModel, self>
@@ -27,5 +23,14 @@ class TenantChild extends Model
     public function tenant(): BelongsTo
     {
         return $this->belongsTo(TenantModel::class, 'tenant_id');
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<\Workbench\App\Models\TenantModel>
+     */
+    #[TenantRelation]
+    public function tenants(): BelongsToMany
+    {
+        return $this->belongsToMany(TenantModel::class, 'tenant_relations', 'tenant_id', 'tenant_child2_id');
     }
 }

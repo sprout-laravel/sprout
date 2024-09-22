@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace Sprout\Database\Eloquent\Concerns;
 
 use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Database\Eloquent\Scope;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
@@ -35,7 +34,7 @@ trait IsTenantChild
                 ->map(fn (ReflectionMethod $method) => $method->getName());
 
             if ($methods->isEmpty()) {
-                throw new RuntimeException('No tenant relation found in mode [' . static::class . ']');
+                throw new RuntimeException('No tenant relation found in model [' . static::class . ']');
             }
 
             if ($methods->count() > 1) {
@@ -46,7 +45,7 @@ trait IsTenantChild
 
             return $methods->first();
         } catch (ReflectionException $exception) {
-            throw new RuntimeException('Unable to find tenant relation for model [' . static::class . ']', previous: $exception);
+            throw new RuntimeException('Unable to find tenant relation for model [' . static::class . ']', previous: $exception); // @codeCoverageIgnore
         }
     }
 

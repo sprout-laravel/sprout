@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Scope;
 
 final class TenantChildScope implements Scope
 {
-
     /**
      * Apply the scope to a given Eloquent query builder.
      *

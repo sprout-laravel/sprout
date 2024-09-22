@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Scope;
 
 final class BelongsToManyTenantsScope implements Scope
 {
-
     /**
      * Apply the scope to a given Eloquent query builder.
      *

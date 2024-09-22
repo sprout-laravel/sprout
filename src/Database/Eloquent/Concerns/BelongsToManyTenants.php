@@ -10,7 +10,7 @@ trait BelongsToManyTenants
 {
     use IsTenantChild;
 
-    public static function bootBelongsToTenant(): void
+    public static function bootBelongsToManyTenants(): void
     {
         // Automatically scope queries
         static::addGlobalScope(new BelongsToManyTenantsScope());

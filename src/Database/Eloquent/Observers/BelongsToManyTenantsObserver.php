@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Sprout\Database\Eloquent\Observers;
 
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Sprout\Contracts\Tenancy;
@@ -63,11 +62,12 @@ class BelongsToManyTenantsObserver
      */
     private function isTenantMismatched(Model $model, Tenant&Model $tenant, BelongsToMany $relation): bool
     {
-        /** @var \Illuminate\Database\Eloquent\Collection<int, TenantModel> $relatedModels */
+        /** @var \Illuminate\Database\Eloquent\Collection<int, TenantModel>|null $relatedModels */
         $relatedModels = $model->getRelation($relation->getRelationName());
 
-        // If the tenant model isn't in the loaded relation, there's a mismatch
-        return $relatedModels->first(function (Tenant&Model $model) use ($tenant) {
+        // If the tenant model isn't in the loaded relation, or the relation is
+        // null, there's a mismatch
+        return $relatedModels?->first(function (Tenant&Model $model) use ($tenant) {
                 return $model->is($tenant);
             }) === null;
     }
