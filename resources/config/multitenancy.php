@@ -18,7 +18,6 @@ return [
             'provider' => 'tenants',
             'options'  => [
                 TenancyOptions::hydrateTenantRelation(),
-                TenancyOptions::checkForRelationWithTenant(),
                 TenancyOptions::throwIfNotRelated(),
             ],
         ],

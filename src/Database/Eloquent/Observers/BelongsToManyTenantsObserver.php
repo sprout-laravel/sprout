@@ -29,26 +29,25 @@ class BelongsToManyTenantsObserver
      */
     private function doesModelAlreadyHaveATenant(Model $model, BelongsToMany $relation, Tenancy $tenancy): bool
     {
-        // If the tenancy is set to perform the check query, and the relation
-        // isn't loaded
-        if (
-            /** @phpstan-ignore-next-line */
-            TenancyOptions::shouldCheckForRelationWithTenant($tenancy)
-            && ! $model->relationLoaded($relation->getRelationName())
-        ) {
+        // If the relation isn't loaded
+        if (! $model->relationLoaded($relation->getRelationName())) {
             // Load it
             $model->load($relation->getRelationName());
         }
 
-        /** @var \Illuminate\Database\Eloquent\Collection<int, TenantModel>|null $relatedModels */
-        $relatedModels = $model->getRelation($relation->getRelationName());
+        if ($model->relationLoaded($relation->getRelationName())) {
+            /** @var \Illuminate\Database\Eloquent\Collection<int, TenantModel>|null $relatedModels */
+            $relatedModels = $model->getRelation($relation->getRelationName());
 
-        if ($relatedModels === null) {
-            return false;
+            if ($relatedModels === null) {
+                return false;
+            }
+
+            // If it's not empty, there are already tenants
+            return $relatedModels->isNotEmpty();
         }
 
-        // If it's not empty, there are already tenants
-        return $relatedModels->isNotEmpty();
+        return false;
     }
 
     /**
@@ -128,8 +127,14 @@ class BelongsToManyTenantsObserver
             // what it's for, but this should be more flexible
             if ($this->isTenantMismatched($model, $tenant, $relation)) {
                 // So, the current foreign key value doesn't match the current
-                // tenant, so we'll throw an exception
-                throw TenantMismatch::make($model::class, $tenancy->getName());
+                // tenant, so we'll throw an exception...if we're allowed to
+                if (TenancyOptions::shouldThrowIfNotRelated($tenancy)) {
+                    throw TenantMismatch::make($model::class, $tenancy->getName());
+                }
+
+                // If we hit here, we should continue without doing anything
+                // with the tenant
+                return false;
             }
 
             // If we hit here, then the foreign key that's set is for the current
@@ -143,11 +148,11 @@ class BelongsToManyTenantsObserver
     }
 
     /**
-     * @param \Illuminate\Database\Eloquent\Model&\Sprout\Database\Eloquent\Concerns\BelongsToTenant $model
+     * @param \Illuminate\Database\Eloquent\Model&\Sprout\Database\Eloquent\Concerns\BelongsToManyTenants $model
      *
      * @return void
      *
-     * @phpstan-param Model                                                                          $model
+     * @phpstan-param ChildModel                                                                          $model
      *
      * @throws \Sprout\Exceptions\TenantMissing
      * @throws \Sprout\Exceptions\TenantMismatch
@@ -172,16 +177,25 @@ class BelongsToManyTenantsObserver
             return;
         }
 
+        /**
+         * @var \Illuminate\Database\Eloquent\Model&\Sprout\Contracts\Tenant $tenant
+         * @phpstan-var TenantModel                                          $tenant
+         */
+        $tenant = $tenancy->tenant();
+
         // Attach the tenant
-        $relation->attach($tenancy->tenant());
+        $relation->attach($tenant);
+
+        // Set the relation to contain the tenant
+        $this->setRelation($model, $relation, $tenant);
     }
 
     /**
-     * @param \Illuminate\Database\Eloquent\Model&\Sprout\Database\Eloquent\Concerns\BelongsToTenant $model
+     * @param \Illuminate\Database\Eloquent\Model&\Sprout\Database\Eloquent\Concerns\BelongsToManyTenants $model
      *
      * @return void
      *
-     * @phpstan-param Model                                                                          $model
+     * @phpstan-param ChildModel                                                                          $model
      *
      * @throws \Sprout\Exceptions\TenantMissing
      * @throws \Sprout\Exceptions\TenantMismatch
@@ -213,6 +227,21 @@ class BelongsToManyTenantsObserver
         $tenant = $tenancy->tenant();
 
         // Set the relation to contain the tenant
+        $this->setRelation($model, $relation, $tenant);
+    }
+
+    /**
+     * @param \Illuminate\Database\Eloquent\Model                               $model
+     * @param \Illuminate\Database\Eloquent\Relations\BelongsToMany<TenantModel> $relation
+     * @param \Sprout\Contracts\Tenant                                          $tenant
+     *
+     * @phpstan-param ChildModel                                                $model
+     * @phpstan-param TenantModel                                               $tenant
+     *
+     * @return void
+     */
+    private function setRelation(Model $model, BelongsToMany $relation, Tenant $tenant): void
+    {
         $model->setRelation($relation->getRelationName(), $tenant->newCollection([$tenant]));
     }
 }

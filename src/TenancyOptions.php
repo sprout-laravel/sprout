@@ -18,16 +18,6 @@ class TenancyOptions
     }
 
     /**
-     * Check whether a model relates to the tenant before hydrating
-     *
-     * @return string
-     */
-    public static function checkForRelationWithTenant(): string
-    {
-        return 'tenant-relation.check';
-    }
-
-    /**
      * Throw an exception if the model isn't related to the tenant
      *
      * @return string
@@ -38,7 +28,9 @@ class TenancyOptions
     }
 
     /**
-     * @param \Sprout\Contracts\Tenancy<\Sprout\Contracts\Tenant> $tenancy
+     * @template TenantClass of \Sprout\Contracts\Tenant
+     *
+     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
      *
      * @return bool
      */
@@ -48,17 +40,9 @@ class TenancyOptions
     }
 
     /**
-     * @param \Sprout\Contracts\Tenancy<\Sprout\Contracts\Tenant> $tenancy
+     * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @return bool
-     */
-    public static function shouldCheckForRelationWithTenant(Tenancy $tenancy): bool
-    {
-        return $tenancy->hasOption(static::checkForRelationWithTenant());
-    }
-
-    /**
-     * @param \Sprout\Contracts\Tenancy<\Sprout\Contracts\Tenant> $tenancy
+     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
      *
      * @return bool
      */

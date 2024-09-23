@@ -13,7 +13,7 @@ return new class extends Migration {
         Schema::create('tenant_child1', static function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('tenant_id')->references('id')->on('tenants');
+            $table->foreignId('tenant_id')->nullable()->references('id')->on('tenants');
 
             $table->timestamps();
         });

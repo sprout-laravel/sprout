@@ -10,6 +10,7 @@ use Sprout\Contracts\Tenant;
 use Sprout\Database\Eloquent\Contracts\OptionalTenant;
 use Sprout\Exceptions\TenantMismatch;
 use Sprout\Exceptions\TenantMissing;
+use Sprout\TenancyOptions;
 
 /**
  * @template ChildModel of \Illuminate\Database\Eloquent\Model
@@ -49,8 +50,6 @@ class BelongsToTenantObserver
      *
      * @param \Illuminate\Database\Eloquent\Model $model
      *
-     * @phpstan-param ChildModel                  $model
-     *
      * @return bool
      */
     protected function isModelTenantOptional(Model $model): bool
@@ -64,15 +63,14 @@ class BelongsToTenantObserver
      * @param \Illuminate\Database\Eloquent\Model                                        $model
      * @param \Sprout\Contracts\Tenancy<TenantModel>                                     $tenancy
      * @param \Illuminate\Database\Eloquent\Relations\BelongsTo<ChildModel, TenantModel> $relation
+     * @param bool                                                                       $succeedOnMatch
      *
      * @return bool
-     *
-     * @phpstan-param ChildModel $model
      *
      * @throws \Sprout\Exceptions\TenantMismatch
      * @throws \Sprout\Exceptions\TenantMissing
      */
-    private function passesInitialChecks(Model $model, Tenancy $tenancy, BelongsTo $relation): bool
+    private function passesInitialChecks(Model $model, Tenancy $tenancy, BelongsTo $relation, bool $succeedOnMatch = false): bool
     {
         // If we don't have a current tenant, we may need to do something
         if (! $tenancy->check()) {
@@ -100,15 +98,21 @@ class BelongsToTenantObserver
             // what it's for, but this should be more flexible
             if ($this->isTenantMismatched($model, $tenant, $relation)) {
                 // So, the current foreign key value doesn't match the current
-                // tenant, so we'll throw an exception
-                throw TenantMismatch::make($model::class, $tenancy->getName());
+                // tenant, so we'll throw an exception...if we're allowed to
+                if (TenancyOptions::shouldThrowIfNotRelated($tenancy)) {
+                    throw TenantMismatch::make($model::class, $tenancy->getName());
+                }
+
+                // If we hit here, we should continue without doing anything
+                // with the tenant
+                return false;
             }
 
             // If we hit here, then the foreign key that's set is for the current
             // tenant, so, we can assume that either the relation is already
             // set in the model, or it doesn't need to be.
             // Either way, we're finished here
-            return false;
+            return $succeedOnMatch;
         }
 
         return true;
@@ -175,7 +179,7 @@ class BelongsToTenantObserver
         $tenancy = $model->getTenancy();
 
         // If the initial checks do not pass
-        if (! $this->passesInitialChecks($model, $tenancy, $relation)) {
+        if (! $this->passesInitialChecks($model, $tenancy, $relation, true)) {
             // Just exit, an exception will have be thrown
             return;
         }

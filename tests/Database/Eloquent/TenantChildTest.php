@@ -7,6 +7,7 @@ use Illuminate\Config\Repository;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Orchestra\Testbench\TestCase;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use RuntimeException;
 use Sprout\Database\Eloquent\Concerns\IsTenantChild;
@@ -16,6 +17,7 @@ use Workbench\App\Models\TenantChildren;
 use Workbench\App\Models\TenantModel;
 use Workbench\App\Models\TooManyTenantRelationModel;
 
+#[Group('database'), Group('eloquent')]
 class TenantChildTest extends TestCase
 {
     protected $enablesPackageDiscoveries = true;

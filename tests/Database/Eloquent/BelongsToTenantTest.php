@@ -5,16 +5,27 @@ namespace Sprout\Tests\Database\Eloquent;
 
 use Illuminate\Config\Repository;
 use Illuminate\Events\Dispatcher;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Orchestra\Testbench\Concerns\WithWorkbench;
 use Orchestra\Testbench\TestCase;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use Sprout\Database\Eloquent\Concerns\BelongsToTenant;
 use Sprout\Database\Eloquent\Observers\BelongsToTenantObserver;
 use Sprout\Database\Eloquent\Scopes\BelongsToTenantScope;
+use Sprout\Exceptions\TenantMismatch;
+use Sprout\Exceptions\TenantMissing;
+use Sprout\Managers\TenancyManager;
+use Sprout\TenancyOptions;
 use Workbench\App\Models\TenantChild;
+use Workbench\App\Models\TenantChildOptional;
 use Workbench\App\Models\TenantModel;
 
+#[Group('database'), Group('eloquent')]
 class BelongsToTenantTest extends TestCase
 {
+    use WithWorkbench, RefreshDatabase;
+
     protected $enablesPackageDiscoveries = true;
 
     protected function defineEnvironment($app): void
@@ -52,5 +63,249 @@ class BelongsToTenantTest extends TestCase
         } else {
             $this->markTestIncomplete('Cannot complete the test because a custom dispatcher is in place');
         }
+    }
+
+    #[Test]
+    public function automaticallyAssociatesWithTenantWhenCreating(): void
+    {
+        $tenant = TenantModel::factory()->create();
+
+        app(TenancyManager::class)->get()->setTenant($tenant);
+
+        $child = TenantChild::factory()->create();
+
+        $this->assertTrue($child->exists);
+        $this->assertTrue($child->relationLoaded('tenant'));
+        $this->assertTrue($child->tenant->is($tenant));
+    }
+
+    #[Test]
+    public function throwsAnExceptionIfTheresNoTenantAndTheTenantIsNotOptionalWhenCreating(): void
+    {
+        $this->expectException(TenantMissing::class);
+        $this->expectExceptionMessage(
+            'Model ['
+            . TenantChild::class
+            . '] requires a tenant, and the tenancy'
+            . ' [tenants] does not have one'
+        );
+
+        TenantChild::factory()->create();
+    }
+
+    #[Test]
+    public function doesNothingIfTheresNoTenantAndTheTenantIsOptionalWhenCreating(): void
+    {
+        $child = TenantChildOptional::factory()->create();
+
+        $this->assertTrue($child->exists);
+        $this->assertFalse($child->relationLoaded('tenant'));
+        $this->assertNull($child->tenant);
+    }
+
+    #[Test]
+    public function doesNothingIfTheTenantIsAlreadySetOnTheModelWhenCreating(): void
+    {
+        $tenant = TenantModel::factory()->create();
+
+        app(TenancyManager::class)->get()->setTenant($tenant);
+
+        $child = TenantChild::factory()->afterMaking(function (TenantChild $model) use ($tenant) {
+            $model->tenant()->associate($tenant);
+        })->create();
+
+        $this->assertTrue($child->exists);
+        $this->assertTrue($child->relationLoaded('tenant'));
+        $this->assertTrue($child->tenant->is($tenant));
+    }
+
+    #[Test]
+    public function throwsAnExceptionIfTheTenantIsAlreadySetOnTheModelAndItIsDifferentWhenCreating(): void
+    {
+        $tenant = TenantModel::factory()->create();
+
+        $tenancy = app(TenancyManager::class)->get();
+
+        $tenancy->setTenant($tenant);
+        $tenancy->addOption(TenancyOptions::throwIfNotRelated());
+
+        $this->expectException(TenantMismatch::class);
+        $this->expectExceptionMessage(
+            'Model ['
+            . TenantChild::class
+            . '] already has a tenant, but it is not the current tenant for the tenancy'
+            . '  [tenants]'
+        );
+
+        TenantChild::factory()->for(TenantModel::factory(), 'tenant')->create();
+    }
+
+    #[Test]
+    public function doesNotThrowAnExceptionForTenantMismatchIfNotSetToWhenCreating(): void
+    {
+        $tenant = TenantModel::factory()->create();
+
+        $tenancy = app(TenancyManager::class)->get();
+
+        $tenancy->setTenant($tenant);
+        $tenancy->removeOption(TenancyOptions::throwIfNotRelated());
+
+        $child = TenantChild::factory()->for(TenantModel::factory(), 'tenant')->create();
+
+        $this->assertTrue($child->exists);
+        $this->assertFalse($child->relationLoaded('tenant'));
+        $this->assertFalse($child->tenant->is($tenant));
+    }
+
+    #[Test]
+    public function automaticallyPopulateTheTenantRelationWhenHydrating(): void
+    {
+        $tenant = TenantModel::factory()->create();
+
+        app(TenancyManager::class)->get()->setTenant($tenant);
+
+        $child = TenantChild::query()->find(TenantChild::factory()->create()->getKey());
+
+        $this->assertTrue($child->exists);
+        $this->assertTrue($child->relationLoaded('tenant'));
+        $this->assertTrue($child->tenant->is($tenant));
+    }
+
+    #[Test]
+    public function throwsAnExceptionIfTheresNoTenantAndTheTenantIsNotOptionalWhenHydrating(): void
+    {
+        $tenant = TenantModel::factory()->create();
+
+        $tenancy = app(TenancyManager::class)->get();
+
+        $tenancy->setTenant($tenant);
+
+        $child = TenantChild::factory()->create();
+
+        $tenancy->setTenant(null);
+
+        $this->expectException(TenantMissing::class);
+        $this->expectExceptionMessage(
+            'Model ['
+            . TenantChild::class
+            . '] requires a tenant, and the tenancy'
+            . ' [tenants] does not have one'
+        );
+
+        TenantChild::query()->find($child->getKey());
+    }
+
+    #[Test]
+    public function doesNothingIfTheresNoTenantAndTheTenantIsOptionalWhenHydrating(): void
+    {
+        $tenant = TenantModel::factory()->create();
+
+        $tenancy = app(TenancyManager::class)->get();
+
+        $tenancy->setTenant($tenant);
+
+        $child = TenantChildOptional::factory()->create();
+
+        $tenancy->setTenant(null);
+
+        $child = TenantChildOptional::query()->find($child->getKey());
+
+        $this->assertTrue($child->exists);
+        $this->assertFalse($child->relationLoaded('tenant'));
+    }
+
+    #[Test]
+    public function throwsAnExceptionIfTheTenantIsAlreadySetOnTheModelAndItIsDifferentWhenHydrating(): void
+    {
+        $tenant = TenantModel::factory()->create();
+
+        $tenancy = app(TenancyManager::class)->get();
+
+        $tenancy->setTenant($tenant);
+        $tenancy->addOption(TenancyOptions::throwIfNotRelated());
+
+        $child = TenantChild::factory()->create();
+
+        $tenancy->setTenant(TenantModel::factory()->create());
+
+        $this->expectException(TenantMismatch::class);
+        $this->expectExceptionMessage(
+            'Model ['
+            . TenantChild::class
+            . '] already has a tenant, but it is not the current tenant for the tenancy'
+            . '  [tenants]'
+        );
+
+        TenantChild::query()->withoutTenants()->find($child->getKey());
+    }
+
+    #[Test]
+    public function doesNotThrowAnExceptionForTenantMismatchIfNotSetToWhenHydrating(): void
+    {
+        $tenant = TenantModel::factory()->create();
+
+        $tenancy = app(TenancyManager::class)->get();
+
+        $tenancy->setTenant($tenant);
+        $tenancy->removeOption(TenancyOptions::throwIfNotRelated());
+
+        $child = TenantChild::factory()->create();
+
+        $tenancy->setTenant(TenantModel::factory()->create());
+
+        $child = TenantChild::query()->withoutTenants()->find($child->getKey());
+
+        $this->assertTrue($child->exists);
+        $this->assertFalse($child->relationLoaded('tenant'));
+        $this->assertTrue($child->tenant->is($tenant));
+        $this->assertFalse($child->tenant->is($tenancy->tenant()));
+    }
+
+    #[Test]
+    public function onlyReturnsModelsForTheCurrentTenant(): void
+    {
+        $tenant = TenantModel::factory()->create();
+
+        $tenancy = app(TenancyManager::class)->get();
+
+        $tenancy->setTenant($tenant);
+
+        $original = TenantChild::factory()->create();
+
+        $tenancy->setTenant(TenantModel::factory()->create());
+
+        $child = TenantChild::query()->find($original->getKey());
+
+        $this->assertNull($child);
+
+        $tenancy->setTenant($tenant);
+
+        $child = TenantChild::query()->find($original->getKey());
+
+        $this->assertNotNull($child);
+    }
+
+    #[Test]
+    public function ignoresTenantClauseWithBuilderMacro(): void
+    {
+        $tenant = TenantModel::factory()->create();
+
+        $tenancy = app(TenancyManager::class)->get();
+
+        $tenancy->setTenant($tenant);
+
+        $original = TenantChild::factory()->create();
+
+        $tenancy->setTenant(TenantModel::factory()->create());
+
+        $child = TenantChild::query()->withoutTenants()->find($original->getKey());
+
+        $this->assertNotNull($child);
+
+        $tenancy->setTenant($tenant);
+
+        $child = TenantChild::query()->withoutTenants()->find($original->getKey());
+
+        $this->assertNotNull($child);
     }
 }
