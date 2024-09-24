@@ -50,7 +50,7 @@ final class TenancyManager extends BaseFactory
      * @param array<string, mixed>                                                  $config
      * @param string                                                                $name
      *
-     * @phpstan-param array{provider?: string|null, options?: array<string, mixed>} $config
+     * @phpstan-param array{provider?: string|null, options?: list<string>} $config
      *
      * @return \Sprout\Support\DefaultTenancy<\Sprout\Contracts\Tenant>
      */

@@ -1,5 +1,7 @@
 <?php
 
+use Sprout\TenancyOptions;
+
 return [
 
     'defaults' => [
@@ -14,7 +16,10 @@ return [
 
         'tenants' => [
             'provider' => 'tenants',
-            'options'  => [],
+            'options'  => [
+                TenancyOptions::hydrateTenantRelation(),
+                TenancyOptions::throwIfNotRelated(),
+            ],
         ],
 
     ],

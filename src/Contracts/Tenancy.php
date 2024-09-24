@@ -157,17 +157,34 @@ interface Tenancy
     /**
      * Get all tenant options
      *
-     * @return array<string, mixed>
+     * @return list<string>
      */
     public function options(): array;
 
     /**
-     * Get a tenant option
+     * Check if a tenancy has an option
      *
-     * @param string     $key
-     * @param mixed|null $default
+     * @param string $option
      *
-     * @return mixed
+     * @return bool
      */
-    public function option(string $key, mixed $default = null): mixed;
+    public function hasOption(string $option): bool;
+
+    /**
+     * Add an option to the tenancy
+     *
+     * @param string $option
+     *
+     * @return static
+     */
+    public function addOption(string $option): static;
+
+    /**
+     * Remove an option from the tenancy
+     *
+     * @param string $option
+     *
+     * @return static
+     */
+    public function removeOption(string $option): static;
 }
