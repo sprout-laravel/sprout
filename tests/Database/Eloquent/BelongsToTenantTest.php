@@ -293,6 +293,7 @@ class BelongsToTenantTest extends TestCase
         $tenancy = app(TenancyManager::class)->get();
 
         $tenancy->setTenant($tenant);
+        $tenancy->removeOption(TenancyOptions::throwIfNotRelated());
 
         $original = TenantChild::factory()->create();
 
