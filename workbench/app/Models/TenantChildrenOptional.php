@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Sprout\Database\Eloquent\Concerns\BelongsToManyTenants;
 use Sprout\Database\Eloquent\Contracts\OptionalTenant;
-use Workbench\Database\Factories\TenantChildrenOptionlFactory;
+use Workbench\Database\Factories\TenantChildrenOptionalFactory;
 
 class TenantChildrenOptional extends Model implements OptionalTenant
 {
@@ -19,7 +19,7 @@ class TenantChildrenOptional extends Model implements OptionalTenant
 
     protected $table = 'tenant_child2';
 
-    protected static string $factory = TenantChildrenOptionlFactory::class;
+    protected static string $factory = TenantChildrenOptionalFactory::class;
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<\Workbench\App\Models\TenantModel>

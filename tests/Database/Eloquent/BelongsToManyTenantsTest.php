@@ -5,7 +5,6 @@ namespace Sprout\Tests\Database\Eloquent;
 
 use Illuminate\Config\Repository;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Events\Dispatcher;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Orchestra\Testbench\Concerns\WithWorkbench;
@@ -13,18 +12,16 @@ use Orchestra\Testbench\TestCase;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use Sprout\Database\Eloquent\Concerns\BelongsToManyTenants;
-use Sprout\Database\Eloquent\Concerns\BelongsToTenant;
+use Sprout\Database\Eloquent\Contracts\OptionalTenant;
 use Sprout\Database\Eloquent\Observers\BelongsToManyTenantsObserver;
-use Sprout\Database\Eloquent\Observers\BelongsToTenantObserver;
 use Sprout\Database\Eloquent\Scopes\BelongsToManyTenantsScope;
-use Sprout\Database\Eloquent\Scopes\BelongsToTenantScope;
 use Sprout\Exceptions\TenantMismatch;
 use Sprout\Exceptions\TenantMissing;
 use Sprout\Managers\TenancyManager;
 use Sprout\TenancyOptions;
-use Workbench\App\Models\TenantChild;
 use Workbench\App\Models\TenantChildOptional;
 use Workbench\App\Models\TenantChildren;
+use Workbench\App\Models\TenantChildrenOptional;
 use Workbench\App\Models\TenantModel;
 
 #[Group('database'), Group('eloquent')]
@@ -70,6 +67,7 @@ class BelongsToManyTenantsTest extends TestCase
             $this->markTestIncomplete('Cannot complete the test because a custom dispatcher is in place');
         }
     }
+
     #[Test]
     public function automaticallyAssociatesWithTenantWhenCreating(): void
     {
@@ -81,7 +79,7 @@ class BelongsToManyTenantsTest extends TestCase
 
         $this->assertTrue($child->exists);
         $this->assertTrue($child->relationLoaded('tenants'));
-        $this->assertNotNull($child->tenants->first(fn(Model $model) => $model->is($tenant)));
+        $this->assertNotNull($child->tenants->first(fn (Model $model) => $model->is($tenant)));
     }
 
     #[Test]
@@ -99,13 +97,29 @@ class BelongsToManyTenantsTest extends TestCase
     }
 
     #[Test]
-    public function doesNothingIfTheresNoTenantAndTheTenantIsOptionalWhenCreating(): void
+    public function doesNothingIfTheresNoTenantAndTheTenantIsOptionalWithInterfaceWhenCreating(): void
     {
-        $child = TenantChildOptional::factory()->create();
+        $child = TenantChildrenOptional::factory()->create();
 
+        $this->assertInstanceOf(OptionalTenant::class, $child);
         $this->assertTrue($child->exists);
         $this->assertFalse($child->relationLoaded('tenant'));
-        $this->assertNull($child->tenants);
+        $this->assertEmpty($child->tenants);
+    }
+
+    #[Test]
+    public function doesNothingIfTheresNoTenantAndTheTenantIsOptionalWithOverrideWhenCreating(): void
+    {
+        TenantChildren::ignoreTenantRestrictions();
+
+        $child = TenantChildren::factory()->create();
+
+        TenantChildren::resetTenantRestrictions();
+
+        $this->assertNotInstanceOf(OptionalTenant::class, $child);
+        $this->assertTrue($child->exists);
+        $this->assertFalse($child->relationLoaded('tenant'));
+        $this->assertEmpty($child->tenants);
     }
 
     #[Test]
@@ -137,7 +151,7 @@ class BelongsToManyTenantsTest extends TestCase
 
         $this->assertTrue($child->exists);
         $this->assertTrue($child->relationLoaded('tenants'));
-        $this->assertNotNull($child->tenants->first(fn(Model $model) => $model->is($tenant)));
+        $this->assertNotNull($child->tenants->first(fn (Model $model) => $model->is($tenant)));
     }
 
     #[Test]
@@ -165,7 +179,7 @@ class BelongsToManyTenantsTest extends TestCase
     }
 
     #[Test]
-    public function doesNothingIfTheresNoTenantAndTheTenantIsOptionalWhenHydrating(): void
+    public function doesNothingIfTheresNoTenantAndTheTenantIsOptionalWithInterfaceWhenHydrating(): void
     {
         $tenant = TenantModel::factory()->create();
 
@@ -173,12 +187,37 @@ class BelongsToManyTenantsTest extends TestCase
 
         $tenancy->setTenant($tenant);
 
-        $child = TenantChildOptional::factory()->create();
+        $child = TenantChildrenOptional::factory()->create();
 
         $tenancy->setTenant(null);
 
-        $child = TenantChildOptional::query()->find($child->getKey());
+        $child = TenantChildrenOptional::query()->find($child->getKey());
 
+        $this->assertInstanceOf(OptionalTenant::class, $child);
+        $this->assertTrue($child->exists);
+        $this->assertFalse($child->relationLoaded('tenants'));
+    }
+
+    #[Test]
+    public function doesNothingIfTheresNoTenantAndTheTenantIsOptionalWithOverrideWhenHydrating(): void
+    {
+        TenantChildren:: ignoreTenantRestrictions();
+
+        $tenant = TenantModel::factory()->create();
+
+        $tenancy = app(TenancyManager::class)->get();
+
+        $tenancy->setTenant($tenant);
+
+        $child = TenantChildren::factory()->create();
+
+        $tenancy->setTenant(null);
+
+        $child = TenantChildren::query()->find($child->getKey());
+
+        TenantChildren::resetTenantRestrictions();
+
+        $this->assertNotInstanceOf(OptionalTenant::class, $child);
         $this->assertTrue($child->exists);
         $this->assertFalse($child->relationLoaded('tenants'));
     }
@@ -226,8 +265,8 @@ class BelongsToManyTenantsTest extends TestCase
 
         $this->assertTrue($child->exists);
         $this->assertTrue($child->relationLoaded('tenants'));
-        $this->assertNotNull($child->tenants->first(fn(Model $model) => $model->is($tenant)));
-        $this->assertNull($child->tenants->first(fn(Model $model) => $model->is($tenancy->tenant())));
+        $this->assertNotNull($child->tenants->first(fn (Model $model) => $model->is($tenant)));
+        $this->assertNull($child->tenants->first(fn (Model $model) => $model->is($tenancy->tenant())));
     }
 
     #[Test]

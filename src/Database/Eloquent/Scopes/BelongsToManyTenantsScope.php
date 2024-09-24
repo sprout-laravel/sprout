@@ -33,7 +33,7 @@ final class BelongsToManyTenantsScope extends TenantChildScope
         // If there's no current tenant
         if (! $tenancy->check()) {
             // We can exit early because the tenant is optional!
-            if ($model instanceof OptionalTenant) {
+            if ($model::isTenantOptional()) { // @phpstan-ignore-line
                 return;
             }
 

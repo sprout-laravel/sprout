@@ -11,6 +11,7 @@ use Orchestra\Testbench\TestCase;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use Sprout\Database\Eloquent\Concerns\BelongsToTenant;
+use Sprout\Database\Eloquent\Contracts\OptionalTenant;
 use Sprout\Database\Eloquent\Observers\BelongsToTenantObserver;
 use Sprout\Database\Eloquent\Scopes\BelongsToTenantScope;
 use Sprout\Exceptions\TenantMismatch;
@@ -94,10 +95,24 @@ class BelongsToTenantTest extends TestCase
     }
 
     #[Test]
-    public function doesNothingIfTheresNoTenantAndTheTenantIsOptionalWhenCreating(): void
+    public function doesNothingIfTheresNoTenantAndTheTenantIsOptionalWithInterfaceWhenCreating(): void
     {
         $child = TenantChildOptional::factory()->create();
 
+        $this->assertInstanceOf(OptionalTenant::class, $child);
+        $this->assertTrue($child->exists);
+        $this->assertFalse($child->relationLoaded('tenant'));
+        $this->assertNull($child->tenant);
+    }
+
+    #[Test]
+    public function doesNothingIfTheresNoTenantAndTheTenantIsOptionalWithOverrideWhenCreating(): void
+    {
+        TenantChild::ignoreTenantRestrictions();
+        $child = TenantChild::factory()->create();
+        TenantChild::resetTenantRestrictions();
+
+        $this->assertNotInstanceOf(OptionalTenant::class, $child);
         $this->assertTrue($child->exists);
         $this->assertFalse($child->relationLoaded('tenant'));
         $this->assertNull($child->tenant);
@@ -196,7 +211,7 @@ class BelongsToTenantTest extends TestCase
     }
 
     #[Test]
-    public function doesNothingIfTheresNoTenantAndTheTenantIsOptionalWhenHydrating(): void
+    public function doesNothingIfTheresNoTenantAndTheTenantIsOptionalWithInterfaceWhenHydrating(): void
     {
         $tenant = TenantModel::factory()->create();
 
@@ -210,6 +225,31 @@ class BelongsToTenantTest extends TestCase
 
         $child = TenantChildOptional::query()->find($child->getKey());
 
+        $this->assertInstanceOf(OptionalTenant::class, $child);
+        $this->assertTrue($child->exists);
+        $this->assertFalse($child->relationLoaded('tenant'));
+    }
+
+    #[Test]
+    public function doesNothingIfTheresNoTenantAndTheTenantIsOptionalWithOverrideWhenHydrating(): void
+    {
+        TenantChild::ignoreTenantRestrictions();
+
+        $tenant = TenantModel::factory()->create();
+
+        $tenancy = app(TenancyManager::class)->get();
+
+        $tenancy->setTenant($tenant);
+
+        $child = TenantChild::factory()->create();
+
+        $tenancy->setTenant(null);
+
+        $child = TenantChild::query()->find($child->getKey());
+
+        TenantChild::resetTenantRestrictions();
+
+        $this->assertNotInstanceOf(OptionalTenant::class, $child);
         $this->assertTrue($child->exists);
         $this->assertFalse($child->relationLoaded('tenant'));
     }

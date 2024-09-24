@@ -116,4 +116,31 @@ class TenantChildTest extends TestCase
         $this->assertSame('tenants', $tenancy1->getName());
         $this->assertSame('tenants', $tenancy2->getName());
     }
+
+    #[Test]
+    public function hasManualTenantRestrictionOverride(): void
+    {
+        $this->assertFalse(TenantChild::isTenantOptional());
+        $this->assertFalse(TenantChildren::isTenantOptional());
+
+        TenantChild::ignoreTenantRestrictions();
+
+        $this->assertTrue(TenantChild::isTenantOptional());
+        $this->assertFalse(TenantChildren::isTenantOptional());
+
+        TenantChildren::ignoreTenantRestrictions();
+
+        $this->assertTrue(TenantChild::isTenantOptional());
+        $this->assertTrue(TenantChildren::isTenantOptional());
+
+        TenantChild::resetTenantRestrictions();
+
+        $this->assertFalse(TenantChild::isTenantOptional());
+        $this->assertTrue(TenantChildren::isTenantOptional());
+
+        TenantChildren::resetTenantRestrictions();
+
+        $this->assertFalse(TenantChild::isTenantOptional());
+        $this->assertFalse(TenantChildren::isTenantOptional());
+    }
 }

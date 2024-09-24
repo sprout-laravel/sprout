@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
-use Sprout\Database\Eloquent\Contracts\OptionalTenant;
 use Sprout\Exceptions\TenantMismatch;
 use Sprout\Exceptions\TenantMissing;
 use Sprout\TenancyOptions;
@@ -46,26 +45,16 @@ class BelongsToTenantObserver
     }
 
     /**
-     * Check if a model is marked as having an optional tenant
-     *
-     * @param \Illuminate\Database\Eloquent\Model $model
-     *
-     * @return bool
-     */
-    protected function isModelTenantOptional(Model $model): bool
-    {
-        return $model instanceof OptionalTenant;
-    }
-
-    /**
      * Perform initial checks and return they passed or not
      *
-     * @param \Illuminate\Database\Eloquent\Model                                        $model
-     * @param \Sprout\Contracts\Tenancy<TenantModel>                                     $tenancy
-     * @param \Illuminate\Database\Eloquent\Relations\BelongsTo<ChildModel, TenantModel> $relation
-     * @param bool                                                                       $succeedOnMatch
+     * @param \Illuminate\Database\Eloquent\Model&\Sprout\Database\Eloquent\Concerns\BelongsToTenant $model
+     * @param \Sprout\Contracts\Tenancy<TenantModel>                                                 $tenancy
+     * @param \Illuminate\Database\Eloquent\Relations\BelongsTo<ChildModel, TenantModel>             $relation
+     * @param bool                                                                                   $succeedOnMatch
      *
      * @return bool
+     *
+     * @phpstan-param ChildModel                                                                     $model
      *
      * @throws \Sprout\Exceptions\TenantMismatch
      * @throws \Sprout\Exceptions\TenantMissing
@@ -75,7 +64,7 @@ class BelongsToTenantObserver
         // If we don't have a current tenant, we may need to do something
         if (! $tenancy->check()) {
             // The model doesn't require a tenant, so we exit silently
-            if ($this->isModelTenantOptional($model)) {
+            if ($model::isTenantOptional()) { // @phpstan-ignore-line
                 // We return true so that the model can be created
                 return false;
             }

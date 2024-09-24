@@ -10,6 +10,7 @@ use ReflectionMethod;
 use RuntimeException;
 use Sprout\Attributes\TenantRelation;
 use Sprout\Contracts\Tenancy;
+use Sprout\Database\Eloquent\Contracts\OptionalTenant;
 use Sprout\Managers\TenancyManager;
 
 /**
@@ -20,9 +21,35 @@ use Sprout\Managers\TenancyManager;
 trait IsTenantChild
 {
     /**
-     * @var array<class-string<\Illuminate\Database\Eloquent\Model>, string>
+     * @var string
      */
-    protected static array $tenantRelationNames = [];
+    protected static string $tenantRelationName;
+
+    protected static bool $ignoreTenantRestrictions = false;
+
+    public static function shouldIgnoreTenantRestrictions(): bool
+    {
+        return self::$ignoreTenantRestrictions;
+    }
+
+    public static function ignoreTenantRestrictions(): void
+    {
+        self::$ignoreTenantRestrictions = true;
+    }
+
+    public static function resetTenantRestrictions(): void
+    {
+        self::$ignoreTenantRestrictions = false;
+    }
+
+    public static function isTenantOptional(): bool
+    {
+        return is_subclass_of(static::class, OptionalTenant::class)
+               || (
+                   method_exists(static::class, 'shouldIgnoreTenantRestrictions')
+                   && static::shouldIgnoreTenantRestrictions() // @phpstan-ignore-line
+               );
+    }
 
     private function findTenantRelationName(): string
     {
@@ -52,10 +79,10 @@ trait IsTenantChild
     public function getTenantRelationName(): ?string
     {
         if (! isset($this->tenantRelationNames[static::class])) {
-            self::$tenantRelationNames[static::class] = $this->findTenantRelationName();
+            self::$tenantRelationName = $this->findTenantRelationName();
         }
 
-        return self::$tenantRelationNames[static::class] ?? null;
+        return self::$tenantRelationName ?? null;
     }
 
     public function getTenancyName(): ?string
