@@ -143,4 +143,27 @@ class TenantChildTest extends TestCase
         $this->assertFalse(TenantChild::isTenantOptional());
         $this->assertFalse(TenantChildren::isTenantOptional());
     }
+
+    #[Test]
+    public function hasManualTenantRestrictionTemporaryOverride(): void
+    {
+        $this->assertFalse(TenantChild::isTenantOptional());
+        $this->assertFalse(TenantChildren::isTenantOptional());
+
+        TenantChild::withoutTenantRestrictions(function () {
+            $this->assertTrue(TenantChild::isTenantOptional());
+            $this->assertFalse(TenantChildren::isTenantOptional());
+        });
+
+        $this->assertFalse(TenantChild::isTenantOptional());
+        $this->assertFalse(TenantChildren::isTenantOptional());
+
+        TenantChildren::withoutTenantRestrictions(function () {
+            $this->assertFalse(TenantChild::isTenantOptional());
+            $this->assertTrue(TenantChildren::isTenantOptional());
+        });
+
+        $this->assertFalse(TenantChild::isTenantOptional());
+        $this->assertFalse(TenantChildren::isTenantOptional());
+    }
 }

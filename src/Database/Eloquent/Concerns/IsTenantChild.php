@@ -42,6 +42,26 @@ trait IsTenantChild
         self::$ignoreTenantRestrictions = false;
     }
 
+    /**
+     * @template RetType of mixed
+     *
+     * @param callable(): RetType $callback
+     *
+     * @return mixed
+     *
+     * @phpstan-return RetType
+     */
+    public static function withoutTenantRestrictions(callable $callback): mixed
+    {
+        self::ignoreTenantRestrictions();
+
+        $return = $callback();
+
+        self::resetTenantRestrictions();
+
+        return $return;
+    }
+
     public static function isTenantOptional(): bool
     {
         return is_subclass_of(static::class, OptionalTenant::class)
