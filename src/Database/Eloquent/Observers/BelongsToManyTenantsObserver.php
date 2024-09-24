@@ -34,19 +34,11 @@ class BelongsToManyTenantsObserver
             $model->load($relation->getRelationName());
         }
 
-        if ($model->relationLoaded($relation->getRelationName())) {
-            /** @var \Illuminate\Database\Eloquent\Collection<int, TenantModel>|null $relatedModels */
-            $relatedModels = $model->getRelation($relation->getRelationName());
+        /** @var \Illuminate\Database\Eloquent\Collection<int, TenantModel> $relatedModels */
+        $relatedModels = $model->getRelation($relation->getRelationName());
 
-            if ($relatedModels === null) {
-                return false;
-            }
-
-            // If it's not empty, there are already tenants
-            return $relatedModels->isNotEmpty();
-        }
-
-        return false;
+        // If it's not empty, there are already tenants
+        return $relatedModels->isNotEmpty();
     }
 
     /**
@@ -84,7 +76,7 @@ class BelongsToManyTenantsObserver
      * @throws \Sprout\Exceptions\TenantMismatch
      * @throws \Sprout\Exceptions\TenantMissing
      */
-    private function passesInitialChecks(Model $model, Tenancy $tenancy, BelongsToMany $relation): bool
+    private function passesInitialChecks(Model $model, Tenancy $tenancy, BelongsToMany $relation, bool $succeedOnMatch = false): bool
     {
         // If we don't have a current tenant, we may need to do something
         if (! $tenancy->check()) {
@@ -126,7 +118,7 @@ class BelongsToManyTenantsObserver
             // tenant, so, we can assume that either the relation is already
             // set in the model, or it doesn't need to be.
             // Either way, we're finished here
-            return false;
+            return $succeedOnMatch;
         }
 
         return true;
@@ -200,7 +192,7 @@ class BelongsToManyTenantsObserver
         $tenancy = $model->getTenancy();
 
         // If the initial checks do not pass
-        if (! $this->passesInitialChecks($model, $tenancy, $relation)) {
+        if (! $this->passesInitialChecks($model, $tenancy, $relation, true)) {
             // Just exit, an exception will have be thrown
             return;
         }
