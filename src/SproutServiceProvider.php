@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Sprout;
 
 use Illuminate\Contracts\Events\Dispatcher;
+use Illuminate\Queue\Events\JobProcessing;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Routing\Router;
 use Illuminate\Support\ServiceProvider;
@@ -13,6 +14,7 @@ use Sprout\Http\RouterMethods;
 use Sprout\Listeners\IdentifyTenantOnRouting;
 use Sprout\Listeners\PerformIdentityResolverSetup;
 use Sprout\Listeners\SetCurrentTenantContext;
+use Sprout\Listeners\SetCurrentTenantForJob;
 use Sprout\Managers\IdentityResolverManager;
 use Sprout\Managers\ProviderManager;
 use Sprout\Managers\TenancyManager;
@@ -102,5 +104,6 @@ class SproutServiceProvider extends ServiceProvider
 
         $events->listen(CurrentTenantChanged::class, SetCurrentTenantContext::class);
         $events->listen(CurrentTenantChanged::class, PerformIdentityResolverSetup::class);
+        $events->listen(JobProcessing::class, SetCurrentTenantForJob::class);
     }
 }
