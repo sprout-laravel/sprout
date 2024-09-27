@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Tests\Core;
+namespace Sprout\Tests;
 
 use Illuminate\Support\ServiceProvider;
 use Orchestra\Testbench\Concerns\WithWorkbench;
