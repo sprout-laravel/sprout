@@ -3,16 +3,26 @@ declare(strict_types=1);
 
 namespace Sprout\Tests;
 
+use Illuminate\Events\Dispatcher;
+use Illuminate\Queue\Events\JobProcessing;
+use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\ServiceProvider;
 use Orchestra\Testbench\Concerns\WithWorkbench;
 use Orchestra\Testbench\TestCase;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
+use Sprout\Events\CurrentTenantChanged;
+use Sprout\Listeners\IdentifyTenantOnRouting;
+use Sprout\Listeners\PerformIdentityResolverSetup;
+use Sprout\Listeners\SetCurrentTenantContext;
+use Sprout\Listeners\SetCurrentTenantForJob;
 use Sprout\Managers\IdentityResolverManager;
 use Sprout\Managers\ProviderManager;
 use Sprout\Managers\TenancyManager;
 use Sprout\Sprout;
 use Sprout\SproutServiceProvider;
 
+#[Group('core'), Group('serviceProviders')]
 class ServiceProviderTest extends TestCase
 {
     use WithWorkbench;
@@ -100,9 +110,26 @@ class ServiceProviderTest extends TestCase
     {
         $paths = ServiceProvider::pathsToPublish(SproutServiceProvider::class, 'config');
 
-        $key = realpath(__DIR__ . '/../../src');
+        $key = realpath(__DIR__ . '/../src');
 
         $this->assertArrayHasKey($key . '/../resources/config/multitenancy.php', $paths);
         $this->assertContains(config_path('multitenancy.php'), $paths);
+    }
+
+    #[Test]
+    public function registersEventHandlers(): void
+    {
+        $dispatcher = app()->make(Dispatcher::class);
+
+        $this->assertTrue($dispatcher->hasListeners(RouteMatched::class));
+        $this->assertTrue($dispatcher->hasListeners(CurrentTenantChanged::class));
+        $this->assertTrue($dispatcher->hasListeners(JobProcessing::class));
+
+        $listeners = $dispatcher->getRawListeners();
+
+        $this->assertContains(IdentifyTenantOnRouting::class, $listeners[RouteMatched::class]);
+        $this->assertContains(SetCurrentTenantContext::class, $listeners[CurrentTenantChanged::class]);
+        $this->assertContains(PerformIdentityResolverSetup::class, $listeners[CurrentTenantChanged::class]);
+        $this->assertContains(SetCurrentTenantForJob::class, $listeners[JobProcessing::class]);
     }
 }

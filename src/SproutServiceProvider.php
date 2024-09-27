@@ -30,11 +30,6 @@ class SproutServiceProvider extends ServiceProvider
         $this->registerManagers();
         $this->registerMiddleware();
         $this->registerRouteMixin();
-
-        $this->booting(function () {
-            $this->publishConfig();
-            $this->registerEventListeners();
-        });
     }
 
     private function handleCoreConfig(): void
@@ -85,6 +80,12 @@ class SproutServiceProvider extends ServiceProvider
     protected function registerRouteMixin(): void
     {
         Router::mixin(new RouterMethods());
+    }
+
+    public function boot(): void
+    {
+        $this->publishConfig();
+        $this->registerEventListeners();
     }
 
     private function publishConfig(): void

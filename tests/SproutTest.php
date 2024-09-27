@@ -7,10 +7,12 @@ use Illuminate\Config\Repository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Orchestra\Testbench\Concerns\WithWorkbench;
 use Orchestra\Testbench\TestCase;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use Sprout\Sprout;
 use Workbench\App\Models\TenantModel;
 
+#[Group('core'), Group('services')]
 class SproutTest extends TestCase
 {
     use WithWorkbench, RefreshDatabase;
