@@ -28,9 +28,17 @@ class TenancyOptions
     }
 
     /**
-     * @template TenantClass of \Sprout\Contracts\Tenant
+     * Make sure that queued jobs are aware of the current tenant
      *
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
+     * @return string
+     */
+    public static function makeJobsTenantAware(): string
+    {
+        return 'tenant-aware.jobs';
+    }
+
+    /**
+     * @param \Sprout\Contracts\Tenancy<*> $tenancy
      *
      * @return bool
      */
@@ -40,14 +48,22 @@ class TenancyOptions
     }
 
     /**
-     * @template TenantClass of \Sprout\Contracts\Tenant
-     *
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Sprout\Contracts\Tenancy<*> $tenancy
      *
      * @return bool
      */
     public static function shouldThrowIfNotRelated(Tenancy $tenancy): bool
     {
         return $tenancy->hasOption(static::throwIfNotRelated());
+    }
+
+    /**
+     * @param \Sprout\Contracts\Tenancy<*> $tenancy
+     *
+     * @return bool
+     */
+    public static function shouldJobsBeTenantAware(Tenancy $tenancy): bool
+    {
+        return $tenancy->hasOption(static::makeJobsTenantAware());
     }
 }

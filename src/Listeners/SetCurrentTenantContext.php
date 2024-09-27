@@ -10,16 +10,6 @@ use Sprout\Sprout;
 final class SetCurrentTenantContext
 {
     /**
-     * @var \Sprout\Sprout
-     */
-    private Sprout $sprout;
-
-    public function __construct(Sprout $sprout)
-    {
-        $this->sprout = $sprout;
-    }
-
-    /**
      * @template TenantClass of \Sprout\Contracts\Tenant
      *
      * @param \Sprout\Events\CurrentTenantChanged<TenantClass> $event
@@ -28,12 +18,20 @@ final class SetCurrentTenantContext
      */
     public function handle(CurrentTenantChanged $event): void
     {
-        $contextKey = $this->sprout->contextKey($event->tenancy);
+        $contextKey = 'sprout.tenants';
+        $context = [];
 
-        if ($event->current === null && Context::has($contextKey)) {
-            Context::forget($contextKey);
-        } else if ($event->current !== null) {
-            Context::add($contextKey, $this->sprout->contextValue($event->current));
+        if (Context::has($contextKey)) {
+            /** @var array<string, int|string> $context */
+            $context = Context::get($contextKey, []);
         }
+
+        if ($event->current === null) {
+            unset($context[$event->tenancy->getName()]);
+        } else {
+            $context[$event->tenancy->getName()] = $event->current->getTenantKey();
+        }
+
+        Context::add($contextKey, $context);
     }
 }

@@ -4,15 +4,17 @@ declare(strict_types=1);
 namespace Sprout;
 
 use Illuminate\Contracts\Events\Dispatcher;
+use Illuminate\Queue\Events\JobProcessing;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Routing\Router;
 use Illuminate\Support\ServiceProvider;
 use Sprout\Events\CurrentTenantChanged;
 use Sprout\Http\Middleware\TenantRoutes;
 use Sprout\Http\RouterMethods;
-use Sprout\Listeners\SetCurrentTenantContext;
 use Sprout\Listeners\IdentifyTenantOnRouting;
 use Sprout\Listeners\PerformIdentityResolverSetup;
+use Sprout\Listeners\SetCurrentTenantContext;
+use Sprout\Listeners\SetCurrentTenantForJob;
 use Sprout\Managers\IdentityResolverManager;
 use Sprout\Managers\ProviderManager;
 use Sprout\Managers\TenancyManager;
@@ -27,9 +29,6 @@ class SproutServiceProvider extends ServiceProvider
         $this->registerSprout();
         $this->registerManagers();
         $this->registerMiddleware();
-        $this->booting(function () {
-            $this->registerEventListeners();
-        });
         $this->registerRouteMixin();
     }
 
@@ -78,6 +77,22 @@ class SproutServiceProvider extends ServiceProvider
         $router->aliasMiddleware(TenantRoutes::ALIAS, TenantRoutes::class);
     }
 
+    protected function registerRouteMixin(): void
+    {
+        Router::mixin(new RouterMethods());
+    }
+
+    public function boot(): void
+    {
+        $this->publishConfig();
+        $this->registerEventListeners();
+    }
+
+    private function publishConfig(): void
+    {
+        $this->publishes([__DIR__ . '/../resources/config/multitenancy.php' => config_path('multitenancy.php')], 'config');
+    }
+
     private function registerEventListeners(): void
     {
         /** @var \Illuminate\Contracts\Events\Dispatcher $events */
@@ -90,20 +105,6 @@ class SproutServiceProvider extends ServiceProvider
 
         $events->listen(CurrentTenantChanged::class, SetCurrentTenantContext::class);
         $events->listen(CurrentTenantChanged::class, PerformIdentityResolverSetup::class);
-    }
-
-    protected function registerRouteMixin(): void
-    {
-        Router::mixin(new RouterMethods);
-    }
-
-    public function boot(): void
-    {
-        $this->publishConfig();
-    }
-
-    private function publishConfig(): void
-    {
-        $this->publishes([__DIR__ . '/../resources/config/multitenancy.php' => config_path('multitenancy.php')], 'config');
+        $events->listen(JobProcessing::class, SetCurrentTenantForJob::class);
     }
 }

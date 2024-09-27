@@ -2,9 +2,13 @@
 
 ![Packagist Version](https://img.shields.io/packagist/v/sprout/sprout)
 ![Packagist PHP Version Support](https://img.shields.io/packagist/php-v/sprout/sprout)
+
 ![GitHub](https://img.shields.io/github/license/sprout-laravel/sprout)
 ![Laravel](https://img.shields.io/badge/laravel-11.x-red.svg)
 [![codecov](https://codecov.io/gh/sprout-laravel/sprout/branch/main/graph/badge.svg?token=FHJ41NQMTA)](https://codecov.io/gh/sprout-laravel/sprout)
+
+![Unit Tests](https://github.com/sprout-laravel/sprout/actions/workflows/tests.yml/badge.svg)
+![Static Analysis](https://github.com/sprout-laravel/sprout/actions/workflows/static-analysis.yml/badge.svg)
 
 # Sprout for Laravel
 ### A flexible, seamless and easy to use multitenancy solution for Laravel
