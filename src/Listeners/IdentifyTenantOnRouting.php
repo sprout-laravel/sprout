@@ -8,9 +8,6 @@ use Illuminate\Routing\Route;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Sprout\Http\Middleware\TenantRoutes;
-use Sprout\Managers\IdentityResolverManager;
-use Sprout\Managers\TenancyManager;
-use Sprout\Sprout;
 use Sprout\Support\ResolutionHelper;
 use Sprout\Support\ResolutionHook;
 

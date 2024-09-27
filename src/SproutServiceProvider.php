@@ -10,7 +10,7 @@ use Illuminate\Support\ServiceProvider;
 use Sprout\Events\CurrentTenantChanged;
 use Sprout\Http\Middleware\TenantRoutes;
 use Sprout\Http\RouterMethods;
-use Sprout\Listeners\HandleTenantContext;
+use Sprout\Listeners\SetCurrentTenantContext;
 use Sprout\Listeners\IdentifyTenantOnRouting;
 use Sprout\Listeners\PerformIdentityResolverSetup;
 use Sprout\Managers\IdentityResolverManager;
@@ -88,7 +88,7 @@ class SproutServiceProvider extends ServiceProvider
             $events->listen(RouteMatched::class, IdentifyTenantOnRouting::class);
         }
 
-        $events->listen(CurrentTenantChanged::class, HandleTenantContext::class);
+        $events->listen(CurrentTenantChanged::class, SetCurrentTenantContext::class);
         $events->listen(CurrentTenantChanged::class, PerformIdentityResolverSetup::class);
     }
 

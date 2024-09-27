@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Context;
 use Sprout\Events\CurrentTenantChanged;
 use Sprout\Sprout;
 
-final class HandleTenantContext
+final class SetCurrentTenantContext
 {
     /**
      * @var \Sprout\Sprout
