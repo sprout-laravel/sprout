@@ -76,24 +76,6 @@ final class Sprout
         return (bool) $this->config('listen_for_routing', true);
     }
 
-    /**
-     * @param \Sprout\Contracts\Tenancy<\Sprout\Contracts\Tenant> $tenancy
-     *
-     * @return string
-     */
-    public function contextKey(Tenancy $tenancy): string
-    {
-        /** @phpstan-ignore-next-line */
-        return str_replace(['{tenancy}'], [$tenancy->getName()], $this->config('context.key', '{tenancy}_key'));
-    }
-
-    public function contextValue(Tenant $tenant): int|string
-    {
-        return $this->config('context.use', 'key') === 'key'
-            ? $tenant->getTenantKey()
-            : $tenant->getTenantIdentifier();
-    }
-
     public function resolvers(): IdentityResolverManager
     {
         return $this->app->make(IdentityResolverManager::class);

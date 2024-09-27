@@ -31,8 +31,6 @@ class SproutTest extends TestCase
 
         $this->assertTrue($sprout->config('listen_for_routing'));
         $this->assertTrue(config('sprout.listen_for_routing'));
-        $this->assertNotNull($sprout->config('context'));
-        $this->assertNotNull(config('sprout.context'));
 
         app()['config']->set('sprout.listen_for_routing', false);
 
@@ -56,36 +54,6 @@ class SproutTest extends TestCase
         $this->assertTrue($sprout->config('listen_for_routing'));
         $this->assertTrue(config('sprout.listen_for_routing'));
         $this->assertTrue($sprout->shouldListenForRouting());
-    }
-
-    #[Test]
-    public function canProvideContextKeyForTenancy(): void
-    {
-        $sprout = app()->make(Sprout::class);
-        $tenancy = $sprout->tenancies()->get('tenants');
-
-        app()['config']->set('sprout.context.key', '{tenancy}_key');
-
-        $this->assertSame('tenants_key', $sprout->contextKey($tenancy));
-
-        app()['config']->set('sprout.context.key', 'the_key_for_the_{tenancy}');
-
-        $this->assertSame('the_key_for_the_tenants', $sprout->contextKey($tenancy));
-    }
-
-    #[Test]
-    public function canProvideContextValueForTenant(): void
-    {
-        $sprout = app()->make(Sprout::class);
-        $tenant = TenantModel::first();
-
-        app()['config']->set('sprout.context.use', 'key');
-
-        $this->assertSame($tenant->getTenantKey(), $sprout->contextValue($tenant));
-
-        app()['config']->set('sprout.context.use', 'identifier');
-
-        $this->assertSame($tenant->getTenantIdentifier(), $sprout->contextValue($tenant));
     }
 
     #[Test]

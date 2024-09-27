@@ -45,9 +45,6 @@ class ServiceProviderTest extends TestCase
         $this->assertTrue(app()['config']->has('sprout'));
         $this->assertIsArray(app()['config']->get('sprout'));
         $this->assertTrue(app()['config']->has('sprout.listen_for_routing'));
-        $this->assertTrue(app()['config']->has('sprout.context'));
-        $this->assertTrue(app()['config']->has('sprout.context.key'));
-        $this->assertTrue(app()['config']->has('sprout.context.use'));
     }
 
     #[Test]
