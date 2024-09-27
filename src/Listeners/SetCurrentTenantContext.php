@@ -18,12 +18,20 @@ final class SetCurrentTenantContext
      */
     public function handle(CurrentTenantChanged $event): void
     {
-        $contextKey = 'sprout.tenants.' . $event->tenancy->getName();
+        $contextKey = 'sprout.tenants';
+        $context = [];
 
-        if ($event->current === null && Context::has($contextKey)) {
-            Context::forget($contextKey);
-        } else if ($event->current !== null && ! Context::has($contextKey)) {
-            Context::add($contextKey, $event->current->getTenantKey());
+        if (Context::has($contextKey)) {
+            /** @var array<string, int|string> $context */
+            $context = Context::get($contextKey, []);
         }
+
+        if ($event->current === null) {
+            unset($context[$event->tenancy->getName()]);
+        } else {
+            $context[$event->tenancy->getName()] = $event->current->getTenantKey();
+        }
+
+        Context::add($contextKey, $context);
     }
 }
