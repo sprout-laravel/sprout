@@ -10,9 +10,9 @@ use Illuminate\Support\ServiceProvider;
 use Sprout\Events\CurrentTenantChanged;
 use Sprout\Http\Middleware\TenantRoutes;
 use Sprout\Http\RouterMethods;
-use Sprout\Listeners\SetCurrentTenantContext;
 use Sprout\Listeners\IdentifyTenantOnRouting;
 use Sprout\Listeners\PerformIdentityResolverSetup;
+use Sprout\Listeners\SetCurrentTenantContext;
 use Sprout\Managers\IdentityResolverManager;
 use Sprout\Managers\ProviderManager;
 use Sprout\Managers\TenancyManager;
@@ -27,10 +27,12 @@ class SproutServiceProvider extends ServiceProvider
         $this->registerSprout();
         $this->registerManagers();
         $this->registerMiddleware();
+        $this->registerRouteMixin();
+
         $this->booting(function () {
+            $this->publishConfig();
             $this->registerEventListeners();
         });
-        $this->registerRouteMixin();
     }
 
     private function handleCoreConfig(): void
@@ -78,6 +80,16 @@ class SproutServiceProvider extends ServiceProvider
         $router->aliasMiddleware(TenantRoutes::ALIAS, TenantRoutes::class);
     }
 
+    protected function registerRouteMixin(): void
+    {
+        Router::mixin(new RouterMethods());
+    }
+
+    private function publishConfig(): void
+    {
+        $this->publishes([__DIR__ . '/../resources/config/multitenancy.php' => config_path('multitenancy.php')], 'config');
+    }
+
     private function registerEventListeners(): void
     {
         /** @var \Illuminate\Contracts\Events\Dispatcher $events */
@@ -90,20 +102,5 @@ class SproutServiceProvider extends ServiceProvider
 
         $events->listen(CurrentTenantChanged::class, SetCurrentTenantContext::class);
         $events->listen(CurrentTenantChanged::class, PerformIdentityResolverSetup::class);
-    }
-
-    protected function registerRouteMixin(): void
-    {
-        Router::mixin(new RouterMethods);
-    }
-
-    public function boot(): void
-    {
-        $this->publishConfig();
-    }
-
-    private function publishConfig(): void
-    {
-        $this->publishes([__DIR__ . '/../resources/config/multitenancy.php' => config_path('multitenancy.php')], 'config');
     }
 }
