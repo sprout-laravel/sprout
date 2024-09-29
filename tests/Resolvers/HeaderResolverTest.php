@@ -43,7 +43,7 @@ class HeaderResolverTest extends TestCase
     #[Test]
     public function resolvesFromRoute(): void
     {
-        $tenant = TenantModel::first();
+        $tenant = TenantModel::factory()->createOne();
 
         $result = $this->get(route('header.route'), ['Tenants-Identifier' => $tenant->getTenantIdentifier()]);
 

@@ -52,7 +52,7 @@ class SessionResolverTest extends TestCase
     #[Test]
     public function resolvesFromRoute(): void
     {
-        $tenant = TenantModel::first();
+        $tenant = TenantModel::factory()->createOne();
 
         $result = $this->withSession(['multitenancy' => ['tenants' => $tenant->getTenantIdentifier()]])->get(route('session.route'));
 

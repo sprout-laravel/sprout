@@ -47,7 +47,7 @@ class PathResolverTest extends TestCase
     #[Test]
     public function resolvesFromParameter(): void
     {
-        $tenant = TenantModel::first();
+        $tenant = TenantModel::factory()->createOne();
 
         $result = $this->get(route('path.route', ['tenants_path' => $tenant->getTenantIdentifier()]));
 
@@ -58,7 +58,7 @@ class PathResolverTest extends TestCase
     #[Test]
     public function resolvesWithoutParameter(): void
     {
-        $tenant = TenantModel::first();
+        $tenant = TenantModel::factory()->createOne();
 
         $result = $this->get('/' . $tenant->getTenantIdentifier() . '/path-request');
 

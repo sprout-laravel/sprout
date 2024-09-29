@@ -20,16 +20,6 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $tenants = TenantModelFactory::new()->createMany(20);
 
-        $tenants->each(function (TenantModel $tenant, int $i) {
-            TenantChildFactory::new()->afterMaking(function (TenantChild $child) use ($tenant) {
-                $child->tenant()->associate($tenant);
-            })->createMany(5);
-        });
-
-        TenantChildrenFactory::new()->afterCreating(function (TenantChildren $child) use ($tenants) {
-            $child->tenants()->saveMany($tenants->random(random_int(1, 4)));
-        })->createMany(10);
     }
 }
