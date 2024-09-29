@@ -23,6 +23,7 @@ use Sprout\Listeners\SetCurrentTenantForJob;
 use Sprout\Managers\IdentityResolverManager;
 use Sprout\Managers\ProviderManager;
 use Sprout\Managers\TenancyManager;
+use Sprout\Support\StorageHelper;
 
 class SproutServiceProvider extends ServiceProvider
 {
@@ -121,32 +122,7 @@ class SproutServiceProvider extends ServiceProvider
         // service, we'll do that here
         if ($this->sprout->config('services.storage', false)) {
             $filesystemManager = $this->app->make(FilesystemManager::class);
-            $filesystemManager->extend('sprout', function (Application $app, array $config) use ($filesystemManager) {
-                $tenancy = $this->sprout->tenancies()->get($config['tenancy'] ?? null);
-
-                // If there's no tenant, error out
-                if (! $tenancy->check()) {
-                    // TODO: Better exception
-                    throw new RuntimeException('There isn\'t a current a tenant');
-                }
-
-                $tenant = $tenancy->tenant();
-
-                // If the tenant isn't configured for resources, also error out
-                if (! ($tenant instanceof TenantHasResources)) {
-                    // TODO: Better exception
-                    throw new RuntimeException('Current tenant isn\t configured for resources');
-                }
-
-                /** @var string $pathPrefix */
-                $pathPrefix = $this->config['path'] ?? '{tenant}';
-
-                // Build up the path prefix with the tenant resource key
-                $config['prefix'] = str_replace('{tenant}', $tenant->getTenantResourceKey(), $pathPrefix);
-
-                // Create a scoped driver for the new path
-                return $filesystemManager->createScopedDriver($config);
-            });
+            $filesystemManager->extend('sprout', StorageHelper::creator($this->sprout, $filesystemManager));
         }
     }
 }
