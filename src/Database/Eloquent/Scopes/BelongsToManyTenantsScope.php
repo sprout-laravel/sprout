@@ -38,7 +38,7 @@ final class BelongsToManyTenantsScope extends TenantChildScope
             }
 
             // We should throw an exception because the tenant is missing
-            throw TenantMissing::make($model::class, $tenancy->getName());
+            throw TenantMissing::make($tenancy->getName());
         }
 
         // Finally, add the clause so that all queries are scoped to the

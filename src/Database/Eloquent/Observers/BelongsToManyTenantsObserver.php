@@ -88,7 +88,7 @@ class BelongsToManyTenantsObserver
 
             // If we hit here then there's no tenant, and the model isn't
             // marked as tenant being optional, so we throw an exception
-            throw TenantMissing::make($model::class, $tenancy->getName());
+            throw TenantMissing::make($tenancy->getName());
         }
 
         /**
