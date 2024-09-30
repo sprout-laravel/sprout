@@ -149,13 +149,8 @@ final class PathIdentityResolver extends BaseIdentityResolver implements Identit
     {
         parent::setup($tenancy, $tenant);
 
-        if (sprout()->config('services.cookies', false) === true) {
-            if ($tenant !== null) {
-                CookieHelper::setDefaults(path: $this->getTenantRoutePrefix($tenancy));
-            } else {
-                // If there's no tenant, we can set it to its defaults
-                CookieHelper::setDefaults();
-            }
+        if ($tenant !== null && sprout()->config('services.cookies', false) === true) {
+            CookieHelper::setDefaults(path: $this->getTenantRoutePrefix($tenancy));
         }
     }
 }

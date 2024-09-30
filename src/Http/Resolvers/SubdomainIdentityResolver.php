@@ -141,13 +141,8 @@ final class SubdomainIdentityResolver extends BaseIdentityResolver implements Id
     {
         parent::setup($tenancy, $tenant);
 
-        if (sprout()->config('services.cookies', false) === true) {
-            if ($tenant !== null) {
-                CookieHelper::setDefaults(domain: $this->getTenantRouteDomain($tenancy));
-            } else {
-                // If there's no tenant, we can set it to its defaults
-                CookieHelper::setDefaults();
-            }
+        if ($tenant !== null && sprout()->config('services.cookies', false) === true) {
+            CookieHelper::setDefaults(domain: $this->getTenantRouteDomain($tenancy));
         }
     }
 }
