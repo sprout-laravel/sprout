@@ -120,4 +120,16 @@ class FilesystemTest extends TestCase
         $this->assertNotNull($disk);
         $this->assertSame($tenant2->getTenantResourceKey(), basename($disk->path('')));
     }
+
+    #[Test]
+    public function doesNothingIfStorageServiceIsDisabled(): void
+    {
+        config()->set('sprout.services.storage', false);
+
+        app(TenancyManager::class)->get()->setTenant(TenantModel::factory()->createOne());
+
+        $disk = Storage::disk('tenant');
+
+        $this->assertNull($disk);
+    }
 }

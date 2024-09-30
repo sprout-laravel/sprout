@@ -16,7 +16,11 @@ final class StorageHelper
 {
     public static function creator(Sprout $sprout, FilesystemManager $manager): Closure
     {
-        return static function (Application $app, array $config) use ($sprout, $manager): Filesystem {
+        return static function (Application $app, array $config) use ($sprout, $manager): ?Filesystem {
+            if ($sprout->config('services.storage', false) === false) {
+                return null;
+            }
+
             $tenancy = $sprout->tenancies()->get($config['tenancy'] ?? null);
 
             // If there's no tenant, error out
