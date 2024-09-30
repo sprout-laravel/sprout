@@ -9,6 +9,7 @@ use Illuminate\Filesystem\FilesystemManager;
 use Illuminate\Foundation\Application;
 use RuntimeException;
 use Sprout\Contracts\TenantHasResources;
+use Sprout\Exceptions\TenantMissing;
 use Sprout\Sprout;
 
 final class StorageHelper
@@ -20,8 +21,7 @@ final class StorageHelper
 
             // If there's no tenant, error out
             if (! $tenancy->check()) {
-                // TODO: Better exception
-                throw new RuntimeException('There isn\'t a current a tenant');
+                throw TenantMissing::make($tenancy->getName());
             }
 
             $tenant = $tenancy->tenant();
