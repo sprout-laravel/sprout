@@ -12,7 +12,7 @@ use PHPUnit\Framework\Attributes\Test;
 use Sprout\Sprout;
 use Workbench\App\Models\TenantModel;
 
-#[Group('core'), Group('services')]
+#[Group('core')]
 class SproutTest extends TestCase
 {
     use WithWorkbench, RefreshDatabase;

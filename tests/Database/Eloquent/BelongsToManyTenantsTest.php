@@ -87,10 +87,7 @@ class BelongsToManyTenantsTest extends TestCase
     {
         $this->expectException(TenantMissing::class);
         $this->expectExceptionMessage(
-            'Model ['
-            . TenantChildren::class
-            . '] requires a tenant, and the tenancy'
-            . ' [tenants] does not have one'
+            'There is no current tenant for tenancy [tenants]'
         );
 
         TenantChildren::factory()->create();
@@ -169,10 +166,7 @@ class BelongsToManyTenantsTest extends TestCase
 
         $this->expectException(TenantMissing::class);
         $this->expectExceptionMessage(
-            'Model ['
-            . TenantChildren::class
-            . '] requires a tenant, and the tenancy'
-            . ' [tenants] does not have one'
+            'There is no current tenant for tenancy [tenants]'
         );
 
         TenantChildren::query()->find($child->getKey());

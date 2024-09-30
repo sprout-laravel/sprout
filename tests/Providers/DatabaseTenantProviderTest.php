@@ -6,15 +6,14 @@ namespace Sprout\Tests\Providers;
 use Illuminate\Config\Repository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Orchestra\Testbench\Concerns\WithWorkbench;
 use Orchestra\Testbench\TestCase;
 use PHPUnit\Framework\Attributes\Test;
 use Sprout\Managers\ProviderManager;
 use Sprout\Providers\DatabaseTenantProvider;
-use Sprout\Providers\EloquentTenantProvider;
 use Sprout\Sprout;
 use Sprout\Support\GenericTenant;
-use Workbench\App\Models\TenantModel;
 
 class DatabaseTenantProviderTest extends TestCase
 {
@@ -47,9 +46,10 @@ class DatabaseTenantProviderTest extends TestCase
     {
         $id = DB::table('tenants')->insertGetId(
             [
-                'name'       => 'Test Tenant',
-                'identifier' => 'the-big-test-boy',
-                'active'     => true,
+                'name'         => 'Test Tenant',
+                'identifier'   => 'the-big-test-boy',
+                'resource_key' => Str::uuid()->toString(),
+                'active'       => true,
             ]
         );
 
@@ -76,9 +76,10 @@ class DatabaseTenantProviderTest extends TestCase
     {
         $id = DB::table('tenants')->insertGetId(
             [
-                'name'       => 'Test Tenant',
-                'identifier' => 'the-big-test-boy2',
-                'active'     => true,
+                'name'         => 'Test Tenant',
+                'identifier'   => 'the-big-test-boy2',
+                'resource_key' => Str::uuid()->toString(),
+                'active'       => true,
             ]
         );
 

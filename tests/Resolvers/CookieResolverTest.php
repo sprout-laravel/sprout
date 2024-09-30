@@ -49,7 +49,7 @@ class CookieResolverTest extends TestCase
     #[Test]
     public function resolvesFromRoute(): void
     {
-        $tenant = TenantModel::first();
+        $tenant = TenantModel::factory()->createOne();
 
         $result = $this->withUnencryptedCookie('Tenants-Identifier', $tenant->getTenantIdentifier())->get(route('cookie.route'));
 

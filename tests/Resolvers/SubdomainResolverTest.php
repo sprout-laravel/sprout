@@ -48,7 +48,7 @@ class SubdomainResolverTest extends TestCase
     #[Test]
     public function resolvesFromParameter(): void
     {
-        $tenant = TenantModel::first();
+        $tenant = TenantModel::factory()->createOne();
 
         $result = $this->get(route('subdomain.route', ['tenants_subdomain' => $tenant->getTenantIdentifier()]));
 
@@ -59,7 +59,7 @@ class SubdomainResolverTest extends TestCase
     #[Test]
     public function resolvesWithoutParameter(): void
     {
-        $tenant = TenantModel::first();
+        $tenant = TenantModel::factory()->createOne();
 
         $result = $this->get('http://' . $tenant->getTenantIdentifier() . '.localhost/subdomain-request');
 

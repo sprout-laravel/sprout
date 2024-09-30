@@ -4,13 +4,18 @@ declare(strict_types=1);
 namespace Sprout;
 
 use Illuminate\Contracts\Events\Dispatcher;
+use Illuminate\Filesystem\FilesystemManager;
+use Illuminate\Foundation\Application;
 use Illuminate\Queue\Events\JobProcessing;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Routing\Router;
 use Illuminate\Support\ServiceProvider;
+use RuntimeException;
+use Sprout\Contracts\TenantHasResources;
 use Sprout\Events\CurrentTenantChanged;
 use Sprout\Http\Middleware\TenantRoutes;
 use Sprout\Http\RouterMethods;
+use Sprout\Listeners\CleanupLaravelServices;
 use Sprout\Listeners\IdentifyTenantOnRouting;
 use Sprout\Listeners\PerformIdentityResolverSetup;
 use Sprout\Listeners\SetCurrentTenantContext;
@@ -18,6 +23,7 @@ use Sprout\Listeners\SetCurrentTenantForJob;
 use Sprout\Managers\IdentityResolverManager;
 use Sprout\Managers\ProviderManager;
 use Sprout\Managers\TenancyManager;
+use Sprout\Support\StorageHelper;
 
 class SproutServiceProvider extends ServiceProvider
 {
@@ -86,6 +92,7 @@ class SproutServiceProvider extends ServiceProvider
     {
         $this->publishConfig();
         $this->registerEventListeners();
+        $this->registerServiceOverrides();
     }
 
     private function publishConfig(): void
@@ -105,6 +112,17 @@ class SproutServiceProvider extends ServiceProvider
 
         $events->listen(CurrentTenantChanged::class, SetCurrentTenantContext::class);
         $events->listen(CurrentTenantChanged::class, PerformIdentityResolverSetup::class);
+        $events->listen(CurrentTenantChanged::class, CleanupLaravelServices::class);
         $events->listen(JobProcessing::class, SetCurrentTenantForJob::class);
+    }
+
+    private function registerServiceOverrides(): void
+    {
+        // If we're providing a tenanted override for Laravels filesystem/storage
+        // service, we'll do that here
+        if ($this->sprout->config('services.storage', false)) {
+            $filesystemManager = $this->app->make(FilesystemManager::class);
+            $filesystemManager->extend('sprout', StorageHelper::creator($this->sprout, $filesystemManager));
+        }
     }
 }

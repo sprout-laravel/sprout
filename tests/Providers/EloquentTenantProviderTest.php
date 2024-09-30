@@ -43,7 +43,7 @@ class EloquentTenantProviderTest extends TestCase
     #[Test]
     public function canRetrieveByIdentifier(): void
     {
-        $newTenant = TenantModel::create(
+        $newTenant = TenantModel::factory()->createOne(
             [
                 'name'       => 'Test Tenant',
                 'identifier' => 'the-big-test-boy',
@@ -70,7 +70,7 @@ class EloquentTenantProviderTest extends TestCase
     #[Test]
     public function canRetrieveByKey(): void
     {
-        $newTenant = TenantModel::create(
+        $newTenant = TenantModel::factory()->createOne(
             [
                 'name'       => 'Test Tenant',
                 'identifier' => 'the-big-test-boy2',

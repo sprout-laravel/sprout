@@ -6,26 +6,23 @@ namespace Workbench\App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Sprout\Contracts\Tenant;
-use Sprout\Contracts\TenantHasResources;
-use Sprout\Database\Eloquent\Concerns\HasTenantResources;
 use Sprout\Database\Eloquent\Concerns\IsTenant;
-use Workbench\Database\Factories\TenantModelFactory;
+use Workbench\Database\Factories\NoResourcesTenantModelFactory;
 
-class TenantModel extends Model implements Tenant, TenantHasResources
+class NoResourcesTenantModel extends Model implements Tenant
 {
     /**
-     * @use \Illuminate\Database\Eloquent\Factories\HasFactory<TenantModelFactory>
+     * @use \Illuminate\Database\Eloquent\Factories\HasFactory<NoResourcesTenantModelFactory>
      */
-    use IsTenant, HasFactory, HasTenantResources;
+    use IsTenant, HasFactory;
 
     protected $table = 'tenants';
 
-    protected static string $factory = TenantModelFactory::class;
+    protected static string $factory = NoResourcesTenantModelFactory::class;
 
     protected $fillable = [
         'name',
         'identifier',
-        'resource_key',
         'active',
     ];
 

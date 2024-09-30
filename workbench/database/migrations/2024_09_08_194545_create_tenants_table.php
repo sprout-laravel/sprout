@@ -15,6 +15,7 @@ return new class extends Migration {
 
             $table->string('name');
             $table->string('identifier')->unique();
+            $table->uuid('resource_key')->nullable()->unique();
             $table->boolean('active')->default(true);
 
             $table->timestamps();
