@@ -56,17 +56,18 @@ class CookieTest extends TestCase
     #[Test]
     public function doesNotAffectNonTenantedCookies(): void
     {
-        $result1 = $this->get(route('home'));
+        $result = $this->get(route('home'));
 
-        $result1->assertOk()->assertCookie('no_tenancy_cookie');
+        $result->assertOk()->assertCookie('no_tenancy_cookie');
 
-        $cookie1 = $result1->getCookie('no_tenancy_cookie');
+        /** @var \Symfony\Component\HttpFoundation\Cookie $cookie */
+        $cookie = $result->getCookie('no_tenancy_cookie');
 
-        $this->assertSame(config('session.domain'), $cookie1->getDomain());
-        $this->assertSame(config('session.path'), $cookie1->getPath());
-        $this->assertSame((bool)config('session.secure'), $cookie1->isSecure());
-        $this->assertSame(config('session.same_site'), $cookie1->getSameSite());
-        $this->assertSame('foo', $cookie1->getValue());
+        $this->assertSame(config('session.domain'), $cookie->getDomain());
+        $this->assertSame(config('session.path'), $cookie->getPath());
+        $this->assertSame((bool)config('session.secure'), $cookie->isSecure());
+        $this->assertSame(config('session.same_site'), $cookie->getSameSite());
+        $this->assertSame('foo', $cookie->getValue());
     }
 
     #[Test]
@@ -74,17 +75,18 @@ class CookieTest extends TestCase
     {
         $tenant = TenantModel::factory()->createOne();
 
-        $result2 = $this->get(route('subdomain.route', [$tenant->getTenantIdentifier()]));
+        $result = $this->get(route('subdomain.route', [$tenant->getTenantIdentifier()]));
 
-        $result2->assertOk()->assertCookie('yes_tenancy_cookie');
+        $result->assertOk()->assertCookie('yes_tenancy_cookie');
 
-        $cookie2 = $result2->getCookie('yes_tenancy_cookie');
+        /** @var \Symfony\Component\HttpFoundation\Cookie $cookie */
+        $cookie = $result->getCookie('yes_tenancy_cookie');
 
-        $this->assertSame($tenant->getTenantIdentifier() . '.localhost', $cookie2->getDomain());
-        $this->assertSame(config('session.path'), $cookie2->getPath());
-        $this->assertSame((bool)config('session.secure'), $cookie2->isSecure());
-        $this->assertSame(config('session.same_site'), $cookie2->getSameSite());
-        $this->assertSame((string)$tenant->getTenantKey(), $cookie2->getValue());
+        $this->assertSame($tenant->getTenantIdentifier() . '.localhost', $cookie->getDomain());
+        $this->assertSame(config('session.path'), $cookie->getPath());
+        $this->assertSame((bool)config('session.secure'), $cookie->isSecure());
+        $this->assertSame(config('session.same_site'), $cookie->getSameSite());
+        $this->assertSame((string)$tenant->getTenantKey(), $cookie->getValue());
     }
 
     #[Test]
@@ -92,16 +94,59 @@ class CookieTest extends TestCase
     {
         $tenant = TenantModel::factory()->createOne();
 
-        $result2 = $this->get(route('path.route', [$tenant->getTenantIdentifier()]));
+        $result = $this->get(route('path.route', [$tenant->getTenantIdentifier()]));
 
-        $result2->assertOk()->assertCookie('yes_tenancy_cookie');
+        $result->assertOk()->assertCookie('yes_tenancy_cookie');
 
-        $cookie2 = $result2->getCookie('yes_tenancy_cookie');
+        /** @var \Symfony\Component\HttpFoundation\Cookie $cookie */
+        $cookie = $result->getCookie('yes_tenancy_cookie');
 
-        $this->assertSame(config('session.domain'), $cookie2->getDomain());
-        $this->assertSame($tenant->getTenantIdentifier(), $cookie2->getPath());
-        $this->assertSame((bool)config('session.secure'), $cookie2->isSecure());
-        $this->assertSame(config('session.same_site'), $cookie2->getSameSite());
-        $this->assertSame((string)$tenant->getTenantKey(), $cookie2->getValue());
+        $this->assertSame(config('session.domain'), $cookie->getDomain());
+        $this->assertSame($tenant->getTenantIdentifier(), $cookie->getPath());
+        $this->assertSame((bool)config('session.secure'), $cookie->isSecure());
+        $this->assertSame(config('session.same_site'), $cookie->getSameSite());
+        $this->assertSame((string)$tenant->getTenantKey(), $cookie->getValue());
+    }
+
+    #[Test]
+    public function doesNotSetTheCookieDomainWhenUsingTheSubdomainIdentityResolverIfDisabled(): void
+    {
+        config()->set('sprout.services.cookies', false);
+
+        $tenant = TenantModel::factory()->createOne();
+
+        $result = $this->get(route('subdomain.route', [$tenant->getTenantIdentifier()]));
+
+        $result->assertOk()->assertCookie('yes_tenancy_cookie');
+
+        /** @var \Symfony\Component\HttpFoundation\Cookie $cookie */
+        $cookie = $result->getCookie('yes_tenancy_cookie');
+
+        $this->assertSame(config('session.domain'), $cookie->getDomain());
+        $this->assertSame(config('session.path'), $cookie->getPath());
+        $this->assertSame((bool)config('session.secure'), $cookie->isSecure());
+        $this->assertSame(config('session.same_site'), $cookie->getSameSite());
+        $this->assertSame((string)$tenant->getTenantKey(), $cookie->getValue());
+    }
+
+    #[Test]
+    public function doesNotSetTheCookiePathWhenUsingThePathIdentityResolverIfDisabled(): void
+    {
+        config()->set('sprout.services.cookies', false);
+
+        $tenant = TenantModel::factory()->createOne();
+
+        $result = $this->get(route('path.route', [$tenant->getTenantIdentifier()]));
+
+        $result->assertOk()->assertCookie('yes_tenancy_cookie');
+
+        /** @var \Symfony\Component\HttpFoundation\Cookie $cookie */
+        $cookie = $result->getCookie('yes_tenancy_cookie');
+
+        $this->assertSame(config('session.domain'), $cookie->getDomain());
+        $this->assertSame(config('session.path'), $cookie->getPath());
+        $this->assertSame((bool)config('session.secure'), $cookie->isSecure());
+        $this->assertSame(config('session.same_site'), $cookie->getSameSite());
+        $this->assertSame((string)$tenant->getTenantKey(), $cookie->getValue());
     }
 }
