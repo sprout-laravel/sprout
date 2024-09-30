@@ -76,11 +76,15 @@ final class StorageHelper
      */
     private static function getDiskConfig(array $config): array
     {
-        // Get the disk we're overriding and its config
-        /** @var string $diskName */
-        $diskName = $config['disk'] ?? config('filesystems.default');
+        if (is_array($config['disk'])) {
+            $diskConfig = $config['disk'];
+        } else {
+            /** @var string $diskName */
+            $diskName   = $config['disk'] ?? config('filesystems.default');
+            $diskConfig = config('filesystems.disks.' . $diskName);
+        }
+
         /** @var array<string, mixed> $diskConfig */
-        $diskConfig = config('filesystems.disks.' . $diskName);
 
         // This is where we'd do anything like load config overrides for
         // the tenant, like say they have their own S3 setup, etc.
