@@ -113,7 +113,7 @@ final class PathIdentityResolver extends BaseIdentityResolver implements Identit
     public function getTenantRoutePrefix(Tenancy $tenancy): string
     {
         if (! $tenancy->check()) {
-            throw TenantMissing::make($tenancy->getName());
+            throw TenantMissing::make($tenancy->getName()); // @codeCoverageIgnore
         }
 
         /** @var string $identifier */
