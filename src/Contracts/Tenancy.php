@@ -32,6 +32,13 @@ interface Tenancy
      * tenant.
      *
      * @return bool
+     *
+     * @phpstan-assert-if-true \Sprout\Contracts\Tenant $this->tenant()
+     * @phpstan-assert-if-true string $this->identifier()
+     * @phpstan-assert-if-true string|int $this->key()
+     * @phpstan-assert-if-false null $this->tenant()
+     * @phpstan-assert-if-false null $this->identifier()
+     * @phpstan-assert-if-false null $this->key()
      */
     public function check(): bool;
 
