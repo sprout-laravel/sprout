@@ -15,6 +15,7 @@ use Sprout\Exceptions\TenantMissing;
 use Sprout\Http\Middleware\TenantRoutes;
 use Sprout\Support\BaseIdentityResolver;
 use Sprout\Support\CookieHelper;
+use Sprout\TenancyOptions;
 use function Sprout\sprout;
 
 final class PathIdentityResolver extends BaseIdentityResolver implements IdentityResolverUsesParameters
@@ -149,8 +150,27 @@ final class PathIdentityResolver extends BaseIdentityResolver implements Identit
     {
         parent::setup($tenancy, $tenant);
 
-        if ($tenant !== null && sprout()->config('services.cookies', false) === true) {
-            CookieHelper::setDefaults(path: $this->getTenantRoutePrefix($tenancy));
+        if ($tenant !== null) {
+            if (sprout()->config('services.sessions', false) === true) {
+                CookieHelper::setSessionDefaults(
+                    cookieName: CookieHelper::getCookieName($tenancy, $tenant),
+                    path      : $this->getTenantRoutePrefix($tenancy)
+                );
+            }
+
+            // This technically isn't necessary if we're overriding sessions,
+            // BUT, it's here just to catch any unique use cases
+            if (sprout()->config('services.cookies', false) === true) {
+                CookieHelper::setCookieDefaults(path: $this->getTenantRoutePrefix($tenancy));
+            }
+        } else if(TenancyOptions::shouldResetServices($tenancy)) {
+            if (sprout()->config('services.sessions', false) === true) {
+                CookieHelper::resetSessionDefaults();
+            }
+
+            if (sprout()->config('services.cookies', false) === true) {
+                CookieHelper::resetCookieDefaults();
+            }
         }
     }
 }

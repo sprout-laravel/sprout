@@ -36,11 +36,11 @@ return [
         'storage'  => true,
 
         // This will enable the overwriting of the default settings for cookies.
-        // Each identity resolver may have effect different settings.
+        // Each identity resolver may have affected different settings.
         'cookies'  => true,
 
         // This will enable the overwriting of the default settings for sessions.
-        // Each identity resolver may have effect different settings.
+        // Each identity resolver may have affected different settings.
         'sessions' => true,
     ],
 

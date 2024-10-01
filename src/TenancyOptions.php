@@ -38,6 +38,16 @@ class TenancyOptions
     }
 
     /**
+     * Reset services if the tenancy becomes vacant
+     *
+     * @return string
+     */
+    public static function resetServices(): string
+    {
+        return 'services.reset';
+    }
+
+    /**
      * @param \Sprout\Contracts\Tenancy<*> $tenancy
      *
      * @return bool
@@ -65,5 +75,15 @@ class TenancyOptions
     public static function shouldJobsBeTenantAware(Tenancy $tenancy): bool
     {
         return $tenancy->hasOption(static::makeJobsTenantAware());
+    }
+
+    /**
+     * @param \Sprout\Contracts\Tenancy<*> $tenancy
+     *
+     * @return bool
+     */
+    public static function shouldResetServices(Tenancy $tenancy): bool
+    {
+        return $tenancy->hasOption(static::resetServices());
     }
 }
