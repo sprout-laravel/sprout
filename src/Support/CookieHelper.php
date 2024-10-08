@@ -4,11 +4,18 @@ declare(strict_types=1);
 namespace Sprout\Support;
 
 use Illuminate\Cookie\CookieJar;
+use RuntimeException;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 
 final class CookieHelper
 {
+    /**
+     * @param \Sprout\Contracts\Tenancy<*> $tenancy
+     * @param \Sprout\Contracts\Tenant     $tenant
+     *
+     * @return string
+     */
     public static function getCookieName(Tenancy $tenancy, Tenant $tenant): string
     {
         return $tenancy->getName() . '_' . $tenant->getTenantIdentifier() . '_session';
@@ -19,6 +26,17 @@ final class CookieHelper
         self::collectCookieDefaults($path, $domain, $secure, $sameSite);
 
         $config = config();
+
+        // If the config isn't already backed up, we'll do so
+        if (! $config->has('_original.session')) {
+            $config->set('_original.session', [
+                'cookie'    => $config->get('session.cookie'),
+                'path'      => $config->get('session.path'),
+                'domain'    => $config->get('session.domain'),
+                'secure'    => $config->get('session.secure'),
+                'same_site' => $config->get('session.same_site'),
+            ]);
+        }
 
         $config->set('session.cookie', $cookieName);
         $config->set('session.path', $path);
@@ -31,12 +49,14 @@ final class CookieHelper
     {
         $config = config();
 
-        $sessionConfig = require config_path('session.php');
+        if (! $config->has('_original.session')) {
+            throw new RuntimeException('Cannot reset session defaults as they are missing');
+        }
 
-        $config->set('session.path', $sessionConfig['path']);
-        $config->set('session.domain', $sessionConfig['domain']);
-        $config->set('session.secure', $sessionConfig['secure']);
-        $config->set('session.same_site', $sessionConfig['same_site']);
+        $config->set('session.path', $config->get('_original.session.path'));
+        $config->set('session.domain', $config->get('_original.session.domain'));
+        $config->set('session.secure', $config->get('_original.session.secure'));
+        $config->set('session.same_site', $config->get('_original.session.same_site'));
     }
 
     public static function setCookieDefaults(?string $path = null, ?string $domain = null, ?bool $secure = null, ?string $sameSite = null): void
