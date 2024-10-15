@@ -13,14 +13,15 @@ use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 use Sprout\Exceptions\TenantMissing;
 use Sprout\Http\Middleware\TenantRoutes;
+use Sprout\Overrides\CookieOverride;
+use Sprout\Overrides\SessionOverride;
 use Sprout\Support\BaseIdentityResolver;
-use Sprout\Support\CookieHelper;
-use Sprout\TenancyOptions;
-use function Sprout\sprout;
 
 final class SubdomainIdentityResolver extends BaseIdentityResolver implements IdentityResolverUsesParameters
 {
-    use FindsIdentityInRouteParameter;
+    use FindsIdentityInRouteParameter {
+        setup as parameterSetup;
+    }
 
     private string $domain;
 
@@ -140,29 +141,15 @@ final class SubdomainIdentityResolver extends BaseIdentityResolver implements Id
      */
     public function setup(Tenancy $tenancy, ?Tenant $tenant): void
     {
+        // Call the parent implementation in case there's something there
         parent::setup($tenancy, $tenant);
 
+        // Call the trait setup so that parameter has a default value
+        $this->parameterSetup($tenancy, $tenant);
+
         if ($tenant !== null) {
-            if (sprout()->config('services.sessions', false) === true) {
-                CookieHelper::setSessionDefaults(
-                    cookieName: CookieHelper::getCookieName($tenancy, $tenant),
-                    domain    : $this->getTenantRouteDomain($tenancy)
-                );
-            }
-
-            // This technically isn't necessary if we're overriding sessions,
-            // BUT, it's here just to catch any unique use cases
-            if (sprout()->config('services.cookies', false) === true) {
-                CookieHelper::setCookieDefaults(domain: $this->getTenantRouteDomain($tenancy));
-            }
-        } else if(TenancyOptions::shouldResetServices($tenancy)) {
-            if (sprout()->config('services.sessions', false) === true) {
-                CookieHelper::resetSessionDefaults();
-            }
-
-            if (sprout()->config('services.cookies', false) === true) {
-                CookieHelper::resetCookieDefaults();
-            }
+            CookieOverride::setDomain($this->getTenantRouteDomain($tenancy));
+            SessionOverride::setDomain($this->getTenantRouteDomain($tenancy));
         }
     }
 }
