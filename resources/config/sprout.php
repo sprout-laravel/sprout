@@ -53,9 +53,15 @@ return [
         // This will override the storage by introducing a 'sprout' driver
         // that wraps any other storage drive in a tenant resource subdirectory.
         \Sprout\Overrides\StorageOverride::class,
+        // This will override the cache by introducing a 'sprout' driver
+        // that adds a prefix to cache stores for the current tenant.
+        \Sprout\Overrides\CacheOverride::class,
         // This will override the cookie settings so that all created cookies
         // are specific to the tenant.
         \Sprout\Overrides\CookieOverride::class,
+        // This will override the session by introducing a 'sprout' driver
+        // that wraps any other session store.
+        \Sprout\Overrides\SessionOverride::class,
     ],
 
 ];
