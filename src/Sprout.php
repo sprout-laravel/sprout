@@ -4,8 +4,8 @@ declare(strict_types=1);
 namespace Sprout;
 
 use Illuminate\Contracts\Foundation\Application;
+use Sprout\Contracts\ServiceOverride;
 use Sprout\Contracts\Tenancy;
-use Sprout\Contracts\Tenant;
 use Sprout\Managers\IdentityResolverManager;
 use Sprout\Managers\ProviderManager;
 use Sprout\Managers\TenancyManager;
@@ -21,6 +21,11 @@ final class Sprout
      * @var array<int, \Sprout\Contracts\Tenancy<\Sprout\Contracts\Tenant>>
      */
     private array $tenancies = [];
+
+    /**
+     * @var array<class-string<\Sprout\Contracts\ServiceOverride>, \Sprout\Contracts\ServiceOverride>
+     */
+    private array $overrides = [];
 
     public function __construct(Application $app)
     {
@@ -73,7 +78,7 @@ final class Sprout
 
     public function shouldListenForRouting(): bool
     {
-        return (bool) $this->config('listen_for_routing', true);
+        return (bool)$this->config('listen_for_routing', true);
     }
 
     public function resolvers(): IdentityResolverManager
@@ -89,5 +94,25 @@ final class Sprout
     public function tenancies(): TenancyManager
     {
         return $this->app->make(TenancyManager::class);
+    }
+
+    public function hasOverride(string $class): bool
+    {
+        return isset($this->overrides[$class]);
+    }
+
+    public function addOverride(ServiceOverride $override): self
+    {
+        $this->overrides[$override::class] = $override;
+
+        return $this;
+    }
+
+    /**
+     * @return array<class-string<\Sprout\Contracts\ServiceOverride>, \Sprout\Contracts\ServiceOverride>
+     */
+    public function getOverrides(): array
+    {
+        return $this->overrides;
     }
 }

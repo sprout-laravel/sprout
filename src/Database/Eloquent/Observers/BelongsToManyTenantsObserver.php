@@ -20,9 +20,9 @@ class BelongsToManyTenantsObserver
     /**
      * Check if a model already has a tenant set
      *
-     * @param \Illuminate\Database\Eloquent\Model                                $model
-     * @param \Illuminate\Database\Eloquent\Relations\BelongsToMany<TenantModel> $relation
-     * @param \Sprout\Contracts\Tenancy<TenantModel>                             $tenancy
+     * @param \Illuminate\Database\Eloquent\Model                                            $model
+     * @param \Illuminate\Database\Eloquent\Relations\BelongsToMany<ChildModel, TenantModel> $relation
+     * @param \Sprout\Contracts\Tenancy<TenantModel>                                         $tenancy
      *
      * @return bool
      */
@@ -44,9 +44,9 @@ class BelongsToManyTenantsObserver
     /**
      * Check if a model belongs to a different tenant
      *
-     * @param \Illuminate\Database\Eloquent\Model                                $model
-     * @param \Illuminate\Database\Eloquent\Model&\Sprout\Contracts\Tenant       $tenant
-     * @param \Illuminate\Database\Eloquent\Relations\BelongsToMany<TenantModel> $relation
+     * @param \Illuminate\Database\Eloquent\Model                                            $model
+     * @param \Illuminate\Database\Eloquent\Model&\Sprout\Contracts\Tenant                   $tenant
+     * @param \Illuminate\Database\Eloquent\Relations\BelongsToMany<ChildModel, TenantModel> $relation
      *
      * @return bool
      */
@@ -67,7 +67,8 @@ class BelongsToManyTenantsObserver
      *
      * @param \Illuminate\Database\Eloquent\Model&\Sprout\Database\Eloquent\Concerns\BelongsToManyTenants $model
      * @param \Sprout\Contracts\Tenancy<TenantModel>                                                      $tenancy
-     * @param \Illuminate\Database\Eloquent\Relations\BelongsToMany<TenantModel>                          $relation
+     * @param \Illuminate\Database\Eloquent\Relations\BelongsToMany<ChildModel, TenantModel>              $relation
+     * @param bool                                                                                        $succeedOnMatch
      *
      * @return bool
      *
@@ -137,7 +138,7 @@ class BelongsToManyTenantsObserver
     public function created(Model $model): void
     {
         /**
-         * @var \Illuminate\Database\Eloquent\Relations\BelongsToMany<TenantModel> $relation
+         * @var \Illuminate\Database\Eloquent\Relations\BelongsToMany<ChildModel, TenantModel> $relation
          * @phpstan-ignore-next-line
          */
         $relation = $model->getTenantRelation();
@@ -180,7 +181,7 @@ class BelongsToManyTenantsObserver
     public function retrieved(Model $model): void
     {
         /**
-         * @var \Illuminate\Database\Eloquent\Relations\BelongsToMany<TenantModel> $relation
+         * @var \Illuminate\Database\Eloquent\Relations\BelongsToMany<ChildModel, TenantModel> $relation
          * @phpstan-ignore-next-line
          */
         $relation = $model->getTenantRelation();
@@ -208,12 +209,12 @@ class BelongsToManyTenantsObserver
     }
 
     /**
-     * @param \Illuminate\Database\Eloquent\Model                                $model
-     * @param \Illuminate\Database\Eloquent\Relations\BelongsToMany<TenantModel> $relation
-     * @param \Sprout\Contracts\Tenant                                           $tenant
+     * @param \Illuminate\Database\Eloquent\Model                                            $model
+     * @param \Illuminate\Database\Eloquent\Relations\BelongsToMany<ChildModel, TenantModel> $relation
+     * @param \Sprout\Contracts\Tenant                                                       $tenant
      *
-     * @phpstan-param ChildModel                                                 $model
-     * @phpstan-param TenantModel                                                $tenant
+     * @phpstan-param ChildModel                                                             $model
+     * @phpstan-param TenantModel                                                            $tenant
      *
      * @return void
      */
