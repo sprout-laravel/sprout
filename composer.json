@@ -60,6 +60,9 @@
       "phpstan"
     ],
     "test"              : [
+      "@clear",
+      "@prepare",
+      "@build",
       "@php vendor/bin/phpunit"
     ]
   },
