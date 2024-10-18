@@ -39,6 +39,7 @@ final class SessionOverride implements BootableServiceOverride
         self::$path = $path;
     }
 
+    // @codeCoverageIgnoreStart
     public static function setSameSite(?string $sameSite): void
     {
         self::$sameSite = $sameSite;
@@ -48,6 +49,7 @@ final class SessionOverride implements BootableServiceOverride
     {
         self::$secure = $secure;
     }
+    // @codeCoverageIgnoreEnd
 
     public static function doNotOverrideDatabase(): void
     {

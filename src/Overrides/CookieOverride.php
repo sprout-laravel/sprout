@@ -28,6 +28,7 @@ final class CookieOverride implements ServiceOverride
         self::$path = $path;
     }
 
+    // @codeCoverageIgnoreStart
     public static function setSameSite(?string $sameSite): void
     {
         self::$sameSite = $sameSite;
@@ -37,6 +38,7 @@ final class CookieOverride implements ServiceOverride
     {
         self::$secure = $secure;
     }
+    // @codeCoverageIgnoreEnd
 
     /**
      * Set up the service override
