@@ -13,6 +13,8 @@ use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use Sprout\Attributes\CurrentTenant;
 use Sprout\Contracts\Tenant;
+use Sprout\Overrides\CacheOverride;
+use Sprout\Overrides\StorageOverride;
 use Workbench\App\Models\TenantModel;
 
 #[Group('resolvers'), Group('sessions')]
@@ -30,6 +32,11 @@ class SessionResolverTest extends TestCase
             $config->set('multitenancy.resolvers.session', [
                 'driver'  => 'session',
                 'session' => 'multitenancy.{tenancy}',
+            ]);
+            $config->set('sprout.services', [
+                StorageOverride::class,
+                CacheOverride::class,
+                StorageOverride::class,
             ]);
         });
     }
