@@ -14,10 +14,7 @@ use Sprout\Contracts\ServiceOverride;
 use Sprout\Events\CurrentTenantChanged;
 use Sprout\Http\Middleware\TenantRoutes;
 use Sprout\Http\RouterMethods;
-use Sprout\Listeners\CleanupLaravelServices;
 use Sprout\Listeners\IdentifyTenantOnRouting;
-use Sprout\Listeners\PerformIdentityResolverSetup;
-use Sprout\Listeners\SetCurrentTenantContext;
 use Sprout\Listeners\SetCurrentTenantForJob;
 use Sprout\Managers\IdentityResolverManager;
 use Sprout\Managers\ProviderManager;
@@ -34,7 +31,6 @@ class SproutServiceProvider extends ServiceProvider
         $this->registerManagers();
         $this->registerMiddleware();
         $this->registerRouteMixin();
-        $this->registerServiceOverrides();
     }
 
     private function handleCoreConfig(): void
@@ -87,6 +83,20 @@ class SproutServiceProvider extends ServiceProvider
         Router::mixin(new RouterMethods());
     }
 
+    public function boot(): void
+    {
+        $this->publishConfig();
+        $this->registerServiceOverrides();
+        $this->registerEventListeners();
+        $this->registerTenancyBootstrappers();
+        $this->bootServiceOverrides();
+    }
+
+    private function publishConfig(): void
+    {
+        $this->publishes([__DIR__ . '/../resources/config/multitenancy.php' => config_path('multitenancy.php')], ['config', 'sprout-config']);
+    }
+
     private function registerServiceOverrides(): void
     {
         /** @var array<class-string<\Sprout\Contracts\ServiceOverride>> $overrides */
@@ -102,19 +112,6 @@ class SproutServiceProvider extends ServiceProvider
 
             $this->sprout->addOverride($override);
         }
-    }
-
-    public function boot(): void
-    {
-        $this->publishConfig();
-        $this->registerEventListeners();
-        $this->registerTenancyBootstrappers();
-        $this->bootServiceOverrides();
-    }
-
-    private function publishConfig(): void
-    {
-        $this->publishes([__DIR__ . '/../resources/config/multitenancy.php' => config_path('multitenancy.php')], 'config');
     }
 
     private function registerEventListeners(): void
