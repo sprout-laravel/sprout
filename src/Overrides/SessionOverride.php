@@ -13,6 +13,7 @@ use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 use Sprout\Contracts\TenantHasResources;
 use Sprout\Exceptions\TenantMissing;
+use Sprout\Overrides\Session\DatabaseSessionHandler;
 use Sprout\Sprout;
 use function Sprout\sprout;
 
@@ -25,6 +26,8 @@ final class SessionOverride implements BootableServiceOverride
     private static ?bool $secure = null;
 
     private static ?string $sameSite = null;
+
+    private static bool $overrideDatabase = true;
 
     public static function setDomain(?string $domain): void
     {
@@ -46,6 +49,11 @@ final class SessionOverride implements BootableServiceOverride
         self::$secure = $secure;
     }
 
+    public static function doNotOverrideDatabase(): void
+    {
+        self::$overrideDatabase = false;
+    }
+
     /**
      * Boot a service override
      *
@@ -59,7 +67,7 @@ final class SessionOverride implements BootableServiceOverride
      */
     public function boot(Application $app, Sprout $sprout): void
     {
-        $sessionManager = $app->make(SessionManager::class);
+        $sessionManager = app(SessionManager::class);
 
         // The native driver proxies the call to the createFileDriver method,
         // so we have to override that too.
@@ -67,11 +75,10 @@ final class SessionOverride implements BootableServiceOverride
 
         $sessionManager->extend('file', $fileCreator);
         $sessionManager->extend('native', $fileCreator);
-        // database
-        // apc
-        // memcached
-        // redis
-        // dynamodb
+
+        if (self::$overrideDatabase) {
+            $sessionManager->extend('database', self::createDatabaseDriver());
+        }
     }
 
     /**
@@ -103,6 +110,7 @@ final class SessionOverride implements BootableServiceOverride
          * @var string|null $sameSite
          */
 
+        /** @var \Illuminate\Contracts\Config\Repository $config */
         $config = config();
 
         // Set the config values
@@ -111,6 +119,9 @@ final class SessionOverride implements BootableServiceOverride
         $config->set('session.secure', $secure);
         $config->set('session.same_site', $sameSite);
         $config->set('session.cookie', $this->getCookieName($tenancy, $tenant));
+
+        // Reset all the drivers
+        app(SessionManager::class)->forgetDrivers();
     }
 
     /**
@@ -131,15 +142,13 @@ final class SessionOverride implements BootableServiceOverride
      */
     public function cleanup(Tenancy $tenancy, Tenant $tenant): void
     {
-        $sessionManager = app()->make(SessionManager::class);
-
         // Reset all the drivers
-        $sessionManager->forgetDrivers();
+        app(SessionManager::class)->forgetDrivers();
     }
 
     /**
      * @param \Sprout\Contracts\Tenancy<*> $tenancy
-     * @param \Sprout\Contracts\Tenant     $tenant
+     * @param \Sprout\Contracts\Tenant $tenant
      *
      * @return string
      */
@@ -187,6 +196,28 @@ final class SessionOverride implements BootableServiceOverride
                 app()->make('files'),
                 $path,
                 $lifetime,
+            );
+        };
+    }
+
+    private static function createDatabaseDriver(): Closure
+    {
+        return static function (): DatabaseSessionHandler {
+            $table      = config('session.table');
+            $lifetime   = config('session.lifetime');
+            $connection = config('session.connection');
+
+            /**
+             * @var string|null $connection
+             * @var string      $table
+             * @var int         $lifetime
+             */
+
+            return new DatabaseSessionHandler(
+                app()->make('db')->connection($connection),
+                $table,
+                $lifetime,
+                app()
             );
         };
     }
