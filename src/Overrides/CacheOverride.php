@@ -60,12 +60,12 @@ final class CacheOverride implements BootableServiceOverride
 
                 $tenant = $tenancy->tenant();
 
-                if (! isset($config['store'])) {
+                if (! isset($config['override'])) {
                     throw new RuntimeException('No cache store provided to override');
                 }
 
                 /** @var array<string, mixed> $storeConfig */
-                $storeConfig = config('caches.store.' . $config['store']);
+                $storeConfig = config('caches.store.' . $config['override']);
                 $prefix      = (
                                isset($storeConfig['prefix'])
                                    ? $storeConfig['prefix'] . '_'
