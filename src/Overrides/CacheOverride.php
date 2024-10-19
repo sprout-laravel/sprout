@@ -20,6 +20,7 @@ use Sprout\Contracts\Tenant;
 use Sprout\Exceptions\TenantMissing;
 use Sprout\Sprout;
 
+/** @codeCoverageIgnore */
 final class CacheOverride implements BootableServiceOverride
 {
     /**

@@ -17,6 +17,7 @@ use Sprout\Overrides\Session\DatabaseSessionHandler;
 use Sprout\Sprout;
 use function Sprout\sprout;
 
+/** @codeCoverageIgnore */
 final class SessionOverride implements BootableServiceOverride
 {
     private static ?string $path = null;
