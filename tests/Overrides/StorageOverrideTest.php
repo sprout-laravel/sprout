@@ -6,6 +6,8 @@ namespace Sprout\Tests\Overrides;
 use Illuminate\Config\Repository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
+use InvalidArgumentException;
+use Orchestra\Testbench\Attributes\DefineEnvironment;
 use Orchestra\Testbench\Concerns\WithWorkbench;
 use Orchestra\Testbench\TestCase;
 use PHPUnit\Framework\Attributes\Group;
@@ -13,6 +15,9 @@ use PHPUnit\Framework\Attributes\Test;
 use RuntimeException;
 use Sprout\Exceptions\TenantMissing;
 use Sprout\Managers\TenancyManager;
+use Sprout\Overrides\CacheOverride;
+use Sprout\Overrides\CookieOverride;
+use Sprout\Overrides\SessionOverride;
 use Workbench\App\Models\NoResourcesTenantModel;
 use Workbench\App\Models\TenantModel;
 
@@ -27,6 +32,12 @@ class StorageOverrideTest extends TestCase
     {
         tap($app['config'], static function (Repository $config) {
             $config->set('multitenancy.providers.tenants.model', TenantModel::class);
+        });
+    }
+
+    protected function createTenantDisk($app): void
+    {
+        tap($app['config'], static function (Repository $config) {
             $config->set('filesystems.disks.tenant', [
                 'driver'  => 'sprout',
                 'disk'    => 'local',
@@ -35,7 +46,18 @@ class StorageOverrideTest extends TestCase
         });
     }
 
-    #[Test]
+    protected function noStorageOverride($app): void
+    {
+        tap($app['config'], static function (Repository $config) {
+            $config->set('sprout.services', [
+                CacheOverride::class,
+                CookieOverride::class,
+                SessionOverride::class,
+            ]);
+        });
+    }
+
+    #[Test, DefineEnvironment('createTenantDisk')]
     public function canCreateScopedTenantFilesystemDisk(): void
     {
         $tenant = TenantModel::factory()->createOne();
@@ -48,7 +70,7 @@ class StorageOverrideTest extends TestCase
         $this->assertSame($tenant->getTenantResourceKey(), basename($disk->path('')));
     }
 
-    #[Test]
+    #[Test, DefineEnvironment('createTenantDisk')]
     public function canCreateScopedTenantFilesystemDiskWithCustomConfig(): void
     {
         config()->set('filesystems.disks.tenant.disk', config('filesystems.disks.local'));
@@ -63,7 +85,7 @@ class StorageOverrideTest extends TestCase
         $this->assertSame($tenant->getTenantResourceKey(), basename($disk->path('')));
     }
 
-    #[Test]
+    #[Test, DefineEnvironment('createTenantDisk')]
     public function throwsExceptionIfThereIsNoTenant(): void
     {
         $this->expectException(TenantMissing::class);
@@ -72,7 +94,7 @@ class StorageOverrideTest extends TestCase
         Storage::disk('tenant');
     }
 
-    #[Test]
+    #[Test, DefineEnvironment('createTenantDisk')]
     public function throwsExceptionIfTheTenantDoesNotHaveResources(): void
     {
         $this->expectException(RuntimeException::class);
@@ -85,7 +107,7 @@ class StorageOverrideTest extends TestCase
         Storage::disk('tenant');
     }
 
-    #[Test]
+    #[Test, DefineEnvironment('createTenantDisk')]
     public function cleansUpStorageDiskAfterTenantChange(): void
     {
         $tenant = TenantModel::factory()->createOne();
@@ -99,7 +121,7 @@ class StorageOverrideTest extends TestCase
         app(TenancyManager::class)->get()->setTenant(null);
     }
 
-    #[Test]
+    #[Test, DefineEnvironment('createTenantDisk')]
     public function recreatesStorageDiskPerTenant(): void
     {
         $tenant1 = TenantModel::factory()->createOne();
@@ -121,17 +143,14 @@ class StorageOverrideTest extends TestCase
         $this->assertSame($tenant2->getTenantResourceKey(), basename($disk->path('')));
     }
 
-    #[Test]
-    public function doesNothingIfStorageServiceIsDisabled(): void
+    #[Test, DefineEnvironment('noStorageOverride')]
+    public function doesNotOverrideStorageIfDisabled(): void
     {
-        $this->markTestSkipped('This needs to be refactored for the new approach');
-
-        config()->set('sprout.services.storage', false);
-
         app(TenancyManager::class)->get()->setTenant(TenantModel::factory()->createOne());
 
-        $disk = Storage::disk('tenant');
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Disk [tenant] does not have a configured driver.');
 
-        $this->assertNull($disk);
+        Storage::disk('tenant');
     }
 }
