@@ -18,8 +18,9 @@ workbench:
     components: false
     views: false
   build:
-    - vendor:publish --provider="Sprout\\SproutServiceProvider"
-    - crete-sqlite-db
+    - asset-publish
+    - create-sqlite-db
     - migrate:refresh
-  assets: []
+  assets:
+    - sprout-config
   sync: []

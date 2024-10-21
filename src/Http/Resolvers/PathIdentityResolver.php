@@ -13,13 +13,15 @@ use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 use Sprout\Exceptions\TenantMissing;
 use Sprout\Http\Middleware\TenantRoutes;
+use Sprout\Overrides\CookieOverride;
+use Sprout\Overrides\SessionOverride;
 use Sprout\Support\BaseIdentityResolver;
-use Sprout\Support\CookieHelper;
-use function Sprout\sprout;
 
 final class PathIdentityResolver extends BaseIdentityResolver implements IdentityResolverUsesParameters
 {
-    use FindsIdentityInRouteParameter;
+    use FindsIdentityInRouteParameter {
+        setup as parameterSetup;
+    }
 
     private int $segment = 1;
 
@@ -147,10 +149,15 @@ final class PathIdentityResolver extends BaseIdentityResolver implements Identit
      */
     public function setup(Tenancy $tenancy, ?Tenant $tenant): void
     {
+        // Call the parent implementation in case there's something there
         parent::setup($tenancy, $tenant);
 
-        if ($tenant !== null && sprout()->config('services.cookies', false) === true) {
-            CookieHelper::setDefaults(path: $this->getTenantRoutePrefix($tenancy));
+        // Call the trait setup so that parameter has a default value
+        $this->parameterSetup($tenancy, $tenant);
+
+        if ($tenant !== null) {
+            CookieOverride::setPath($this->getTenantRoutePrefix($tenancy));
+            SessionOverride::setPath($this->getTenantRoutePrefix($tenancy));
         }
     }
 }

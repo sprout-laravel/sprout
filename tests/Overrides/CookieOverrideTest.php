@@ -1,22 +1,26 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Tests\Services;
+namespace Sprout\Tests\Overrides;
 
 use Illuminate\Config\Repository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Cookie;
+use Orchestra\Testbench\Attributes\DefineEnvironment;
 use Orchestra\Testbench\Concerns\WithWorkbench;
 use Orchestra\Testbench\TestCase;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use Sprout\Attributes\CurrentTenant;
 use Sprout\Contracts\Tenant;
+use Sprout\Overrides\CacheOverride;
+use Sprout\Overrides\SessionOverride;
+use Sprout\Overrides\StorageOverride;
 use Workbench\App\Models\TenantModel;
 
 #[Group('services'), Group('cookies')]
-class CookieTest extends TestCase
+class CookieOverrideTest extends TestCase
 {
     use WithWorkbench, RefreshDatabase;
 
@@ -27,6 +31,17 @@ class CookieTest extends TestCase
         tap($app['config'], static function (Repository $config) {
             $config->set('multitenancy.providers.tenants.model', TenantModel::class);
             $config->set('multitenancy.resolvers.subdomain.domain', 'localhost');
+        });
+    }
+
+    protected function noCookieOverride($app): void
+    {
+        tap($app['config'], static function (Repository $config) {
+            $config->set('sprout.services', [
+                CacheOverride::class,
+                StorageOverride::class,
+                SessionOverride::class,
+            ]);
         });
     }
 
@@ -108,11 +123,9 @@ class CookieTest extends TestCase
         $this->assertSame((string)$tenant->getTenantKey(), $cookie->getValue());
     }
 
-    #[Test]
+    #[Test, DefineEnvironment('noCookieOverride')]
     public function doesNotSetTheCookieDomainWhenUsingTheSubdomainIdentityResolverIfDisabled(): void
     {
-        config()->set('sprout.services.cookies', false);
-
         $tenant = TenantModel::factory()->createOne();
 
         $result = $this->get(route('subdomain.route', [$tenant->getTenantIdentifier()]));
@@ -129,11 +142,9 @@ class CookieTest extends TestCase
         $this->assertSame((string)$tenant->getTenantKey(), $cookie->getValue());
     }
 
-    #[Test]
+    #[Test, DefineEnvironment('noCookieOverride')]
     public function doesNotSetTheCookiePathWhenUsingThePathIdentityResolverIfDisabled(): void
     {
-        config()->set('sprout.services.cookies', false);
-
         $tenant = TenantModel::factory()->createOne();
 
         $result = $this->get(route('path.route', [$tenant->getTenantIdentifier()]));

@@ -13,6 +13,9 @@ use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use Sprout\Attributes\CurrentTenant;
 use Sprout\Contracts\Tenant;
+use Sprout\Overrides\CacheOverride;
+use Sprout\Overrides\CookieOverride;
+use Sprout\Overrides\StorageOverride;
 use Workbench\App\Models\TenantModel;
 
 #[Group('resolvers'), Group('sessions')]
@@ -31,10 +34,15 @@ class SessionResolverTest extends TestCase
                 'driver'  => 'session',
                 'session' => 'multitenancy.{tenancy}',
             ]);
+            $config->set('sprout.services', [
+                StorageOverride::class,
+                CacheOverride::class,
+                CookieOverride::class,
+            ]);
         });
     }
 
-    protected function defineRoutes($router)
+    protected function defineRoutes($router): void
     {
         $router->middleware(StartSession::class)->group(function (Router $router) {
             $router->get('/', function () {
