@@ -53,6 +53,9 @@ return [
         // This will override the storage by introducing a 'sprout' driver
         // that wraps any other storage drive in a tenant resource subdirectory.
         \Sprout\Overrides\StorageOverride::class,
+        // This will hydrate tenants when running jobs, based on the current
+        // context.
+        \Sprout\Overrides\JobOverride::class,
         // This will override the cache by introducing a 'sprout' driver
         // that adds a prefix to cache stores for the current tenant.
         \Sprout\Overrides\CacheOverride::class,
