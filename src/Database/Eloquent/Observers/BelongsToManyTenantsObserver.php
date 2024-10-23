@@ -194,7 +194,11 @@ class BelongsToManyTenantsObserver
 
         // If the initial checks do not pass
         if (! $this->passesInitialChecks($model, $tenancy, $relation, true)) {
-            // Just exit, an exception will have be thrown
+            // Just exit, an exception will have been thrown
+            return;
+        }
+
+        if (! TenancyOptions::shouldHydrateTenantRelation($tenancy)) {
             return;
         }
 

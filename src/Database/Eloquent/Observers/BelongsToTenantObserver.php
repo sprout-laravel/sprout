@@ -173,6 +173,10 @@ class BelongsToTenantObserver
             return;
         }
 
+        if (! TenancyOptions::shouldHydrateTenantRelation($tenancy)) {
+            return;
+        }
+
         // Populate the relation with the tenant
         $model->setRelation($relation->getRelationName(), $tenancy->tenant());
     }
