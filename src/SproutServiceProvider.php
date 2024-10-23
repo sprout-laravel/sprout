@@ -26,16 +26,10 @@ class SproutServiceProvider extends ServiceProvider
 
     public function register(): void
     {
-        $this->handleCoreConfig();
         $this->registerSprout();
         $this->registerManagers();
         $this->registerMiddleware();
         $this->registerRouteMixin();
-    }
-
-    private function handleCoreConfig(): void
-    {
-        $this->mergeConfigFrom(__DIR__ . '/../resources/config/sprout.php', 'sprout');
     }
 
     private function registerSprout(): void
@@ -94,7 +88,10 @@ class SproutServiceProvider extends ServiceProvider
 
     private function publishConfig(): void
     {
-        $this->publishes([__DIR__ . '/../resources/config/multitenancy.php' => config_path('multitenancy.php')], ['config', 'sprout-config']);
+        $this->publishes([
+            __DIR__ . '/../resources/config/sprout.php' => config_path('sprout.php'),
+            __DIR__ . '/../resources/config/multitenancy.php' => config_path('multitenancy.php')
+        ], ['config', 'sprout-config']);
     }
 
     private function registerServiceOverrides(): void
