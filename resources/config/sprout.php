@@ -29,14 +29,14 @@ return [
     */
 
     'bootstrappers' => [
+        // Set the current tenant within the Laravel context
+        \Sprout\Listeners\SetCurrentTenantContext::class,
         // Calls the setup method on the current identity resolver
         \Sprout\Listeners\PerformIdentityResolverSetup::class,
         // Performs any clean-up from the previous tenancy
         \Sprout\Listeners\CleanupServiceOverrides::class,
         // Sets up service overrides for the current tenancy
         \Sprout\Listeners\SetupServiceOverrides::class,
-        // Set the current tenant within the Laravel context
-        \Sprout\Listeners\SetCurrentTenantContext::class,
     ],
 
     /*
