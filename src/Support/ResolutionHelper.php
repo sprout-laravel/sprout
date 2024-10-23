@@ -11,10 +11,30 @@ use Sprout\Sprout;
 class ResolutionHelper
 {
     /**
+     * @param array<string|null> $options
+     *
+     * @return array<string|null>
+     */
+    public static function parseOptions(array $options): array
+    {
+        if (count($options) === 2) {
+            [$resolverName, $tenancyName] = $options;
+        } else if (count($options) === 1) {
+            [$resolverName] = $options;
+            $tenancyName = null;
+        } else {
+            $resolverName = $tenancyName = null;
+        }
+
+        return [$resolverName, $tenancyName];
+    }
+
+    /**
      * @param \Illuminate\Http\Request       $request
      * @param \Sprout\Support\ResolutionHook $hook
      * @param string|null                    $resolverName
      * @param string|null                    $tenancyName
+     * @param bool                           $throw
      *
      * @return bool
      *
