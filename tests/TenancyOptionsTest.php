@@ -40,12 +40,6 @@ class TenancyOptionsTest extends TestCase
     }
 
     #[Test]
-    public function makeJobsTenantAwareOption(): void
-    {
-        $this->assertSame('tenant-aware.jobs', TenancyOptions::makeJobsTenantAware());
-    }
-
-    #[Test]
     public function correctlyReportsHydrateTenantRelationOptionPresence(): void
     {
         $tenancy = app(TenancyManager::class)->get('tenants');
@@ -69,18 +63,5 @@ class TenancyOptionsTest extends TestCase
         $tenancy->addOption(TenancyOptions::throwIfNotRelated());
 
         $this->assertTrue(TenancyOptions::shouldThrowIfNotRelated($tenancy));
-    }
-
-    #[Test]
-    public function correctlyReportsMakeJobsTenantAwareOptionPresence(): void
-    {
-        $tenancy = app(TenancyManager::class)->get('tenants');
-        $tenancy->removeOption(TenancyOptions::makeJobsTenantAware());
-
-        $this->assertFalse(TenancyOptions::shouldJobsBeTenantAware($tenancy));
-
-        $tenancy->addOption(TenancyOptions::makeJobsTenantAware());
-
-        $this->assertTrue(TenancyOptions::shouldJobsBeTenantAware($tenancy));
     }
 }

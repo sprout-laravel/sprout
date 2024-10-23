@@ -120,8 +120,6 @@ class SproutServiceProvider extends ServiceProvider
         if ($this->sprout->shouldListenForRouting()) {
             $events->listen(RouteMatched::class, IdentifyTenantOnRouting::class);
         }
-
-        $events->listen(JobProcessing::class, SetCurrentTenantForJob::class);
     }
 
     private function registerTenancyBootstrappers(): void

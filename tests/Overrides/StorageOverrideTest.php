@@ -15,9 +15,12 @@ use PHPUnit\Framework\Attributes\Test;
 use RuntimeException;
 use Sprout\Exceptions\TenantMissing;
 use Sprout\Managers\TenancyManager;
+use Sprout\Overrides\AuthOverride;
 use Sprout\Overrides\CacheOverride;
 use Sprout\Overrides\CookieOverride;
+use Sprout\Overrides\JobOverride;
 use Sprout\Overrides\SessionOverride;
+use Sprout\Overrides\StorageOverride;
 use Workbench\App\Models\NoResourcesTenantModel;
 use Workbench\App\Models\TenantModel;
 
@@ -50,7 +53,9 @@ class StorageOverrideTest extends TestCase
     {
         tap($app['config'], static function (Repository $config) {
             $config->set('sprout.services', [
+                JobOverride::class,
                 CacheOverride::class,
+                AuthOverride::class,
                 CookieOverride::class,
                 SessionOverride::class,
             ]);
