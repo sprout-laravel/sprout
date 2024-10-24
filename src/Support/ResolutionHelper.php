@@ -38,12 +38,12 @@ class ResolutionHelper
      *
      * @return bool
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
      * @throws \Sprout\Exceptions\NoTenantFound
      */
     public static function handleResolution(Request $request, ResolutionHook $hook, ?string $resolverName = null, ?string $tenancyName = null, bool $throw = true): bool
     {
-        $sprout   = app()->make(Sprout::class);
+        /** @var \Sprout\Sprout $sprout */
+        $sprout   = app(Sprout::class);
         $resolver = $sprout->resolvers()->get($resolverName);
         $tenancy  = $sprout->tenancies()->get($tenancyName);
 

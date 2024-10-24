@@ -20,10 +20,21 @@ use Sprout\Contracts\Tenant;
 use Sprout\Exceptions\TenantMissing;
 use Sprout\Sprout;
 
-/** @codeCoverageIgnore */
+/**
+ * Cache Override
+ *
+ * This class provides the override/multitenancy extension/features for Laravels
+ * cache service.
+ *
+ * @package Overrides
+ *
+ * @codeCoverageIgnore
+ */
 final class CacheOverride implements BootableServiceOverride
 {
     /**
+     * Cache stores that can be purged
+     *
      * @var list<string>
      */
     private static array $purgableStores = [];
@@ -102,6 +113,8 @@ final class CacheOverride implements BootableServiceOverride
     }
 
     /**
+     * Create a memcache cache store that's tenanted
+     *
      * @param string               $prefix
      * @param array<string, mixed> $config
      *
@@ -122,6 +135,8 @@ final class CacheOverride implements BootableServiceOverride
     }
 
     /**
+     * Create a Redis cache store that's tenanted
+     *
      * @param string               $prefix
      * @param array<string, mixed> $config
      *
@@ -138,6 +153,8 @@ final class CacheOverride implements BootableServiceOverride
     }
 
     /**
+     * Create a database cache store that's tenanted
+     *
      * @param string               $prefix
      * @param array<string, mixed> $config
      *

@@ -12,13 +12,22 @@ use Sprout\Support\ResolutionHook;
 /**
  * Tenant Routes Middleware
  *
- * Marks routes are being tenanted.
+ * This piece of middleware has a dual function.
+ * It marks routes as being multitenanted if resolving during routing, and it
+ * will resolve tenants if resolving during middleware.
+ *
+ * @package Core
  */
 final class TenantRoutes
 {
+    /**
+     * The alias for this middleware
+     */
     public const ALIAS = 'sprout.tenanted';
 
     /**
+     * Handle the request
+     *
      * @param \Illuminate\Http\Request $request
      * @param \Closure                 $next
      * @param string                   ...$options

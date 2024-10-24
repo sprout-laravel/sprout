@@ -8,6 +8,11 @@ use Sprout\Support\BaseFactory;
 use Sprout\Support\DefaultTenancy;
 
 /**
+ * Tenancy Manager
+ *
+ * This is a manager and factory, responsible for creating and storing
+ * implementations of {@see \Sprout\Contracts\Tenancy}.
+ *
  * @extends \Sprout\Support\BaseFactory<\Sprout\Contracts\Tenancy>
  */
 final class TenancyManager extends BaseFactory
@@ -17,6 +22,12 @@ final class TenancyManager extends BaseFactory
      */
     private ProviderManager $providerManager;
 
+    /**
+     * Create a new instance
+     *
+     * @param \Illuminate\Contracts\Foundation\Application $app
+     * @param \Sprout\Managers\ProviderManager             $providerManager
+     */
     public function __construct(Application $app, ProviderManager $providerManager)
     {
         parent::__construct($app);
@@ -47,6 +58,8 @@ final class TenancyManager extends BaseFactory
     }
 
     /**
+     * Create the default implementation
+     *
      * @param array<string, mixed>                                                  $config
      * @param string                                                                $name
      *

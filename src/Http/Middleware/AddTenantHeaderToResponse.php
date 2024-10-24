@@ -11,6 +11,14 @@ use Sprout\Sprout;
 use Sprout\Support\ResolutionHelper;
 use Sprout\Support\ResolutionHook;
 
+/**
+ * Add Tenant Header to Response
+ *
+ * This piece of middleware is responsible for adding the tenant identifier
+ * header to responses when using the header-based identity resolver.
+ *
+ * @package Http\Resolvers
+ */
 final class AddTenantHeaderToResponse
 {
     /**
@@ -18,12 +26,19 @@ final class AddTenantHeaderToResponse
      */
     private Sprout $sprout;
 
+    /**
+     * Create new instance
+     *
+     * @param \Sprout\Sprout $sprout
+     */
     public function __construct(Sprout $sprout)
     {
         $this->sprout = $sprout;
     }
 
     /**
+     * Handle the request
+     *
      * @param \Illuminate\Http\Request $request
      * @param \Closure                 $next
      * @param string                   ...$options

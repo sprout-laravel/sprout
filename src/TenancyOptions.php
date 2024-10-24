@@ -5,6 +5,13 @@ namespace Sprout;
 
 use Sprout\Contracts\Tenancy;
 
+/**
+ * Tenancy Options
+ *
+ * This is a helper class for providing and check for tenancy options.
+ *
+ * @package Core
+ */
 class TenancyOptions
 {
     /**

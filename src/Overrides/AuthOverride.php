@@ -8,6 +8,14 @@ use Sprout\Contracts\ServiceOverride;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 
+/**
+ * Auth Override
+ *
+ * This class provides the override/multitenancy extension/features for Laravels
+ * auth service.
+ *
+ * @package Overrides
+ */
 final class AuthOverride implements ServiceOverride
 {
     /**
@@ -15,6 +23,11 @@ final class AuthOverride implements ServiceOverride
      */
     private AuthManager $authManager;
 
+    /**
+     * Create a new instance
+     *
+     * @param \Illuminate\Auth\AuthManager $authManager
+     */
     public function __construct(AuthManager $authManager)
     {
         $this->authManager = $authManager;

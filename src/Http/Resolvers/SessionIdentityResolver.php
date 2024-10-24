@@ -15,11 +15,26 @@ use Sprout\Support\BaseIdentityResolver;
 use Sprout\Support\ResolutionHook;
 use function Sprout\sprout;
 
+/**
+ * Session Identity Resolver
+ *
+ * This class is responsible for resolving tenant identities from the current
+ * request using the session.
+ *
+ * @package Http\Resolvers
+ */
 final class SessionIdentityResolver extends BaseIdentityResolver
 {
+    /**
+     * The name of the session
+     *
+     * @var string
+     */
     private string $session;
 
     /**
+     * Create a new instance
+     *
      * @param string      $name
      * @param string|null $session
      */
@@ -30,13 +45,28 @@ final class SessionIdentityResolver extends BaseIdentityResolver
         $this->session = $session ?? 'multitenancy.{tenancy}';
     }
 
-    public function getSession(): string
+    /**
+     * Get the name of the session
+     *
+     * @return string
+     */
+    public function getSessionName(): string
     {
         return $this->session;
     }
 
     /**
-     * @param \Sprout\Contracts\Tenancy<\Sprout\Contracts\Tenant> $tenancy
+     * Get the session name with replacements
+     *
+     * This method returns the name of the header returned by
+     * {@see self::getSessionName()}, except it replaces <code>{tenancy}</code>
+     * and <code>{resolver}</code> with the name of the tenancy, and resolver,
+     * respectively.
+     *
+     * You can use an uppercase character for the first character, <code>{Tenancy}</code>
+     * and <code>{Resolver}</code>, and it'll be run through {@see \ucfirst()}.
+     *
+     * @param \Sprout\Contracts\Tenancy<*> $tenancy
      *
      * @return string
      */
@@ -45,7 +75,7 @@ final class SessionIdentityResolver extends BaseIdentityResolver
         return str_replace(
             ['{tenancy}', '{resolver}', '{Tenancy}', '{Resolver}'],
             [$tenancy->getName(), $this->getName(), ucfirst($tenancy->getName()), ucfirst($this->getName())],
-            $this->getSession()
+            $this->getSessionName()
         );
     }
 

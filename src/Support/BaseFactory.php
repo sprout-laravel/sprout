@@ -10,10 +10,15 @@ use Psr\Container\NotFoundExceptionInterface;
 use RuntimeException;
 
 /**
+ * Base Factory
+ *
+ * This is an abstract base factory used by Sprout internals.
  *
  * @template FactoryClass of object
  *
  * @package Core
+ *
+ * @internal
  */
 abstract class BaseFactory
 {
@@ -27,6 +32,8 @@ abstract class BaseFactory
     protected static array $customCreators = [];
 
     /**
+     * Register a custom creator
+     *
      * @param string                                                                    $name
      * @param \Closure                                                                  $callback
      *

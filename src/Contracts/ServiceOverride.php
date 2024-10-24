@@ -7,6 +7,8 @@ namespace Sprout\Contracts;
  *
  * This contract marks a class as being responsible for handling the overriding
  * of a core Laravel service, such as cookies, sessions, or the database.
+ *
+ * @package Overrides
  */
 interface ServiceOverride
 {

@@ -4,41 +4,22 @@ declare(strict_types=1);
 namespace Sprout\Overrides;
 
 use Illuminate\Cookie\CookieJar;
+use Sprout\Concerns\OverridesCookieSettings;
 use Sprout\Contracts\ServiceOverride;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 
+/**
+ * Cookie Override
+ *
+ * This class provides the override/multitenancy extension/features for Laravels
+ * cookie service.
+ *
+ * @package Overrides
+ */
 final class CookieOverride implements ServiceOverride
 {
-    private static ?string $path = null;
-
-    private static ?string $domain = null;
-
-    private static ?bool $secure = null;
-
-    private static ?string $sameSite = null;
-
-    public static function setDomain(?string $domain): void
-    {
-        self::$domain = $domain;
-    }
-
-    public static function setPath(?string $path): void
-    {
-        self::$path = $path;
-    }
-
-    // @codeCoverageIgnoreStart
-    public static function setSameSite(?string $sameSite): void
-    {
-        self::$sameSite = $sameSite;
-    }
-
-    public static function setSecure(?bool $secure): void
-    {
-        self::$secure = $secure;
-    }
-    // @codeCoverageIgnoreEnd
+    use OverridesCookieSettings;
 
     /**
      * Set up the service override

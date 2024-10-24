@@ -14,16 +14,33 @@ use Sprout\Contracts\Tenant;
 use Sprout\Http\Middleware\TenantRoutes;
 use Sprout\Support\BaseIdentityResolver;
 
+/**
+ * Cookie Identity Resolver
+ *
+ * This class is responsible for resolving tenant identities from the current
+ * request using cookies.
+ *
+ * @package Http\Resolvers
+ */
 final class CookieIdentityResolver extends BaseIdentityResolver
 {
+    /**
+     * The cookie name
+     *
+     * @var string
+     */
     private string $cookie;
 
     /**
+     * Additional options for the cookie
+     *
      * @var array<string, mixed>
      */
     private array $options;
 
     /**
+     * Create a new instance
+     *
      * @param string                                $name
      * @param string|null                           $cookie
      * @param array<string, mixed>                  $options
@@ -37,13 +54,28 @@ final class CookieIdentityResolver extends BaseIdentityResolver
         $this->options = $options;
     }
 
-    public function getCookie(): string
+    /**
+     * Get the cookie name
+     *
+     * @return string
+     */
+    public function getCookieName(): string
     {
         return $this->cookie;
     }
 
     /**
-     * @param \Sprout\Contracts\Tenancy<\Sprout\Contracts\Tenant> $tenancy
+     * Get the cookie name with replacements
+     *
+     * This method returns the name of the cookie returned by
+     * {@see self::getCookieName()}, except it replaces <code>{tenancy}</code>
+     * and <code>{resolver}</code> with the name of the tenancy, and resolver,
+     * respectively.
+     *
+     * You can use an uppercase character for the first character, <code>{Tenancy}</code>
+     * and <code>{Resolver}</code>, and it'll be run through {@see \ucfirst()}.
+     *
+     * @param \Sprout\Contracts\Tenancy<*> $tenancy
      *
      * @return string
      */
@@ -52,7 +84,7 @@ final class CookieIdentityResolver extends BaseIdentityResolver
         return str_replace(
             ['{tenancy}', '{resolver}', '{Tenancy}', '{Resolver}'],
             [$tenancy->getName(), $this->getName(), ucfirst($tenancy->getName()), ucfirst($this->getName())],
-            $this->getCookie()
+            $this->getCookieName()
         );
     }
 
@@ -135,6 +167,8 @@ final class CookieIdentityResolver extends BaseIdentityResolver
     }
 
     /**
+     * Get the details for cookie creation, with defaults
+     *
      * @param array<string, mixed> $details
      *
      * @return array<string, mixed>

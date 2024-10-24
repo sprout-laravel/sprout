@@ -9,5 +9,5 @@ namespace Sprout;
  */
 function sprout(): Sprout
 {
-    return app()->make(Sprout::class);
+    return app(Sprout::class);
 }

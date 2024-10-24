@@ -5,10 +5,21 @@ namespace Sprout\Database\Eloquent\Scopes;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Sprout\Database\Eloquent\Contracts\OptionalTenant;
-use Sprout\Database\Eloquent\TenantChildScope;
 use Sprout\Exceptions\TenantMissing;
 
+/**
+ * Belongs to Tenant Scope
+ *
+ * This is a scope automatically attached to Eloquent models that relate
+ * to a single tenant using a "belongs to" relationship.
+ *
+ * It automatically adds the necessary clauses to queries to help avoid data
+ * leaking between tenants in a "Shared Database, Shared Schema" setup.
+ *
+ * @see     \Sprout\Database\Eloquent\Concerns\BelongsToManyTenants
+ *
+ * @package Database\Eloquent
+ */
 final class BelongsToTenantScope extends TenantChildScope
 {
     /**

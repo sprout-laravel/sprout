@@ -12,6 +12,14 @@ use Sprout\Contracts\Tenant;
 use Sprout\Listeners\SetCurrentTenantForJob;
 use Sprout\Sprout;
 
+/**
+ * Job Override
+ *
+ * This class provides the override/multitenancy extension/features for Laravels
+ * queue/job service.
+ *
+ * @package Overrides
+ */
 final class JobOverride implements BootableServiceOverride
 {
     /**

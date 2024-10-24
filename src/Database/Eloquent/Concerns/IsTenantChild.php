@@ -14,35 +14,67 @@ use Sprout\Database\Eloquent\Contracts\OptionalTenant;
 use Sprout\Managers\TenancyManager;
 
 /**
+ * Is Tenant Child
+ *
+ * This trait provides helper methods and functionality that supports the
+ * automatic handling of Eloquent models that are direct descendants of
+ * {@see \Sprout\Contracts\Tenant} models.
+ *
  * @phpstan-require-extends \Illuminate\Database\Eloquent\Model
  *
  * @mixin \Illuminate\Database\Eloquent\Model
+ *
+ * @package Database\Eloquent
  */
 trait IsTenantChild
 {
     /**
+     * The name of the tenant relation
+     *
      * @var string
      */
     protected static string $tenantRelationName;
 
+    /**
+     * Whether to ignore tenant ownership restrictions
+     *
+     * @var bool
+     */
     protected static bool $ignoreTenantRestrictions = false;
 
+    /**
+     * Check if tenant ownership restrictions should be ignored
+     *
+     * @return bool
+     */
     public static function shouldIgnoreTenantRestrictions(): bool
     {
         return self::$ignoreTenantRestrictions;
     }
 
+    /**
+     * Enable the ignoring of tenant ownership restrictions
+     *
+     * @return void
+     */
     public static function ignoreTenantRestrictions(): void
     {
         self::$ignoreTenantRestrictions = true;
     }
 
+    /**
+     * Disable the ignoring of tenant ownership restrictions
+     *
+     * @return void
+     */
     public static function resetTenantRestrictions(): void
     {
         self::$ignoreTenantRestrictions = false;
     }
 
     /**
+     * Temporarily disable tenant ownership restrictions and run the provided callback
+     *
      * @template RetType of mixed
      *
      * @param callable(): RetType $callback
@@ -62,6 +94,13 @@ trait IsTenantChild
         return $return;
     }
 
+    /**
+     * Check if the model can function without a tenant
+     *
+     * @return bool
+     *
+     * @see \Sprout\Database\Eloquent\Contracts\OptionalTenant
+     */
     public static function isTenantOptional(): bool
     {
         return is_subclass_of(static::class, OptionalTenant::class)
@@ -71,6 +110,13 @@ trait IsTenantChild
                );
     }
 
+    /**
+     * Attempt to find the name of the tenant relation
+     *
+     * @return string
+     *
+     * @see \Sprout\Attributes\TenantRelation
+     */
     private function findTenantRelationName(): string
     {
         try {
@@ -96,6 +142,11 @@ trait IsTenantChild
         }
     }
 
+    /**
+     * Get the name of the tenant relation
+     *
+     * @return string|null
+     */
     public function getTenantRelationName(): ?string
     {
         if (! isset($this->tenantRelationNames[static::class])) {
@@ -105,16 +156,34 @@ trait IsTenantChild
         return self::$tenantRelationName ?? null;
     }
 
+    /**
+     * Get the name of the tenancy this model relates to a tenant of
+     *
+     * @return string|null
+     */
     public function getTenancyName(): ?string
     {
         return null;
     }
 
+    /**
+     * Get the tenancy this model relates to a tenant of
+     *
+     * @return \Sprout\Contracts\Tenancy
+     */
     public function getTenancy(): Tenancy
     {
-        return app(TenancyManager::class)->get($this->getTenancyName());
+        /** @var \Sprout\Managers\TenancyManager $tenancyManager */
+        $tenancyManager = app(TenancyManager::class);
+
+        return $tenancyManager->get($this->getTenancyName());
     }
 
+    /**
+     * Get the tenant relation
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     */
     public function getTenantRelation(): Relation
     {
         return $this->{$this->getTenantRelationName()}();

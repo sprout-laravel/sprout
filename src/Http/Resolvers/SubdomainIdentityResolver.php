@@ -17,14 +17,36 @@ use Sprout\Overrides\CookieOverride;
 use Sprout\Overrides\SessionOverride;
 use Sprout\Support\BaseIdentityResolver;
 
+/**
+ * The Subdomain Identity Resolver
+ *
+ * This class is responsible for resolving tenant identities from the current
+ * request using a subdomain.
+ *
+ * @package Http\Resolvers
+ */
 final class SubdomainIdentityResolver extends BaseIdentityResolver implements IdentityResolverUsesParameters
 {
     use FindsIdentityInRouteParameter {
         setup as parameterSetup;
     }
 
+    /**
+     * The parent domain
+     *
+     * @var string
+     */
     private string $domain;
 
+    /**
+     * Create a new instance
+     *
+     * @param string      $name
+     * @param string      $domain
+     * @param string|null $pattern
+     * @param string|null $parameter
+     * @param array<\Sprout\Support\ResolutionHook>       $hooks
+     */
     public function __construct(string $name, string $domain, ?string $pattern = null, ?string $parameter = null, array $hooks = [])
     {
         parent::__construct($name, $hooks);
@@ -58,6 +80,8 @@ final class SubdomainIdentityResolver extends BaseIdentityResolver implements Id
     }
 
     /**
+     * Get the domain name with parameter for the route definition
+     *
      * @template TenantClass of \Sprout\Contracts\Tenant
      *
      * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
@@ -85,7 +109,7 @@ final class SubdomainIdentityResolver extends BaseIdentityResolver implements Id
      */
     public function routes(Router $router, Closure $groupRoutes, Tenancy $tenancy): RouteRegistrar
     {
-        return $this->applyParameterPattern(
+        return $this->applyParameterPatternMapping(
             $router->domain($this->getRouteDomain($tenancy))
                    ->middleware([TenantRoutes::ALIAS . ':' . $this->getName() . ',' . $tenancy->getName()])
                    ->group($groupRoutes),

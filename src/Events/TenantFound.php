@@ -8,6 +8,16 @@ use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 
 /**
+ * Tenant Found Event
+ *
+ * This is an event used to notify the application and provide reactivity when
+ * a tenant is found.
+ * It is an abstract base class that exists so that developers can listen to
+ * all events where tenants are found, regardless of the method used.
+ *
+ * @see \Sprout\Events\TenantIdentified
+ * @see \Sprout\Events\TenantLoaded
+ *
  * @template TenantClass of Tenant
  *
  * @method static void dispatch(Tenant $tenant, Tenancy $tenancy)
@@ -19,13 +29,8 @@ abstract readonly class TenantFound
     use Dispatchable;
 
     /**
-     * @var \Sprout\Contracts\Tenant
+     * The tenancy whose tenant was found
      *
-     * @phpstan-var TenantClass
-     */
-    public Tenant $tenant;
-
-    /**
      * @var \Sprout\Contracts\Tenancy
      *
      * @phpstan-var \Sprout\Contracts\Tenancy<TenantClass>
@@ -33,6 +38,17 @@ abstract readonly class TenantFound
     public Tenancy $tenancy;
 
     /**
+     * The tenant that was found
+     *
+     * @var \Sprout\Contracts\Tenant
+     *
+     * @phpstan-var TenantClass
+     */
+    public Tenant $tenant;
+
+    /**
+     * Create a new instance
+     *
      * @param \Sprout\Contracts\Tenant                       $tenant
      * @param \Sprout\Contracts\Tenancy                      $tenancy
      *

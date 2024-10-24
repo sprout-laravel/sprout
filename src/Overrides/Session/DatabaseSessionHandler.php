@@ -9,8 +9,24 @@ use RuntimeException;
 use Sprout\Exceptions\TenantMissing;
 use function Sprout\sprout;
 
+/**
+ * Database Session Handler
+ *
+ * This is a database session driver that wraps the default
+ * {@see \Illuminate\Session\DatabaseSessionHandler} and adds a where clause
+ * to the query to ensure sessions are tenanted.
+ *
+ * @package Overrides
+ */
 class DatabaseSessionHandler extends OriginalDatabaseSessionHandler
 {
+    /**
+     * Get a fresh query builder instance for the table.
+     *
+     * @return \Illuminate\Database\Query\Builder
+     *
+     * @throws \Sprout\Exceptions\TenantMissing
+     */
     protected function getQuery(): Builder
     {
         $tenancy = sprout()->getCurrentTenancy();

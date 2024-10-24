@@ -8,9 +8,19 @@ use Illuminate\Routing\RouteRegistrar;
 use Sprout\Managers\IdentityResolverManager;
 use Sprout\Managers\TenancyManager;
 
+/**
+ * Route Methods Mixin
+ *
+ * This class is used as a mixin to add Sprout specific methods to
+ * {@see \Illuminate\Routing\Router}.
+ *
+ * @package Core
+ */
 class RouterMethods
 {
     /**
+     * Create tenanted routes
+     *
      * @param Closure     $routes
      * @param string|null $resolver
      * @param string|null $tenancy

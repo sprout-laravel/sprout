@@ -5,6 +5,15 @@ namespace Sprout\Support;
 
 use Sprout\Contracts\Tenant;
 
+/**
+ * Generic Tenant
+ *
+ * This is a default implementation of the {@see \Sprout\Contracts\Tenant}
+ * interface for the use with {@see \Sprout\Providers\DatabaseTenantProvider}
+ * as the tenant entity.
+ *
+ * @pacakge Core
+ */
 class GenericTenant implements Tenant
 {
     /**

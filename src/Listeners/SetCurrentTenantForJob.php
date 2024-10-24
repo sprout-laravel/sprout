@@ -8,6 +8,15 @@ use Illuminate\Support\Facades\Context;
 use Sprout\Managers\TenancyManager;
 use Sprout\TenancyOptions;
 
+/**
+ * Set Current Tenant For Job
+ *
+ * This class is an event listener for {@see \Illuminate\Queue\Events\JobProcessing}
+ * that ensures there are current tenants when processing jobs, utilising
+ * Laravels context service.
+ *
+ * @package Overrides
+ */
 final class SetCurrentTenantForJob
 {
     /**

@@ -12,9 +12,14 @@ use Sprout\Support\BaseFactory;
 use Sprout\Support\GenericTenant;
 
 /**
+ * Tenant Provider Manager
+ *
+ * This is a manager and factory, responsible for creating and storing
+ * implementations of {@see \Sprout\Contracts\TenantProvider}.
+ *
  * @extends \Sprout\Support\BaseFactory<\Sprout\Contracts\TenantProvider>
  *
- * @package Providers
+ * @package Core
  */
 final class ProviderManager extends BaseFactory
 {

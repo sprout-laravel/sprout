@@ -12,8 +12,18 @@ use Sprout\Exceptions\TenantMissing;
 use Sprout\TenancyOptions;
 
 /**
+ * Belongs to Many Tenants Observer
+ *
+ * This is an observer automatically attached to Eloquent models that relate to
+ * tenants using a "belongs to many" relationship, to automate association
+ * and hydration of the tenant relation.
+ *
  * @template ChildModel of \Illuminate\Database\Eloquent\Model
  * @template TenantModel of \Illuminate\Database\Eloquent\Model&\Sprout\Contracts\Tenant
+ *
+ * @see     \Sprout\Database\Eloquent\Concerns\BelongsToManyTenants
+ *
+ * @package Database\Eloquent
  */
 class BelongsToManyTenantsObserver
 {
@@ -126,6 +136,10 @@ class BelongsToManyTenantsObserver
     }
 
     /**
+     * Handle the created event on the model
+     *
+     * The created event is fired after a model is persisted to the database.
+     *
      * @param \Illuminate\Database\Eloquent\Model&\Sprout\Database\Eloquent\Concerns\BelongsToManyTenants $model
      *
      * @return void
@@ -169,6 +183,11 @@ class BelongsToManyTenantsObserver
     }
 
     /**
+     * Handle the retrieved event on the model
+     *
+     * The retrieved event is fired after a model is retrieved from
+     * persistent storage and hydrated.
+     *
      * @param \Illuminate\Database\Eloquent\Model&\Sprout\Database\Eloquent\Concerns\BelongsToManyTenants $model
      *
      * @return void
@@ -213,6 +232,8 @@ class BelongsToManyTenantsObserver
     }
 
     /**
+     * Set the hydrate value of a relation
+     *
      * @param \Illuminate\Database\Eloquent\Model                                            $model
      * @param \Illuminate\Database\Eloquent\Relations\BelongsToMany<ChildModel, TenantModel> $relation
      * @param \Sprout\Contracts\Tenant                                                       $tenant

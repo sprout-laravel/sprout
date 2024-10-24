@@ -12,7 +12,14 @@ use Sprout\Http\Resolvers\SubdomainIdentityResolver;
 use Sprout\Support\BaseFactory;
 
 /**
+ * Identity Resolver Manager
+ *
+ * This is a manager and factory, responsible for creating and storing
+ * implementations of {@see \Sprout\Contracts\IdentityResolver}.
+ *
  * @extends \Sprout\Support\BaseFactory<\Sprout\Contracts\IdentityResolver>
+ *
+ * @package Core
  */
 final class IdentityResolverManager extends BaseFactory
 {

@@ -10,6 +10,13 @@ use Sprout\Managers\IdentityResolverManager;
 use Sprout\Managers\ProviderManager;
 use Sprout\Managers\TenancyManager;
 
+/**
+ * Sprout
+ *
+ * This is the core Sprout class.
+ *
+ * @package Core
+ */
 final class Sprout
 {
     /**
@@ -27,17 +34,34 @@ final class Sprout
      */
     private array $overrides = [];
 
+    /**
+     * Create a new instance
+     *
+     * @param \Illuminate\Contracts\Foundation\Application $app
+     */
     public function __construct(Application $app)
     {
         $this->app = $app;
     }
 
+    /**
+     * Get a config item from the sprout config
+     *
+     * @param string     $key
+     * @param mixed|null $default
+     *
+     * @return mixed
+     *
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     */
     public function config(string $key, mixed $default = null): mixed
     {
         return $this->app->make('config')->get('sprout.' . $key, $default);
     }
 
     /**
+     * Set the current tenancy
+     *
      * @template TenantClass of \Sprout\Contracts\Tenant
      *
      * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
@@ -51,12 +75,19 @@ final class Sprout
         }
     }
 
+    /**
+     * Check if there is a current tenancy
+     *
+     * @return bool
+     */
     public function hasCurrentTenancy(): bool
     {
         return count($this->tenancies) > 0;
     }
 
     /**
+     * Get the current tenancy
+     *
      * @return \Sprout\Contracts\Tenancy<\Sprout\Contracts\Tenant>|null
      */
     public function getCurrentTenancy(): ?Tenancy
@@ -69,6 +100,8 @@ final class Sprout
     }
 
     /**
+     * Get all the current tenancies
+     *
      * @return \Sprout\Contracts\Tenancy<\Sprout\Contracts\Tenant>[]
      */
     public function getAllCurrentTenancies(): array
@@ -76,31 +109,73 @@ final class Sprout
         return $this->tenancies;
     }
 
+    /**
+     * Should Sprout listen for the routing event
+     *
+     * @return bool
+     *
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     */
     public function shouldListenForRouting(): bool
     {
         return (bool)$this->config('listen_for_routing', true);
     }
 
+    /**
+     * Get the identity resolver manager
+     *
+     * @return \Sprout\Managers\IdentityResolverManager
+     *
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     */
     public function resolvers(): IdentityResolverManager
     {
         return $this->app->make(IdentityResolverManager::class);
     }
 
+    /**
+     * Get the tenant providers manager
+     *
+     * @return \Sprout\Managers\ProviderManager
+     *
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     */
     public function providers(): ProviderManager
     {
         return $this->app->make(ProviderManager::class);
     }
 
+    /**
+     * Get the tenancy manager
+     *
+     * @return \Sprout\Managers\TenancyManager
+     *
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     */
     public function tenancies(): TenancyManager
     {
         return $this->app->make(TenancyManager::class);
     }
 
+    /**
+     * Is an override enabled
+     *
+     * @param string $class
+     *
+     * @return bool
+     */
     public function hasOverride(string $class): bool
     {
         return isset($this->overrides[$class]);
     }
 
+    /**
+     * Add an override
+     *
+     * @param \Sprout\Contracts\ServiceOverride $override
+     *
+     * @return $this
+     */
     public function addOverride(ServiceOverride $override): self
     {
         $this->overrides[$override::class] = $override;
@@ -109,6 +184,8 @@ final class Sprout
     }
 
     /**
+     * Get all overrides
+     *
      * @return array<class-string<\Sprout\Contracts\ServiceOverride>, \Sprout\Contracts\ServiceOverride>
      */
     public function getOverrides(): array
