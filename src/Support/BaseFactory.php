@@ -8,7 +8,6 @@ use InvalidArgumentException;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use RuntimeException;
-use Sprout\Concerns\HasCustomCreators;
 
 /**
  *
@@ -19,9 +18,26 @@ use Sprout\Concerns\HasCustomCreators;
 abstract class BaseFactory
 {
     /**
-     * @use \Sprout\Concerns\HasCustomCreators<FactoryClass>
+     * Custom creators
+     *
+     * @var array<string, \Closure>
+     *
+     * @phpstan-var array<string, \Closure(Application, array<string, mixed>, string): FactoryClass>
      */
-    use HasCustomCreators;
+    protected static array $customCreators = [];
+
+    /**
+     * @param string                                                                    $name
+     * @param \Closure                                                                  $callback
+     *
+     * @phpstan-param \Closure(Application, array<string, mixed>, string): FactoryClass $callback
+     *
+     * @return void
+     */
+    public static function register(string $name, \Closure $callback): void
+    {
+        static::$customCreators[$name] = $callback;
+    }
 
     /**
      * The Laravel application
@@ -131,7 +147,7 @@ abstract class BaseFactory
             $config = $this->getConfig($name);
         } catch (NotFoundExceptionInterface|ContainerExceptionInterface $e) {
             throw new RuntimeException(
-                          'Unable to load config for [' . $this->getFactoryName() . '::' . $name . ']',
+                'Unable to load config for [' . $this->getFactoryName() . '::' . $name . ']',
                 previous: $e
             );
         }
