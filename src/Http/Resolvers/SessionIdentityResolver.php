@@ -7,8 +7,8 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Router;
 use Illuminate\Routing\RouteRegistrar;
-use RuntimeException;
 use Sprout\Contracts\Tenancy;
+use Sprout\Exceptions\CompatibilityException;
 use Sprout\Http\Middleware\TenantRoutes;
 use Sprout\Overrides\SessionOverride;
 use Sprout\Support\BaseIdentityResolver;
@@ -90,11 +90,13 @@ final class SessionIdentityResolver extends BaseIdentityResolver
      * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
      *
      * @return string|null
+     *
+     * @throws \Sprout\Exceptions\CompatibilityException
      */
     public function resolveFromRequest(Request $request, Tenancy $tenancy): ?string
     {
         if (sprout()->hasOverride(SessionOverride::class)) {
-            throw new RuntimeException('Cannot use the session resolver for tenancy [' . $tenancy->getName() . '] and the session override');
+            throw CompatibilityException::make('resolver', $this->getName(), 'override', SessionOverride::class);
         }
 
         /**

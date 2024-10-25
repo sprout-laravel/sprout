@@ -12,7 +12,7 @@ use Orchestra\Testbench\Concerns\WithWorkbench;
 use Orchestra\Testbench\TestCase;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
-use RuntimeException;
+use Sprout\Exceptions\MisconfigurationException;
 use Sprout\Exceptions\TenantMissing;
 use Sprout\Managers\TenancyManager;
 use Sprout\Overrides\AuthOverride;
@@ -20,7 +20,6 @@ use Sprout\Overrides\CacheOverride;
 use Sprout\Overrides\CookieOverride;
 use Sprout\Overrides\JobOverride;
 use Sprout\Overrides\SessionOverride;
-use Sprout\Overrides\StorageOverride;
 use Workbench\App\Models\NoResourcesTenantModel;
 use Workbench\App\Models\TenantModel;
 
@@ -102,8 +101,8 @@ class StorageOverrideTest extends TestCase
     #[Test, DefineEnvironment('createTenantDisk')]
     public function throwsExceptionIfTheTenantDoesNotHaveResources(): void
     {
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('Current tenant isn\t configured for resources');
+        $this->expectException(MisconfigurationException::class);
+        $this->expectExceptionMessage('The current tenant [' . NoResourcesTenantModel::class . '] is not configured correctly for resources');
 
         config()->set('multitenancy.providers.tenants.model', NoResourcesTenantModel::class);
 

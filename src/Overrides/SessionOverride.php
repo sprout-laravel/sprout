@@ -13,6 +13,8 @@ use Sprout\Contracts\BootableServiceOverride;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 use Sprout\Contracts\TenantHasResources;
+use Sprout\Exceptions\MisconfigurationException;
+use Sprout\Exceptions\TenancyMissing;
 use Sprout\Exceptions\TenantMissing;
 use Sprout\Overrides\Session\DatabaseSessionHandler;
 use Sprout\Sprout;
@@ -164,7 +166,7 @@ final class SessionOverride implements BootableServiceOverride
             $tenancy      = sprout()->getCurrentTenancy();
 
             if ($tenancy === null) {
-                throw new RuntimeException('No current tenancy');
+                throw TenancyMissing::make();
             }
 
             // If there's no tenant, error out
@@ -176,8 +178,7 @@ final class SessionOverride implements BootableServiceOverride
 
             // If the tenant isn't configured for resources, also error out
             if (! ($tenant instanceof TenantHasResources)) {
-                // TODO: Better exception
-                throw new RuntimeException('Current tenant isn\t configured for resources');
+                throw MisconfigurationException::misconfigured('tenant', $tenant::class, 'resources');
             }
 
             $path .= $tenant->getTenantResourceKey();

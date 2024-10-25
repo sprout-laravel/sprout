@@ -17,6 +17,7 @@ use RuntimeException;
 use Sprout\Contracts\BootableServiceOverride;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
+use Sprout\Exceptions\MisconfigurationException;
 use Sprout\Exceptions\TenantMissing;
 use Sprout\Sprout;
 
@@ -73,7 +74,7 @@ final class CacheOverride implements BootableServiceOverride
                 $tenant = $tenancy->tenant();
 
                 if (! isset($config['override'])) {
-                    throw new RuntimeException('No cache store provided to override');
+                    throw MisconfigurationException::missingConfig('override', self::class, 'override');
                 }
 
                 /** @var array<string, mixed> $storeConfig */
@@ -105,7 +106,7 @@ final class CacheOverride implements BootableServiceOverride
                     'memcached' => $this->createTenantedMemcachedStore($prefix, $storeConfig),
                     'redis'     => $this->createTenantedRedisStore($prefix, $storeConfig),
                     'database'  => $this->createTenantedDatabaseStore($prefix, $storeConfig),
-                    default     => throw new RuntimeException('Unsupported cache driver'),
+                    default     => throw MisconfigurationException::invalidConfig('driver', 'override', CacheOverride::class)
                 }, array_merge($config, $storeConfig));
 
             }

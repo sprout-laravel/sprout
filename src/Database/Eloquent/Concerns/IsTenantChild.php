@@ -7,10 +7,10 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
-use RuntimeException;
 use Sprout\Attributes\TenantRelation;
 use Sprout\Contracts\Tenancy;
 use Sprout\Database\Eloquent\Contracts\OptionalTenant;
+use Sprout\Exceptions\TenantRelationException;
 use Sprout\Managers\TenancyManager;
 
 /**
@@ -115,6 +115,8 @@ trait IsTenantChild
      *
      * @return string
      *
+     * @throws \Sprout\Exceptions\TenantRelationException
+     *
      * @see \Sprout\Attributes\TenantRelation
      */
     private function findTenantRelationName(): string
@@ -127,18 +129,16 @@ trait IsTenantChild
                 ->map(fn (ReflectionMethod $method) => $method->getName());
 
             if ($methods->isEmpty()) {
-                throw new RuntimeException('No tenant relation found in model [' . static::class . ']');
+                throw TenantRelationException::missing(static::class);
             }
 
             if ($methods->count() > 1) {
-                throw new RuntimeException(
-                    'Models can only have one tenant relation, [' . static::class . '] has ' . $methods->count()
-                );
+                throw TenantRelationException::tooMany(static::class, $methods->count());
             }
 
             return $methods->first();
         } catch (ReflectionException $exception) {
-            throw new RuntimeException('Unable to find tenant relation for model [' . static::class . ']', previous: $exception); // @codeCoverageIgnore
+            throw TenantRelationException::missing(static::class, previous: $exception); // @codeCoverageIgnore
         }
     }
 
@@ -146,6 +146,8 @@ trait IsTenantChild
      * Get the name of the tenant relation
      *
      * @return string|null
+     *
+     * @throws \Sprout\Exceptions\TenantRelationException
      */
     public function getTenantRelationName(): ?string
     {

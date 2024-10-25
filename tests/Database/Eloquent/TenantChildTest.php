@@ -11,6 +11,7 @@ use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use RuntimeException;
 use Sprout\Database\Eloquent\Concerns\IsTenantChild;
+use Sprout\Exceptions\TenantRelationException;
 use Workbench\App\Models\NoTenantRelationModel;
 use Workbench\App\Models\TenantChild;
 use Workbench\App\Models\TenantChildren;
@@ -52,8 +53,8 @@ class TenantChildTest extends TestCase
     {
         $model = new NoTenantRelationModel();
 
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('No tenant relation found in model [' . NoTenantRelationModel::class . ']');
+        $this->expectException(TenantRelationException::class);
+        $this->expectExceptionMessage('Cannot find tenant relation for model [' . NoTenantRelationModel::class . ']');
 
         $model->getTenantRelationName();
     }
@@ -63,8 +64,8 @@ class TenantChildTest extends TestCase
     {
         $model = new TooManyTenantRelationModel();
 
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('Models can only have one tenant relation, [' . TooManyTenantRelationModel::class . '] has 2');
+        $this->expectException(TenantRelationException::class);
+        $this->expectExceptionMessage('Expected one tenant relation, found 2 in model [' . TooManyTenantRelationModel::class . ']');
 
         $model->getTenantRelationName();
     }

@@ -4,8 +4,8 @@ declare(strict_types=1);
 namespace Sprout\Managers;
 
 use Illuminate\Database\Eloquent\Model;
-use InvalidArgumentException;
 use Sprout\Contracts\Tenant;
+use Sprout\Exceptions\MisconfigurationException;
 use Sprout\Providers\DatabaseTenantProvider;
 use Sprout\Providers\EloquentTenantProvider;
 use Sprout\Support\BaseFactory;
@@ -58,13 +58,13 @@ final class ProviderManager extends BaseFactory
      * @phpstan-param array{model?: class-string<TenantModel>} $config
      *
      * @phpstan-return \Sprout\Providers\EloquentTenantProvider<TenantModel>
+     *
+     * @throws \Sprout\Exceptions\MisconfigurationException
      */
     protected function createEloquentProvider(array $config, string $name): EloquentTenantProvider
     {
         if (! isset($config['model'])) {
-            throw new InvalidArgumentException(
-                'No model provided for provider [' . $name . ']'
-            );
+            throw MisconfigurationException::missingConfig('model', 'provider', $name);
         }
 
         if (
@@ -72,12 +72,10 @@ final class ProviderManager extends BaseFactory
             || ! is_subclass_of($config['model'], Model::class)
             || ! is_subclass_of($config['model'], Tenant::class)
         ) {
-            throw new InvalidArgumentException(
-                'Invalid model provided for provider [' . $name . ']'
-            );
+            throw MisconfigurationException::invalidConfig('model', 'provider', $name);
         }
 
-        return new EloquentTenantProvider($name,  $config['model']);
+        return new EloquentTenantProvider($name, $config['model']);
     }
 
     /**
@@ -93,6 +91,8 @@ final class ProviderManager extends BaseFactory
      * @phpstan-param array{entity?: class-string<TenantEntity>, table?: string|class-string<\Illuminate\Database\Eloquent\Model>, connection?: string} $config
      *
      * @phpstan-return \Sprout\Providers\DatabaseTenantProvider<TenantEntity>
+     *
+     * @throws \Sprout\Exceptions\MisconfigurationException
      */
     protected function createDatabaseProvider(array $config, string $name): DatabaseTenantProvider
     {
@@ -103,15 +103,11 @@ final class ProviderManager extends BaseFactory
                 || ! is_subclass_of($config['entity'], Tenant::class)
             )
         ) {
-            throw new InvalidArgumentException(
-                'Invalid entity provided for provider [' . $name . ']'
-            );
+            throw MisconfigurationException::invalidConfig('entity', 'provider', $name);
         }
 
         if (! isset($config['table'])) {
-            throw new InvalidArgumentException(
-                'No table provided for provider [' . $name . ']'
-            );
+            throw MisconfigurationException::missingConfig('table', 'provider', $name);
         }
 
         // This allows users to provide a model name for retrieval of table and
@@ -120,9 +116,7 @@ final class ProviderManager extends BaseFactory
             // It's worth checking that the provided value is in fact a model,
             // otherwise things are going to get awkward
             if (! is_subclass_of($config['table'], Model::class)) {
-                throw new InvalidArgumentException(
-                    'Invalid table provided for provider [' . $name . ']'
-                );
+                throw MisconfigurationException::invalidConfig('table', 'provider', $name);
             }
 
             $model      = new $config['table']();

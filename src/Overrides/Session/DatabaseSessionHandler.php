@@ -6,6 +6,7 @@ namespace Sprout\Overrides\Session;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Session\DatabaseSessionHandler as OriginalDatabaseSessionHandler;
 use RuntimeException;
+use Sprout\Exceptions\TenancyMissing;
 use Sprout\Exceptions\TenantMissing;
 use function Sprout\sprout;
 
@@ -26,13 +27,14 @@ class DatabaseSessionHandler extends OriginalDatabaseSessionHandler
      * @return \Illuminate\Database\Query\Builder
      *
      * @throws \Sprout\Exceptions\TenantMissing
+     * @throws \Sprout\Exceptions\TenancyMissing
      */
     protected function getQuery(): Builder
     {
         $tenancy = sprout()->getCurrentTenancy();
 
         if ($tenancy === null) {
-            throw new RuntimeException('No current tenancy');
+            throw TenancyMissing::make();
         }
 
         if ($tenancy->check() === false) {
