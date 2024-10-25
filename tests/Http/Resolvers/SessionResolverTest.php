@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Tests\Resolvers;
+namespace Http\Resolvers;
 
 use Illuminate\Config\Repository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -17,7 +17,6 @@ use Sprout\Overrides\AuthOverride;
 use Sprout\Overrides\CacheOverride;
 use Sprout\Overrides\CookieOverride;
 use Sprout\Overrides\JobOverride;
-use Sprout\Overrides\SessionOverride;
 use Sprout\Overrides\StorageOverride;
 use Workbench\App\Models\TenantModel;
 
