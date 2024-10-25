@@ -148,7 +148,7 @@ class BelongsToManyTenantsTest extends TestCase
 
         $this->assertTrue($child->exists);
         $this->assertTrue($child->relationLoaded('tenants'));
-        $this->assertNotNull($child->tenants->first(fn (Model $model) => $model->is($tenant)));
+        $this->assertNotNull($child->getRelation('tenants')->first(fn (Model $model) => $model->is($tenant)));
     }
 
     #[Test]
