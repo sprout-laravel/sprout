@@ -218,7 +218,7 @@ class BelongsToManyTenantsObserver
         }
 
         if (! TenancyOptions::shouldHydrateTenantRelation($tenancy)) {
-            return;
+            return; // @codeCoverageIgnore
         }
 
         /**

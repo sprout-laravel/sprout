@@ -180,7 +180,25 @@ class BelongsToTenantTest extends TestCase
 
         $this->assertTrue($child->exists);
         $this->assertTrue($child->relationLoaded('tenant'));
-        $this->assertTrue($child->tenant->is($tenant));
+        $this->assertNotNull($child->getRelation('tenant'));
+        $this->assertTrue($child->getRelation('tenant')->is($tenant));
+    }
+
+    #[Test]
+    public function doNotHydrateWhenHydrateTenantRelationIsMissing(): void
+    {
+        /** @var \Sprout\Contracts\Tenancy $tenancy */
+        $tenancy = app(TenancyManager::class)->get();
+        $tenancy->removeOption(TenancyOptions::hydrateTenantRelation());
+
+        $tenant = TenantModel::factory()->create();
+
+        $tenancy->setTenant($tenant);
+
+        $child = TenantChild::query()->find(TenantChild::factory()->create()->getKey());
+
+        $this->assertTrue($child->exists);
+        $this->assertFalse($child->relationLoaded('tenant'));
     }
 
     #[Test]
