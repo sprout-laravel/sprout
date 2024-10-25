@@ -3,23 +3,43 @@ declare(strict_types=1);
 
 namespace Sprout\Overrides;
 
-use Illuminate\Cookie\CookieJar;
-use Sprout\Concerns\OverridesCookieSettings;
-use Sprout\Contracts\ServiceOverride;
+use Illuminate\Contracts\Events\Dispatcher;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Queue\Events\JobProcessing;
+use Sprout\Contracts\BootableServiceOverride;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
+use Sprout\Listeners\SetCurrentTenantForJob;
+use Sprout\Sprout;
 
 /**
- * Cookie Override
+ * Job Override
  *
  * This class provides the override/multitenancy extension/features for Laravels
- * cookie service.
+ * queue/job service.
  *
  * @package Overrides
  */
-final class CookieOverride implements ServiceOverride
+final class JobOverride implements BootableServiceOverride
 {
-    use OverridesCookieSettings;
+    /**
+     * Boot a service override
+     *
+     * This method should perform any initial steps required for the service
+     * override that take place during the booting of the framework.
+     *
+     * @param \Illuminate\Contracts\Foundation\Application $app
+     * @param \Sprout\Sprout                               $sprout
+     *
+     * @return void
+     */
+    public function boot(Application $app, Sprout $sprout): void
+    {
+        /** @var \Illuminate\Contracts\Events\Dispatcher $events */
+        $events = app(Dispatcher::class);
+
+        $events->listen(JobProcessing::class, SetCurrentTenantForJob::class);
+    }
 
     /**
      * Set up the service override
@@ -35,23 +55,7 @@ final class CookieOverride implements ServiceOverride
      */
     public function setup(Tenancy $tenancy, Tenant $tenant): void
     {
-        // Collect the values
-        $path     = self::$path ?? config('session.path') ?? '/';
-        $domain   = self::$domain ?? config('session.domain');
-        $secure   = self::$secure ?? config('session.secure', false);
-        $sameSite = self::$sameSite ?? config('session.same_site');
-
-        /**
-         * This is here to make PHPStan quiet down
-         *
-         * @var string      $path
-         * @var string|null $domain
-         * @var bool|null   $secure
-         * @var string|null $sameSite
-         */
-
-        // Set the default values on the cookiejar
-        app(CookieJar::class)->setDefaultPathAndDomain($path, $domain, $secure, $sameSite);
+        // I am intentionally empty
     }
 
     /**
@@ -72,6 +76,6 @@ final class CookieOverride implements ServiceOverride
      */
     public function cleanup(Tenancy $tenancy, Tenant $tenant): void
     {
-        // This is intentionally empty
+        // I am intentionally empty
     }
 }

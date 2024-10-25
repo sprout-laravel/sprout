@@ -5,6 +5,13 @@ namespace Sprout;
 
 use Sprout\Contracts\Tenancy;
 
+/**
+ * Tenancy Options
+ *
+ * This is a helper class for providing and check for tenancy options.
+ *
+ * @package Core
+ */
 class TenancyOptions
 {
     /**
@@ -28,16 +35,6 @@ class TenancyOptions
     }
 
     /**
-     * Make sure that queued jobs are aware of the current tenant
-     *
-     * @return string
-     */
-    public static function makeJobsTenantAware(): string
-    {
-        return 'tenant-aware.jobs';
-    }
-
-    /**
      * @param \Sprout\Contracts\Tenancy<*> $tenancy
      *
      * @return bool
@@ -55,15 +52,5 @@ class TenancyOptions
     public static function shouldThrowIfNotRelated(Tenancy $tenancy): bool
     {
         return $tenancy->hasOption(static::throwIfNotRelated());
-    }
-
-    /**
-     * @param \Sprout\Contracts\Tenancy<*> $tenancy
-     *
-     * @return bool
-     */
-    public static function shouldJobsBeTenantAware(Tenancy $tenancy): bool
-    {
-        return $tenancy->hasOption(static::makeJobsTenantAware());
     }
 }

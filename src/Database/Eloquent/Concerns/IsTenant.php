@@ -4,8 +4,15 @@ declare(strict_types=1);
 namespace Sprout\Database\Eloquent\Concerns;
 
 /**
+ * Is Tenant
+ *
+ * This trait provides a default implementation of the {@see \Sprout\Contracts\Tenant}
+ * interface to simplify the creation of tenant models.
+ *
  * @phpstan-require-implements \Sprout\Contracts\Tenant
  * @phpstan-require-extends \Illuminate\Database\Eloquent\Model
+ *
+ * @pacakge Database\Eloquent
  */
 trait IsTenant
 {

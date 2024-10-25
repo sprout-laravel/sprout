@@ -3,23 +3,35 @@ declare(strict_types=1);
 
 namespace Sprout\Overrides;
 
-use Illuminate\Cookie\CookieJar;
-use Sprout\Concerns\OverridesCookieSettings;
+use Illuminate\Auth\AuthManager;
 use Sprout\Contracts\ServiceOverride;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 
 /**
- * Cookie Override
+ * Auth Override
  *
  * This class provides the override/multitenancy extension/features for Laravels
- * cookie service.
+ * auth service.
  *
  * @package Overrides
  */
-final class CookieOverride implements ServiceOverride
+final class AuthOverride implements ServiceOverride
 {
-    use OverridesCookieSettings;
+    /**
+     * @var \Illuminate\Auth\AuthManager
+     */
+    private AuthManager $authManager;
+
+    /**
+     * Create a new instance
+     *
+     * @param \Illuminate\Auth\AuthManager $authManager
+     */
+    public function __construct(AuthManager $authManager)
+    {
+        $this->authManager = $authManager;
+    }
 
     /**
      * Set up the service override
@@ -35,23 +47,7 @@ final class CookieOverride implements ServiceOverride
      */
     public function setup(Tenancy $tenancy, Tenant $tenant): void
     {
-        // Collect the values
-        $path     = self::$path ?? config('session.path') ?? '/';
-        $domain   = self::$domain ?? config('session.domain');
-        $secure   = self::$secure ?? config('session.secure', false);
-        $sameSite = self::$sameSite ?? config('session.same_site');
-
-        /**
-         * This is here to make PHPStan quiet down
-         *
-         * @var string      $path
-         * @var string|null $domain
-         * @var bool|null   $secure
-         * @var string|null $sameSite
-         */
-
-        // Set the default values on the cookiejar
-        app(CookieJar::class)->setDefaultPathAndDomain($path, $domain, $secure, $sameSite);
+        $this->forgetGuards();
     }
 
     /**
@@ -72,6 +68,18 @@ final class CookieOverride implements ServiceOverride
      */
     public function cleanup(Tenancy $tenancy, Tenant $tenant): void
     {
-        // This is intentionally empty
+        $this->forgetGuards();
+    }
+
+    /**
+     * Forget all resolved guards
+     *
+     * @return void
+     */
+    private function forgetGuards(): void
+    {
+        if ($this->authManager->hasResolvedGuards()) {
+            $this->authManager->forgetGuards();
+        }
     }
 }

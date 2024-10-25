@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace Sprout;
 
 use Illuminate\Contracts\Events\Dispatcher;
-use Illuminate\Queue\Events\JobProcessing;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Routing\Router;
 use Illuminate\Support\ServiceProvider;
@@ -15,27 +14,25 @@ use Sprout\Events\CurrentTenantChanged;
 use Sprout\Http\Middleware\TenantRoutes;
 use Sprout\Http\RouterMethods;
 use Sprout\Listeners\IdentifyTenantOnRouting;
-use Sprout\Listeners\SetCurrentTenantForJob;
 use Sprout\Managers\IdentityResolverManager;
 use Sprout\Managers\ProviderManager;
 use Sprout\Managers\TenancyManager;
 
+/**
+ * Sprout Service Provider
+ *
+ * @package Core
+ */
 class SproutServiceProvider extends ServiceProvider
 {
     private Sprout $sprout;
 
     public function register(): void
     {
-        $this->handleCoreConfig();
         $this->registerSprout();
         $this->registerManagers();
         $this->registerMiddleware();
         $this->registerRouteMixin();
-    }
-
-    private function handleCoreConfig(): void
-    {
-        $this->mergeConfigFrom(__DIR__ . '/../resources/config/sprout.php', 'sprout');
     }
 
     private function registerSprout(): void
@@ -94,7 +91,10 @@ class SproutServiceProvider extends ServiceProvider
 
     private function publishConfig(): void
     {
-        $this->publishes([__DIR__ . '/../resources/config/multitenancy.php' => config_path('multitenancy.php')], ['config', 'sprout-config']);
+        $this->publishes([
+            __DIR__ . '/../resources/config/sprout.php'       => config_path('sprout.php'),
+            __DIR__ . '/../resources/config/multitenancy.php' => config_path('multitenancy.php'),
+        ], ['config', 'sprout-config']);
     }
 
     private function registerServiceOverrides(): void
@@ -123,8 +123,6 @@ class SproutServiceProvider extends ServiceProvider
         if ($this->sprout->shouldListenForRouting()) {
             $events->listen(RouteMatched::class, IdentifyTenantOnRouting::class);
         }
-
-        $events->listen(JobProcessing::class, SetCurrentTenantForJob::class);
     }
 
     private function registerTenancyBootstrappers(): void

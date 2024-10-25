@@ -8,12 +8,25 @@ use Illuminate\Support\Str;
 use Sprout\Contracts\TenantHasResources;
 
 /**
+ * Has Tenant Resources
+ *
+ * This trait provides helper methods alongside default implementations and
+ * functionality to support a {@see \Sprout\Contracts\Tenant} model that also
+ * implements the {@see \Sprout\Contracts\TenantHasResources} interface.
+ *
  * @phpstan-require-implements \Sprout\Contracts\Tenant
  * @phpstan-require-implements \Sprout\Contracts\TenantHasResources
  * @phpstan-require-extends \Illuminate\Database\Eloquent\Model
+ *
+ * @package Database\Eloquent
  */
 trait HasTenantResources
 {
+    /**
+     * Boot the trait
+     *
+     * @return void
+     */
     public static function bootHasTenantResources(): void
     {
         static::creating(static function (Model&TenantHasResources $model) {

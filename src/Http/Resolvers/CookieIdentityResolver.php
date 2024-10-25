@@ -4,26 +4,43 @@ declare(strict_types=1);
 namespace Sprout\Http\Resolvers;
 
 use Closure;
+use Illuminate\Cookie\CookieJar;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Routing\Router;
 use Illuminate\Routing\RouteRegistrar;
 use Illuminate\Support\Facades\Cookie;
-use Sprout\Contracts\IdentityResolverTerminates;
 use Sprout\Contracts\Tenancy;
+use Sprout\Contracts\Tenant;
 use Sprout\Http\Middleware\TenantRoutes;
 use Sprout\Support\BaseIdentityResolver;
 
-final class CookieIdentityResolver extends BaseIdentityResolver implements IdentityResolverTerminates
+/**
+ * Cookie Identity Resolver
+ *
+ * This class is responsible for resolving tenant identities from the current
+ * request using cookies.
+ *
+ * @package Http\Resolvers
+ */
+final class CookieIdentityResolver extends BaseIdentityResolver
 {
+    /**
+     * The cookie name
+     *
+     * @var string
+     */
     private string $cookie;
 
     /**
+     * Additional options for the cookie
+     *
      * @var array<string, mixed>
      */
     private array $options;
 
     /**
+     * Create a new instance
+     *
      * @param string                                $name
      * @param string|null                           $cookie
      * @param array<string, mixed>                  $options
@@ -37,13 +54,28 @@ final class CookieIdentityResolver extends BaseIdentityResolver implements Ident
         $this->options = $options;
     }
 
-    public function getCookie(): string
+    /**
+     * Get the cookie name
+     *
+     * @return string
+     */
+    public function getCookieName(): string
     {
         return $this->cookie;
     }
 
     /**
-     * @param \Sprout\Contracts\Tenancy<\Sprout\Contracts\Tenant> $tenancy
+     * Get the cookie name with replacements
+     *
+     * This method returns the name of the cookie returned by
+     * {@see self::getCookieName()}, except it replaces <code>{tenancy}</code>
+     * and <code>{resolver}</code> with the name of the tenancy, and resolver,
+     * respectively.
+     *
+     * You can use an uppercase character for the first character, <code>{Tenancy}</code>
+     * and <code>{Resolver}</code>, and it'll be run through {@see \ucfirst()}.
+     *
+     * @param \Sprout\Contracts\Tenancy<*> $tenancy
      *
      * @return string
      */
@@ -52,7 +84,7 @@ final class CookieIdentityResolver extends BaseIdentityResolver implements Ident
         return str_replace(
             ['{tenancy}', '{resolver}', '{Tenancy}', '{Resolver}'],
             [$tenancy->getName(), $this->getName(), ucfirst($tenancy->getName()), ucfirst($this->getName())],
-            $this->getCookie()
+            $this->getCookieName()
         );
     }
 
@@ -101,14 +133,25 @@ final class CookieIdentityResolver extends BaseIdentityResolver implements Ident
     }
 
     /**
-     * @param \Sprout\Contracts\Tenancy<\Sprout\Contracts\Tenant> $tenancy
-     * @param \Illuminate\Http\Response                           $response
+     * Perform setup actions for the tenant
+     *
+     * When a tenant is marked as the current tenant within a tenancy, this
+     * method will be called to perform any necessary setup actions.
+     * This method is also called if there is no current tenant, as there may
+     * be actions needed.
+     *
+     * @template TenantClass of \Sprout\Contracts\Tenant
+     *
+     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Sprout\Contracts\Tenant|null          $tenant
+     *
+     * @phpstan-param Tenant|null                    $tenant
      *
      * @return void
      */
-    public function terminate(Tenancy $tenancy, Response $response): void
+    public function setup(Tenancy $tenancy, ?Tenant $tenant): void
     {
-        if ($tenancy->check()) {
+        if ($tenant !== null && $tenancy->check()) {
             /**
              * @var array{name:string, value:string} $details
              */
@@ -119,11 +162,13 @@ final class CookieIdentityResolver extends BaseIdentityResolver implements Ident
                 ]
             );
 
-            $response->withCookie(Cookie::make(...$details));
+            app(CookieJar::class)->queue(Cookie::make(...$details));
         }
     }
 
     /**
+     * Get the details for cookie creation, with defaults
+     *
      * @param array<string, mixed> $details
      *
      * @return array<string, mixed>

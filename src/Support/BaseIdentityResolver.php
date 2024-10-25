@@ -8,6 +8,14 @@ use Sprout\Contracts\IdentityResolver;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 
+/**
+ * Base Identity Resolver
+ *
+ * This is an abstract {@see \Sprout\Contracts\IdentityResolver} to provide
+ *  a shared implementation of common functionality.
+ *
+ * @package Core
+ */
 abstract class BaseIdentityResolver implements IdentityResolver
 {
     /**
@@ -21,6 +29,8 @@ abstract class BaseIdentityResolver implements IdentityResolver
     private array $hooks;
 
     /**
+     * Create a new instance
+     *
      * @param string                                $name
      * @param array<\Sprout\Support\ResolutionHook> $hooks
      */

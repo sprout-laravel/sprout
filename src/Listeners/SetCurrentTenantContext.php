@@ -7,6 +7,15 @@ use Illuminate\Support\Facades\Context;
 use Sprout\Events\CurrentTenantChanged;
 use Sprout\Sprout;
 
+/**
+ * Set Current Tenant Context
+ *
+ * This class is an event listener for {@see \Sprout\Events\CurrentTenantChanged}
+ * that handles the setting of the current tenants key, within Laravels
+ * context service.
+ *
+ * @package Core
+ */
 final class SetCurrentTenantContext
 {
     /**

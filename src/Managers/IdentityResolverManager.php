@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Sprout\Managers;
 
-use InvalidArgumentException;
+use Sprout\Exceptions\MisconfigurationException;
 use Sprout\Http\Resolvers\CookieIdentityResolver;
 use Sprout\Http\Resolvers\HeaderIdentityResolver;
 use Sprout\Http\Resolvers\PathIdentityResolver;
@@ -12,7 +12,14 @@ use Sprout\Http\Resolvers\SubdomainIdentityResolver;
 use Sprout\Support\BaseFactory;
 
 /**
+ * Identity Resolver Manager
+ *
+ * This is a manager and factory, responsible for creating and storing
+ * implementations of {@see \Sprout\Contracts\IdentityResolver}.
+ *
  * @extends \Sprout\Support\BaseFactory<\Sprout\Contracts\IdentityResolver>
+ *
+ * @package Core
  */
 final class IdentityResolverManager extends BaseFactory
 {
@@ -47,13 +54,13 @@ final class IdentityResolverManager extends BaseFactory
      * @phpstan-param array{domain?: string, pattern?: string|null, parameter?: string|null, hooks?: array<\Sprout\Support\ResolutionHook>} $config
      *
      * @return \Sprout\Http\Resolvers\SubdomainIdentityResolver
+     *
+     * @throws \Sprout\Exceptions\MisconfigurationException
      */
     protected function createSubdomainResolver(array $config, string $name): SubdomainIdentityResolver
     {
         if (! isset($config['domain'])) {
-            throw new InvalidArgumentException(
-                'No domain provided for resolver [' . $name . ']'
-            );
+            throw MisconfigurationException::missingConfig('domain', 'resolver', $name);
         }
 
         return new SubdomainIdentityResolver(
@@ -74,15 +81,15 @@ final class IdentityResolverManager extends BaseFactory
      * @phpstan-param array{segment?: int|null, pattern?: string|null, parameter?: string|null, hooks?: array<\Sprout\Support\ResolutionHook>} $config
      *
      * @return \Sprout\Http\Resolvers\PathIdentityResolver
+     *
+     * @throws \Sprout\Exceptions\MisconfigurationException
      */
     protected function createPathResolver(array $config, string $name): PathIdentityResolver
     {
         $segment = $config['segment'] ?? 1;
 
         if ($segment < 1) {
-            throw new InvalidArgumentException(
-                'Invalid path segment [' . $segment . '], path segments should be 1 indexed'
-            );
+            throw MisconfigurationException::invalidConfig('segment', 'resolver', $name);
         }
 
         return new PathIdentityResolver(

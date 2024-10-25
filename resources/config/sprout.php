@@ -29,14 +29,14 @@ return [
     */
 
     'bootstrappers' => [
+        // Set the current tenant within the Laravel context
+        \Sprout\Listeners\SetCurrentTenantContext::class,
         // Calls the setup method on the current identity resolver
         \Sprout\Listeners\PerformIdentityResolverSetup::class,
         // Performs any clean-up from the previous tenancy
         \Sprout\Listeners\CleanupServiceOverrides::class,
         // Sets up service overrides for the current tenancy
         \Sprout\Listeners\SetupServiceOverrides::class,
-        // Set the current tenant within the Laravel context
-        \Sprout\Listeners\SetCurrentTenantContext::class,
     ],
 
     /*
@@ -53,9 +53,15 @@ return [
         // This will override the storage by introducing a 'sprout' driver
         // that wraps any other storage drive in a tenant resource subdirectory.
         \Sprout\Overrides\StorageOverride::class,
+        // This will hydrate tenants when running jobs, based on the current
+        // context.
+        \Sprout\Overrides\JobOverride::class,
         // This will override the cache by introducing a 'sprout' driver
         // that adds a prefix to cache stores for the current tenant.
         \Sprout\Overrides\CacheOverride::class,
+        // This is a simple override that removes all currently resolved
+        // guards to prevent user auth leaking.
+        \Sprout\Overrides\AuthOverride::class,
         // This will override the cookie settings so that all created cookies
         // are specific to the tenant.
         \Sprout\Overrides\CookieOverride::class,

@@ -6,6 +6,14 @@ namespace Sprout\Listeners;
 use Sprout\Events\CurrentTenantChanged;
 use Sprout\Sprout;
 
+/**
+ * Setup Service Overrides
+ *
+ * This class is an event listener for {@see \Sprout\Events\CurrentTenantChanged}
+ * that sets up any service overrides using their setup action hook.
+ *
+ * @package Override
+ */
 final class SetupServiceOverrides
 {
     /**
@@ -13,12 +21,19 @@ final class SetupServiceOverrides
      */
     private Sprout $sprout;
 
+    /**
+     * Create a new instance
+     *
+     * @param \Sprout\Sprout $sprout
+     */
     public function __construct(Sprout $sprout)
     {
         $this->sprout = $sprout;
     }
 
     /**
+     * Handle the event
+     *
      * @template TenantClass of \Sprout\Contracts\Tenant
      *
      * @param \Sprout\Events\CurrentTenantChanged<TenantClass> $event

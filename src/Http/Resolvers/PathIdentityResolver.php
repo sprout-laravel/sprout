@@ -17,14 +17,36 @@ use Sprout\Overrides\CookieOverride;
 use Sprout\Overrides\SessionOverride;
 use Sprout\Support\BaseIdentityResolver;
 
+/**
+ * Path Identity Resolver
+ *
+ * This class is responsible for resolving tenant identities from the current
+ * request using the path.
+ *
+ * @package Http\Resolvers
+ */
 final class PathIdentityResolver extends BaseIdentityResolver implements IdentityResolverUsesParameters
 {
     use FindsIdentityInRouteParameter {
         setup as parameterSetup;
     }
 
+    /**
+     * The path segment containing the identifier
+     *
+     * @var int
+     */
     private int $segment = 1;
 
+    /**
+     * Create a new instance
+     *
+     * @param string                                $name
+     * @param int|null                              $segment
+     * @param string|null                           $pattern
+     * @param string|null                           $parameter
+     * @param array<\Sprout\Support\ResolutionHook> $hooks
+     */
     public function __construct(string $name, ?int $segment = null, ?string $pattern = null, ?string $parameter = null, array $hooks = [])
     {
         parent::__construct($name, $hooks);
@@ -79,7 +101,7 @@ final class PathIdentityResolver extends BaseIdentityResolver implements Identit
      */
     public function routes(Router $router, Closure $groupRoutes, Tenancy $tenancy): RouteRegistrar
     {
-        return $this->applyParameterPattern(
+        return $this->applyParameterPatternMapping(
             $router->middleware([TenantRoutes::ALIAS . ':' . $this->getName() . ',' . $tenancy->getName()])
                    ->prefix($this->getRoutePrefix($tenancy))
                    ->group($groupRoutes),

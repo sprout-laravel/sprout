@@ -13,6 +13,13 @@ use Sprout\Events\TenantIdentified;
 use Sprout\Events\TenantLoaded;
 
 /**
+ * Default Tenancy
+ *
+ * This is a default implementation of the {@see \Sprout\Contracts\Tenancy}
+ * interface.
+ *
+ * @package Core
+ *
  * @template TenantClass of \Sprout\Contracts\Tenant
  *
  * @implements \Sprout\Contracts\Tenancy<TenantClass>
@@ -49,6 +56,8 @@ final class DefaultTenancy implements Tenancy
     private ?ResolutionHook $hook = null;
 
     /**
+     * Create a new instance
+     *
      * @param string                                        $name
      * @param \Sprout\Contracts\TenantProvider<TenantClass> $provider
      * @param list<string>                                  $options

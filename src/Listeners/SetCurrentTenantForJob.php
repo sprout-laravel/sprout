@@ -8,6 +8,15 @@ use Illuminate\Support\Facades\Context;
 use Sprout\Managers\TenancyManager;
 use Sprout\TenancyOptions;
 
+/**
+ * Set Current Tenant For Job
+ *
+ * This class is an event listener for {@see \Illuminate\Queue\Events\JobProcessing}
+ * that ensures there are current tenants when processing jobs, utilising
+ * Laravels context service.
+ *
+ * @package Overrides
+ */
 final class SetCurrentTenantForJob
 {
     /**
@@ -33,12 +42,8 @@ final class SetCurrentTenantForJob
             /** @var \Sprout\Contracts\Tenancy<*> $tenancy */
             $tenancy = $this->tenancies->get($tenancyName);
 
-            // We don't want to set a tenant if there's already one, and we don't
-            // want to set a tenant on tenancies that don't have tenant-aware jobs
-            if (! $tenancy->check() && TenancyOptions::shouldJobsBeTenantAware($tenancy)) {
-                // It's always the key, so we load instead of identifying
-                $tenancy->load($key);
-            }
+            // It's always the key, so we load instead of identifying
+            $tenancy->load($key);
         }
     }
 }

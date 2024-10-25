@@ -14,7 +14,10 @@ use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use Sprout\Attributes\CurrentTenant;
 use Sprout\Contracts\Tenant;
+use Sprout\Overrides\AuthOverride;
 use Sprout\Overrides\CacheOverride;
+use Sprout\Overrides\CookieOverride;
+use Sprout\Overrides\JobOverride;
 use Sprout\Overrides\SessionOverride;
 use Sprout\Overrides\StorageOverride;
 use Workbench\App\Models\TenantModel;
@@ -38,8 +41,10 @@ class CookieOverrideTest extends TestCase
     {
         tap($app['config'], static function (Repository $config) {
             $config->set('sprout.services', [
-                CacheOverride::class,
                 StorageOverride::class,
+                JobOverride::class,
+                CacheOverride::class,
+                AuthOverride::class,
                 SessionOverride::class,
             ]);
         });

@@ -5,13 +5,19 @@ namespace Sprout\Tests\Listeners;
 
 use Illuminate\Config\Repository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Queue\QueueManager;
 use Illuminate\Support\Facades\Context;
+use Orchestra\Testbench\Attributes\DefineEnvironment;
 use Orchestra\Testbench\Concerns\WithWorkbench;
 use Orchestra\Testbench\TestCase;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use Sprout\Managers\TenancyManager;
+use Sprout\Overrides\AuthOverride;
+use Sprout\Overrides\CacheOverride;
+use Sprout\Overrides\CookieOverride;
+use Sprout\Overrides\JobOverride;
+use Sprout\Overrides\SessionOverride;
+use Sprout\Overrides\StorageOverride;
 use Sprout\TenancyOptions;
 use Workbench\App\Jobs\TestTenantJob;
 use Workbench\App\Models\TenantModel;
@@ -30,12 +36,24 @@ class SetCurrentTenantForJobTest extends TestCase
         });
     }
 
-    #[Test]
+    protected function noJobOverride($app): void
+    {
+        tap($app['config'], static function (Repository $config) {
+            $config->set('sprout.services', [
+                StorageOverride::class,
+                CacheOverride::class,
+                AuthOverride::class,
+                CookieOverride::class,
+                SessionOverride::class,
+            ]);
+        });
+    }
+
+    #[Test, DefineEnvironment('noJobOverride')]
     public function doesNotSetCurrentTenantForJobWithoutOption(): void
     {
         /** @var \Sprout\Contracts\Tenancy<*> $tenancy */
         $tenancy = app(TenancyManager::class)->get();
-        $tenancy->removeOption(TenancyOptions::makeJobsTenantAware());
 
         $this->assertFalse($tenancy->check());
 
@@ -56,7 +74,6 @@ class SetCurrentTenantForJobTest extends TestCase
     {
         /** @var \Sprout\Contracts\Tenancy<*> $tenancy */
         $tenancy = app(TenancyManager::class)->get();
-        $tenancy->addOption(TenancyOptions::makeJobsTenantAware());
 
         $this->assertFalse($tenancy->check());
 

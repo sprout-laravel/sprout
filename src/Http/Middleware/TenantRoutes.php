@@ -6,34 +6,28 @@ namespace Sprout\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Sprout\Contracts\IdentityResolverTerminates;
-use Sprout\Exceptions\NoTenantFound;
-use Sprout\Managers\IdentityResolverManager;
-use Sprout\Managers\TenancyManager;
-use Sprout\Sprout;
 use Sprout\Support\ResolutionHelper;
 use Sprout\Support\ResolutionHook;
 
 /**
  * Tenant Routes Middleware
  *
- * Marks routes are being tenanted.
+ * This piece of middleware has a dual function.
+ * It marks routes as being multitenanted if resolving during routing, and it
+ * will resolve tenants if resolving during middleware.
+ *
+ * @package Core
  */
 final class TenantRoutes
 {
+    /**
+     * The alias for this middleware
+     */
     public const ALIAS = 'sprout.tenanted';
 
     /**
-     * @var \Sprout\Sprout
-     */
-    private Sprout $sprout;
-
-    public function __construct(Sprout $sprout)
-    {
-        $this->sprout = $sprout;
-    }
-
-    /**
+     * Handle the request
+     *
      * @param \Illuminate\Http\Request $request
      * @param \Closure                 $next
      * @param string                   ...$options
@@ -44,45 +38,15 @@ final class TenantRoutes
      */
     public function handle(Request $request, Closure $next, string ...$options): Response
     {
-        if (count($options) === 2) {
-            [$resolverName, $tenancyName] = $options;
-        } else if (count($options) === 1) {
-            [$resolverName] = $options;
-            $tenancyName = null;
-        } else {
-            $resolverName = $tenancyName = null;
-        }
+        [$resolverName, $tenancyName] = ResolutionHelper::parseOptions($options);
 
         ResolutionHelper::handleResolution(
             $request,
             ResolutionHook::Middleware,
             $resolverName,
-            $tenancyName
+            $tenancyName,
         );
 
-        // TODO: Decide whether to do anything with the following conditions
-        //if (! $tenancy->wasResolved()) {
-        //}
-        //
-        //if ($tenancy->resolver() !== $resolver) {
-        //}
-
         return $next($request);
-    }
-
-    public function terminate(Request $request, Response $response): void
-    {
-        if ($this->sprout->hasCurrentTenancy()) {
-            /** @var \Sprout\Contracts\Tenancy<\Sprout\Contracts\Tenant> $tenancy */
-            $tenancy = $this->sprout->getCurrentTenancy();
-
-            if ($tenancy->wasResolved()) {
-                $resolver = $tenancy->resolver();
-
-                if ($resolver instanceof IdentityResolverTerminates) {
-                    $resolver->terminate($tenancy, $response);
-                }
-            }
-        }
     }
 }

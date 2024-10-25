@@ -6,9 +6,14 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
 
 /**
+ * Identity Resolver uses Parameters Contract
+ *
+ * This contract marks an identity resolver as being capable of using route
+ * parameters to resolve the identifier for a tenant.
+ *
  * @package Resolvers
  */
-interface IdentityResolverUsesParameters
+interface IdentityResolverUsesParameters extends IdentityResolver
 {
     /**
      * Get the name of the route parameter

@@ -11,19 +11,39 @@ use Sprout\Sprout;
 class ResolutionHelper
 {
     /**
+     * @param array<string|null> $options
+     *
+     * @return array<string|null>
+     */
+    public static function parseOptions(array $options): array
+    {
+        if (count($options) === 2) {
+            [$resolverName, $tenancyName] = $options;
+        } else if (count($options) === 1) {
+            [$resolverName] = $options;
+            $tenancyName = null;
+        } else {
+            $resolverName = $tenancyName = null;
+        }
+
+        return [$resolverName, $tenancyName];
+    }
+
+    /**
      * @param \Illuminate\Http\Request       $request
      * @param \Sprout\Support\ResolutionHook $hook
      * @param string|null                    $resolverName
      * @param string|null                    $tenancyName
+     * @param bool                           $throw
      *
      * @return bool
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
      * @throws \Sprout\Exceptions\NoTenantFound
      */
     public static function handleResolution(Request $request, ResolutionHook $hook, ?string $resolverName = null, ?string $tenancyName = null, bool $throw = true): bool
     {
-        $sprout   = app()->make(Sprout::class);
+        /** @var \Sprout\Sprout $sprout */
+        $sprout   = app(Sprout::class);
         $resolver = $sprout->resolvers()->get($resolverName);
         $tenancy  = $sprout->tenancies()->get($tenancyName);
 

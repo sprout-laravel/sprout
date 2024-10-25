@@ -8,13 +8,34 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Router;
 use Illuminate\Routing\RouteRegistrar;
 use Sprout\Contracts\Tenancy;
+use Sprout\Http\Middleware\AddTenantHeaderToResponse;
 use Sprout\Http\Middleware\TenantRoutes;
 use Sprout\Support\BaseIdentityResolver;
 
+/**
+ * Header Identity Resolver
+ *
+ * This class is responsible for resolving tenant identities from the current
+ * request using headers.
+ *
+ * @package Http\Resolvers
+ */
 final class HeaderIdentityResolver extends BaseIdentityResolver
 {
+    /**
+     * The header name
+     *
+     * @var string
+     */
     private string $header;
 
+    /**
+     * Create a new instance
+     *
+     * @param string                                  $name
+     * @param string|null                             $header
+     * @param array<\Sprout\Support\ResolutionHook> $hooks
+     */
     public function __construct(string $name, ?string $header = null, array $hooks = [])
     {
         parent::__construct($name, $hooks);
@@ -23,15 +44,27 @@ final class HeaderIdentityResolver extends BaseIdentityResolver
     }
 
     /**
+     * Get the name of the header
+     *
      * @return string
      */
-    public function getHeader(): string
+    public function getHeaderName(): string
     {
         return $this->header;
     }
 
     /**
-     * @param \Sprout\Contracts\Tenancy<\Sprout\Contracts\Tenant> $tenancy
+     * Get the header name with replacements
+     *
+     * This method returns the name of the header returned by
+     * {@see self::getHeaderName()}, except it replaces <code>{tenancy}</code>
+     * and <code>{resolver}</code> with the name of the tenancy, and resolver,
+     * respectively.
+     *
+     * You can use an uppercase character for the first character, <code>{Tenancy}</code>
+     * and <code>{Resolver}</code>, and it'll be run through {@see \ucfirst()}.
+     *
+     * @param \Sprout\Contracts\Tenancy<*> $tenancy
      *
      * @return string
      */
@@ -40,7 +73,7 @@ final class HeaderIdentityResolver extends BaseIdentityResolver
         return str_replace(
             ['{tenancy}', '{resolver}', '{Tenancy}', '{Resolver}'],
             [$tenancy->getName(), $this->getName(), ucfirst($tenancy->getName()), ucfirst($this->getName())],
-            $this->getHeader()
+            $this->getHeaderName()
         );
     }
 
@@ -77,7 +110,9 @@ final class HeaderIdentityResolver extends BaseIdentityResolver
      */
     public function routes(Router $router, Closure $groupRoutes, Tenancy $tenancy): RouteRegistrar
     {
-        return $router->middleware([TenantRoutes::ALIAS . ':' . $this->getName() . ',' . $tenancy->getName()])
-                      ->group($groupRoutes);
+        return $router->middleware([
+            TenantRoutes::ALIAS . ':' . $this->getName() . ',' . $tenancy->getName(),
+            AddTenantHeaderToResponse::class . ':' . $this->getName() . ',' . $tenancy->getName(),
+        ])->group($groupRoutes);
     }
 }

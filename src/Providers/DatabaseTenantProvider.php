@@ -10,6 +10,13 @@ use Sprout\Support\BaseTenantProvider;
 use Sprout\Support\GenericTenant;
 
 /**
+ * Database Tenant Provider
+ *
+ * This is an implementation of {@see \Sprout\Contracts\TenantProvider} that
+ * uses Laravels base query builder.
+ *
+ * @package Core
+ *
  * @template EntityClass of \Sprout\Contracts\Tenant
  *
  * @extends \Sprout\Support\BaseTenantProvider<EntityClass>

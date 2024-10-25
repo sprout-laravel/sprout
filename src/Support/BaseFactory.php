@@ -4,24 +4,44 @@ declare(strict_types=1);
 namespace Sprout\Support;
 
 use Illuminate\Contracts\Foundation\Application;
-use InvalidArgumentException;
-use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\NotFoundExceptionInterface;
-use RuntimeException;
-use Sprout\Concerns\HasCustomCreators;
+use Sprout\Exceptions\MisconfigurationException;
 
 /**
+ * Base Factory
+ *
+ * This is an abstract base factory used by Sprout internals.
  *
  * @template FactoryClass of object
  *
  * @package Core
+ *
+ * @internal
  */
 abstract class BaseFactory
 {
     /**
-     * @use \Sprout\Concerns\HasCustomCreators<FactoryClass>
+     * Custom creators
+     *
+     * @var array<string, \Closure>
+     *
+     * @phpstan-var array<string, \Closure(Application, array<string, mixed>, string): FactoryClass>
      */
-    use HasCustomCreators;
+    protected static array $customCreators = [];
+
+    /**
+     * Register a custom creator
+     *
+     * @param string                                                                    $name
+     * @param \Closure                                                                  $callback
+     *
+     * @phpstan-param \Closure(Application, array<string, mixed>, string): FactoryClass $callback
+     *
+     * @return void
+     */
+    public static function register(string $name, \Closure $callback): void
+    {
+        static::$customCreators[$name] = $callback;
+    }
 
     /**
      * The Laravel application
@@ -69,11 +89,22 @@ abstract class BaseFactory
      * Get the default name
      *
      * @return string
+     *
+     * @throws \Sprout\Exceptions\MisconfigurationException
      */
     protected function getDefaultName(): string
     {
-        /** @phpstan-ignore-next-line */
-        return $this->app['config']->get('multitenancy.defaults.' . $this->getFactoryName());
+        /** @var \Illuminate\Config\Repository $config */
+        $config = app('config');
+
+        /** @var string|null $name */
+        $name = $config->get('multitenancy.defaults.' . $this->getFactoryName());
+
+        if ($name === null) {
+            throw MisconfigurationException::noDefault($this->getFactoryName());
+        }
+
+        return $name;
     }
 
     /**
@@ -82,14 +113,16 @@ abstract class BaseFactory
      * @param string $name
      *
      * @return array<string, mixed>|null
-     *
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
      */
     protected function getConfig(string $name): ?array
     {
-        /** @phpstan-ignore-next-line */
-        return $this->app['config']->get($this->getConfigKey($name));
+        /** @var \Illuminate\Config\Repository $repo */
+        $repo = app('config');
+
+        /** @var array<string,mixed>|null $config */
+        $config = $repo->get($this->getConfigKey($name));
+
+        return $config;
     }
 
     /**
@@ -101,12 +134,15 @@ abstract class BaseFactory
      * @return object
      *
      * @phpstan-return FactoryClass
+     *
+     * @throws \Sprout\Exceptions\MisconfigurationException
      */
     protected function callCustomCreator(string $name, array $config): object
     {
         if (! isset(static::$customCreators[$name])) {
-            throw new InvalidArgumentException(
-                'Custom creator [' . $name . '] does not exist'
+            throw MisconfigurationException::notFound(
+                'custom creator',
+                $this->getFactoryName() . '::' . $name
             );
         }
 
@@ -123,24 +159,17 @@ abstract class BaseFactory
      * @return object
      *
      * @phpstan-return FactoryClass
+     *
+     * @throws \Sprout\Exceptions\MisconfigurationException
      */
     protected function resolve(string $name): object
     {
         // We need config, even if it's empty
-        try {
-            $config = $this->getConfig($name);
-        } catch (NotFoundExceptionInterface|ContainerExceptionInterface $e) {
-            throw new RuntimeException(
-                          'Unable to load config for [' . $this->getFactoryName() . '::' . $name . ']',
-                previous: $e
-            );
-        }
+        $config = $this->getConfig($name);
 
         // If there's no config, complain
         if ($config === null) {
-            throw new InvalidArgumentException(
-                'Invalid [' . $this->getFactoryName() . '], no config found'
-            );
+            throw MisconfigurationException::notFound('config', $this->getFactoryName() . '::' . $name);
         }
 
         // Ooo custom creation logic, let's use that
@@ -165,9 +194,7 @@ abstract class BaseFactory
         }
 
         // There's no valid creator, so we'll complain
-        throw new InvalidArgumentException(
-            'Unable to create [' . $this->getFactoryName() . '::' . $name . '], no valid creator found'
-        );
+        throw MisconfigurationException::notFound('creator', $this->getFactoryName() . '::' . $name);
     }
 
     /**
@@ -178,6 +205,8 @@ abstract class BaseFactory
      * @return object
      *
      * @phpstan-return FactoryClass
+     *
+     * @throws \Sprout\Exceptions\MisconfigurationException
      */
     public function get(?string $name = null): object
     {

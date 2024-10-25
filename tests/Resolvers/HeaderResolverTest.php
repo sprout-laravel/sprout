@@ -11,6 +11,7 @@ use Orchestra\Testbench\TestCase;
 use PHPUnit\Framework\Attributes\Test;
 use Sprout\Attributes\CurrentTenant;
 use Sprout\Contracts\Tenant;
+use Sprout\Http\Middleware\AddTenantHeaderToResponse;
 use Workbench\App\Models\TenantModel;
 
 class HeaderResolverTest extends TestCase
@@ -65,5 +66,14 @@ class HeaderResolverTest extends TestCase
         $result = $this->get(route('header.route'));
 
         $result->assertInternalServerError();
+    }
+
+    #[Test]
+    public function addTenantHeaderQueueingMiddleware(): void
+    {
+        $route = app(Router::class)->getRoutes()->getByName('header.route');
+
+        $this->assertNotNull($route);
+        $this->assertContains(AddTenantHeaderToResponse::class . ':header,tenants', $route->middleware());
     }
 }

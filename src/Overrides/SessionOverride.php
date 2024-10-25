@@ -8,50 +8,42 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Session\FileSessionHandler;
 use Illuminate\Session\SessionManager;
 use RuntimeException;
+use Sprout\Concerns\OverridesCookieSettings;
 use Sprout\Contracts\BootableServiceOverride;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 use Sprout\Contracts\TenantHasResources;
+use Sprout\Exceptions\MisconfigurationException;
+use Sprout\Exceptions\TenancyMissing;
 use Sprout\Exceptions\TenantMissing;
 use Sprout\Overrides\Session\DatabaseSessionHandler;
 use Sprout\Sprout;
 use function Sprout\sprout;
 
-/** @codeCoverageIgnore */
+/**
+ * Session Override
+ *
+ * This class provides the override/multitenancy extension/features for Laravels
+ * session service.
+ *
+ * @package Overrides
+ *
+ * @codeCoverageIgnore
+ */
 final class SessionOverride implements BootableServiceOverride
 {
-    private static ?string $path = null;
+    use OverridesCookieSettings;
 
-    private static ?string $domain = null;
-
-    private static ?bool $secure = null;
-
-    private static ?string $sameSite = null;
-
+    /**
+     * @var bool
+     */
     private static bool $overrideDatabase = true;
 
-    public static function setDomain(?string $domain): void
-    {
-        self::$domain = $domain;
-    }
-
-    public static function setPath(?string $path): void
-    {
-        self::$path = $path;
-    }
-
-    // @codeCoverageIgnoreStart
-    public static function setSameSite(?string $sameSite): void
-    {
-        self::$sameSite = $sameSite;
-    }
-
-    public static function setSecure(?bool $secure): void
-    {
-        self::$secure = $secure;
-    }
-    // @codeCoverageIgnoreEnd
-
+    /**
+     * Prevent this override from overriding the database driver
+     *
+     * @return void
+     */
     public static function doNotOverrideDatabase(): void
     {
         self::$overrideDatabase = false;
@@ -174,7 +166,7 @@ final class SessionOverride implements BootableServiceOverride
             $tenancy      = sprout()->getCurrentTenancy();
 
             if ($tenancy === null) {
-                throw new RuntimeException('No current tenancy');
+                throw TenancyMissing::make();
             }
 
             // If there's no tenant, error out
@@ -186,8 +178,7 @@ final class SessionOverride implements BootableServiceOverride
 
             // If the tenant isn't configured for resources, also error out
             if (! ($tenant instanceof TenantHasResources)) {
-                // TODO: Better exception
-                throw new RuntimeException('Current tenant isn\t configured for resources');
+                throw MisconfigurationException::misconfigured('tenant', $tenant::class, 'resources');
             }
 
             $path .= $tenant->getTenantResourceKey();

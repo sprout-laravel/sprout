@@ -12,9 +12,18 @@ use Sprout\Contracts\BootableServiceOverride;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 use Sprout\Contracts\TenantHasResources;
+use Sprout\Exceptions\MisconfigurationException;
 use Sprout\Exceptions\TenantMissing;
 use Sprout\Sprout;
 
+/**
+ * Storage Override
+ *
+ * This class provides the override/multitenancy extension/features for Laravels
+ * storage service.
+ *
+ * @package Overrides
+ */
 final class StorageOverride implements BootableServiceOverride
 {
     /**
@@ -86,6 +95,14 @@ final class StorageOverride implements BootableServiceOverride
         }
     }
 
+    /**
+     * Create a driver creator
+     *
+     * @param \Sprout\Sprout                           $sprout
+     * @param \Illuminate\Filesystem\FilesystemManager $manager
+     *
+     * @return \Closure
+     */
     private static function creator(Sprout $sprout, FilesystemManager $manager): Closure
     {
         return static function (Application $app, array $config) use ($sprout, $manager): Filesystem {
@@ -100,8 +117,7 @@ final class StorageOverride implements BootableServiceOverride
 
             // If the tenant isn't configured for resources, also error out
             if (! ($tenant instanceof TenantHasResources)) {
-                // TODO: Better exception
-                throw new RuntimeException('Current tenant isn\t configured for resources');
+                throw MisconfigurationException::misconfigured('tenant', $tenant::class, 'resources');
             }
 
             $tenantConfig = self::getTenantStorageConfig($manager, $tenant, $config);
@@ -112,6 +128,8 @@ final class StorageOverride implements BootableServiceOverride
     }
 
     /**
+     * Tenantise the storage config
+     *
      * @param \Illuminate\Filesystem\FilesystemManager $manager
      * @param \Sprout\Contracts\TenantHasResources     $tenant
      * @param array<string, mixed>                     $config
@@ -136,12 +154,22 @@ final class StorageOverride implements BootableServiceOverride
         return $tenantConfig;
     }
 
+    /**
+     * Create a storage prefix using the current tenant
+     *
+     * @param \Sprout\Contracts\TenantHasResources $tenant
+     * @param string                               $pathPrefix
+     *
+     * @return string
+     */
     private static function createTenantedPrefix(TenantHasResources $tenant, string $pathPrefix): string
     {
         return str_replace('{tenant}', $tenant->getTenantResourceKey(), $pathPrefix);
     }
 
     /**
+     * Get the config of the disk being tenantised
+     *
      * @param array<string, mixed> $config
      *
      * @return array<string, mixed>
