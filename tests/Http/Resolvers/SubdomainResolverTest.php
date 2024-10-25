@@ -36,6 +36,27 @@ class SubdomainResolverTest extends TestCase
         });
     }
 
+    protected function withParameterPatternName($app): void
+    {
+        tap($app['config'], static function (Repository $config) {
+            $config->set('multitenancy.resolvers.subdomain.pattern', '.*');
+        });
+    }
+
+    protected function withoutManualParameterName($app): void
+    {
+        tap($app['config'], static function (Repository $config) {
+            $config->set('multitenancy.resolvers.subdomain.parameter', null);
+        });
+    }
+
+    protected function withoutParameterPattern($app): void
+    {
+        tap($app['config'], static function (Repository $config) {
+            $config->set('multitenancy.resolvers.subdomain.pattern', null);
+        });
+    }
+
     protected function defineRoutes($router)
     {
         $router->get('/', function () {
@@ -51,15 +72,6 @@ class SubdomainResolverTest extends TestCase
         $router->get('/subdomain-request', function (#[CurrentTenant] Tenant $tenant) {
             return $tenant->getTenantKey();
         })->middleware('sprout.tenanted')->name('subdomain.request');
-    }
-
-    #[Test, DefineEnvironment('withManualParameterName')]
-    public function allowsForCustomParameterName(): void
-    {
-        /** @var \Sprout\Http\Resolvers\SubdomainIdentityResolver $resolver */
-        $resolver = resolver('subdomain');
-
-        $this->assertSame('custom-parameter', $resolver->getParameter());
     }
 
     #[Test]
@@ -106,5 +118,41 @@ class SubdomainResolverTest extends TestCase
         $result = $this->get('http://localhost/subdomain-request');
 
         $result->assertInternalServerError();
+    }
+
+    #[Test, DefineEnvironment('withoutParameterPattern')]
+    public function hasNoParameterPatternByDefault(): void
+    {
+        /** @var \Sprout\Http\Resolvers\SubdomainIdentityResolver $resolver */
+        $resolver = resolver('subdomain');
+
+        $this->assertNull($resolver->getPattern());
+    }
+
+    #[Test, DefineEnvironment('withoutManualParameterName')]
+    public function hasDefaultParameterNameByDefault(): void
+    {
+        /** @var \Sprout\Http\Resolvers\SubdomainIdentityResolver $resolver */
+        $resolver = resolver('subdomain');
+
+        $this->assertSame('{tenancy}_{resolver}', $resolver->getParameter());
+    }
+
+    #[Test, DefineEnvironment('withManualParameterName')]
+    public function allowsForCustomParameterName(): void
+    {
+        /** @var \Sprout\Http\Resolvers\SubdomainIdentityResolver $resolver */
+        $resolver = resolver('subdomain');
+
+        $this->assertSame('custom-parameter', $resolver->getParameter());
+    }
+
+    #[Test, DefineEnvironment('withParameterPatternName')]
+    public function allowsForCustomParameterPattern(): void
+    {
+        /** @var \Sprout\Http\Resolvers\SubdomainIdentityResolver $resolver */
+        $resolver = resolver('subdomain');
+
+        $this->assertSame('.*', $resolver->getPattern());
     }
 }

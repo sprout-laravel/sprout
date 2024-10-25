@@ -139,7 +139,7 @@ trait FindsIdentityInRouteParameter
      */
     public function hasPattern(): bool
     {
-        return $this->pattern !== null;
+        return $this->getPattern() !== null;
     }
 
     /**
@@ -167,7 +167,7 @@ trait FindsIdentityInRouteParameter
     protected function getParameterPatternMapping(Tenancy $tenancy): array
     {
         if (! $this->hasPattern()) {
-            return [];
+            return []; // @codeCoverageIgnore
         }
 
         return [
@@ -191,7 +191,7 @@ trait FindsIdentityInRouteParameter
      */
     protected function applyParameterPatternMapping(RouteRegistrar $registrar, Tenancy $tenancy): RouteRegistrar
     {
-        if ($this->hasPattern()) {
+        if (! $this->hasPattern()) {
             return $registrar;
         }
 
