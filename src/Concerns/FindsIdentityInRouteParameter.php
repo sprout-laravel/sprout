@@ -219,7 +219,7 @@ trait FindsIdentityInRouteParameter
             return $identifier;
         }
 
-        return null;
+        return null; // @codeCoverageIgnore
     }
 
     /**
