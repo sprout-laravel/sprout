@@ -6,12 +6,14 @@ namespace Http\Resolvers;
 use Illuminate\Config\Repository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Routing\Router;
+use Orchestra\Testbench\Attributes\DefineEnvironment;
 use Orchestra\Testbench\Concerns\WithWorkbench;
 use Orchestra\Testbench\TestCase;
 use PHPUnit\Framework\Attributes\Test;
 use Sprout\Attributes\CurrentTenant;
 use Sprout\Contracts\Tenant;
 use Workbench\App\Models\TenantModel;
+use function Sprout\resolver;
 
 class PathResolverTest extends TestCase
 {
@@ -24,6 +26,13 @@ class PathResolverTest extends TestCase
         tap($app['config'], static function (Repository $config) {
             $config->set('multitenancy.providers.tenants.model', TenantModel::class);
             $config->set('multitenancy.defaults.resolver', 'path');
+        });
+    }
+
+    protected function withManualParameterName($app): void
+    {
+        tap($app['config'], static function (Repository $config) {
+            $config->set('multitenancy.resolvers.path.parameter', 'custom-parameter');
         });
     }
 
@@ -42,6 +51,15 @@ class PathResolverTest extends TestCase
         $router->get('/{identifier}/path-request', function (#[CurrentTenant] Tenant $tenant) {
             return $tenant->getTenantKey();
         })->middleware('sprout.tenanted')->name('path.request');
+    }
+
+    #[Test, DefineEnvironment('withManualParameterName')]
+    public function allowsForCustomParameterName(): void
+    {
+        /** @var \Sprout\Http\Resolvers\PathIdentityResolver $resolver */
+        $resolver = resolver('path');
+
+        $this->assertSame('custom-parameter', $resolver->getParameter());
     }
 
     #[Test]

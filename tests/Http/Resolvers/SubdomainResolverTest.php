@@ -6,12 +6,14 @@ namespace Http\Resolvers;
 use Illuminate\Config\Repository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Routing\Router;
+use Orchestra\Testbench\Attributes\DefineEnvironment;
 use Orchestra\Testbench\Concerns\WithWorkbench;
 use Orchestra\Testbench\TestCase;
 use PHPUnit\Framework\Attributes\Test;
 use Sprout\Attributes\CurrentTenant;
 use Sprout\Contracts\Tenant;
 use Workbench\App\Models\TenantModel;
+use function Sprout\resolver;
 
 class SubdomainResolverTest extends TestCase
 {
@@ -24,6 +26,13 @@ class SubdomainResolverTest extends TestCase
         tap($app['config'], static function (Repository $config) {
             $config->set('multitenancy.providers.tenants.model', TenantModel::class);
             $config->set('multitenancy.resolvers.subdomain.domain', 'localhost');
+        });
+    }
+
+    protected function withManualParameterName($app): void
+    {
+        tap($app['config'], static function (Repository $config) {
+            $config->set('multitenancy.resolvers.subdomain.parameter', 'custom-parameter');
         });
     }
 
@@ -42,6 +51,15 @@ class SubdomainResolverTest extends TestCase
         $router->get('/subdomain-request', function (#[CurrentTenant] Tenant $tenant) {
             return $tenant->getTenantKey();
         })->middleware('sprout.tenanted')->name('subdomain.request');
+    }
+
+    #[Test, DefineEnvironment('withManualParameterName')]
+    public function allowsForCustomParameterName(): void
+    {
+        /** @var \Sprout\Http\Resolvers\SubdomainIdentityResolver $resolver */
+        $resolver = resolver('subdomain');
+
+        $this->assertSame('custom-parameter', $resolver->getParameter());
     }
 
     #[Test]
