@@ -155,7 +155,7 @@ trait FindsIdentityInRouteParameter
     /**
      * Get the route parameter pattern mapping
      *
-     * This method returns an array mappings the route parameter name to its
+     * This method returns an array mapping the route parameter name to its
      * pattern, for use in route definitions.
      *
      * @template TenantClass of \Sprout\Contracts\Tenant
