@@ -16,7 +16,7 @@ use Sprout\Contracts\TenantHasResources;
 use Sprout\Exceptions\MisconfigurationException;
 use Sprout\Exceptions\TenancyMissing;
 use Sprout\Exceptions\TenantMissing;
-use Sprout\Overrides\Session\DatabaseSessionHandler;
+use Sprout\Overrides\Session\TenantAwareDatabaseSessionHandler;
 use Sprout\Sprout;
 use function Sprout\sprout;
 
@@ -196,7 +196,7 @@ final class SessionOverride implements BootableServiceOverride
 
     private static function createDatabaseDriver(): Closure
     {
-        return static function (): DatabaseSessionHandler {
+        return static function (): TenantAwareDatabaseSessionHandler {
             $table      = config('session.table');
             $lifetime   = config('session.lifetime');
             $connection = config('session.connection');
@@ -207,7 +207,7 @@ final class SessionOverride implements BootableServiceOverride
              * @var int         $lifetime
              */
 
-            return new DatabaseSessionHandler(
+            return new TenantAwareDatabaseSessionHandler(
                 app()->make('db')->connection($connection),
                 $table,
                 $lifetime,

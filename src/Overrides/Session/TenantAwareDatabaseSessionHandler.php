@@ -4,14 +4,13 @@ declare(strict_types=1);
 namespace Sprout\Overrides\Session;
 
 use Illuminate\Database\Query\Builder;
-use Illuminate\Session\DatabaseSessionHandler as OriginalDatabaseSessionHandler;
-use RuntimeException;
+use Illuminate\Session\DatabaseSessionHandler;
 use Sprout\Exceptions\TenancyMissing;
 use Sprout\Exceptions\TenantMissing;
 use function Sprout\sprout;
 
 /**
- * Database Session Handler
+ * Tenant Aware Database Session Handler
  *
  * This is a database session driver that wraps the default
  * {@see \Illuminate\Session\DatabaseSessionHandler} and adds a where clause
@@ -19,7 +18,7 @@ use function Sprout\sprout;
  *
  * @package Overrides
  */
-class DatabaseSessionHandler extends OriginalDatabaseSessionHandler
+class TenantAwareDatabaseSessionHandler extends DatabaseSessionHandler
 {
     /**
      * Get a fresh query builder instance for the table.
