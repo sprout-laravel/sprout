@@ -13,7 +13,6 @@ use Illuminate\Cache\MemcachedStore;
 use Illuminate\Cache\NullStore;
 use Illuminate\Cache\RedisStore;
 use Illuminate\Contracts\Foundation\Application;
-use RuntimeException;
 use Sprout\Contracts\BootableServiceOverride;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
@@ -28,8 +27,6 @@ use Sprout\Sprout;
  * cache service.
  *
  * @package Overrides
- *
- * @codeCoverageIgnore
  */
 final class CacheOverride implements BootableServiceOverride
 {

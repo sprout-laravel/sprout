@@ -7,7 +7,6 @@ use Closure;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Session\FileSessionHandler;
 use Illuminate\Session\SessionManager;
-use RuntimeException;
 use Sprout\Concerns\OverridesCookieSettings;
 use Sprout\Contracts\BootableServiceOverride;
 use Sprout\Contracts\Tenancy;
@@ -27,8 +26,6 @@ use function Sprout\sprout;
  * session service.
  *
  * @package Overrides
- *
- * @codeCoverageIgnore
  */
 final class SessionOverride implements BootableServiceOverride
 {

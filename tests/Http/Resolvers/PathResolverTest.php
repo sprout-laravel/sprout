@@ -1,17 +1,19 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Tests\Resolvers;
+namespace Http\Resolvers;
 
 use Illuminate\Config\Repository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Routing\Router;
+use Orchestra\Testbench\Attributes\DefineEnvironment;
 use Orchestra\Testbench\Concerns\WithWorkbench;
 use Orchestra\Testbench\TestCase;
 use PHPUnit\Framework\Attributes\Test;
 use Sprout\Attributes\CurrentTenant;
 use Sprout\Contracts\Tenant;
 use Workbench\App\Models\TenantModel;
+use function Sprout\resolver;
 
 class PathResolverTest extends TestCase
 {
@@ -27,7 +29,35 @@ class PathResolverTest extends TestCase
         });
     }
 
-    protected function defineRoutes($router)
+    protected function withManualParameterName($app): void
+    {
+        tap($app['config'], static function (Repository $config) {
+            $config->set('multitenancy.resolvers.path.parameter', 'custom-parameter');
+        });
+    }
+
+    protected function withParameterPatternName($app): void
+    {
+        tap($app['config'], static function (Repository $config) {
+            $config->set('multitenancy.resolvers.path.pattern', '.*');
+        });
+    }
+
+    protected function withoutManualParameterName($app): void
+    {
+        tap($app['config'], static function (Repository $config) {
+            $config->set('multitenancy.resolvers.path.parameter', null);
+        });
+    }
+
+    protected function withoutParameterPattern($app): void
+    {
+        tap($app['config'], static function (Repository $config) {
+            $config->set('multitenancy.resolvers.path.pattern', null);
+        });
+    }
+
+    protected function defineRoutes($router): void
     {
         $router->get('/', function () {
             return 'no';
@@ -80,5 +110,41 @@ class PathResolverTest extends TestCase
         $result = $this->get('/i-am-not-real/path-request');
 
         $result->assertInternalServerError();
+    }
+
+    #[Test, DefineEnvironment('withoutParameterPattern')]
+    public function hasNoParameterPatternByDefault(): void
+    {
+        /** @var \Sprout\Http\Resolvers\SubdomainIdentityResolver $resolver */
+        $resolver = resolver('path');
+
+        $this->assertNull($resolver->getPattern());
+    }
+
+    #[Test, DefineEnvironment('withoutManualParameterName')]
+    public function hasDefaultParameterNameByDefault(): void
+    {
+        /** @var \Sprout\Http\Resolvers\SubdomainIdentityResolver $resolver */
+        $resolver = resolver('path');
+
+        $this->assertSame('{tenancy}_{resolver}', $resolver->getParameter());
+    }
+
+    #[Test, DefineEnvironment('withManualParameterName')]
+    public function allowsForCustomParameterName(): void
+    {
+        /** @var \Sprout\Http\Resolvers\PathIdentityResolver $resolver */
+        $resolver = resolver('path');
+
+        $this->assertSame('custom-parameter', $resolver->getParameter());
+    }
+
+    #[Test, DefineEnvironment('withParameterPatternName')]
+    public function allowsForCustomParameterPattern(): void
+    {
+        /** @var \Sprout\Http\Resolvers\PathIdentityResolver $resolver */
+        $resolver = resolver('path');
+
+        $this->assertSame('.*', $resolver->getPattern());
     }
 }
