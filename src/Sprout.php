@@ -9,6 +9,7 @@ use Sprout\Contracts\Tenancy;
 use Sprout\Managers\IdentityResolverManager;
 use Sprout\Managers\ProviderManager;
 use Sprout\Managers\TenancyManager;
+use Sprout\Support\ResolutionHook;
 
 /**
  * Sprout
@@ -191,5 +192,22 @@ final class Sprout
     public function getOverrides(): array
     {
         return $this->overrides;
+    }
+
+    /**
+     * Check if a resolution hook is enabled
+     *
+     * @param \Sprout\Support\ResolutionHook $hook
+     *
+     * @return bool
+     *
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     */
+    public function supportsHook(ResolutionHook $hook): bool
+    {
+        /** @var array<ResolutionHook> $enabledHooks */
+        $enabledHooks = $this->config('hooks', []);
+
+        return in_array($hook, $enabledHooks, true);
     }
 }

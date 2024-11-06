@@ -17,6 +17,7 @@ use Sprout\Listeners\IdentifyTenantOnRouting;
 use Sprout\Managers\IdentityResolverManager;
 use Sprout\Managers\ProviderManager;
 use Sprout\Managers\TenancyManager;
+use Sprout\Support\ResolutionHook;
 
 /**
  * Sprout Service Provider
@@ -120,7 +121,7 @@ class SproutServiceProvider extends ServiceProvider
         $events = $this->app->make(Dispatcher::class);
 
         // If we should be listening for routing
-        if ($this->sprout->shouldListenForRouting()) {
+        if ($this->sprout->supportsHook(ResolutionHook::Routing)) {
             $events->listen(RouteMatched::class, IdentifyTenantOnRouting::class);
         }
     }
