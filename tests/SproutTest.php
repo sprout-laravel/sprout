@@ -10,6 +10,7 @@ use Orchestra\Testbench\TestCase;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use Sprout\Sprout;
+use Sprout\Support\ResolutionHook;
 use Workbench\App\Models\TenantModel;
 
 #[Group('core')]
@@ -49,13 +50,13 @@ class SproutTest extends TestCase
 
         $this->assertFalse($sprout->config('listen_for_routing'));
         $this->assertFalse(config('sprout.listen_for_routing'));
-        $this->assertFalse($sprout->shouldListenForRouting());
+        $this->assertFalse($sprout->supportsHook(ResolutionHook::Routing));
 
         app()['config']->set('sprout.listen_for_routing', true);
 
         $this->assertTrue($sprout->config('listen_for_routing'));
         $this->assertTrue(config('sprout.listen_for_routing'));
-        $this->assertTrue($sprout->shouldListenForRouting());
+        $this->assertTrue($sprout->supportsHook(ResolutionHook::Routing));
     }
 
     #[Test]

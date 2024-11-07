@@ -5,7 +5,6 @@ namespace Sprout\Listeners;
 
 use Illuminate\Support\Facades\Context;
 use Sprout\Events\CurrentTenantChanged;
-use Sprout\Sprout;
 
 /**
  * Set Current Tenant Context
@@ -28,7 +27,7 @@ final class SetCurrentTenantContext
     public function handle(CurrentTenantChanged $event): void
     {
         $contextKey = 'sprout.tenants';
-        $context = [];
+        $context    = [];
 
         if (Context::has($contextKey)) {
             /** @var array<string, int|string> $context */

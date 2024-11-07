@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Sprout\Exceptions;
 
+use Sprout\Support\ResolutionHook;
+
 /**
  * Misconfiguration Exception
  *
@@ -80,5 +82,17 @@ final class MisconfigurationException extends SproutException
     public static function noDefault(string $type): self
     {
         return new self('There is no default ' . $type . ' set');
+    }
+
+    /**
+     * Create a new exception for when a resolution hook is not supported
+     *
+     * @param \Sprout\Support\ResolutionHook $hook
+     *
+     * @return self
+     */
+    public static function unsupportedHook(ResolutionHook $hook): self
+    {
+        return new self('The resolution hook [' . $hook->name . '] is not supported');
     }
 }
