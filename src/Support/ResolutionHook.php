@@ -14,11 +14,6 @@ namespace Sprout\Support;
 enum ResolutionHook
 {
     /**
-     * During the bootstrapping fo Laravel
-     */
-    case Bootstrapping;
-
-    /**
      * During the booting of service providers
      */
     case Booting;
