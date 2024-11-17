@@ -14,7 +14,6 @@ return [
     */
 
     'hooks' => [
-        // \Sprout\Support\ResolutionHook::Bootstrapping,
         // \Sprout\Support\ResolutionHook::Booting,
         \Sprout\Support\ResolutionHook::Routing,
         \Sprout\Support\ResolutionHook::Middleware,
