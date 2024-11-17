@@ -9,7 +9,6 @@ use Sprout\Contracts\DeferrableServiceOverride;
 use Sprout\Contracts\ServiceOverride;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
-use Sprout\Overrides\StorageOverride;
 
 trait HandlesServiceOverrides
 {
@@ -39,7 +38,7 @@ trait HandlesServiceOverrides
     private array $bootedOverrides = [];
 
     /**
-     * @var array<string, array<class-string<\Sprout\Contracts\ServiceOverride>>
+     * @var array<string, array<class-string<\Sprout\Contracts\ServiceOverride>, bool>>
      */
     private array $setupOverrides = [];
 
@@ -97,6 +96,7 @@ trait HandlesServiceOverrides
 
         // The override is bootable
         if ($override instanceof BootableServiceOverride) {
+            /** @var class-string<\Sprout\Contracts\BootableServiceOverride> $overrideClass */
             // So register it as one
             $this->bootableOverrides[$overrideClass] = $override;
             $this->bootedOverrides[$overrideClass]   = false;
@@ -203,17 +203,16 @@ trait HandlesServiceOverrides
     /**
      * Boot a service override
      *
-     * @template TenantClass of \Sprout\Contracts\Tenant
-     *
-     * @param class-string<\Sprout\Contracts\BootableServiceOverride> $overrideClass
-     *
-     * @phpstan-param TenantClass                                     $tenant
+     * @param class-string<\Sprout\Contracts\ServiceOverride> $overrideClass
      *
      * @return void
      */
     protected function bootOverride(string $overrideClass): void
     {
-        $this->overrides[$overrideClass]->boot($this->app, $this);
+        /** @var \Sprout\Contracts\BootableServiceOverride $override */
+        $override = $this->overrides[$overrideClass];
+
+        $override->boot($this->app, $this);
         $this->bootedOverrides[$overrideClass] = true;
     }
 
@@ -359,11 +358,11 @@ trait HandlesServiceOverrides
     /**
      * Get all service overrides for a tenancy
      *
-     * @param \Sprout\Contracts\Tenancy|null $tenancy
+     * @param \Sprout\Contracts\Tenancy<*>|null $tenancy
      *
-     * @return \Sprout\Contracts\ServiceOverride[]|void
+     * @return array<\Sprout\Contracts\ServiceOverride>
      */
-    public function getCurrentOverrides(?Tenancy $tenancy = null)
+    public function getCurrentOverrides(?Tenancy $tenancy = null): array
     {
         $tenancy ??= $this->getCurrentTenancy();
 
@@ -376,5 +375,7 @@ trait HandlesServiceOverrides
                 ARRAY_FILTER_USE_KEY
             );
         }
+
+        return [];
     }
 }

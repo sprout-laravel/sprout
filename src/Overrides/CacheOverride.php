@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Sprout\Overrides;
 
+use Illuminate\Cache\ApcStore;
 use Illuminate\Cache\ApcWrapper;
 use Illuminate\Cache\ArrayStore;
 use Illuminate\Cache\CacheManager;
