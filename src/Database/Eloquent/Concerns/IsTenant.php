@@ -27,6 +27,7 @@ trait IsTenant
      */
     public function getTenantIdentifier(): string
     {
+        /** @phpstan-ignore return.type */
         return $this->getAttribute($this->getTenantIdentifierName());
     }
 
@@ -57,6 +58,7 @@ trait IsTenant
      */
     public function getTenantKey(): int|string
     {
+        /** @phpstan-ignore return.type */
         return $this->getKey();
     }
 

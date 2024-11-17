@@ -24,7 +24,10 @@ class DatabaseTenantProviderTest extends TestCase
     protected function defineEnvironment($app): void
     {
         tap($app['config'], static function (Repository $config) {
-            $config->set('multitenancy.providers.backup.table', 'tenants');
+            $config->set('multitenancy.providers.backup', [
+                'driver' => 'database',
+                'table'  => 'tenants',
+            ]);
         });
     }
 

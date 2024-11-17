@@ -36,6 +36,11 @@ final class Sprout
     private array $overrides = [];
 
     /**
+     * @var bool
+     */
+    private bool $withinContext = false;
+
+    /**
      * Create a new instance
      *
      * @param \Illuminate\Contracts\Foundation\Application $app
@@ -74,6 +79,8 @@ final class Sprout
         if ($this->getCurrentTenancy() !== $tenancy) {
             $this->tenancies[] = $tenancy;
         }
+
+        $this->markAsInContext();
     }
 
     /**
@@ -209,5 +216,39 @@ final class Sprout
         $enabledHooks = $this->config('hooks', []);
 
         return in_array($hook, $enabledHooks, true);
+    }
+
+    /**
+     * Flag the current request as being within multitenanted context
+     *
+     * @return static
+     */
+    public function markAsInContext(): self
+    {
+        $this->withinContext = true;
+
+        return $this;
+    }
+
+    /**
+     * Flag the current request as being outside multitenanted context
+     *
+     * @return static
+     */
+    public function maskAsOutsideContext(): self
+    {
+        $this->withinContext = false;
+
+        return $this;
+    }
+
+    /**
+     * Check if the current request is within multitenanted context
+     *
+     * @return bool
+     */
+    public function withinContext():bool
+    {
+        return $this->withinContext;
     }
 }

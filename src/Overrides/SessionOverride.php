@@ -5,6 +5,7 @@ namespace Sprout\Overrides;
 
 use Closure;
 use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Session\DatabaseSessionHandler as OriginalDatabaseSessionHandler;
 use Illuminate\Session\FileSessionHandler;
 use Illuminate\Session\SessionManager;
 use Sprout\Concerns\OverridesCookieSettings;
@@ -160,25 +161,28 @@ final class SessionOverride implements BootableServiceOverride
             /** @var string $originalPath */
             $originalPath = config('session.files');
             $path         = rtrim($originalPath, '/') . DIRECTORY_SEPARATOR;
-            $tenancy      = sprout()->getCurrentTenancy();
 
-            if ($tenancy === null) {
-                throw TenancyMissing::make();
+            if (sprout()->withinContext()) {
+                $tenancy = sprout()->getCurrentTenancy();
+
+                if ($tenancy === null) {
+                    throw TenancyMissing::make();
+                }
+
+                // If there's no tenant, error out
+                if (! $tenancy->check()) {
+                    throw TenantMissing::make($tenancy->getName());
+                }
+
+                $tenant = $tenancy->tenant();
+
+                // If the tenant isn't configured for resources, also error out
+                if (! ($tenant instanceof TenantHasResources)) {
+                    throw MisconfigurationException::misconfigured('tenant', $tenant::class, 'resources');
+                }
+
+                $path .= $tenant->getTenantResourceKey();
             }
-
-            // If there's no tenant, error out
-            if (! $tenancy->check()) {
-                throw TenantMissing::make($tenancy->getName());
-            }
-
-            $tenant = $tenancy->tenant();
-
-            // If the tenant isn't configured for resources, also error out
-            if (! ($tenant instanceof TenantHasResources)) {
-                throw MisconfigurationException::misconfigured('tenant', $tenant::class, 'resources');
-            }
-
-            $path .= $tenant->getTenantResourceKey();
 
             /** @var int $lifetime */
             $lifetime = config('session.lifetime');
@@ -193,7 +197,7 @@ final class SessionOverride implements BootableServiceOverride
 
     private static function createDatabaseDriver(): Closure
     {
-        return static function (): DatabaseSessionHandler {
+        return static function (): OriginalDatabaseSessionHandler {
             $table      = config('session.table');
             $lifetime   = config('session.lifetime');
             $connection = config('session.connection');
@@ -204,7 +208,16 @@ final class SessionOverride implements BootableServiceOverride
              * @var int         $lifetime
              */
 
-            return new DatabaseSessionHandler(
+            if (sprout()->withinContext()) {
+                return new DatabaseSessionHandler(
+                    app()->make('db')->connection($connection),
+                    $table,
+                    $lifetime,
+                    app()
+                );
+            }
+
+            return new OriginalDatabaseSessionHandler(
                 app()->make('db')->connection($connection),
                 $table,
                 $lifetime,
