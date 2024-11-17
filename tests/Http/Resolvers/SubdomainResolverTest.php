@@ -14,6 +14,7 @@ use Sprout\Attributes\CurrentTenant;
 use Sprout\Contracts\Tenant;
 use Workbench\App\Models\TenantModel;
 use function Sprout\resolver;
+use function Sprout\sprout;
 
 class SubdomainResolverTest extends TestCase
 {
@@ -86,6 +87,7 @@ class SubdomainResolverTest extends TestCase
 
         $result->assertOk();
         $result->assertContent((string)$tenant->getTenantKey());
+        $this->assertTrue(sprout()->withinContext());
     }
 
     #[Test]
@@ -95,6 +97,7 @@ class SubdomainResolverTest extends TestCase
 
         $result->assertOk();
         $result->assertContent('no');
+        $this->assertFalse(sprout()->withinContext());
     }
 
     #[Test]
