@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Http\Resolvers;
+namespace Sprout\Tests\Http\Resolvers;
 
 use Illuminate\Config\Repository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -26,6 +26,7 @@ class SubdomainResolverTest extends TestCase
         tap($app['config'], static function (Repository $config) {
             $config->set('multitenancy.providers.tenants.model', TenantModel::class);
             $config->set('multitenancy.resolvers.subdomain.domain', 'localhost');
+            $config->set('session.driver', 'database');
         });
     }
 
@@ -59,19 +60,21 @@ class SubdomainResolverTest extends TestCase
 
     protected function defineRoutes($router)
     {
-        $router->get('/', function () {
-            return 'no';
-        });
+        $router->middleware('web')->group(function (Router $router) {
+            $router->get('/', function () {
+                return 'no';
+            });
 
-        $router->tenanted(function (Router $router) {
-            $router->get('/subdomain-route', function (#[CurrentTenant] Tenant $tenant) {
+            $router->tenanted(function (Router $router) {
+                $router->get('/subdomain-route', function (#[CurrentTenant] Tenant $tenant) {
+                    return $tenant->getTenantKey();
+                })->name('subdomain.route');
+            }, 'subdomain', 'tenants');
+
+            $router->get('/subdomain-request', function (#[CurrentTenant] Tenant $tenant) {
                 return $tenant->getTenantKey();
-            })->name('subdomain.route');
-        }, 'subdomain', 'tenants');
-
-        $router->get('/subdomain-request', function (#[CurrentTenant] Tenant $tenant) {
-            return $tenant->getTenantKey();
-        })->middleware('sprout.tenanted')->name('subdomain.request');
+            })->middleware('sprout.tenanted')->name('subdomain.request');
+        });
     }
 
     #[Test]
@@ -83,6 +86,15 @@ class SubdomainResolverTest extends TestCase
 
         $result->assertOk();
         $result->assertContent((string)$tenant->getTenantKey());
+    }
+
+    #[Test]
+    public function canAccessNonTenantedRoutesSuccessfully(): void
+    {
+        $result = $this->get('/');
+
+        $result->assertOk();
+        $result->assertContent('no');
     }
 
     #[Test]
