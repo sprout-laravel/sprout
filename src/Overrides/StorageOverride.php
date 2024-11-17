@@ -9,6 +9,7 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Filesystem\FilesystemManager;
 use RuntimeException;
 use Sprout\Contracts\BootableServiceOverride;
+use Sprout\Contracts\DeferrableServiceOverride;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 use Sprout\Contracts\TenantHasResources;
@@ -24,8 +25,18 @@ use Sprout\Sprout;
  *
  * @package Overrides
  */
-final class StorageOverride implements BootableServiceOverride
+final class StorageOverride implements BootableServiceOverride, DeferrableServiceOverride
 {
+    /**
+     * Get the service to watch for before overriding
+     *
+     * @return string
+     */
+    public static function service(): string
+    {
+        return 'filesystem';
+    }
+
     /**
      * Boot a service override
      *

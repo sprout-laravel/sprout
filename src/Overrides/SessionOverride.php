@@ -10,6 +10,7 @@ use Illuminate\Session\FileSessionHandler;
 use Illuminate\Session\SessionManager;
 use Sprout\Concerns\OverridesCookieSettings;
 use Sprout\Contracts\BootableServiceOverride;
+use Sprout\Contracts\DeferrableServiceOverride;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 use Sprout\Contracts\TenantHasResources;
@@ -28,7 +29,7 @@ use function Sprout\sprout;
  *
  * @package Overrides
  */
-final class SessionOverride implements BootableServiceOverride
+final class SessionOverride implements BootableServiceOverride, DeferrableServiceOverride
 {
     use OverridesCookieSettings;
 
@@ -45,6 +46,16 @@ final class SessionOverride implements BootableServiceOverride
     public static function doNotOverrideDatabase(): void
     {
         self::$overrideDatabase = false;
+    }
+
+    /**
+     * Get the service to watch for before overriding
+     *
+     * @return string
+     */
+    public static function service(): string
+    {
+        return SessionManager::class;
     }
 
     /**

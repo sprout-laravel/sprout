@@ -20,8 +20,10 @@ use Sprout\Overrides\CacheOverride;
 use Sprout\Overrides\CookieOverride;
 use Sprout\Overrides\JobOverride;
 use Sprout\Overrides\SessionOverride;
+use Sprout\Overrides\StorageOverride;
 use Workbench\App\Models\NoResourcesTenantModel;
 use Workbench\App\Models\TenantModel;
+use function Sprout\sprout;
 
 #[Group('services'), Group('filesystem')]
 class StorageOverrideTest extends TestCase
@@ -57,6 +59,20 @@ class StorageOverrideTest extends TestCase
                 AuthOverride::class,
                 CookieOverride::class,
                 SessionOverride::class,
+            ]);
+        });
+    }
+
+    protected function yesStorageOverride($app): void
+    {
+        tap($app['config'], static function (Repository $config) {
+            $config->set('sprout.services', [
+                JobOverride::class,
+                CacheOverride::class,
+                AuthOverride::class,
+                CookieOverride::class,
+                SessionOverride::class,
+                StorageOverride::class
             ]);
         });
     }
@@ -116,7 +132,11 @@ class StorageOverrideTest extends TestCase
     {
         $tenant = TenantModel::factory()->createOne();
 
-        app(TenancyManager::class)->get()->setTenant($tenant);
+        $tenancy = app(TenancyManager::class)->get();
+
+        sprout()->setCurrentTenancy($tenancy);
+
+        $tenancy->setTenant($tenant);
 
         Storage::disk('tenant');
 
@@ -130,7 +150,11 @@ class StorageOverrideTest extends TestCase
     {
         $tenant1 = TenantModel::factory()->createOne();
 
-        app(TenancyManager::class)->get()->setTenant($tenant1);
+        $tenancy = app(TenancyManager::class)->get();
+
+        sprout()->setCurrentTenancy($tenancy);
+
+        $tenancy->setTenant($tenant1);
 
         $disk = Storage::disk('tenant');
 

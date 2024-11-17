@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Sprout\Overrides;
 
-use Illuminate\Cache\ApcStore;
 use Illuminate\Cache\ApcWrapper;
 use Illuminate\Cache\ArrayStore;
 use Illuminate\Cache\CacheManager;
@@ -14,6 +13,7 @@ use Illuminate\Cache\NullStore;
 use Illuminate\Cache\RedisStore;
 use Illuminate\Contracts\Foundation\Application;
 use Sprout\Contracts\BootableServiceOverride;
+use Sprout\Contracts\DeferrableServiceOverride;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 use Sprout\Exceptions\MisconfigurationException;
@@ -28,7 +28,7 @@ use Sprout\Sprout;
  *
  * @package Overrides
  */
-final class CacheOverride implements BootableServiceOverride
+final class CacheOverride implements BootableServiceOverride, DeferrableServiceOverride
 {
     /**
      * Cache stores that can be purged
@@ -36,6 +36,16 @@ final class CacheOverride implements BootableServiceOverride
      * @var list<string>
      */
     private static array $purgableStores = [];
+
+    /**
+     * Get the service to watch for before overriding
+     *
+     * @return string
+     */
+    public static function service(): string
+    {
+        return CacheManager::class;
+    }
 
     /**
      * Boot a service override
