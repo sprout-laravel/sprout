@@ -88,6 +88,16 @@ class BelongsToManyTenantsTest extends TestCase
     }
 
     #[Test]
+    public function doesNotAutomaticallyAssociateWithTenantWhenCreatingWhenOutsideMultitenantedContext(): void
+    {
+        $child = TenantChildren::factory()->create();
+
+        $this->assertTrue($child->exists);
+        $this->assertFalse($child->relationLoaded('tenants'));
+        $this->assertTrue($child->tenants->isEmpty());
+    }
+
+    #[Test]
     public function throwsAnExceptionIfTheresNoTenantAndTheTenantIsNotOptionalWhenCreating(): void
     {
         sprout()->setCurrentTenancy(app(TenancyManager::class)->get());
@@ -98,6 +108,15 @@ class BelongsToManyTenantsTest extends TestCase
         );
 
         TenantChildren::factory()->create();
+    }
+
+    #[Test]
+    public function doesNotThrowAnExceptionIfTheresNoTenantAndTheTenantIsNotOptionalWhenCreatingWhenOutsideMultitenantedContext(): void
+    {
+        $model = TenantChildren::factory()->create();
+
+        $this->assertNotNull($model);
+        $this->assertTrue($model->exists);
     }
 
     #[Test]
@@ -160,6 +179,16 @@ class BelongsToManyTenantsTest extends TestCase
         $this->assertTrue($child->exists);
         $this->assertTrue($child->relationLoaded('tenants'));
         $this->assertNotNull($child->getRelation('tenants')->first(fn (Model $model) => $model->is($tenant)));
+    }
+
+    #[Test]
+    public function doesNotAutomaticallyPopulateTheTenantRelationWhenHydratingWhenOutsideMultitenantedContext(): void
+    {
+
+        $child = TenantChildren::query()->find(TenantChildren::factory()->create()->getKey());
+
+        $this->assertTrue($child->exists);
+        $this->assertFalse($child->relationLoaded('tenants'));
     }
 
     #[Test]
