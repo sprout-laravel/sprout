@@ -17,7 +17,7 @@ use Sprout\Contracts\TenantHasResources;
 use Sprout\Exceptions\MisconfigurationException;
 use Sprout\Exceptions\TenancyMissing;
 use Sprout\Exceptions\TenantMissing;
-use Sprout\Overrides\Session\DatabaseSessionHandler;
+use Sprout\Overrides\Session\TenantAwareDatabaseSessionHandler;
 use Sprout\Sprout;
 use function Sprout\sprout;
 
@@ -220,7 +220,7 @@ final class SessionOverride implements BootableServiceOverride, DeferrableServic
              */
 
             if (sprout()->withinContext()) {
-                return new DatabaseSessionHandler(
+                return new TenantAwareDatabaseSessionHandler(
                     app()->make('db')->connection($connection),
                     $table,
                     $lifetime,
