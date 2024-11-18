@@ -4,12 +4,11 @@ declare(strict_types=1);
 namespace Sprout\Http\Middleware;
 
 use Closure;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Sprout\Sprout;
 use Sprout\Support\ResolutionHelper;
 use Sprout\Support\ResolutionHook;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Tenant Routes Middleware
@@ -55,7 +54,7 @@ final class TenantRoutes
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
      * @throws \Sprout\Exceptions\MisconfigurationException
      */
-    public function handle(Request $request, Closure $next, string ...$options): Response|RedirectResponse
+    public function handle(Request $request, Closure $next, string ...$options): Response
     {
         if ($this->sprout->supportsHook(ResolutionHook::Middleware)) {
             [$resolverName, $tenancyName] = ResolutionHelper::parseOptions($options);
