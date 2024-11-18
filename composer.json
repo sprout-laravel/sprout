@@ -4,7 +4,7 @@
   "type"             : "library",
   "require"          : {
     "php"              : "^8.2",
-    "laravel/framework": "^11.0",
+    "laravel/framework": "^11.32",
     "league/flysystem-path-prefixing": "^3.0"
   },
   "require-dev"      : {
