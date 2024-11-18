@@ -14,24 +14,9 @@ namespace Sprout\Concerns;
 trait OverridesCookieSettings
 {
     /**
-     * @var string|null
+     * @var array{path?:string|null,domain?:string|null,secure?:bool|null,same_site?:string|null}
      */
-    protected static ?string $path = null;
-
-    /**
-     * @var string|null
-     */
-    protected static ?string $domain = null;
-
-    /**
-     * @var bool|null
-     */
-    protected static ?bool $secure = null;
-
-    /**
-     * @var string|null
-     */
-    protected static ?string $sameSite = null;
+    protected static array $settings = [];
 
     /**
      * Set the cookie domain
@@ -42,7 +27,7 @@ trait OverridesCookieSettings
      */
     public static function setDomain(?string $domain): void
     {
-        self::$domain = $domain;
+        self::$settings['domain'] = $domain;
     }
 
     /**
@@ -54,7 +39,7 @@ trait OverridesCookieSettings
      */
     public static function setPath(?string $path): void
     {
-        self::$path = $path;
+        self::$settings['path'] = '/' . ltrim($path, '/');
     }
 
     // @codeCoverageIgnoreStart
@@ -68,7 +53,7 @@ trait OverridesCookieSettings
      */
     public static function setSameSite(?string $sameSite): void
     {
-        self::$sameSite = $sameSite;
+        self::$settings['same_site'] = $sameSite;
     }
 
     /**
@@ -80,7 +65,7 @@ trait OverridesCookieSettings
      */
     public static function setSecure(?bool $secure): void
     {
-        self::$secure = $secure;
+        self::$settings['secure'] = $secure;
     }
     // @codeCoverageIgnoreEnd
 }
