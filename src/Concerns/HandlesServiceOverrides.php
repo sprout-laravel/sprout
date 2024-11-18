@@ -122,6 +122,10 @@ trait HandlesServiceOverrides
         // Register the deferred override and its service
         $this->deferredOverrides[$overrideClass] = $overrideClass::service();
 
+        if ($this->app->resolved($overrideClass::service())) {
+            $this->processOverride($overrideClass);
+        }
+
         $this->app->afterResolving($overrideClass::service(), function () use ($overrideClass) {
             $this->processOverride($overrideClass);
 
