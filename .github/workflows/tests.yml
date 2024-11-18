@@ -39,7 +39,7 @@ jobs:
         run: vendor/bin/testbench vendor:publish --provider="Sprout\\SproutServiceProvider"
 
       - name: Execute tests
-        run: composer test
+        run: vendor/bin/phpunit --testsuite=Unit,Feature
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v4
