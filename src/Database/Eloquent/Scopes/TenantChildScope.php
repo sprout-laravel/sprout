@@ -20,6 +20,11 @@ use Illuminate\Database\Eloquent\Scope;
 abstract class TenantChildScope implements Scope
 {
     /**
+     * @var array<string, string>
+     */
+    protected array $extensions = [];
+
+    /**
      * Extend the query builder with the necessary macros
      *
      * @template ModelClass of \Illuminate\Database\Eloquent\Model
@@ -34,5 +39,9 @@ abstract class TenantChildScope implements Scope
             /** @phpstan-ignore-next-line */
             return $builder->withoutGlobalScope($this);
         });
+
+        foreach ($this->extensions as $macro => $method) {
+            $builder->macro($macro, $this->$method(...));
+        }
     }
 }
