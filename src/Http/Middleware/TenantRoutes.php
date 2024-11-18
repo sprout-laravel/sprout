@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Sprout\Http\Middleware;
 
 use Closure;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Sprout\Sprout;
@@ -54,7 +55,7 @@ final class TenantRoutes
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
      * @throws \Sprout\Exceptions\MisconfigurationException
      */
-    public function handle(Request $request, Closure $next, string ...$options): Response
+    public function handle(Request $request, Closure $next, string ...$options): Response|RedirectResponse
     {
         if ($this->sprout->supportsHook(ResolutionHook::Middleware)) {
             [$resolverName, $tenancyName] = ResolutionHelper::parseOptions($options);
