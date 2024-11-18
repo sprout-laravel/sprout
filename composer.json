@@ -63,7 +63,7 @@
       "@clear",
       "@prepare",
       "@build",
-      "@php vendor/bin/phpunit"
+      "@php vendor/bin/phpunit --testsuite=Unit,Feature"
     ]
   },
   "extra"            : {
