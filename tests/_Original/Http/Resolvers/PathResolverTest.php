@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Tests\Http\Resolvers;
+namespace Sprout\Tests\_Original\Http\Resolvers;
 
 use Illuminate\Config\Repository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -14,9 +14,8 @@ use Sprout\Attributes\CurrentTenant;
 use Sprout\Contracts\Tenant;
 use Workbench\App\Models\TenantModel;
 use function Sprout\resolver;
-use function Sprout\sprout;
 
-class SubdomainResolverTest extends TestCase
+class PathResolverTest extends TestCase
 {
     use WithWorkbench, RefreshDatabase;
 
@@ -26,56 +25,53 @@ class SubdomainResolverTest extends TestCase
     {
         tap($app['config'], static function (Repository $config) {
             $config->set('multitenancy.providers.tenants.model', TenantModel::class);
-            $config->set('multitenancy.resolvers.subdomain.domain', 'localhost');
-            $config->set('session.driver', 'database');
+            $config->set('multitenancy.defaults.resolver', 'path');
         });
     }
 
     protected function withManualParameterName($app): void
     {
         tap($app['config'], static function (Repository $config) {
-            $config->set('multitenancy.resolvers.subdomain.parameter', 'custom-parameter');
+            $config->set('multitenancy.resolvers.path.parameter', 'custom-parameter');
         });
     }
 
     protected function withParameterPatternName($app): void
     {
         tap($app['config'], static function (Repository $config) {
-            $config->set('multitenancy.resolvers.subdomain.pattern', '.*');
+            $config->set('multitenancy.resolvers.path.pattern', '.*');
         });
     }
 
     protected function withoutManualParameterName($app): void
     {
         tap($app['config'], static function (Repository $config) {
-            $config->set('multitenancy.resolvers.subdomain.parameter', null);
+            $config->set('multitenancy.resolvers.path.parameter', null);
         });
     }
 
     protected function withoutParameterPattern($app): void
     {
         tap($app['config'], static function (Repository $config) {
-            $config->set('multitenancy.resolvers.subdomain.pattern', null);
+            $config->set('multitenancy.resolvers.path.pattern', null);
         });
     }
 
-    protected function defineRoutes($router)
+    protected function defineRoutes($router): void
     {
-        $router->middleware('web')->group(function (Router $router) {
-            $router->get('/', function () {
-                return 'no';
-            });
-
-            $router->tenanted(function (Router $router) {
-                $router->get('/subdomain-route', function (#[CurrentTenant] Tenant $tenant) {
-                    return $tenant->getTenantKey();
-                })->name('subdomain.route');
-            }, 'subdomain', 'tenants');
-
-            $router->get('/subdomain-request', function (#[CurrentTenant] Tenant $tenant) {
-                return $tenant->getTenantKey();
-            })->middleware('sprout.tenanted')->name('subdomain.request');
+        $router->get('/', function () {
+            return 'no';
         });
+
+        $router->tenanted(function (Router $router) {
+            $router->get('/path-route', function (#[CurrentTenant] Tenant $tenant) {
+                return $tenant->getTenantKey();
+            })->name('path.route');
+        }, 'path', 'tenants');
+
+        $router->get('/{identifier}/path-request', function (#[CurrentTenant] Tenant $tenant) {
+            return $tenant->getTenantKey();
+        })->middleware('sprout.tenanted')->name('path.request');
     }
 
     #[Test]
@@ -83,21 +79,10 @@ class SubdomainResolverTest extends TestCase
     {
         $tenant = TenantModel::factory()->createOne();
 
-        $result = $this->get(route('subdomain.route', ['tenants_subdomain' => $tenant->getTenantIdentifier()]));
+        $result = $this->get(route('path.route', ['tenants_path' => $tenant->getTenantIdentifier()]));
 
         $result->assertOk();
         $result->assertContent((string)$tenant->getTenantKey());
-        $this->assertTrue(sprout()->withinContext());
-    }
-
-    #[Test]
-    public function canAccessNonTenantedRoutesSuccessfully(): void
-    {
-        $result = $this->get('/');
-
-        $result->assertOk();
-        $result->assertContent('no');
-        $this->assertFalse(sprout()->withinContext());
     }
 
     #[Test]
@@ -105,7 +90,7 @@ class SubdomainResolverTest extends TestCase
     {
         $tenant = TenantModel::factory()->createOne();
 
-        $result = $this->get('http://' . $tenant->getTenantIdentifier() . '.localhost/subdomain-request');
+        $result = $this->get('/' . $tenant->getTenantIdentifier() . '/path-request');
 
         $result->assertOk();
         $result->assertContent((string)$tenant->getTenantKey());
@@ -114,7 +99,7 @@ class SubdomainResolverTest extends TestCase
     #[Test]
     public function throwsExceptionForInvalidTenantWithParameter(): void
     {
-        $result = $this->get(route('subdomain.route', ['tenants_subdomain' => 'i-am-not-real']));
+        $result = $this->get(route('path.route', ['tenants_path' => 'i-am-not-real']));
 
         $result->assertInternalServerError();
     }
@@ -122,15 +107,7 @@ class SubdomainResolverTest extends TestCase
     #[Test]
     public function throwsExceptionForInvalidTenantWithoutParameter(): void
     {
-        $result = $this->get('http://i-am-not-real.localhost/subdomain-request');
-
-        $result->assertInternalServerError();
-    }
-
-    #[Test]
-    public function throwsExceptionForInvalidTenantWithJustMultitenantedDomain(): void
-    {
-        $result = $this->get('http://localhost/subdomain-request');
+        $result = $this->get('/i-am-not-real/path-request');
 
         $result->assertInternalServerError();
     }
@@ -139,7 +116,7 @@ class SubdomainResolverTest extends TestCase
     public function hasNoParameterPatternByDefault(): void
     {
         /** @var \Sprout\Http\Resolvers\SubdomainIdentityResolver $resolver */
-        $resolver = resolver('subdomain');
+        $resolver = resolver('path');
 
         $this->assertNull($resolver->getPattern());
     }
@@ -148,7 +125,7 @@ class SubdomainResolverTest extends TestCase
     public function hasDefaultParameterNameByDefault(): void
     {
         /** @var \Sprout\Http\Resolvers\SubdomainIdentityResolver $resolver */
-        $resolver = resolver('subdomain');
+        $resolver = resolver('path');
 
         $this->assertSame('{tenancy}_{resolver}', $resolver->getParameter());
     }
@@ -156,8 +133,8 @@ class SubdomainResolverTest extends TestCase
     #[Test, DefineEnvironment('withManualParameterName')]
     public function allowsForCustomParameterName(): void
     {
-        /** @var \Sprout\Http\Resolvers\SubdomainIdentityResolver $resolver */
-        $resolver = resolver('subdomain');
+        /** @var \Sprout\Http\Resolvers\PathIdentityResolver $resolver */
+        $resolver = resolver('path');
 
         $this->assertSame('custom-parameter', $resolver->getParameter());
     }
@@ -165,8 +142,8 @@ class SubdomainResolverTest extends TestCase
     #[Test, DefineEnvironment('withParameterPatternName')]
     public function allowsForCustomParameterPattern(): void
     {
-        /** @var \Sprout\Http\Resolvers\SubdomainIdentityResolver $resolver */
-        $resolver = resolver('subdomain');
+        /** @var \Sprout\Http\Resolvers\PathIdentityResolver $resolver */
+        $resolver = resolver('path');
 
         $this->assertSame('.*', $resolver->getPattern());
     }

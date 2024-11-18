@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Tests;
+namespace Sprout\Tests\_Original;
 
 use Illuminate\Events\Dispatcher;
 use Illuminate\Queue\Events\JobProcessing;
@@ -110,7 +110,7 @@ class ServiceProviderTest extends TestCase
     {
         $paths = ServiceProvider::pathsToPublish(SproutServiceProvider::class, 'config');
 
-        $key = realpath(__DIR__ . '/../src');
+        $key = realpath(__DIR__ . '/../../src');
 
         $this->assertArrayHasKey($key . '/../resources/config/multitenancy.php', $paths);
         $this->assertContains(config_path('multitenancy.php'), $paths);

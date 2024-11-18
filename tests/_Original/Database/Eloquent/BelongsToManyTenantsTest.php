@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Tests\Database\Eloquent;
+namespace Sprout\Tests\_Original\Database\Eloquent;
 
 use Illuminate\Config\Repository;
 use Illuminate\Database\Eloquent\Model;
@@ -19,7 +19,6 @@ use Sprout\Exceptions\TenantMismatch;
 use Sprout\Exceptions\TenantMissing;
 use Sprout\Managers\TenancyManager;
 use Sprout\TenancyOptions;
-use Workbench\App\Models\TenantChildOptional;
 use Workbench\App\Models\TenantChildren;
 use Workbench\App\Models\TenantChildrenOptional;
 use Workbench\App\Models\TenantModel;

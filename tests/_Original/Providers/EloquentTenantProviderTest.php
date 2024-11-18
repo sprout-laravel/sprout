@@ -1,11 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Tests\Providers;
+namespace Sprout\Tests\_Original\Providers;
 
 use Illuminate\Config\Repository;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
-use Illuminate\Foundation\Testing\DatabaseTruncation;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Orchestra\Testbench\Concerns\WithWorkbench;
 use Orchestra\Testbench\TestCase;

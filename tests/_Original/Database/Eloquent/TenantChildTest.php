@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Tests\Database\Eloquent;
+namespace Sprout\Tests\_Original\Database\Eloquent;
 
 use Illuminate\Config\Repository;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Orchestra\Testbench\TestCase;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
-use RuntimeException;
 use Sprout\Database\Eloquent\Concerns\IsTenantChild;
 use Sprout\Exceptions\TenantRelationException;
 use Workbench\App\Models\NoTenantRelationModel;

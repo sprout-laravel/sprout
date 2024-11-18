@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Tests;
+namespace Sprout\Tests\_Original;
 
 use Illuminate\Config\Repository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
