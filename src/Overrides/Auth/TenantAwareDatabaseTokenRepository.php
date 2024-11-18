@@ -36,6 +36,10 @@ class TenantAwareDatabaseTokenRepository extends DatabaseTokenRepository
      */
     protected function getPayload($email, #[SensitiveParameter] $token): array
     {
+        if (! sprout()->withinContext()) {
+            return parent::getPayload($email, $token);
+        }
+
         $tenancy = sprout()->getCurrentTenancy();
 
         if ($tenancy === null) {
@@ -67,6 +71,10 @@ class TenantAwareDatabaseTokenRepository extends DatabaseTokenRepository
      */
     protected function getTenantedQuery(string $email): Builder
     {
+        if (! sprout()->withinContext()) {
+            return $this->getTable()->where('email', $email);
+        }
+        
         $tenancy = sprout()->getCurrentTenancy();
 
         if ($tenancy === null) {
