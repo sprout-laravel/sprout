@@ -39,7 +39,7 @@ trait OverridesCookieSettings
      */
     public static function setPath(?string $path): void
     {
-        self::$settings['path'] = '/' . ltrim($path, '/');
+        self::$settings['path'] = $path ? '/' . ltrim($path, '/') : null;
     }
 
     // @codeCoverageIgnoreStart
