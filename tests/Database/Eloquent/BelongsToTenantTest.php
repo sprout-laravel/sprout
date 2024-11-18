@@ -21,6 +21,7 @@ use Sprout\TenancyOptions;
 use Workbench\App\Models\TenantChild;
 use Workbench\App\Models\TenantChildOptional;
 use Workbench\App\Models\TenantModel;
+use function Sprout\sprout;
 
 #[Group('database'), Group('eloquent')]
 class BelongsToTenantTest extends TestCase
@@ -71,7 +72,11 @@ class BelongsToTenantTest extends TestCase
     {
         $tenant = TenantModel::factory()->create();
 
-        app(TenancyManager::class)->get()->setTenant($tenant);
+        $tenancy = app(TenancyManager::class)->get();
+
+        sprout()->setCurrentTenancy($tenancy);
+
+        $tenancy->setTenant($tenant);
 
         $child = TenantChild::factory()->create();
 
@@ -81,14 +86,36 @@ class BelongsToTenantTest extends TestCase
     }
 
     #[Test]
+    public function doesNotAutomaticallyAssociateWithTenantWhenCreatingWhenOutsideMultitenantedContext(): void
+    {
+        $child = TenantChild::factory()->create();
+
+        $this->assertTrue($child->exists);
+        $this->assertFalse($child->relationLoaded('tenant'));
+        $this->assertNull($child->tenant);
+    }
+
+    #[Test]
     public function throwsAnExceptionIfTheresNoTenantAndTheTenantIsNotOptionalWhenCreating(): void
     {
+        sprout()->setCurrentTenancy(app(TenancyManager::class)->get());
+
         $this->expectException(TenantMissing::class);
         $this->expectExceptionMessage(
             'There is no current tenant for tenancy [tenants]'
         );
 
         TenantChild::factory()->create();
+    }
+
+    #[Test]
+    public function doesNotThrowAnExceptionIfTheresNoTenantAndTheTenantIsNotOptionalWhenCreatingWhenOutsideMultitenantedContext(): void
+    {
+        $child = TenantChild::factory()->create();
+
+        $this->assertTrue($child->exists);
+        $this->assertFalse($child->relationLoaded('tenant'));
+        $this->assertNull($child->tenant);
     }
 
     #[Test]
@@ -138,7 +165,10 @@ class BelongsToTenantTest extends TestCase
 
         $tenancy = app(TenancyManager::class)->get();
 
+        sprout()->setCurrentTenancy($tenancy);
+
         $tenancy->setTenant($tenant);
+
         $tenancy->addOption(TenancyOptions::throwIfNotRelated());
 
         $this->expectException(TenantMismatch::class);
@@ -174,7 +204,11 @@ class BelongsToTenantTest extends TestCase
     {
         $tenant = TenantModel::factory()->create();
 
-        app(TenancyManager::class)->get()->setTenant($tenant);
+        $tenancy = app(TenancyManager::class)->get();
+
+        sprout()->setCurrentTenancy($tenancy);
+
+        $tenancy->setTenant($tenant);
 
         $child = TenantChild::query()->find(TenantChild::factory()->create()->getKey());
 
@@ -182,6 +216,15 @@ class BelongsToTenantTest extends TestCase
         $this->assertTrue($child->relationLoaded('tenant'));
         $this->assertNotNull($child->getRelation('tenant'));
         $this->assertTrue($child->getRelation('tenant')->is($tenant));
+    }
+
+    #[Test]
+    public function doesNotAutomaticallyPopulateTheTenantRelationWhenHydratingWhenOutsideMultitenantedCContext(): void
+    {
+        $child = TenantChild::query()->find(TenantChild::factory()->create()->getKey());
+
+        $this->assertTrue($child->exists);
+        $this->assertFalse($child->relationLoaded('tenant'));
     }
 
     #[Test]
@@ -207,6 +250,8 @@ class BelongsToTenantTest extends TestCase
         $tenant = TenantModel::factory()->create();
 
         $tenancy = app(TenancyManager::class)->get();
+
+        sprout()->setCurrentTenancy($tenancy);
 
         $tenancy->setTenant($tenant);
 
@@ -273,7 +318,10 @@ class BelongsToTenantTest extends TestCase
 
         $tenancy = app(TenancyManager::class)->get();
 
+        sprout()->setCurrentTenancy($tenancy);
+
         $tenancy->setTenant($tenant);
+
         $tenancy->addOption(TenancyOptions::throwIfNotRelated());
 
         $child = TenantChild::factory()->create();
@@ -298,7 +346,10 @@ class BelongsToTenantTest extends TestCase
 
         $tenancy = app(TenancyManager::class)->get();
 
+        sprout()->setCurrentTenancy($tenancy);
+
         $tenancy->setTenant($tenant);
+
         $tenancy->removeOption(TenancyOptions::throwIfNotRelated());
 
         $child = TenantChild::factory()->create();
@@ -319,6 +370,8 @@ class BelongsToTenantTest extends TestCase
         $tenant = TenantModel::factory()->create();
 
         $tenancy = app(TenancyManager::class)->get();
+
+        sprout()->setCurrentTenancy($tenancy);
 
         $tenancy->setTenant($tenant);
 
