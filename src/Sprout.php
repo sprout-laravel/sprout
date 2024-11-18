@@ -119,18 +119,6 @@ final class Sprout
     }
 
     /**
-     * Should Sprout listen for the routing event
-     *
-     * @return bool
-     *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
-     */
-    public function shouldListenForRouting(): bool
-    {
-        return (bool)$this->config('listen_for_routing', true);
-    }
-
-    /**
      * Get the identity resolver manager
      *
      * @return \Sprout\Managers\IdentityResolverManager
