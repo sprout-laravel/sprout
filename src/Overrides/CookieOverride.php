@@ -47,10 +47,10 @@ final class CookieOverride implements ServiceOverride, DeferrableServiceOverride
     public function setup(Tenancy $tenancy, Tenant $tenant): void
     {
         // Collect the values
-        $path     = self::$path ?? config('session.path') ?? '/';
-        $domain   = self::$domain ?? config('session.domain');
-        $secure   = self::$secure ?? config('session.secure', false);
-        $sameSite = self::$sameSite ?? config('session.same_site');
+        $path     = self::$settings['path'] ?? config('session.path') ?? '/';
+        $domain   = self::$settings['domain'] ?? config('session.domain');
+        $secure   = self::$settings['secure'] ?? config('session.secure', false);
+        $sameSite = self::$settings['same_site'] ?? config('session.same_site');
 
         /**
          * This is here to make PHPStan quiet down

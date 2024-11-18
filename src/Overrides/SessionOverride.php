@@ -99,29 +99,15 @@ final class SessionOverride implements BootableServiceOverride, DeferrableServic
      */
     public function setup(Tenancy $tenancy, Tenant $tenant): void
     {
-        // Collect the values
-        $path     = self::$path ?? config('session.path') ?? '/';
-        $domain   = self::$domain ?? config('session.domain');
-        $secure   = self::$secure ?? config('session.secure', false);
-        $sameSite = self::$sameSite ?? config('session.same_site');
-
-        /**
-         * This is here to make PHPStan quiet down
-         *
-         * @var string      $path
-         * @var string|null $domain
-         * @var bool|null   $secure
-         * @var string|null $sameSite
-         */
+        $settings = self::$settings;
 
         /** @var \Illuminate\Contracts\Config\Repository $config */
         $config = config();
 
-        // Set the config values
-        $config->set('session.path', $path);
-        $config->set('session.domain', $domain);
-        $config->set('session.secure', $secure);
-        $config->set('session.same_site', $sameSite);
+        foreach ($settings as $setting => $value) {
+            $config->set('session.' . $setting, $value);
+        }
+
         $config->set('session.cookie', $this->getCookieName($tenancy, $tenant));
 
         // Reset all the drivers

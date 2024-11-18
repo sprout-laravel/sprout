@@ -5,10 +5,10 @@ namespace Sprout\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Sprout\Sprout;
 use Sprout\Support\ResolutionHelper;
 use Sprout\Support\ResolutionHook;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Tenant Routes Middleware
