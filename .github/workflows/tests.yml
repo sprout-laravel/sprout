@@ -35,9 +35,6 @@ jobs:
       - name: Prepare testbench
         run: composer clear && composer prepare && composer build
 
-      - name: Publish required assets
-        run: vendor/bin/testbench vendor:publish --provider="Sprout\\SproutServiceProvider"
-
       - name: Execute tests
         run: vendor/bin/phpunit --testsuite=Unit,Feature
 
