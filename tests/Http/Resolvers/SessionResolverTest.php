@@ -1,18 +1,20 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Tests\Resolvers;
+namespace Http\Resolvers;
 
 use Illuminate\Config\Repository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Routing\Router;
 use Illuminate\Session\Middleware\StartSession;
+use Orchestra\Testbench\Attributes\DefineEnvironment;
 use Orchestra\Testbench\Concerns\WithWorkbench;
 use Orchestra\Testbench\TestCase;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use Sprout\Attributes\CurrentTenant;
 use Sprout\Contracts\Tenant;
+use Sprout\Exceptions\CompatibilityException;
 use Sprout\Overrides\AuthOverride;
 use Sprout\Overrides\CacheOverride;
 use Sprout\Overrides\CookieOverride;
@@ -20,6 +22,7 @@ use Sprout\Overrides\JobOverride;
 use Sprout\Overrides\SessionOverride;
 use Sprout\Overrides\StorageOverride;
 use Workbench\App\Models\TenantModel;
+use function Sprout\sprout;
 
 #[Group('resolvers'), Group('sessions')]
 class SessionResolverTest extends TestCase
@@ -43,6 +46,20 @@ class SessionResolverTest extends TestCase
                 CacheOverride::class,
                 AuthOverride::class,
                 CookieOverride::class,
+            ]);
+        });
+    }
+
+    protected function withSessionOverride($app):void
+    {
+        tap($app['config'], static function (Repository $config) {
+            $config->set('sprout.services', [
+                StorageOverride::class,
+                JobOverride::class,
+                CacheOverride::class,
+                AuthOverride::class,
+                CookieOverride::class,
+                SessionOverride::class,
             ]);
         });
     }
@@ -87,5 +104,20 @@ class SessionResolverTest extends TestCase
         $result = $this->get(route('session.route'));
 
         $result->assertInternalServerError();
+    }
+
+    #[Test]
+    public function throwsExceptionIfSessionOverrideIsEnabled(): void
+    {
+        sprout()->registerOverride(SessionOverride::class);
+        $tenant = TenantModel::factory()->createOne();
+
+        $result = $this->withSession(['multitenancy' => ['tenants' => $tenant->getTenantIdentifier()]])->get(route('session.route'));
+        $result->assertInternalServerError();
+        $this->assertInstanceOf(CompatibilityException::class, $result->exception);
+        $this->assertSame(
+            'Cannot use resolver [session] with override [' . SessionOverride::class . ']',
+            $result->exception->getMessage()
+        );
     }
 }

@@ -47,8 +47,6 @@ final class CleanupServiceOverrides
             return;
         }
 
-        foreach ($this->sprout->getOverrides() as $override) {
-            $override->cleanup($event->tenancy, $event->previous);
-        }
+        $this->sprout->cleanupOverrides($event->tenancy, $event->previous);
     }
 }

@@ -5,11 +5,12 @@ namespace Sprout\Overrides;
 
 use Closure;
 use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Session\DatabaseSessionHandler as OriginalDatabaseSessionHandler;
 use Illuminate\Session\FileSessionHandler;
 use Illuminate\Session\SessionManager;
-use RuntimeException;
 use Sprout\Concerns\OverridesCookieSettings;
 use Sprout\Contracts\BootableServiceOverride;
+use Sprout\Contracts\DeferrableServiceOverride;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 use Sprout\Contracts\TenantHasResources;
@@ -27,10 +28,8 @@ use function Sprout\sprout;
  * session service.
  *
  * @package Overrides
- *
- * @codeCoverageIgnore
  */
-final class SessionOverride implements BootableServiceOverride
+final class SessionOverride implements BootableServiceOverride, DeferrableServiceOverride
 {
     use OverridesCookieSettings;
 
@@ -47,6 +46,16 @@ final class SessionOverride implements BootableServiceOverride
     public static function doNotOverrideDatabase(): void
     {
         self::$overrideDatabase = false;
+    }
+
+    /**
+     * Get the service to watch for before overriding
+     *
+     * @return string
+     */
+    public static function service(): string
+    {
+        return SessionManager::class;
     }
 
     /**
@@ -163,25 +172,28 @@ final class SessionOverride implements BootableServiceOverride
             /** @var string $originalPath */
             $originalPath = config('session.files');
             $path         = rtrim($originalPath, '/') . DIRECTORY_SEPARATOR;
-            $tenancy      = sprout()->getCurrentTenancy();
 
-            if ($tenancy === null) {
-                throw TenancyMissing::make();
+            if (sprout()->withinContext()) {
+                $tenancy = sprout()->getCurrentTenancy();
+
+                if ($tenancy === null) {
+                    throw TenancyMissing::make();
+                }
+
+                // If there's no tenant, error out
+                if (! $tenancy->check()) {
+                    throw TenantMissing::make($tenancy->getName());
+                }
+
+                $tenant = $tenancy->tenant();
+
+                // If the tenant isn't configured for resources, also error out
+                if (! ($tenant instanceof TenantHasResources)) {
+                    throw MisconfigurationException::misconfigured('tenant', $tenant::class, 'resources');
+                }
+
+                $path .= $tenant->getTenantResourceKey();
             }
-
-            // If there's no tenant, error out
-            if (! $tenancy->check()) {
-                throw TenantMissing::make($tenancy->getName());
-            }
-
-            $tenant = $tenancy->tenant();
-
-            // If the tenant isn't configured for resources, also error out
-            if (! ($tenant instanceof TenantHasResources)) {
-                throw MisconfigurationException::misconfigured('tenant', $tenant::class, 'resources');
-            }
-
-            $path .= $tenant->getTenantResourceKey();
 
             /** @var int $lifetime */
             $lifetime = config('session.lifetime');
@@ -196,7 +208,7 @@ final class SessionOverride implements BootableServiceOverride
 
     private static function createDatabaseDriver(): Closure
     {
-        return static function (): TenantAwareDatabaseSessionHandler {
+        return static function (): OriginalDatabaseSessionHandler {
             $table      = config('session.table');
             $lifetime   = config('session.lifetime');
             $connection = config('session.connection');
@@ -207,7 +219,16 @@ final class SessionOverride implements BootableServiceOverride
              * @var int         $lifetime
              */
 
-            return new TenantAwareDatabaseSessionHandler(
+            if (sprout()->withinContext()) {
+                return new TenantAwareDatabaseSessionHandler(
+                    app()->make('db')->connection($connection),
+                    $table,
+                    $lifetime,
+                    app()
+                );
+            }
+
+            return new OriginalDatabaseSessionHandler(
                 app()->make('db')->connection($connection),
                 $table,
                 $lifetime,

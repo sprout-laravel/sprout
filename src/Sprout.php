@@ -4,11 +4,16 @@ declare(strict_types=1);
 namespace Sprout;
 
 use Illuminate\Contracts\Foundation\Application;
+use InvalidArgumentException;
+use Sprout\Concerns\HandlesServiceOverrides;
+use Sprout\Contracts\BootableServiceOverride;
+use Sprout\Contracts\DeferrableServiceOverride;
 use Sprout\Contracts\ServiceOverride;
 use Sprout\Contracts\Tenancy;
 use Sprout\Managers\IdentityResolverManager;
 use Sprout\Managers\ProviderManager;
 use Sprout\Managers\TenancyManager;
+use Sprout\Support\ResolutionHook;
 
 /**
  * Sprout
@@ -19,6 +24,8 @@ use Sprout\Managers\TenancyManager;
  */
 final class Sprout
 {
+    use HandlesServiceOverrides;
+
     /**
      * @var \Illuminate\Contracts\Foundation\Application
      */
@@ -30,9 +37,9 @@ final class Sprout
     private array $tenancies = [];
 
     /**
-     * @var array<class-string<\Sprout\Contracts\ServiceOverride>, \Sprout\Contracts\ServiceOverride>
+     * @var bool
      */
-    private array $overrides = [];
+    private bool $withinContext = false;
 
     /**
      * Create a new instance
@@ -73,6 +80,8 @@ final class Sprout
         if ($this->getCurrentTenancy() !== $tenancy) {
             $this->tenancies[] = $tenancy;
         }
+
+        $this->markAsInContext();
     }
 
     /**
@@ -158,38 +167,53 @@ final class Sprout
     }
 
     /**
-     * Is an override enabled
+     * Check if a resolution hook is enabled
      *
-     * @param string $class
+     * @param \Sprout\Support\ResolutionHook $hook
      *
      * @return bool
+     *
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
      */
-    public function hasOverride(string $class): bool
+    public function supportsHook(ResolutionHook $hook): bool
     {
-        return isset($this->overrides[$class]);
+        /** @var array<ResolutionHook> $enabledHooks */
+        $enabledHooks = $this->config('hooks', []);
+
+        return in_array($hook, $enabledHooks, true);
     }
 
     /**
-     * Add an override
+     * Flag the current request as being within multitenanted context
      *
-     * @param \Sprout\Contracts\ServiceOverride $override
-     *
-     * @return $this
+     * @return static
      */
-    public function addOverride(ServiceOverride $override): self
+    public function markAsInContext(): self
     {
-        $this->overrides[$override::class] = $override;
+        $this->withinContext = true;
 
         return $this;
     }
 
     /**
-     * Get all overrides
+     * Flag the current request as being outside multitenanted context
      *
-     * @return array<class-string<\Sprout\Contracts\ServiceOverride>, \Sprout\Contracts\ServiceOverride>
+     * @return static
      */
-    public function getOverrides(): array
+    public function maskAsOutsideContext(): self
     {
-        return $this->overrides;
+        $this->withinContext = false;
+
+        return $this;
+    }
+
+    /**
+     * Check if the current request is within multitenanted context
+     *
+     * @return bool
+     */
+    public function withinContext(): bool
+    {
+        return $this->withinContext;
     }
 }

@@ -5,6 +5,7 @@ namespace Sprout\Overrides;
 
 use Illuminate\Cookie\CookieJar;
 use Sprout\Concerns\OverridesCookieSettings;
+use Sprout\Contracts\DeferrableServiceOverride;
 use Sprout\Contracts\ServiceOverride;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
@@ -17,9 +18,19 @@ use Sprout\Contracts\Tenant;
  *
  * @package Overrides
  */
-final class CookieOverride implements ServiceOverride
+final class CookieOverride implements ServiceOverride, DeferrableServiceOverride
 {
     use OverridesCookieSettings;
+
+    /**
+     * Get the service to watch for before overriding
+     *
+     * @return string
+     */
+    public static function service(): string
+    {
+        return 'cookie';
+    }
 
     /**
      * Set up the service override

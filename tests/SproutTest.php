@@ -10,6 +10,7 @@ use Orchestra\Testbench\TestCase;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use Sprout\Sprout;
+use Sprout\Support\ResolutionHook;
 use Workbench\App\Models\TenantModel;
 
 #[Group('core')]
@@ -31,31 +32,15 @@ class SproutTest extends TestCase
     {
         $sprout = app()->make(Sprout::class);
 
-        $this->assertTrue($sprout->config('listen_for_routing'));
-        $this->assertTrue(config('sprout.listen_for_routing'));
+        $this->assertNotNull($sprout->config('hooks'));
+        $this->assertNotNull(config('sprout.hooks'));
+        $this->assertSame($sprout->config('hooks'), config('sprout.hooks'));
 
-        app()['config']->set('sprout.listen_for_routing', false);
+        app()['config']->set('sprout.hooks', null);
 
-        $this->assertFalse($sprout->config('listen_for_routing'));
-        $this->assertFalse(config('sprout.listen_for_routing'));
-    }
-
-    #[Test]
-    public function hasHelperForListeningToRoutingEvents(): void
-    {
-        $sprout = app()->make(Sprout::class);
-
-        app()['config']->set('sprout.listen_for_routing', false);
-
-        $this->assertFalse($sprout->config('listen_for_routing'));
-        $this->assertFalse(config('sprout.listen_for_routing'));
-        $this->assertFalse($sprout->shouldListenForRouting());
-
-        app()['config']->set('sprout.listen_for_routing', true);
-
-        $this->assertTrue($sprout->config('listen_for_routing'));
-        $this->assertTrue(config('sprout.listen_for_routing'));
-        $this->assertTrue($sprout->shouldListenForRouting());
+        $this->assertNull($sprout->config('hooks'));
+        $this->assertNull(config('sprout.hooks'));
+        $this->assertSame($sprout->config('hooks'), config('sprout.hooks'));
     }
 
     #[Test]

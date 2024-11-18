@@ -4,19 +4,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Should Sprout listen for routing?
+    | Enabled hooks
     |--------------------------------------------------------------------------
     |
-    | This value decides whether Sprout listens for the RouteMatched event to
-    | identify tenants.
-    |
-    | Setting it to false will disable the pre-middleware identification,
-    | which in turn will make tenant-aware dependency injection no longer
-    | functionality.
+    | This value contains an array of resolution hooks that should be enabled.
+    | The handling of each hook is different, but if a hook is missing from
+    | here, some things, such as listeners, may not be registered.
     |
     */
 
-    'listen_for_routing' => true,
+    'hooks' => [
+        // \Sprout\Support\ResolutionHook::Booting,
+        \Sprout\Support\ResolutionHook::Routing,
+        \Sprout\Support\ResolutionHook::Middleware,
+    ],
 
     /*
     |--------------------------------------------------------------------------

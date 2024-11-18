@@ -139,7 +139,7 @@ trait FindsIdentityInRouteParameter
      */
     public function hasPattern(): bool
     {
-        return $this->pattern !== null;
+        return $this->getPattern() !== null;
     }
 
     /**
@@ -155,7 +155,7 @@ trait FindsIdentityInRouteParameter
     /**
      * Get the route parameter pattern mapping
      *
-     * This method returns an array mappings the route parameter name to its
+     * This method returns an array mapping the route parameter name to its
      * pattern, for use in route definitions.
      *
      * @template TenantClass of \Sprout\Contracts\Tenant
@@ -167,7 +167,7 @@ trait FindsIdentityInRouteParameter
     protected function getParameterPatternMapping(Tenancy $tenancy): array
     {
         if (! $this->hasPattern()) {
-            return [];
+            return []; // @codeCoverageIgnore
         }
 
         return [
@@ -191,7 +191,7 @@ trait FindsIdentityInRouteParameter
      */
     protected function applyParameterPatternMapping(RouteRegistrar $registrar, Tenancy $tenancy): RouteRegistrar
     {
-        if ($this->hasPattern()) {
+        if (! $this->hasPattern()) {
             return $registrar;
         }
 
@@ -219,7 +219,7 @@ trait FindsIdentityInRouteParameter
             return $identifier;
         }
 
-        return null;
+        return null; // @codeCoverageIgnore
     }
 
     /**

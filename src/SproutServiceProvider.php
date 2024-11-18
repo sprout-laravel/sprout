@@ -17,6 +17,7 @@ use Sprout\Listeners\IdentifyTenantOnRouting;
 use Sprout\Managers\IdentityResolverManager;
 use Sprout\Managers\ProviderManager;
 use Sprout\Managers\TenancyManager;
+use Sprout\Support\ResolutionHook;
 
 /**
  * Sprout Service Provider
@@ -103,14 +104,7 @@ class SproutServiceProvider extends ServiceProvider
         $overrides = config('sprout.services', []);
 
         foreach ($overrides as $overrideClass) {
-            if (! is_subclass_of($overrideClass, ServiceOverride::class)) {
-                throw new InvalidArgumentException('Provided class [' . $overrideClass . '] does not implement ' . ServiceOverride::class);
-            }
-
-            /** @var \Sprout\Contracts\ServiceOverride $override */
-            $override = $this->app->make($overrideClass);
-
-            $this->sprout->addOverride($override);
+            $this->sprout->registerOverride($overrideClass);
         }
     }
 
@@ -120,7 +114,7 @@ class SproutServiceProvider extends ServiceProvider
         $events = $this->app->make(Dispatcher::class);
 
         // If we should be listening for routing
-        if ($this->sprout->shouldListenForRouting()) {
+        if ($this->sprout->supportsHook(ResolutionHook::Routing)) {
             $events->listen(RouteMatched::class, IdentifyTenantOnRouting::class);
         }
     }
@@ -140,10 +134,6 @@ class SproutServiceProvider extends ServiceProvider
 
     private function bootServiceOverrides(): void
     {
-        foreach ($this->sprout->getOverrides() as $override) {
-            if ($override instanceof BootableServiceOverride) {
-                $override->boot($this->app, $this->sprout);
-            }
-        }
+        $this->sprout->bootOverrides();
     }
 }

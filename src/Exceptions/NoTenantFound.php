@@ -18,16 +18,11 @@ final class NoTenantFound extends SproutException
      *
      * @param string      $resolver
      * @param string      $tenancy
-     * @param string|null $identity
      *
      * @return self
      */
-    public static function make(string $resolver, string $tenancy, ?string $identity = null): self
+    public static function make(string $resolver, string $tenancy): self
     {
-        return new self(
-            $identity
-                ? 'No valid tenant [' . $tenancy . '] found for \'' . $identity . '\', resolved via [' . $resolver . ']'
-                : 'No valid tenant [' . $tenancy . '] found [' . $resolver . ']'
-        );
+        return new self('No valid tenant [' . $tenancy . '] found [' . $resolver . ']');
     }
 }

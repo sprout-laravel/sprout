@@ -5,6 +5,7 @@ namespace Sprout\Support;
 
 use Illuminate\Http\Request;
 use Sprout\Contracts\IdentityResolverUsesParameters;
+use Sprout\Exceptions\MisconfigurationException;
 use Sprout\Exceptions\NoTenantFound;
 use Sprout\Sprout;
 
@@ -38,12 +39,20 @@ class ResolutionHelper
      *
      * @return bool
      *
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws \Sprout\Exceptions\MisconfigurationException
      * @throws \Sprout\Exceptions\NoTenantFound
      */
     public static function handleResolution(Request $request, ResolutionHook $hook, ?string $resolverName = null, ?string $tenancyName = null, bool $throw = true): bool
     {
         /** @var \Sprout\Sprout $sprout */
-        $sprout   = app(Sprout::class);
+        $sprout = app(Sprout::class);
+
+        // If the resolution hook is disabled, throw an exception
+        if (! $sprout->supportsHook($hook)) {
+            throw MisconfigurationException::unsupportedHook($hook);
+        }
+
         $resolver = $sprout->resolvers()->get($resolverName);
         $tenancy  = $sprout->tenancies()->get($tenancyName);
 

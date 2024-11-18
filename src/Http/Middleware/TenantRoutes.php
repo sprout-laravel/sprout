@@ -6,6 +6,7 @@ namespace Sprout\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Sprout\Sprout;
 use Sprout\Support\ResolutionHelper;
 use Sprout\Support\ResolutionHook;
 
@@ -26,6 +27,21 @@ final class TenantRoutes
     public const ALIAS = 'sprout.tenanted';
 
     /**
+     * @var \Sprout\Sprout
+     */
+    private Sprout $sprout;
+
+    /**
+     * Create a new instance of the middleware
+     *
+     * @param \Sprout\Sprout $sprout
+     */
+    public function __construct(Sprout $sprout)
+    {
+        $this->sprout = $sprout;
+    }
+
+    /**
      * Handle the request
      *
      * @param \Illuminate\Http\Request $request
@@ -35,17 +51,21 @@ final class TenantRoutes
      * @return \Illuminate\Http\Response
      *
      * @throws \Sprout\Exceptions\NoTenantFound
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws \Sprout\Exceptions\MisconfigurationException
      */
     public function handle(Request $request, Closure $next, string ...$options): Response
     {
-        [$resolverName, $tenancyName] = ResolutionHelper::parseOptions($options);
+        if ($this->sprout->supportsHook(ResolutionHook::Middleware)) {
+            [$resolverName, $tenancyName] = ResolutionHelper::parseOptions($options);
 
-        ResolutionHelper::handleResolution(
-            $request,
-            ResolutionHook::Middleware,
-            $resolverName,
-            $tenancyName,
-        );
+            ResolutionHelper::handleResolution(
+                $request,
+                ResolutionHook::Middleware,
+                $resolverName,
+                $tenancyName,
+            );
+        }
 
         return $next($request);
     }
