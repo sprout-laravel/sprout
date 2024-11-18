@@ -10,6 +10,7 @@ use Sprout\Contracts\Tenant;
 use Sprout\Exceptions\TenantMismatch;
 use Sprout\Exceptions\TenantMissing;
 use Sprout\TenancyOptions;
+use function Sprout\sprout;
 
 /**
  * Belongs to Many Tenants Observer
@@ -151,6 +152,10 @@ class BelongsToManyTenantsObserver
      */
     public function created(Model $model): void
     {
+        if (! sprout()->withinContext()) {
+            return;
+        }
+
         /**
          * @var \Illuminate\Database\Eloquent\Relations\BelongsToMany<ChildModel, TenantModel> $relation
          * @phpstan-ignore-next-line
@@ -199,6 +204,10 @@ class BelongsToManyTenantsObserver
      */
     public function retrieved(Model $model): void
     {
+        if (! sprout()->withinContext()) {
+            return;
+        }
+
         /**
          * @var \Illuminate\Database\Eloquent\Relations\BelongsToMany<ChildModel, TenantModel> $relation
          * @phpstan-ignore-next-line
