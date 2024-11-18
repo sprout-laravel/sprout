@@ -6,6 +6,7 @@ namespace Sprout\Database\Eloquent\Scopes;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Sprout\Exceptions\TenantMissing;
+use function Sprout\sprout;
 
 /**
  * Belongs to many Tenants Scope
@@ -38,6 +39,10 @@ final class BelongsToManyTenantsScope extends TenantChildScope
      */
     public function apply(Builder $builder, Model $model): void
     {
+        if (! sprout()->withinContext()) {
+            return;
+        }
+
         /** @phpstan-ignore-next-line */
         $tenancy = $model->getTenancy();
 
