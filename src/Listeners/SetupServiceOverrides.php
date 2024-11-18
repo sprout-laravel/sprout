@@ -47,8 +47,6 @@ final class SetupServiceOverrides
             return;
         }
 
-        foreach ($this->sprout->getOverrides() as $override) {
-            $override->setup($event->tenancy, $event->current);
-        }
+        $this->sprout->setupOverrides($event->tenancy, $event->current);
     }
 }

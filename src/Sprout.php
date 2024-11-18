@@ -4,6 +4,10 @@ declare(strict_types=1);
 namespace Sprout;
 
 use Illuminate\Contracts\Foundation\Application;
+use InvalidArgumentException;
+use Sprout\Concerns\HandlesServiceOverrides;
+use Sprout\Contracts\BootableServiceOverride;
+use Sprout\Contracts\DeferrableServiceOverride;
 use Sprout\Contracts\ServiceOverride;
 use Sprout\Contracts\Tenancy;
 use Sprout\Managers\IdentityResolverManager;
@@ -20,6 +24,8 @@ use Sprout\Support\ResolutionHook;
  */
 final class Sprout
 {
+    use HandlesServiceOverrides;
+
     /**
      * @var \Illuminate\Contracts\Foundation\Application
      */
@@ -29,11 +35,6 @@ final class Sprout
      * @var array<int, \Sprout\Contracts\Tenancy<\Sprout\Contracts\Tenant>>
      */
     private array $tenancies = [];
-
-    /**
-     * @var array<class-string<\Sprout\Contracts\ServiceOverride>, \Sprout\Contracts\ServiceOverride>
-     */
-    private array $overrides = [];
 
     /**
      * @var bool
@@ -166,42 +167,6 @@ final class Sprout
     }
 
     /**
-     * Is an override enabled
-     *
-     * @param string $class
-     *
-     * @return bool
-     */
-    public function hasOverride(string $class): bool
-    {
-        return isset($this->overrides[$class]);
-    }
-
-    /**
-     * Add an override
-     *
-     * @param \Sprout\Contracts\ServiceOverride $override
-     *
-     * @return $this
-     */
-    public function addOverride(ServiceOverride $override): self
-    {
-        $this->overrides[$override::class] = $override;
-
-        return $this;
-    }
-
-    /**
-     * Get all overrides
-     *
-     * @return array<class-string<\Sprout\Contracts\ServiceOverride>, \Sprout\Contracts\ServiceOverride>
-     */
-    public function getOverrides(): array
-    {
-        return $this->overrides;
-    }
-
-    /**
      * Check if a resolution hook is enabled
      *
      * @param \Sprout\Support\ResolutionHook $hook
@@ -247,7 +212,7 @@ final class Sprout
      *
      * @return bool
      */
-    public function withinContext():bool
+    public function withinContext(): bool
     {
         return $this->withinContext;
     }

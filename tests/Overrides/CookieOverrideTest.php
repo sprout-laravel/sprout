@@ -21,6 +21,7 @@ use Sprout\Overrides\JobOverride;
 use Sprout\Overrides\SessionOverride;
 use Sprout\Overrides\StorageOverride;
 use Workbench\App\Models\TenantModel;
+use function Sprout\sprout;
 
 #[Group('services'), Group('cookies')]
 class CookieOverrideTest extends TestCase
@@ -45,7 +46,6 @@ class CookieOverrideTest extends TestCase
                 JobOverride::class,
                 CacheOverride::class,
                 AuthOverride::class,
-                SessionOverride::class,
             ]);
         });
     }

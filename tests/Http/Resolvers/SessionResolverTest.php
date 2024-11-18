@@ -109,7 +109,7 @@ class SessionResolverTest extends TestCase
     #[Test]
     public function throwsExceptionIfSessionOverrideIsEnabled(): void
     {
-        sprout()->addOverride(new SessionOverride());
+        sprout()->registerOverride(SessionOverride::class);
         $tenant = TenantModel::factory()->createOne();
 
         $result = $this->withSession(['multitenancy' => ['tenants' => $tenant->getTenantIdentifier()]])->get(route('session.route'));

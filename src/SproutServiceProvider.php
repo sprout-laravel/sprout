@@ -104,14 +104,7 @@ class SproutServiceProvider extends ServiceProvider
         $overrides = config('sprout.services', []);
 
         foreach ($overrides as $overrideClass) {
-            if (! is_subclass_of($overrideClass, ServiceOverride::class)) {
-                throw new InvalidArgumentException('Provided class [' . $overrideClass . '] does not implement ' . ServiceOverride::class);
-            }
-
-            /** @var \Sprout\Contracts\ServiceOverride $override */
-            $override = $this->app->make($overrideClass);
-
-            $this->sprout->addOverride($override);
+            $this->sprout->registerOverride($overrideClass);
         }
     }
 
@@ -141,10 +134,6 @@ class SproutServiceProvider extends ServiceProvider
 
     private function bootServiceOverrides(): void
     {
-        foreach ($this->sprout->getOverrides() as $override) {
-            if ($override instanceof BootableServiceOverride) {
-                $override->boot($this->app, $this->sprout);
-            }
-        }
+        $this->sprout->bootOverrides();
     }
 }
