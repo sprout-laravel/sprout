@@ -188,7 +188,7 @@ final class Sprout
      *
      * @return static
      */
-    public function maskAsOutsideContext(): self
+    public function markAsOutsideContext(): self
     {
         $this->withinContext = false;
 
