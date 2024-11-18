@@ -44,4 +44,33 @@ class TenantAwareDatabaseSessionHandler extends DatabaseSessionHandler
                      ->where('tenancy', '=', $tenancy->getName())
                      ->where('tenant_id', '=', $tenancy->key());
     }
+
+    /**
+     * Perform an insert operation on the session ID.
+     *
+     * @param string               $sessionId
+     * @param array<string, mixed> $payload
+     *
+     * @return bool|null
+     *
+     * @throws \Sprout\Exceptions\TenancyMissing
+     * @throws \Sprout\Exceptions\TenantMissing
+     */
+    protected function performInsert($sessionId, $payload): ?bool
+    {
+        $tenancy = sprout()->getCurrentTenancy();
+
+        if ($tenancy === null) {
+            throw TenancyMissing::make();
+        }
+
+        if ($tenancy->check() === false) {
+            throw TenantMissing::make($tenancy->getName());
+        }
+
+        $payload['tenancy']   = $tenancy->getName();
+        $payload['tenant_id'] = $tenancy->key();
+
+        return parent::performInsert($sessionId, $payload);
+    }
 }
