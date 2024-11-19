@@ -7,12 +7,11 @@ use Illuminate\Config\Repository;
 use Orchestra\Testbench\Attributes\DefineEnvironment;
 use PHPUnit\Framework\Attributes\Test;
 use Sprout\Attributes\CurrentTenant;
-use Sprout\Contracts\Tenant;
-use Sprout\Managers\TenancyManager;
 use Sprout\Support\GenericTenant;
 use Sprout\Tests\Unit\UnitTestCase;
 use Workbench\App\Models\TenantModel;
 use function Sprout\sprout;
+use function Sprout\tenancy;
 
 class CurrentTenantTest extends UnitTestCase
 {
@@ -41,7 +40,7 @@ class CurrentTenantTest extends UnitTestCase
     public function resolvesCurrentTenant(): void
     {
         /** @var \Sprout\Contracts\Tenancy $tenancy */
-        $tenancy = app(TenancyManager::class)->get('tenants');
+        $tenancy = tenancy('tenants');
 
         sprout()->setCurrentTenancy($tenancy);
 
@@ -63,7 +62,7 @@ class CurrentTenantTest extends UnitTestCase
     public function resolvesCurrentTenantForSpecificTenancy(): void
     {
         /** @var \Sprout\Contracts\Tenancy $tenancy */
-        $tenancy = app(TenancyManager::class)->get('backup');
+        $tenancy = tenancy('backup');
 
         sprout()->setCurrentTenancy($tenancy);
 
