@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Sprout\Tests\Unit\Support;
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
 use Mockery\MockInterface;
@@ -19,6 +20,8 @@ use function Sprout\tenancy;
 
 class ResolutionHelperTest extends UnitTestCase
 {
+    use RefreshDatabase;
+
     protected function defineEnvironment($app): void
     {
         tap($app['config'], static function ($config) {

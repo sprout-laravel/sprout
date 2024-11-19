@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Sprout\Tests\Unit\Support;
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use PHPUnit\Framework\Attributes\Test;
 use Sprout\Events\TenantIdentified;
@@ -17,6 +18,8 @@ use function Sprout\sprout;
 
 class DefaultTenancyTest extends UnitTestCase
 {
+    use RefreshDatabase;
+
     protected function defineEnvironment($app): void
     {
         tap($app['config'], static function ($config) {
