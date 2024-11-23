@@ -31,6 +31,7 @@ class SproutServiceProvider extends ServiceProvider
         $this->registerManagers();
         $this->registerMiddleware();
         $this->registerRouteMixin();
+        $this->registerServiceOverrideBooting();
     }
 
     private function registerSprout(): void
@@ -78,13 +79,17 @@ class SproutServiceProvider extends ServiceProvider
         Router::mixin(new RouterMethods());
     }
 
+    protected function registerServiceOverrideBooting(): void
+    {
+        $this->app->booted($this->sprout->bootOverrides(...));
+    }
+
     public function boot(): void
     {
         $this->publishConfig();
         $this->registerServiceOverrides();
         $this->registerEventListeners();
         $this->registerTenancyBootstrappers();
-        $this->bootServiceOverrides();
     }
 
     private function publishConfig(): void
@@ -127,10 +132,5 @@ class SproutServiceProvider extends ServiceProvider
         foreach ($bootstrappers as $bootstrapper) {
             $events->listen(CurrentTenantChanged::class, $bootstrapper);
         }
-    }
-
-    private function bootServiceOverrides(): void
-    {
-        $this->sprout->bootOverrides();
     }
 }
