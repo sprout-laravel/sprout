@@ -21,7 +21,7 @@ use Sprout\Sprout;
  *
  * @package Overrides
  */
-final class AuthOverride implements ServiceOverride, BootableServiceOverride, DeferrableServiceOverride
+final class AuthOverride implements BootableServiceOverride, DeferrableServiceOverride
 {
     /**
      * @var \Illuminate\Auth\AuthManager
