@@ -5,7 +5,8 @@ namespace Sprout\Providers;
 
 use Illuminate\Database\Eloquent\Model;
 use Sprout\Contracts\Tenant;
-use Sprout\Contracts\TenantProvider;
+use Sprout\Contracts\TenantHasResources;
+use Sprout\Exceptions\MisconfigurationException;
 use Sprout\Support\BaseTenantProvider;
 
 /**
@@ -131,6 +132,38 @@ final class EloquentTenantProvider extends BaseTenantProvider
 
         return $model->newModelQuery()
                      ->where($model->getTenantKeyName(), $key)
+                     ->first();
+    }
+
+    /**
+     * Retrieve a tenant by its resource key
+     *
+     * Gets an instance of the tenant implementation the provider represents,
+     * using a resource key.
+     * The tenant class must implement the {@see \Sprout\Contracts\TenantHasResources}
+     * interface for this method to work.
+     *
+     * @param string $resourceKey
+     *
+     * @return (\Sprout\Contracts\Tenant&\Sprout\Contracts\TenantHasResources)|null
+     *
+     * @throws \Sprout\Exceptions\MisconfigurationException
+     *
+     * @phpstan-return (TenantModel&\Sprout\Contracts\TenantHasResources)|null
+     *
+     * @see \Sprout\Contracts\TenantHasResources::getTenantResourceKeyName()
+     * @see \Sprout\Contracts\TenantHasResources::getTenantResourceKey()
+     */
+    public function retrieveByResourceKey(string $resourceKey): (Tenant&TenantHasResources)|null
+    {
+        $model = $this->getModel();
+
+        if (! ($model instanceof TenantHasResources)) {
+            throw MisconfigurationException::misconfigured('tenant', $model::class, 'resources');
+        }
+
+        return $model->newModelQuery()
+                     ->where($model->getTenantResourceKeyName(), $resourceKey)
                      ->first();
     }
 }
