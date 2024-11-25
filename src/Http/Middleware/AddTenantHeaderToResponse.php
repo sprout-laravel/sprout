@@ -5,11 +5,10 @@ namespace Sprout\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Sprout\Http\Resolvers\HeaderIdentityResolver;
 use Sprout\Sprout;
 use Sprout\Support\ResolutionHelper;
-use Sprout\Support\ResolutionHook;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Add Tenant Header to Response
@@ -43,9 +42,10 @@ final class AddTenantHeaderToResponse
      * @param \Closure                 $next
      * @param string                   ...$options
      *
-     * @return \Illuminate\Http\Response
+     * @return \Symfony\Component\HttpFoundation\Response
      *
-     * @throws \Sprout\Exceptions\NoTenantFound
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws \Sprout\Exceptions\MisconfigurationException
      */
     public function handle(Request $request, Closure $next, string ...$options): Response
     {
@@ -68,7 +68,7 @@ final class AddTenantHeaderToResponse
         }
 
         return $response->withHeaders([
-            $resolver->getRequestHeaderName($tenancy) => $tenancy->identifier()
+            $resolver->getRequestHeaderName($tenancy) => $tenancy->identifier(),
         ]);
     }
 }
