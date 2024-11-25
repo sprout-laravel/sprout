@@ -48,7 +48,7 @@ final class TenantRoutes
      * @param \Closure                 $next
      * @param string                   ...$options
      *
-     * @return \Illuminate\Http\Response
+     * @return \Symfony\Component\HttpFoundation\Response
      *
      * @throws \Sprout\Exceptions\NoTenantFound
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
