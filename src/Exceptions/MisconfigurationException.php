@@ -42,7 +42,7 @@ final class MisconfigurationException extends SproutException
      */
     public static function invalidConfig(string $value, string $type, string $name): self
     {
-        return new self('The provided value for \'' . $value . '\' is not valid for' . $type . ' [' . $name . ']');
+        return new self('The provided value for \'' . $value . '\' is not valid for ' . $type . ' [' . $name . ']');
     }
 
     /**
