@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Tests\Database\Eloquent;
+namespace Sprout\Tests\_Original\Database\Eloquent;
 
 use Illuminate\Config\Repository;
 use Illuminate\Events\Dispatcher;

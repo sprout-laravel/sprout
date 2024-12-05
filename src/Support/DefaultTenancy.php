@@ -257,6 +257,11 @@ final class DefaultTenancy implements Tenancy
             event(new CurrentTenantChanged($this, $previousTenant, $tenant));
         }
 
+        if ($tenant === null) {
+            $this->resolver = null;
+            $this->hook     = null;
+        }
+
         return $this;
     }
 

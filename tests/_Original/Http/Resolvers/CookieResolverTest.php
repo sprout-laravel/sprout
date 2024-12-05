@@ -1,20 +1,21 @@
 <?php
 declare(strict_types=1);
 
-namespace Http\Resolvers;
+namespace Sprout\Tests\_Original\Http\Resolvers;
 
 use Illuminate\Config\Repository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Routing\Router;
 use Orchestra\Testbench\Concerns\WithWorkbench;
 use Orchestra\Testbench\TestCase;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use Sprout\Attributes\CurrentTenant;
 use Sprout\Contracts\Tenant;
-use Sprout\Http\Middleware\AddTenantHeaderToResponse;
 use Workbench\App\Models\TenantModel;
 
-class HeaderResolverTest extends TestCase
+#[Group('resolvers'), Group('cookies')]
+class CookieResolverTest extends TestCase
 {
     use WithWorkbench, RefreshDatabase;
 
@@ -24,7 +25,11 @@ class HeaderResolverTest extends TestCase
     {
         tap($app['config'], static function (Repository $config) {
             $config->set('multitenancy.providers.tenants.model', TenantModel::class);
-            $config->set('multitenancy.defaults.resolver', 'header');
+            $config->set('multitenancy.defaults.resolver', 'cookie');
+            $config->set('multitenancy.resolvers.cookie', [
+                'driver' => 'cookie',
+                'cookie' => '{Tenancy}-Identifier',
+            ]);
         });
     }
 
@@ -35,10 +40,10 @@ class HeaderResolverTest extends TestCase
         });
 
         $router->tenanted(function (Router $router) {
-            $router->get('/header-route', function (#[CurrentTenant] Tenant $tenant) {
+            $router->get('/cookie-route', function (#[CurrentTenant] Tenant $tenant) {
                 return $tenant->getTenantKey();
-            })->name('header.route');
-        }, 'header', 'tenants');
+            })->name('cookie.route');
+        }, 'cookie', 'tenants');
     }
 
     #[Test]
@@ -46,34 +51,25 @@ class HeaderResolverTest extends TestCase
     {
         $tenant = TenantModel::factory()->createOne();
 
-        $result = $this->get(route('header.route'), ['Tenants-Identifier' => $tenant->getTenantIdentifier()]);
+        $result = $this->withUnencryptedCookie('Tenants-Identifier', $tenant->getTenantIdentifier())->get(route('cookie.route'));
 
         $result->assertOk();
         $result->assertContent((string)$tenant->getTenantKey());
+        $result->cookie('Tenants-Identifier', $tenant->getTenantIdentifier());
     }
 
     #[Test]
     public function throwsExceptionForInvalidTenant(): void
     {
-        $result = $this->get(route('header.route'), ['Tenants-Identifier' => 'i-am-not-real']);
-
+        $result = $this->withCookie('Tenants-Identifier', 'i-am-not-real')->get(route('cookie.route'));
         $result->assertInternalServerError();
     }
 
     #[Test]
     public function throwsExceptionWithoutHeader(): void
     {
-        $result = $this->get(route('header.route'));
+        $result = $this->get(route('cookie.route'));
 
         $result->assertInternalServerError();
-    }
-
-    #[Test]
-    public function addTenantHeaderQueueingMiddleware(): void
-    {
-        $route = app(Router::class)->getRoutes()->getByName('header.route');
-
-        $this->assertNotNull($route);
-        $this->assertContains(AddTenantHeaderToResponse::class . ':header,tenants', $route->middleware());
     }
 }

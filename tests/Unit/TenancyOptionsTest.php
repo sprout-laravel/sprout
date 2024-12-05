@@ -1,29 +1,27 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Tests;
+namespace Sprout\Tests\Unit;
 
 use Illuminate\Config\Repository;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Orchestra\Testbench\Concerns\WithWorkbench;
-use Orchestra\Testbench\TestCase;
-use PHPUnit\Framework\Attributes\Group;
+use Orchestra\Testbench\Attributes\DefineEnvironment;
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\Managers\TenancyManager;
 use Sprout\TenancyOptions;
-use Workbench\App\Models\TenantModel;
+use function Sprout\tenancy;
 
-#[Group('core')]
-class TenancyOptionsTest extends TestCase
+class TenancyOptionsTest extends UnitTestCase
 {
-    use WithWorkbench, RefreshDatabase;
-
-    protected $enablesPackageDiscoveries = true;
-
-    protected function defineEnvironment($app): void
+    protected function setupSecondTenancy($app): void
     {
         tap($app['config'], static function (Repository $config) {
-            $config->set('multitenancy.providers.tenants.model', TenantModel::class);
+            $config->set('multitenancy.providers.backup', [
+                'driver' => 'database',
+                'table'  => 'tenants',
+            ]);
+
+            $config->set('multitenancy.tenancies.backup', [
+                'provider' => 'backup',
+            ]);
         });
     }
 
@@ -39,10 +37,10 @@ class TenancyOptionsTest extends TestCase
         $this->assertSame('tenant-relation.strict', TenancyOptions::throwIfNotRelated());
     }
 
-    #[Test]
+    #[Test, DefineEnvironment('setupSecondTenancy')]
     public function correctlyReportsHydrateTenantRelationOptionPresence(): void
     {
-        $tenancy = app(TenancyManager::class)->get('tenants');
+        $tenancy = tenancy('tenants');
         $tenancy->removeOption(TenancyOptions::hydrateTenantRelation());
 
         $this->assertFalse(TenancyOptions::shouldHydrateTenantRelation($tenancy));
@@ -50,12 +48,16 @@ class TenancyOptionsTest extends TestCase
         $tenancy->addOption(TenancyOptions::hydrateTenantRelation());
 
         $this->assertTrue(TenancyOptions::shouldHydrateTenantRelation($tenancy));
+
+        $tenancy = tenancy('backup');
+
+        $this->assertFalse(TenancyOptions::shouldHydrateTenantRelation($tenancy));
     }
 
-    #[Test]
+    #[Test, DefineEnvironment('setupSecondTenancy')]
     public function correctlyReportsThrowIfNotRelatedOptionPresence(): void
     {
-        $tenancy = app(TenancyManager::class)->get('tenants');
+        $tenancy = tenancy('tenants');
         $tenancy->removeOption(TenancyOptions::throwIfNotRelated());
 
         $this->assertFalse(TenancyOptions::shouldThrowIfNotRelated($tenancy));
@@ -63,5 +65,9 @@ class TenancyOptionsTest extends TestCase
         $tenancy->addOption(TenancyOptions::throwIfNotRelated());
 
         $this->assertTrue(TenancyOptions::shouldThrowIfNotRelated($tenancy));
+
+        $tenancy = tenancy('backup');
+
+        $this->assertFalse(TenancyOptions::shouldThrowIfNotRelated($tenancy));
     }
 }

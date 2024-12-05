@@ -1,13 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace Http\Resolvers;
+namespace Sprout\Tests\_Original\Http\Resolvers;
 
 use Illuminate\Config\Repository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Routing\Router;
 use Illuminate\Session\Middleware\StartSession;
-use Orchestra\Testbench\Attributes\DefineEnvironment;
 use Orchestra\Testbench\Concerns\WithWorkbench;
 use Orchestra\Testbench\TestCase;
 use PHPUnit\Framework\Attributes\Group;

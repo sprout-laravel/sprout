@@ -1,22 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Support;
+namespace Workbench\App;
 
 use Sprout\Contracts\Tenant;
 
-/**
- * Generic Tenant
- *
- * This is a default implementation of the {@see \Sprout\Contracts\Tenant}
- * interface for the use with {@see \Sprout\Providers\DatabaseTenantProvider}
- * as the tenant entity.
- *
- * @pacakge Core
- *
- * @codeCoverageIgnore
- */
-class GenericTenant implements Tenant
+class CustomTenantEntity implements Tenant
 {
     /**
      * All the tenant's attributes.
