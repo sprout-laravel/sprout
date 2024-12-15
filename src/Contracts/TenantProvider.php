@@ -55,4 +55,25 @@ interface TenantProvider
      * @phpstan-return TenantClass|null
      */
     public function retrieveByKey(int|string $key): ?Tenant;
+
+    /**
+     * Retrieve a tenant by its resource key
+     *
+     * Gets an instance of the tenant implementation the provider represents,
+     * using a resource key.
+     * The tenant class must implement the {@see \Sprout\Contracts\TenantHasResources}
+     * interface for this method to work.
+     *
+     * @param string $resourceKey
+     *
+     * @return (\Sprout\Contracts\Tenant&\Sprout\Contracts\TenantHasResources)|null
+     *
+     * @throws \Sprout\Exceptions\MisconfigurationException
+     *
+     * @phpstan-return (TenantClass&\Sprout\Contracts\TenantHasResources)|null
+     *
+     * @see \Sprout\Contracts\Tenant::getTenantKeyName()
+     * @see \Sprout\Contracts\Tenant::getTenantKey()
+     */
+    public function retrieveByResourceKey(string $resourceKey): (Tenant&TenantHasResources)|null;
 }

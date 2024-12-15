@@ -5,7 +5,8 @@ namespace Sprout\Providers;
 
 use Illuminate\Database\ConnectionInterface;
 use Sprout\Contracts\Tenant;
-use Sprout\Contracts\TenantProvider;
+use Sprout\Contracts\TenantHasResources;
+use Sprout\Exceptions\MisconfigurationException;
 use Sprout\Support\BaseTenantProvider;
 use Sprout\Support\GenericTenant;
 
@@ -131,7 +132,7 @@ final class DatabaseTenantProvider extends BaseTenantProvider
      * @see \Sprout\Contracts\Tenant::getTenantIdentifier()
      * @see \Sprout\Contracts\Tenant::getTenantIdentifierName()
      *
-     * @phpstan-return Tenant|null
+     * @phpstan-return EntityClass|null
      */
     public function retrieveByIdentifier(string $identifier): ?Tenant
     {
@@ -160,7 +161,7 @@ final class DatabaseTenantProvider extends BaseTenantProvider
      * @see \Sprout\Contracts\Tenant::getTenantKey()
      * @see \Sprout\Contracts\Tenant::getTenantKeyName()
      *
-     * @phpstan-return Tenant|null
+     * @phpstan-return EntityClass|null
      */
     public function retrieveByKey(int|string $key): ?Tenant
     {
@@ -171,6 +172,44 @@ final class DatabaseTenantProvider extends BaseTenantProvider
 
         if ($attributes !== null) {
             return $this->makeEntity($attributes);
+        }
+
+        return null;
+    }
+
+    /**
+     * Retrieve a tenant by its resource key
+     *
+     * Gets an instance of the tenant implementation the provider represents,
+     * using a resource key.
+     * The tenant class must implement the {@see \Sprout\Contracts\TenantHasResources}
+     * interface for this method to work.
+     *
+     * @param string $resourceKey
+     *
+     * @return (\Sprout\Contracts\Tenant&\Sprout\Contracts\TenantHasResources)|null
+     *
+     * @throws \Sprout\Exceptions\MisconfigurationException
+     *
+     * @phpstan-return (EntityClass&\Sprout\Contracts\TenantHasResources)|null
+     *
+     * @see \Sprout\Contracts\TenantHasResources::getTenantResourceKeyName()
+     * @see \Sprout\Contracts\TenantHasResources::getTenantResourceKey()
+     */
+    public function retrieveByResourceKey(string $resourceKey): (Tenant&TenantHasResources)|null
+    {
+        $entity = $this->getEntity();
+
+        if (! ($entity instanceof TenantHasResources)) {
+            throw MisconfigurationException::misconfigured('tenant', $entity::class, 'resources');
+        }
+
+        $attributes = $this->connection->table($this->table)
+                                       ->where($entity->getTenantResourceKeyName(), '=', $resourceKey)
+                                       ->first();
+
+        if ($attributes !== null) {
+            return $this->makeEntity($attributes); // @phpstan-ignore-line
         }
 
         return null;
