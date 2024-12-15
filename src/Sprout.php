@@ -220,6 +220,12 @@ final class Sprout
      * This method will proxy a call to {@see \Sprout\Contracts\IdentityResolver::route()}
      * to generate a URL for a tenanted route.
      *
+     * If no tenancy name is provided, this method will use the current tenancy
+     * or the default one.
+     * 
+     * If no resolver name is provided, this method will use the resolver
+     * currently linked with the tenancy, or the default one.
+     *
      * @template TenantClass of \Sprout\Contracts\Tenant
      *
      * @param string                   $name
