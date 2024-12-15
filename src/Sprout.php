@@ -4,12 +4,9 @@ declare(strict_types=1);
 namespace Sprout;
 
 use Illuminate\Contracts\Foundation\Application;
-use InvalidArgumentException;
 use Sprout\Concerns\HandlesServiceOverrides;
-use Sprout\Contracts\BootableServiceOverride;
-use Sprout\Contracts\DeferrableServiceOverride;
-use Sprout\Contracts\ServiceOverride;
 use Sprout\Contracts\Tenancy;
+use Sprout\Contracts\Tenant;
 use Sprout\Managers\IdentityResolverManager;
 use Sprout\Managers\ProviderManager;
 use Sprout\Managers\TenancyManager;
@@ -203,5 +200,55 @@ final class Sprout
     public function withinContext(): bool
     {
         return $this->withinContext;
+    }
+
+    /**
+     * Generate a route for a tenant
+     *
+     * This method will proxy a call to {@see \Sprout\Contracts\IdentityResolver::route()}
+     * to generate a URL for a tenanted route.
+     *
+     * If no tenancy name is provided, this method will use the current tenancy
+     * or the default one.
+     * 
+     * If no resolver name is provided, this method will use the resolver
+     * currently linked with the tenancy, or the default one.
+     *
+     * @template TenantClass of \Sprout\Contracts\Tenant
+     *
+     * @param string                   $name
+     * @param \Sprout\Contracts\Tenant $tenant
+     * @param string|null              $resolver
+     * @param string|null              $tenancy
+     * @param array<string, mixed>     $parameters
+     * @param bool                     $absolute
+     *
+     * @phpstan-param TenantClass      $tenant
+     *
+     * @return string
+     *
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws \Sprout\Exceptions\MisconfigurationException
+     * @throws \Sprout\Exceptions\TenantMissing
+     */
+    public function route(string $name, Tenant $tenant, ?string $resolver = null, ?string $tenancy = null, array $parameters = [], bool $absolute = true): string
+    {
+        if ($tenancy === null) {
+            $tenancyInstance = $this->getCurrentTenancy() ?? $this->tenancies()->get();
+        } else {
+            $tenancyInstance = $this->tenancies()->get($tenancy);
+        }
+
+        /** @var \Sprout\Contracts\Tenancy<TenantClass> $tenancyInstance */
+
+        if ($resolver === null) {
+            $resolverInstance = $tenancyInstance->resolver() ?? $this->resolvers()->get();
+        } else {
+            $resolverInstance = $this->resolvers()->get($resolver);
+        }
+
+        /** @var \Sprout\Contracts\IdentityResolver $resolverInstance */
+
+        return $resolverInstance->route($name, $tenancyInstance, $tenant, $parameters, $absolute);
     }
 }

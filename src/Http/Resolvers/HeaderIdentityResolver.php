@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Router;
 use Illuminate\Routing\RouteRegistrar;
 use Sprout\Contracts\Tenancy;
+use Sprout\Contracts\Tenant;
 use Sprout\Http\Middleware\AddTenantHeaderToResponse;
 use Sprout\Http\Middleware\TenantRoutes;
 use Sprout\Support\BaseIdentityResolver;
@@ -114,5 +115,33 @@ final class HeaderIdentityResolver extends BaseIdentityResolver
             TenantRoutes::ALIAS . ':' . $this->getName() . ',' . $tenancy->getName(),
             AddTenantHeaderToResponse::class . ':' . $this->getName() . ',' . $tenancy->getName(),
         ])->group($groupRoutes);
+    }
+
+    /**
+     * Generate a URL for a tenanted route
+     *
+     * This method wraps Laravel's {@see \route()} helper to allow for
+     * identity resolvers that use route parameters.
+     * Route parameter names are dynamic and configurable, so hard-coding them
+     * is less than ideal.
+     *
+     * This method is only really useful for identity resolvers that use route
+     * parameters, but, it's here for backwards compatibility.
+     *
+     * @template TenantClass of \Sprout\Contracts\Tenant
+     *
+     * @param string                                 $name
+     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Sprout\Contracts\Tenant               $tenant
+     * @param array<string, mixed>                   $parameters
+     * @param bool                                   $absolute
+     *
+     * @phpstan-param TenantClass                    $tenant
+     *
+     * @return string
+     */
+    public function route(string $name, Tenancy $tenancy, Tenant $tenant, array $parameters = [], bool $absolute = true): string
+    {
+        return route($name, $parameters, $absolute);
     }
 }
