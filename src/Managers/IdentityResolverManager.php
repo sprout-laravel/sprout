@@ -28,7 +28,7 @@ final class IdentityResolverManager extends BaseFactory
      *
      * @return string
      */
-    protected function getFactoryName(): string
+    public function getFactoryName(): string
     {
         return 'resolver';
     }
@@ -40,7 +40,7 @@ final class IdentityResolverManager extends BaseFactory
      *
      * @return string
      */
-    protected function getConfigKey(string $name): string
+    public function getConfigKey(string $name): string
     {
         return 'multitenancy.resolvers.' . $name;
     }

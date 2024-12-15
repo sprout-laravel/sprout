@@ -41,11 +41,11 @@ final class SubdomainIdentityResolver extends BaseIdentityResolver implements Id
     /**
      * Create a new instance
      *
-     * @param string      $name
-     * @param string      $domain
-     * @param string|null $pattern
-     * @param string|null $parameter
-     * @param array<\Sprout\Support\ResolutionHook>       $hooks
+     * @param string                                $name
+     * @param string                                $domain
+     * @param string|null                           $pattern
+     * @param string|null                           $parameter
+     * @param array<\Sprout\Support\ResolutionHook> $hooks
      */
     public function __construct(string $name, string $domain, ?string $pattern = null, ?string $parameter = null, array $hooks = [])
     {
@@ -80,6 +80,16 @@ final class SubdomainIdentityResolver extends BaseIdentityResolver implements Id
     }
 
     /**
+     * Get the domain the subdomains belong to
+     *
+     * @return string
+     */
+    public function getDomain(): string
+    {
+        return $this->domain;
+    }
+
+    /**
      * Get the domain name with parameter for the route definition
      *
      * @template TenantClass of \Sprout\Contracts\Tenant
@@ -88,7 +98,7 @@ final class SubdomainIdentityResolver extends BaseIdentityResolver implements Id
      *
      * @return string
      */
-    protected function getRouteDomain(Tenancy $tenancy): string
+    public function getRouteDomain(Tenancy $tenancy): string
     {
         return $this->getRouteParameter($tenancy) . '.' . $this->domain;
     }
@@ -111,10 +121,9 @@ final class SubdomainIdentityResolver extends BaseIdentityResolver implements Id
     {
         return $this->applyParameterPatternMapping(
             $router->domain($this->getRouteDomain($tenancy))
-                   ->middleware([TenantRoutes::ALIAS . ':' . $this->getName() . ',' . $tenancy->getName()])
-                   ->group($groupRoutes),
+                   ->middleware([TenantRoutes::ALIAS . ':' . $this->getName() . ',' . $tenancy->getName()]),
             $tenancy
-        );
+        )->group($groupRoutes);
     }
 
     /**

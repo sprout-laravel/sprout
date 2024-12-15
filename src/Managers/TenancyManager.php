@@ -40,7 +40,7 @@ final class TenancyManager extends BaseFactory
      *
      * @return string
      */
-    protected function getFactoryName(): string
+    public function getFactoryName(): string
     {
         return 'tenancy';
     }
@@ -52,7 +52,7 @@ final class TenancyManager extends BaseFactory
      *
      * @return string
      */
-    protected function getConfigKey(string $name): string
+    public function getConfigKey(string $name): string
     {
         return 'multitenancy.tenancies.' . $name;
     }

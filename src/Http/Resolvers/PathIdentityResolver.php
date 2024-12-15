@@ -103,10 +103,9 @@ final class PathIdentityResolver extends BaseIdentityResolver implements Identit
     {
         return $this->applyParameterPatternMapping(
             $router->middleware([TenantRoutes::ALIAS . ':' . $this->getName() . ',' . $tenancy->getName()])
-                   ->prefix($this->getRoutePrefix($tenancy))
-                   ->group($groupRoutes),
+                   ->prefix($this->getRoutePrefix($tenancy)),
             $tenancy
-        );
+        )->group($groupRoutes);
     }
 
     /**

@@ -50,25 +50,25 @@ trait HandlesServiceOverrides
     /**
      * Register a service override
      *
-     * @param class-string<\Sprout\Contracts\ServiceOverride> $overrideClass
+     * @param class-string<\Sprout\Contracts\ServiceOverride> $class
      *
      * @return static
      *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
      */
-    public function registerOverride(string $overrideClass): static
+    public function registerOverride(string $class): static
     {
-        if (! is_subclass_of($overrideClass, ServiceOverride::class)) {
-            throw new InvalidArgumentException('Provided service override [' . $overrideClass . '] does not implement ' . ServiceOverride::class);
+        if (! is_subclass_of($class, ServiceOverride::class)) {
+            throw new InvalidArgumentException('Provided service override [' . $class . '] does not implement ' . ServiceOverride::class);
         }
 
         // Flag the service override as being registered
-        $this->registeredOverrides[] = $overrideClass;
+        $this->registeredOverrides[] = $class;
 
-        if (is_subclass_of($overrideClass, DeferrableServiceOverride::class)) {
-            $this->registerDeferrableOverride($overrideClass);
+        if (is_subclass_of($class, DeferrableServiceOverride::class)) {
+            $this->registerDeferrableOverride($class);
         } else {
-            $this->processOverride($overrideClass);
+            $this->processOverride($class);
         }
 
         return $this;
@@ -145,13 +145,13 @@ trait HandlesServiceOverrides
     /**
      * Check if a service override is bootable
      *
-     * @param class-string<\Sprout\Contracts\ServiceOverride> $overrideClass
+     * @param class-string<\Sprout\Contracts\ServiceOverride> $class
      *
      * @return bool
      */
-    public function isBootableOverride(string $overrideClass): bool
+    public function isBootableOverride(string $class): bool
     {
-        return isset($this->bootableOverrides[$overrideClass]);
+        return isset($this->bootableOverrides[$class]);
     }
 
     /**
@@ -160,13 +160,13 @@ trait HandlesServiceOverrides
      * This method returns true if the service override has been booted, or
      * false if either it hasn't, or it isn't bootable.
      *
-     * @param class-string<\Sprout\Contracts\ServiceOverride> $overrideClass
+     * @param class-string<\Sprout\Contracts\ServiceOverride> $class
      *
      * @return bool
      */
-    public function hasBootedOverride(string $overrideClass): bool
+    public function hasBootedOverride(string $class): bool
     {
-        return $this->bootedOverrides[$overrideClass] ?? false;
+        return $this->bootedOverrides[$class] ?? false;
     }
 
     /**
@@ -224,13 +224,13 @@ trait HandlesServiceOverrides
      * Check if a service override has been set up
      *
      * @param \Sprout\Contracts\Tenancy<*>                       $tenancy
-     * @param class-string<\Sprout\Contracts\ServiceOverride> $overrideClass
+     * @param class-string<\Sprout\Contracts\ServiceOverride> $class
      *
      * @return bool
      */
-    public function hasSetupOverride(Tenancy $tenancy, string $overrideClass): bool
+    public function hasSetupOverride(Tenancy $tenancy, string $class): bool
     {
-        return $this->setupOverrides[$tenancy->getName()][$overrideClass] ?? false;
+        return $this->setupOverrides[$tenancy->getName()][$class] ?? false;
     }
 
     /**

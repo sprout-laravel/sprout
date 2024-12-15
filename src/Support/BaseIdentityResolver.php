@@ -51,6 +51,16 @@ abstract class BaseIdentityResolver implements IdentityResolver
     }
 
     /**
+     * Get the hooks this resolver uses
+     *
+     * @return array<\Sprout\Support\ResolutionHook>
+     */
+    public function getHooks(): array
+    {
+        return $this->hooks;
+    }
+
+    /**
      * Perform setup actions for the tenant
      *
      * When a tenant is marked as the current tenant within a tenancy, this
