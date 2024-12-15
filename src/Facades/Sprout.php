@@ -34,6 +34,7 @@ use Sprout\Support\ResolutionHook;
  * @method static ProviderManager providers()
  * @method static \Sprout\Sprout registerOverride(string $class)
  * @method static IdentityResolverManager resolvers()
+ * @method static string route(string $name, Tenant $tenant, string|null $resolver = null, string|null $tenancy = null, array $parameters = [], bool $absolute = true)
  * @method static void setCurrentTenancy(Tenancy $tenancy)
  * @method static void setupOverrides(Tenancy $tenancy, Tenant $tenant)
  * @method static bool supportsHook(ResolutionHook $hook)
