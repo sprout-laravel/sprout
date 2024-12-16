@@ -11,7 +11,7 @@ namespace Sprout\Exceptions;
  *
  * @package Core
  */
-final class NoTenantFound extends SproutException
+final class NoTenantFoundException extends SproutException
 {
     /**
      * Create the exception

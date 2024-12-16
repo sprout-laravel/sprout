@@ -28,7 +28,7 @@ final class IdentifyTenantOnRouting
      *
      * @return void
      *
-     * @throws \Sprout\Exceptions\NoTenantFound
+     * @throws \Sprout\Exceptions\NoTenantFoundException
      */
     public function handle(RouteMatched $event): void
     {

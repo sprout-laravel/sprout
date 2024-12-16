@@ -7,8 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
-use Sprout\Exceptions\TenantMismatch;
-use Sprout\Exceptions\TenantMissing;
+use Sprout\Exceptions\TenantMismatchException;
+use Sprout\Exceptions\TenantMissingException;
 use Sprout\TenancyOptions;
 use function Sprout\sprout;
 
@@ -67,8 +67,8 @@ class BelongsToTenantObserver
      *
      * @phpstan-param ChildModel                                                                     $model
      *
-     * @throws \Sprout\Exceptions\TenantMismatch
-     * @throws \Sprout\Exceptions\TenantMissing
+     * @throws \Sprout\Exceptions\TenantMismatchException
+     * @throws \Sprout\Exceptions\TenantMissingException
      */
     private function passesInitialChecks(Model $model, Tenancy $tenancy, BelongsTo $relation, bool $succeedOnMatch = false): bool
     {
@@ -82,7 +82,7 @@ class BelongsToTenantObserver
 
             // If we hit here then there's no tenant, and the model isn't
             // marked as tenant being optional, so we throw an exception
-            throw TenantMissing::make($tenancy->getName());
+            throw TenantMissingException::make($tenancy->getName());
         }
 
         /**
@@ -100,7 +100,7 @@ class BelongsToTenantObserver
                 // So, the current foreign key value doesn't match the current
                 // tenant, so we'll throw an exception...if we're allowed to
                 if (TenancyOptions::shouldThrowIfNotRelated($tenancy)) {
-                    throw TenantMismatch::make($model::class, $tenancy->getName());
+                    throw TenantMismatchException::make($model::class, $tenancy->getName());
                 }
 
                 // If we hit here, we should continue without doing anything
@@ -130,8 +130,8 @@ class BelongsToTenantObserver
      *
      * @phpstan-param ChildModel                                                                     $model
      *
-     * @throws \Sprout\Exceptions\TenantMissing
-     * @throws \Sprout\Exceptions\TenantMismatch
+     * @throws \Sprout\Exceptions\TenantMissingException
+     * @throws \Sprout\Exceptions\TenantMismatchException
      */
     public function creating(Model $model): bool
     {
@@ -175,8 +175,8 @@ class BelongsToTenantObserver
      *
      * @phpstan-param ChildModel                                                                     $model
      *
-     * @throws \Sprout\Exceptions\TenantMissing
-     * @throws \Sprout\Exceptions\TenantMismatch
+     * @throws \Sprout\Exceptions\TenantMissingException
+     * @throws \Sprout\Exceptions\TenantMismatchException
      */
     public function retrieved(Model $model): void
     {

@@ -8,8 +8,8 @@ use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Carbon;
 use SensitiveParameter;
-use Sprout\Exceptions\TenancyMissing;
-use Sprout\Exceptions\TenantMissing;
+use Sprout\Exceptions\TenancyMissingException;
+use Sprout\Exceptions\TenantMissingException;
 use function Sprout\sprout;
 
 /**
@@ -31,8 +31,8 @@ class TenantAwareDatabaseTokenRepository extends DatabaseTokenRepository
      *
      * @return array<string, mixed>
      *
-     * @throws \Sprout\Exceptions\TenancyMissing
-     * @throws \Sprout\Exceptions\TenantMissing
+     * @throws \Sprout\Exceptions\TenancyMissingException
+     * @throws \Sprout\Exceptions\TenantMissingException
      */
     protected function getPayload($email, #[SensitiveParameter] $token): array
     {
@@ -43,11 +43,11 @@ class TenantAwareDatabaseTokenRepository extends DatabaseTokenRepository
         $tenancy = sprout()->getCurrentTenancy();
 
         if ($tenancy === null) {
-            throw TenancyMissing::make();
+            throw TenancyMissingException::make();
         }
 
         if (! $tenancy->check()) {
-            throw TenantMissing::make($tenancy->getName());
+            throw TenantMissingException::make($tenancy->getName());
         }
 
         return [
@@ -66,8 +66,8 @@ class TenantAwareDatabaseTokenRepository extends DatabaseTokenRepository
      *
      * @return \Illuminate\Database\Query\Builder
      *
-     * @throws \Sprout\Exceptions\TenancyMissing
-     * @throws \Sprout\Exceptions\TenantMissing
+     * @throws \Sprout\Exceptions\TenancyMissingException
+     * @throws \Sprout\Exceptions\TenantMissingException
      */
     protected function getTenantedQuery(string $email): Builder
     {
@@ -78,11 +78,11 @@ class TenantAwareDatabaseTokenRepository extends DatabaseTokenRepository
         $tenancy = sprout()->getCurrentTenancy();
 
         if ($tenancy === null) {
-            throw TenancyMissing::make();
+            throw TenancyMissingException::make();
         }
 
         if (! $tenancy->check()) {
-            throw TenantMissing::make($tenancy->getName());
+            throw TenantMissingException::make($tenancy->getName());
         }
 
         return $this->getTable()
@@ -98,8 +98,8 @@ class TenantAwareDatabaseTokenRepository extends DatabaseTokenRepository
      *
      * @return object|null
      *
-     * @throws \Sprout\Exceptions\TenancyMissing
-     * @throws \Sprout\Exceptions\TenantMissing
+     * @throws \Sprout\Exceptions\TenancyMissingException
+     * @throws \Sprout\Exceptions\TenantMissingException
      */
     protected function getExistingTenantedRecord(CanResetPasswordContract $user): ?object
     {
@@ -113,8 +113,8 @@ class TenantAwareDatabaseTokenRepository extends DatabaseTokenRepository
      *
      * @return int
      *
-     * @throws \Sprout\Exceptions\TenancyMissing
-     * @throws \Sprout\Exceptions\TenantMissing
+     * @throws \Sprout\Exceptions\TenancyMissingException
+     * @throws \Sprout\Exceptions\TenantMissingException
      */
     protected function deleteExisting(CanResetPasswordContract $user): int
     {
@@ -129,8 +129,8 @@ class TenantAwareDatabaseTokenRepository extends DatabaseTokenRepository
      *
      * @return bool
      *
-     * @throws \Sprout\Exceptions\TenancyMissing
-     * @throws \Sprout\Exceptions\TenantMissing
+     * @throws \Sprout\Exceptions\TenancyMissingException
+     * @throws \Sprout\Exceptions\TenantMissingException
      */
     public function exists(CanResetPasswordContract $user, #[SensitiveParameter] $token): bool
     {
@@ -148,8 +148,8 @@ class TenantAwareDatabaseTokenRepository extends DatabaseTokenRepository
      *
      * @return bool
      *
-     * @throws \Sprout\Exceptions\TenancyMissing
-     * @throws \Sprout\Exceptions\TenantMissing
+     * @throws \Sprout\Exceptions\TenancyMissingException
+     * @throws \Sprout\Exceptions\TenantMissingException
      */
     public function recentlyCreatedToken(CanResetPasswordContract $user): bool
     {

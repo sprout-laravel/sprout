@@ -15,8 +15,8 @@ use Sprout\Database\Eloquent\Concerns\BelongsToManyTenants;
 use Sprout\Database\Eloquent\Contracts\OptionalTenant;
 use Sprout\Database\Eloquent\Observers\BelongsToManyTenantsObserver;
 use Sprout\Database\Eloquent\Scopes\BelongsToManyTenantsScope;
-use Sprout\Exceptions\TenantMismatch;
-use Sprout\Exceptions\TenantMissing;
+use Sprout\Exceptions\TenantMismatchException;
+use Sprout\Exceptions\TenantMissingException;
 use Sprout\Managers\TenancyManager;
 use Sprout\TenancyOptions;
 use Workbench\App\Models\TenantChildren;
@@ -101,7 +101,7 @@ class BelongsToManyTenantsTest extends TestCase
     {
         sprout()->setCurrentTenancy(app(TenancyManager::class)->get());
 
-        $this->expectException(TenantMissing::class);
+        $this->expectException(TenantMissingException::class);
         $this->expectExceptionMessage(
             'There is no current tenant for tenancy [tenants]'
         );
@@ -205,7 +205,7 @@ class BelongsToManyTenantsTest extends TestCase
 
         $tenancy->setTenant(null);
 
-        $this->expectException(TenantMissing::class);
+        $this->expectException(TenantMissingException::class);
         $this->expectExceptionMessage(
             'There is no current tenant for tenancy [tenants]'
         );
@@ -274,7 +274,7 @@ class BelongsToManyTenantsTest extends TestCase
 
         $tenancy->setTenant(TenantModel::factory()->create());
 
-        $this->expectException(TenantMismatch::class);
+        $this->expectException(TenantMismatchException::class);
         $this->expectExceptionMessage(
             'Model ['
             . TenantChildren::class

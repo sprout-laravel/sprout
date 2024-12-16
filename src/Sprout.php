@@ -260,7 +260,7 @@ final class Sprout
      *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
      * @throws \Sprout\Exceptions\MisconfigurationException
-     * @throws \Sprout\Exceptions\TenantMissing
+     * @throws \Sprout\Exceptions\TenantMissingException
      */
     public function route(string $name, Tenant $tenant, ?string $resolver = null, ?string $tenancy = null, array $parameters = [], bool $absolute = true): string
     {

@@ -13,7 +13,7 @@ namespace Sprout\Exceptions;
  *
  * @codeCoverageIgnore
  */
-final class TenancyMissing extends SproutException
+final class TenancyMissingException extends SproutException
 {
     /**
      * Create the exception

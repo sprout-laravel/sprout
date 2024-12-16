@@ -9,7 +9,7 @@ use Illuminate\Routing\Route;
 use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\Test;
 use Sprout\Exceptions\MisconfigurationException;
-use Sprout\Exceptions\NoTenantFound;
+use Sprout\Exceptions\NoTenantFoundException;
 use Sprout\Support\ResolutionHelper;
 use Sprout\Support\ResolutionHook;
 use Sprout\Tests\Unit\UnitTestCase;
@@ -186,12 +186,12 @@ class ResolutionHelperTest extends UnitTestCase
             $mock->shouldReceive('route')->andReturn($fakeRoute);
         });
 
-        $this->expectException(NoTenantFound::class);
+        $this->expectException(NoTenantFoundException::class);
         $this->expectExceptionMessage('No valid tenant [' . $tenancy->getName() . '] found [' . $resolver->getName() . ']');
 
         ResolutionHelper::handleResolution($fakeRequest, ResolutionHook::Routing, $resolver->getName(), $tenancy->getName());
 
-        $this->expectException(NoTenantFound::class);
+        $this->expectException(NoTenantFoundException::class);
         $this->expectExceptionMessage('No valid tenant [' . $tenancy->getName() . '] found [subdomain]');
 
         ResolutionHelper::handleResolution($fakeRequest, ResolutionHook::Routing);
@@ -299,12 +299,12 @@ class ResolutionHelperTest extends UnitTestCase
                  ->andReturn('fake-identifier');
         });
 
-        $this->expectException(NoTenantFound::class);
+        $this->expectException(NoTenantFoundException::class);
         $this->expectExceptionMessage('No valid tenant [' . $tenancy->getName() . '] found [' . $resolver->getName() . ']');
 
         ResolutionHelper::handleResolution($fakeRequest, ResolutionHook::Routing, $resolver->getName(), $tenancy->getName());
 
-        $this->expectException(NoTenantFound::class);
+        $this->expectException(NoTenantFoundException::class);
         $this->expectExceptionMessage('No valid tenant [' . $tenancy->getName() . '] found [subdomain]');
 
         ResolutionHelper::handleResolution($fakeRequest, ResolutionHook::Routing);

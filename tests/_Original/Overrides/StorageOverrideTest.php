@@ -13,7 +13,7 @@ use Orchestra\Testbench\TestCase;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use Sprout\Exceptions\MisconfigurationException;
-use Sprout\Exceptions\TenantMissing;
+use Sprout\Exceptions\TenantMissingException;
 use Sprout\Managers\TenancyManager;
 use Sprout\Overrides\AuthOverride;
 use Sprout\Overrides\CacheOverride;
@@ -108,7 +108,7 @@ class StorageOverrideTest extends TestCase
     #[Test, DefineEnvironment('createTenantDisk')]
     public function throwsExceptionIfThereIsNoTenant(): void
     {
-        $this->expectException(TenantMissing::class);
+        $this->expectException(TenantMissingException::class);
         $this->expectExceptionMessage('There is no current tenant for tenancy [tenants]');
 
         Storage::disk('tenant');
