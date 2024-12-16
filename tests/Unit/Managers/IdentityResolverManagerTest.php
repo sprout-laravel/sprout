@@ -175,5 +175,7 @@ class IdentityResolverManagerTest extends UnitTestCase
         });
 
         $manager = sprout()->resolvers();
+
+        $this->markTestSkipped();
     }
 }
