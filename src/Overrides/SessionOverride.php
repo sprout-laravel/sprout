@@ -8,7 +8,7 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Session\DatabaseSessionHandler as OriginalDatabaseSessionHandler;
 use Illuminate\Session\FileSessionHandler;
 use Illuminate\Session\SessionManager;
-use Sprout\Concerns\OverridesCookieSettings;
+use Illuminate\Support\Arr;
 use Sprout\Contracts\BootableServiceOverride;
 use Sprout\Contracts\DeferrableServiceOverride;
 use Sprout\Contracts\Tenancy;
@@ -19,6 +19,8 @@ use Sprout\Exceptions\TenancyMissing;
 use Sprout\Exceptions\TenantMissing;
 use Sprout\Overrides\Session\TenantAwareDatabaseSessionHandler;
 use Sprout\Sprout;
+use Sprout\Support\Settings;
+use function Sprout\settings;
 use function Sprout\sprout;
 
 /**
@@ -31,23 +33,6 @@ use function Sprout\sprout;
  */
 final class SessionOverride implements BootableServiceOverride, DeferrableServiceOverride
 {
-    use OverridesCookieSettings;
-
-    /**
-     * @var bool
-     */
-    private static bool $overrideDatabase = true;
-
-    /**
-     * Prevent this override from overriding the database driver
-     *
-     * @return void
-     */
-    public static function doNotOverrideDatabase(): void
-    {
-        self::$overrideDatabase = false;
-    }
-
     /**
      * Get the service to watch for before overriding
      *
@@ -80,7 +65,7 @@ final class SessionOverride implements BootableServiceOverride, DeferrableServic
         $sessionManager->extend('file', $fileCreator);
         $sessionManager->extend('native', $fileCreator);
 
-        if (self::$overrideDatabase) {
+        if (settings()->shouldNotOverrideTheDatabase(false) === false) {
             $sessionManager->extend('database', self::createDatabaseDriver());
         }
     }
@@ -99,13 +84,33 @@ final class SessionOverride implements BootableServiceOverride, DeferrableServic
      */
     public function setup(Tenancy $tenancy, Tenant $tenant): void
     {
-        $settings = self::$settings;
-
         /** @var \Illuminate\Contracts\Config\Repository $config */
-        $config = config();
+        $config   = config();
+        $settings = settings();
 
-        foreach ($settings as $setting => $value) {
-            $config->set('session.' . $setting, $value);
+        if (! $settings->has('original.session')) {
+            /** @var array<string, mixed> $original */
+            $original = $config->get('session');
+            $settings->set(
+                'original.session',
+                Arr::only($original, ['path', 'domain', 'secure', 'same_site'])
+            );
+        }
+
+        if ($settings->has(Settings::URL_PATH)) {
+            $config->set('session.path', $settings->getUrlPath());
+        }
+
+        if ($settings->has(Settings::URL_DOMAIN)) {
+            $config->set('session.domain', $settings->getUrlDomain());
+        }
+
+        if ($settings->has(Settings::COOKIE_SECURE)) {
+            $config->set('session.secure', $settings->shouldCookieBeSecure());
+        }
+
+        if ($settings->has(Settings::COOKIE_SAME_SITE)) {
+            $config->set('session.same_site', $settings->shouldCookeBeSameSite());
         }
 
         $config->set('session.cookie', $this->getCookieName($tenancy, $tenant));

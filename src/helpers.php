@@ -5,15 +5,26 @@ namespace Sprout;
 use Sprout\Contracts\IdentityResolver;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\TenantProvider;
+use Sprout\Support\SettingsRepository;
 
 /**
- * Get the core sprout class
+ * Get the core Sprout class
  *
  * @return \Sprout\Sprout
  */
 function sprout(): Sprout
 {
     return app(Sprout::class);
+}
+
+/**
+ * Get the Sprout settings repository
+ *
+ * @return \Sprout\Support\SettingsRepository
+ */
+function settings(): SettingsRepository
+{
+    return sprout()->settings();
 }
 
 /**
