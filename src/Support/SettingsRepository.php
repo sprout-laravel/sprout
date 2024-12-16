@@ -64,7 +64,7 @@ final class SettingsRepository extends Repository
         $this->set(Settings::NO_DATABASE_OVERRIDE, true);
     }
 
-    public function shouldOverrideTheDatabase(?bool $default = null): bool
+    public function shouldNotOverrideTheDatabase(bool $default = null): bool
     {
         return $this->boolean(Settings::NO_DATABASE_OVERRIDE, $default);
     }

@@ -65,7 +65,7 @@ final class SessionOverride implements BootableServiceOverride, DeferrableServic
         $sessionManager->extend('file', $fileCreator);
         $sessionManager->extend('native', $fileCreator);
 
-        if (settings()->shouldOverrideTheDatabase(false) === false) {
+        if (settings()->shouldNotOverrideTheDatabase(false) === false) {
             $sessionManager->extend('database', self::createDatabaseDriver());
         }
     }
