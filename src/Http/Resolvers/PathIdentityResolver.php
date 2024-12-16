@@ -180,7 +180,7 @@ final class PathIdentityResolver extends BaseIdentityResolver implements Identit
         $this->parameterSetup($tenancy, $tenant);
 
         if ($tenant !== null) {
-            settings()->set(Settings::URL_PATH, $this->getTenantRoutePrefix($tenancy));
+            settings()->setUrlPath($this->getTenantRoutePrefix($tenancy));
         }
     }
 }

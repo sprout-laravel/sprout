@@ -8,7 +8,6 @@ use Sprout\Contracts\DeferrableServiceOverride;
 use Sprout\Contracts\ServiceOverride;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
-use Sprout\Support\Settings;
 use function Sprout\settings;
 
 /**
@@ -46,10 +45,10 @@ final class CookieOverride implements ServiceOverride, DeferrableServiceOverride
     public function setup(Tenancy $tenancy, Tenant $tenant): void
     {
         // Collect the values
-        $path     = settings()->get(Settings::URL_PATH, config('session.path') ?? '/');
-        $domain   = settings()->get(Settings::URL_DOMAIN, config('session.domain'));
-        $secure   = settings()->get(Settings::COOKIE_SECURE, config('session.secure', false));
-        $sameSite = settings()->get(Settings::COOKIE_SAME_SITE, config('session.same_site'));
+        $path     = settings()->getUrlPath(config('session.path') ?? '/');             // @phpstan-ignore-line
+        $domain   = settings()->getUrlDomain(config('session.domain'));                // @phpstan-ignore-line
+        $secure   = settings()->shouldCookieBeSecure(config('session.secure', false)); // @phpstan-ignore-line
+        $sameSite = settings()->shouldCookeBeSameSite(config('session.same_site'));    // @phpstan-ignore-line
 
         /**
          * This is here to make PHPStan quiet down

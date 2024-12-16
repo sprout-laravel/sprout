@@ -65,7 +65,7 @@ final class SessionOverride implements BootableServiceOverride, DeferrableServic
         $sessionManager->extend('file', $fileCreator);
         $sessionManager->extend('native', $fileCreator);
 
-        if (settings()->boolean(Settings::NO_DATABASE_OVERRIDE, true) === false) {
+        if (settings()->shouldOverrideTheDatabase(false) === false) {
             $sessionManager->extend('database', self::createDatabaseDriver());
         }
     }
@@ -98,19 +98,19 @@ final class SessionOverride implements BootableServiceOverride, DeferrableServic
         }
 
         if ($settings->has(Settings::URL_PATH)) {
-            $config->set('session.path', $settings->get(Settings::URL_PATH));
+            $config->set('session.path', $settings->getUrlPath());
         }
 
         if ($settings->has(Settings::URL_DOMAIN)) {
-            $config->set('session.domain', $settings->get(Settings::URL_DOMAIN));
+            $config->set('session.domain', $settings->getUrlDomain());
         }
 
         if ($settings->has(Settings::COOKIE_SECURE)) {
-            $config->set('session.secure', $settings->get(Settings::COOKIE_SECURE));
+            $config->set('session.secure', $settings->shouldCookieBeSecure());
         }
 
         if ($settings->has(Settings::COOKIE_SAME_SITE)) {
-            $config->set('session.same_site', $settings->get(Settings::COOKIE_SAME_SITE));
+            $config->set('session.same_site', $settings->shouldCookeBeSameSite());
         }
 
         $config->set('session.cookie', $this->getCookieName($tenancy, $tenant));
