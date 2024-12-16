@@ -176,6 +176,16 @@ class IdentityResolverManagerTest extends UnitTestCase
 
         $manager = sprout()->resolvers();
 
-        $this->markTestSkipped();
+        $this->assertTrue($manager->hasDriver('hello-there'));
+        $this->assertFalse($manager->hasResolved('path'));
+        $this->assertFalse($manager->hasResolved('subdomain'));
+
+        $resolver = $manager->get('path');
+
+        $this->assertInstanceOf(SubdomainIdentityResolver::class, $resolver);
+        $this->assertSame('hello-there', $resolver->getName());
+        $this->assertSame('somedomain.local', $resolver->getDomain());
+        $this->assertTrue($manager->hasResolved('path'));
+        $this->assertFalse($manager->hasResolved('subdomain'));
     }
 }
