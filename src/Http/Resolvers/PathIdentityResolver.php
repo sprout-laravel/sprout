@@ -16,6 +16,8 @@ use Sprout\Http\Middleware\TenantRoutes;
 use Sprout\Overrides\CookieOverride;
 use Sprout\Overrides\SessionOverride;
 use Sprout\Support\BaseIdentityResolver;
+use Sprout\Support\Settings;
+use function Sprout\settings;
 
 /**
  * Path Identity Resolver
@@ -178,8 +180,7 @@ final class PathIdentityResolver extends BaseIdentityResolver implements Identit
         $this->parameterSetup($tenancy, $tenant);
 
         if ($tenant !== null) {
-            CookieOverride::setPath($this->getTenantRoutePrefix($tenancy));
-            SessionOverride::setPath($this->getTenantRoutePrefix($tenancy));
+            settings()->set(Settings::URL_PATH, $this->getTenantRoutePrefix($tenancy));
         }
     }
 }

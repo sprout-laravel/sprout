@@ -16,6 +16,8 @@ use Sprout\Http\Middleware\TenantRoutes;
 use Sprout\Overrides\CookieOverride;
 use Sprout\Overrides\SessionOverride;
 use Sprout\Support\BaseIdentityResolver;
+use Sprout\Support\Settings;
+use function Sprout\settings;
 
 /**
  * The Subdomain Identity Resolver
@@ -172,8 +174,7 @@ final class SubdomainIdentityResolver extends BaseIdentityResolver implements Id
         $this->parameterSetup($tenancy, $tenant);
 
         if ($tenant !== null) {
-            CookieOverride::setDomain($this->getTenantRouteDomain($tenancy));
-            SessionOverride::setDomain($this->getTenantRouteDomain($tenancy));
+            settings()->set(Settings::URL_DOMAIN, $this->getTenantRouteDomain($tenancy));
         }
     }
 }
