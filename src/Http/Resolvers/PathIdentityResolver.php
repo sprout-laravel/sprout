@@ -11,7 +11,7 @@ use Sprout\Concerns\FindsIdentityInRouteParameter;
 use Sprout\Contracts\IdentityResolverUsesParameters;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
-use Sprout\Exceptions\TenantMissing;
+use Sprout\Exceptions\TenantMissingException;
 use Sprout\Http\Middleware\TenantRoutes;
 use Sprout\Overrides\CookieOverride;
 use Sprout\Overrides\SessionOverride;
@@ -105,10 +105,9 @@ final class PathIdentityResolver extends BaseIdentityResolver implements Identit
     {
         return $this->applyParameterPatternMapping(
             $router->middleware([TenantRoutes::ALIAS . ':' . $this->getName() . ',' . $tenancy->getName()])
-                   ->prefix($this->getRoutePrefix($tenancy))
-                   ->group($groupRoutes),
+                   ->prefix($this->getRoutePrefix($tenancy)),
             $tenancy
-        );
+        )->group($groupRoutes);
     }
 
     /**
@@ -134,12 +133,12 @@ final class PathIdentityResolver extends BaseIdentityResolver implements Identit
      *
      * @return string
      *
-     * @throws \Sprout\Exceptions\TenantMissing
+     * @throws \Sprout\Exceptions\TenantMissingException
      */
     public function getTenantRoutePrefix(Tenancy $tenancy): string
     {
         if (! $tenancy->check()) {
-            throw TenantMissing::make($tenancy->getName()); // @codeCoverageIgnore
+            throw TenantMissingException::make($tenancy->getName()); // @codeCoverageIgnore
         }
 
         /** @var string $identifier */
@@ -169,7 +168,7 @@ final class PathIdentityResolver extends BaseIdentityResolver implements Identit
      *
      * @return void
      *
-     * @throws \Sprout\Exceptions\TenantMissing
+     * @throws \Sprout\Exceptions\TenantMissingException
      */
     public function setup(Tenancy $tenancy, ?Tenant $tenant): void
     {

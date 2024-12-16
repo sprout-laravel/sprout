@@ -147,18 +147,6 @@ final class Sprout
     }
 
     /**
-     * Should Sprout listen for the routing event
-     *
-     * @return bool
-     *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
-     */
-    public function shouldListenForRouting(): bool
-    {
-        return (bool)$this->config('listen_for_routing', true);
-    }
-
-    /**
      * Get the identity resolver manager
      *
      * @return \Sprout\Managers\IdentityResolverManager
@@ -228,7 +216,7 @@ final class Sprout
      *
      * @return static
      */
-    public function maskAsOutsideContext(): self
+    public function markAsOutsideContext(): self
     {
         $this->withinContext = false;
 
@@ -272,7 +260,7 @@ final class Sprout
      *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
      * @throws \Sprout\Exceptions\MisconfigurationException
-     * @throws \Sprout\Exceptions\TenantMissing
+     * @throws \Sprout\Exceptions\TenantMissingException
      */
     public function route(string $name, Tenant $tenant, ?string $resolver = null, ?string $tenancy = null, array $parameters = [], bool $absolute = true): string
     {

@@ -15,8 +15,8 @@ use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 use Sprout\Contracts\TenantHasResources;
 use Sprout\Exceptions\MisconfigurationException;
-use Sprout\Exceptions\TenancyMissing;
-use Sprout\Exceptions\TenantMissing;
+use Sprout\Exceptions\TenancyMissingException;
+use Sprout\Exceptions\TenantMissingException;
 use Sprout\Overrides\Session\TenantAwareDatabaseSessionHandler;
 use Sprout\Sprout;
 use Sprout\Support\Settings;
@@ -168,12 +168,12 @@ final class SessionOverride implements BootableServiceOverride, DeferrableServic
                 $tenancy = sprout()->getCurrentTenancy();
 
                 if ($tenancy === null) {
-                    throw TenancyMissing::make();
+                    throw TenancyMissingException::make();
                 }
 
                 // If there's no tenant, error out
                 if (! $tenancy->check()) {
-                    throw TenantMissing::make($tenancy->getName());
+                    throw TenantMissingException::make($tenancy->getName());
                 }
 
                 $tenant = $tenancy->tenant();

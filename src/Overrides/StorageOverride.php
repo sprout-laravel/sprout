@@ -14,7 +14,7 @@ use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 use Sprout\Contracts\TenantHasResources;
 use Sprout\Exceptions\MisconfigurationException;
-use Sprout\Exceptions\TenantMissing;
+use Sprout\Exceptions\TenantMissingException;
 use Sprout\Sprout;
 
 /**
@@ -121,7 +121,7 @@ final class StorageOverride implements BootableServiceOverride, DeferrableServic
 
             // If there's no tenant, error out
             if (! $tenancy->check()) {
-                throw TenantMissing::make($tenancy->getName());
+                throw TenantMissingException::make($tenancy->getName());
             }
 
             $tenant = $tenancy->tenant();

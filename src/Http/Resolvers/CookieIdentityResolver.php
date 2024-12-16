@@ -65,6 +65,16 @@ final class CookieIdentityResolver extends BaseIdentityResolver
     }
 
     /**
+     * Get the extra cookie options
+     *
+     * @return array<string, mixed>
+     */
+    public function getOptions(): array
+    {
+        return $this->options;
+    }
+
+    /**
      * Get the cookie name with replacements
      *
      * This method returns the name of the cookie returned by

@@ -18,7 +18,7 @@ use Sprout\Contracts\DeferrableServiceOverride;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 use Sprout\Exceptions\MisconfigurationException;
-use Sprout\Exceptions\TenantMissing;
+use Sprout\Exceptions\TenantMissingException;
 use Sprout\Sprout;
 
 /**
@@ -69,14 +69,14 @@ final class CacheOverride implements BootableServiceOverride, DeferrableServiceO
             /**
              * @param array<string, mixed> $config
              *
-             * @throws \Sprout\Exceptions\TenantMissing
+             * @throws \Sprout\Exceptions\TenantMissingException
              */
             function (Application $app, array $config) use ($sprout, $cacheManager) {
                 $tenancy = $sprout->tenancies()->get($config['tenancy'] ?? null);
 
                 // If there's no tenant, error out
                 if (! $tenancy->check()) {
-                    throw TenantMissing::make($tenancy->getName());
+                    throw TenantMissingException::make($tenancy->getName());
                 }
 
                 $tenant = $tenancy->tenant();

@@ -5,7 +5,7 @@ namespace Sprout\Database\Eloquent\Scopes;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Sprout\Exceptions\TenantMissing;
+use Sprout\Exceptions\TenantMissingException;
 use function Sprout\sprout;
 
 /**
@@ -35,7 +35,7 @@ final class BelongsToTenantScope extends TenantChildScope
      *
      * @return void
      *
-     * @throws \Sprout\Exceptions\TenantMissing
+     * @throws \Sprout\Exceptions\TenantMissingException
      */
     public function apply(Builder $builder, Model $model): void
     {
@@ -54,7 +54,7 @@ final class BelongsToTenantScope extends TenantChildScope
             }
 
             // We should throw an exception because the tenant is missing
-            throw TenantMissing::make($tenancy->getName());
+            throw TenantMissingException::make($tenancy->getName());
         }
 
         // Finally, add the clause so that all queries are scoped to the

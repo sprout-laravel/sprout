@@ -15,8 +15,14 @@
         testdox="true"
 >
     <testsuites>
-        <testsuite name="Tenanted Laravel Test Suite">
-            <directory>tests</directory>
+        <testsuite name="Original">
+            <directory>tests/_Original</directory>
+        </testsuite>
+        <testsuite name="Feature">
+            <directory>./tests/Feature</directory>
+        </testsuite>
+        <testsuite name="Unit">
+            <directory>./tests/Unit</directory>
         </testsuite>
     </testsuites>
     <source>

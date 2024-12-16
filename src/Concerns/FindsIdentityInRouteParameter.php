@@ -9,7 +9,6 @@ use Illuminate\Routing\RouteRegistrar;
 use Illuminate\Support\Facades\URL;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
-use Sprout\Exceptions\TenantMissing;
 
 /**
  * Find Identity in Route Parameter
@@ -269,22 +268,12 @@ trait FindsIdentityInRouteParameter
      * @param array<string, mixed>                   $parameters
      * @param bool                                   $absolute
      *
-     * @phpstan-param TenantClass|null               $tenant
+     * @phpstan-param TenantClass                    $tenant
      *
      * @return string
-     *
-     * @throws \Sprout\Exceptions\TenantMissing
      */
     public function route(string $name, Tenancy $tenancy, Tenant $tenant, array $parameters = [], bool $absolute = true): string
     {
-        if ($tenant === null) {
-            if (! $tenancy->check()) {
-                throw TenantMissing::make($tenancy->getName());
-            }
-
-            $tenant = $tenancy->tenant();
-        }
-
         $parameter = $this->getRouteParameterName($tenancy);
 
         if (! isset($parameters[$parameter])) {

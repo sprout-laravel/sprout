@@ -113,8 +113,6 @@ interface IdentityResolver
      * @phpstan-param TenantClass                    $tenant
      *
      * @return string
-     *
-     * @throws \Sprout\Exceptions\TenantMissing
      */
     public function route(string $name, Tenancy $tenancy, Tenant $tenant, array $parameters = [], bool $absolute = true): string;
 }

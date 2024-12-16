@@ -70,11 +70,24 @@ abstract class BaseFactory
     }
 
     /**
+     * Check if a factory has a driver
+     *
+     * @param string $name
+     *
+     * @return bool
+     */
+    public function hasDriver(string $name): bool
+    {
+        return isset(static::$customCreators[$name])
+               || method_exists($this, 'create' . ucfirst($name) . ucfirst($this->getFactoryName()));
+    }
+
+    /**
      * Get the name used by this factory
      *
      * @return string
      */
-    abstract protected function getFactoryName(): string;
+    abstract public function getFactoryName(): string;
 
     /**
      * Get the config key for the given name
@@ -83,7 +96,7 @@ abstract class BaseFactory
      *
      * @return string
      */
-    abstract protected function getConfigKey(string $name): string;
+    abstract public function getConfigKey(string $name): string;
 
     /**
      * Get the default name
@@ -92,7 +105,7 @@ abstract class BaseFactory
      *
      * @throws \Sprout\Exceptions\MisconfigurationException
      */
-    protected function getDefaultName(): string
+    public function getDefaultName(): string
     {
         /** @var \Illuminate\Config\Repository $config */
         $config = app('config');
@@ -173,15 +186,22 @@ abstract class BaseFactory
         }
 
         // Ooo custom creation logic, let's use that
-        if (isset($this->customCreators[$name])) {
+        if (isset(static::$customCreators[$name])) {
             return $this->callCustomCreator($name, $config);
         }
 
+        /** @var string|null $driver */
+        $driver = $config['driver'] ?? null;
+
         // Is there a driver?
-        if (isset($config['driver'])) {
+        if ($driver !== null) {
+            // Is there a custom creator for the driver?
+            if (isset(static::$customCreators[$driver])) {
+                return $this->callCustomCreator($driver, $config);
+            }
+
             // This has a driver, so we'll see if we can create based on that
-            /** @phpstan-ignore-next-line */
-            $method = 'create' . ucfirst($config['driver']) . ucfirst($this->getFactoryName());
+            $method = 'create' . ucfirst($driver) . ucfirst($this->getFactoryName());
         } else {
             // There's no driver, so we'll see if there's a default available
             $method = 'createDefault' . ucfirst($this->getFactoryName());
@@ -229,5 +249,21 @@ abstract class BaseFactory
         $this->objects = [];
 
         return $this;
+    }
+
+    /**
+     * Check if a driver has already been resolved
+     *
+     * @param string|null $name
+     *
+     * @return bool
+     */
+    public function hasResolved(?string $name = null): bool
+    {
+        if ($name === null) {
+            return ! empty($this->objects);
+        }
+
+        return isset($this->objects[$name]);
     }
 }

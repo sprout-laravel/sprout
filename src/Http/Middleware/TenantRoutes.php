@@ -50,7 +50,7 @@ final class TenantRoutes
      *
      * @return \Symfony\Component\HttpFoundation\Response
      *
-     * @throws \Sprout\Exceptions\NoTenantFound
+     * @throws \Sprout\Exceptions\NoTenantFoundException
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
      * @throws \Sprout\Exceptions\MisconfigurationException
      */

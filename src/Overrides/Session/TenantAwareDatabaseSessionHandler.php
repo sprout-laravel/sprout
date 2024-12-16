@@ -5,8 +5,8 @@ namespace Sprout\Overrides\Session;
 
 use Illuminate\Database\Query\Builder;
 use Illuminate\Session\DatabaseSessionHandler;
-use Sprout\Exceptions\TenancyMissing;
-use Sprout\Exceptions\TenantMissing;
+use Sprout\Exceptions\TenancyMissingException;
+use Sprout\Exceptions\TenantMissingException;
 use function Sprout\sprout;
 
 /**
@@ -25,19 +25,19 @@ class TenantAwareDatabaseSessionHandler extends DatabaseSessionHandler
      *
      * @return \Illuminate\Database\Query\Builder
      *
-     * @throws \Sprout\Exceptions\TenantMissing
-     * @throws \Sprout\Exceptions\TenancyMissing
+     * @throws \Sprout\Exceptions\TenantMissingException
+     * @throws \Sprout\Exceptions\TenancyMissingException
      */
     protected function getQuery(): Builder
     {
         $tenancy = sprout()->getCurrentTenancy();
 
         if ($tenancy === null) {
-            throw TenancyMissing::make();
+            throw TenancyMissingException::make();
         }
 
         if ($tenancy->check() === false) {
-            throw TenantMissing::make($tenancy->getName());
+            throw TenantMissingException::make($tenancy->getName());
         }
 
         return parent::getQuery()
@@ -53,19 +53,19 @@ class TenantAwareDatabaseSessionHandler extends DatabaseSessionHandler
      *
      * @return bool|null
      *
-     * @throws \Sprout\Exceptions\TenancyMissing
-     * @throws \Sprout\Exceptions\TenantMissing
+     * @throws \Sprout\Exceptions\TenancyMissingException
+     * @throws \Sprout\Exceptions\TenantMissingException
      */
     protected function performInsert($sessionId, $payload): ?bool
     {
         $tenancy = sprout()->getCurrentTenancy();
 
         if ($tenancy === null) {
-            throw TenancyMissing::make();
+            throw TenancyMissingException::make();
         }
 
         if ($tenancy->check() === false) {
-            throw TenantMissing::make($tenancy->getName());
+            throw TenantMissingException::make($tenancy->getName());
         }
 
         $payload['tenancy']   = $tenancy->getName();
