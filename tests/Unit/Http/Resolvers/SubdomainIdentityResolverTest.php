@@ -26,6 +26,14 @@ class SubdomainIdentityResolverTest extends UnitTestCase
         });
     }
 
+    protected function defineRoutes($router): void
+    {
+        $router->tenanted(function () {
+            Route::get('/tenant', function () {
+            })->name('tenant-route');
+        }, 'subdomain');
+    }
+
     protected function withCustomParameterPattern(Application $app): void
     {
         tap($app['config'], static function ($config) {
@@ -141,5 +149,16 @@ class SubdomainIdentityResolverTest extends UnitTestCase
         $this->assertContains($tenancy->getName() . '_' . $resolver->getName(), $route->parameterNames());
         $this->assertArrayHasKey($tenancy->getName() . '_' . $resolver->getName(), $route->wheres);
         $this->assertSame('.*', $route->wheres[$tenancy->getName() . '_' . $resolver->getName()]);
+    }
+
+    #[Test]
+    public function canGenerateRoutesForATenant(): void
+    {
+        $resolver = resolver('subdomain');
+        $tenancy  = tenancy();
+        $tenant   = TenantModel::factory()->createOne();
+
+        $this->assertSame('http://' . $tenant->getTenantIdentifier() . '.localhost/tenant', $resolver->route('tenant-route', $tenancy, $tenant));
+        $this->assertSame('/tenant', $resolver->route('tenant-route', $tenancy, $tenant, absolute: false));
     }
 }

@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace Sprout\Tests\Unit\Http\Resolvers;
 
 use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Route;
 use Orchestra\Testbench\Attributes\DefineEnvironment;
 use PHPUnit\Framework\Attributes\Test;
@@ -22,6 +21,14 @@ class CookieIdentityResolverTest extends UnitTestCase
         tap($app['config'], static function ($config) {
             $config->set('multitenancy.providers.tenants.model', TenantModel::class);
         });
+    }
+
+    protected function defineRoutes($router): void
+    {
+        $router->tenanted(function () {
+            Route::get('/tenant', function () {
+            })->name('tenant-route');
+        }, 'cookie');
     }
 
     protected function withCustomCookieName(Application $app): void
@@ -127,5 +134,16 @@ class CookieIdentityResolverTest extends UnitTestCase
         );
         $this->assertEmpty($resolver->getOptions());
         $this->assertSame([ResolutionHook::Routing], $resolver->getHooks());
+    }
+
+    #[Test]
+    public function canGenerateRoutesForATenant(): void
+    {
+        $resolver = resolver('cookie');
+        $tenancy  = tenancy();
+        $tenant   = TenantModel::factory()->createOne();
+
+        $this->assertSame('http://localhost/tenant', $resolver->route('tenant-route', $tenancy, $tenant));
+        $this->assertSame('/tenant', $resolver->route('tenant-route', $tenancy, $tenant, absolute: false));
     }
 }

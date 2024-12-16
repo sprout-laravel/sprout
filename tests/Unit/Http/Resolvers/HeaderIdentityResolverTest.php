@@ -12,6 +12,7 @@ use Sprout\Http\Middleware\AddTenantHeaderToResponse;
 use Sprout\Http\Resolvers\HeaderIdentityResolver;
 use Sprout\Support\ResolutionHook;
 use Sprout\Tests\Unit\UnitTestCase;
+use Workbench\App\Models\TenantModel;
 use function Sprout\resolver;
 use function Sprout\tenancy;
 
@@ -120,5 +121,16 @@ class HeaderIdentityResolverTest extends UnitTestCase
         $middleware = $routes->getByName('tenant-route')->middleware();
 
         $this->assertContains(AddTenantHeaderToResponse::class . ':' . $resolver->getName() . ',' . $tenancy->getName(), $middleware);
+    }
+
+    #[Test]
+    public function canGenerateRoutesForATenant(): void
+    {
+        $resolver = resolver('header');
+        $tenancy  = tenancy();
+        $tenant   = TenantModel::factory()->createOne();
+
+        $this->assertSame('http://localhost/tenant', $resolver->route('tenant-route', $tenancy, $tenant));
+        $this->assertSame('/tenant', $resolver->route('tenant-route', $tenancy, $tenant, absolute: false));
     }
 }
