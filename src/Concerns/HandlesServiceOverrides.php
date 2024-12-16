@@ -9,6 +9,10 @@ use Sprout\Contracts\DeferrableServiceOverride;
 use Sprout\Contracts\ServiceOverride;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
+use Sprout\Events\ServiceOverrideBooted;
+use Sprout\Events\ServiceOverrideProcessed;
+use Sprout\Events\ServiceOverrideProcessing;
+use Sprout\Events\ServiceOverrideRegistered;
 
 trait HandlesServiceOverrides
 {
@@ -65,6 +69,8 @@ trait HandlesServiceOverrides
         // Flag the service override as being registered
         $this->registeredOverrides[] = $class;
 
+        ServiceOverrideRegistered::dispatch($class);
+
         if (is_subclass_of($class, DeferrableServiceOverride::class)) {
             $this->registerDeferrableOverride($class);
         } else {
@@ -88,6 +94,8 @@ trait HandlesServiceOverrides
      */
     protected function processOverride(string $overrideClass): static
     {
+        ServiceOverrideProcessing::dispatch($overrideClass);
+
         // Create a new instance of the override
         $override = $this->app->make($overrideClass);
 
@@ -106,6 +114,8 @@ trait HandlesServiceOverrides
                 $this->bootOverride($overrideClass);
             }
         }
+
+        ServiceOverrideProcessed::dispatch($override);
 
         return $this;
     }
@@ -218,6 +228,8 @@ trait HandlesServiceOverrides
 
         $override->boot($this->app, $this);
         $this->bootedOverrides[$overrideClass] = true;
+
+        ServiceOverrideBooted::dispatch($override);
     }
 
     /**

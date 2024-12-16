@@ -15,6 +15,7 @@ use Sprout\Managers\IdentityResolverManager;
 use Sprout\Managers\ProviderManager;
 use Sprout\Managers\TenancyManager;
 use Sprout\Support\ResolutionHook;
+use Sprout\Support\SettingsRepository;
 
 /**
  * Sprout Service Provider
@@ -36,10 +37,13 @@ class SproutServiceProvider extends ServiceProvider
 
     private function registerSprout(): void
     {
-        $this->sprout = new Sprout($this->app);
+        $this->sprout = new Sprout($this->app, new SettingsRepository());
 
         $this->app->singleton(Sprout::class, fn () => $this->sprout);
         $this->app->alias(Sprout::class, 'sprout');
+
+        // Bind the settings repository too
+        $this->app->bind(SettingsRepository::class, fn () => $this->sprout->settings());
     }
 
     private function registerManagers(): void

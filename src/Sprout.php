@@ -11,6 +11,7 @@ use Sprout\Managers\IdentityResolverManager;
 use Sprout\Managers\ProviderManager;
 use Sprout\Managers\TenancyManager;
 use Sprout\Support\ResolutionHook;
+use Sprout\Support\SettingsRepository;
 
 /**
  * Sprout
@@ -39,13 +40,20 @@ final class Sprout
     private bool $withinContext = false;
 
     /**
+     * @var \Sprout\Support\SettingsRepository
+     */
+    private SettingsRepository $settings;
+
+    /**
      * Create a new instance
      *
      * @param \Illuminate\Contracts\Foundation\Application $app
+     * @param \Sprout\Support\SettingsRepository           $settings
      */
-    public function __construct(Application $app)
+    public function __construct(Application $app, SettingsRepository $settings)
     {
-        $this->app = $app;
+        $this->app      = $app;
+        $this->settings = $settings;
     }
 
     /**
@@ -61,6 +69,29 @@ final class Sprout
     public function config(string $key, mixed $default = null): mixed
     {
         return $this->app->make('config')->get('sprout.' . $key, $default);
+    }
+
+    /**
+     * Get a config item from the sprout config
+     *
+     * @param string     $key
+     * @param mixed|null $default
+     *
+     * @return mixed
+     */
+    public function setting(string $key, mixed $default = null): mixed
+    {
+        return $this->settings->get($key, $default);
+    }
+
+    /**
+     * Get the Sprout settings repository
+     *
+     * @return \Sprout\Support\SettingsRepository
+     */
+    public function settings(): SettingsRepository
+    {
+        return $this->settings;
     }
 
     /**
@@ -210,7 +241,7 @@ final class Sprout
      *
      * If no tenancy name is provided, this method will use the current tenancy
      * or the default one.
-     * 
+     *
      * If no resolver name is provided, this method will use the resolver
      * currently linked with the tenancy, or the default one.
      *
