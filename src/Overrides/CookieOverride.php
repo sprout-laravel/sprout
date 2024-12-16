@@ -4,11 +4,11 @@ declare(strict_types=1);
 namespace Sprout\Overrides;
 
 use Illuminate\Cookie\CookieJar;
-use Sprout\Concerns\OverridesCookieSettings;
 use Sprout\Contracts\DeferrableServiceOverride;
 use Sprout\Contracts\ServiceOverride;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
+use function Sprout\settings;
 
 /**
  * Cookie Override
@@ -20,8 +20,6 @@ use Sprout\Contracts\Tenant;
  */
 final class CookieOverride implements ServiceOverride, DeferrableServiceOverride
 {
-    use OverridesCookieSettings;
-
     /**
      * Get the service to watch for before overriding
      *
@@ -47,10 +45,10 @@ final class CookieOverride implements ServiceOverride, DeferrableServiceOverride
     public function setup(Tenancy $tenancy, Tenant $tenant): void
     {
         // Collect the values
-        $path     = self::$settings['path'] ?? config('session.path') ?? '/';
-        $domain   = self::$settings['domain'] ?? config('session.domain');
-        $secure   = self::$settings['secure'] ?? config('session.secure', false);
-        $sameSite = self::$settings['same_site'] ?? config('session.same_site');
+        $path     = settings()->getUrlPath(config('session.path') ?? '/');             // @phpstan-ignore-line
+        $domain   = settings()->getUrlDomain(config('session.domain'));                // @phpstan-ignore-line
+        $secure   = settings()->shouldCookieBeSecure(config('session.secure', false)); // @phpstan-ignore-line
+        $sameSite = settings()->shouldCookeBeSameSite(config('session.same_site'));    // @phpstan-ignore-line
 
         /**
          * This is here to make PHPStan quiet down
