@@ -6,8 +6,6 @@ namespace Sprout\Overrides;
 use Illuminate\Auth\AuthManager;
 use Illuminate\Contracts\Foundation\Application;
 use Sprout\Contracts\BootableServiceOverride;
-use Sprout\Contracts\DeferrableServiceOverride;
-use Sprout\Contracts\ServiceOverride;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 use Sprout\Overrides\Auth\TenantAwarePasswordBrokerManager;
@@ -19,35 +17,15 @@ use Sprout\Sprout;
  * This class provides the override/multitenancy extension/features for Laravels
  * auth service.
  *
+ * This override cannot be deferred as it works with several services, and it's
+ * possible that one could be loaded without the other.
+ * Instead, the code that deals with the various services is wrapped in a
+ * condition to only run if the service itself has been loaded.
+ *
  * @package Overrides
  */
-final class AuthOverride implements BootableServiceOverride, DeferrableServiceOverride
+final class AuthOverride implements BootableServiceOverride
 {
-    /**
-     * @var \Illuminate\Auth\AuthManager
-     */
-    private AuthManager $authManager;
-
-    /**
-     * Create a new instance
-     *
-     * @param \Illuminate\Auth\AuthManager $authManager
-     */
-    public function __construct(AuthManager $authManager)
-    {
-        $this->authManager = $authManager;
-    }
-
-    /**
-     * Get the service to watch for before overriding
-     *
-     * @return string
-     */
-    public static function service(): string
-    {
-        return AuthManager::class;
-    }
-
     /**
      * Boot a service override
      *
@@ -64,13 +42,22 @@ final class AuthOverride implements BootableServiceOverride, DeferrableServiceOv
         // Although this isn't strictly necessary, this is here to tidy up
         // the list of deferred services, just in case there's some weird gotcha
         // somewhere that causes the provider to be loaded anyway.
-        // We'll remove the two services we're about to bind against.
-        $app->removeDeferredServices(['auth.password', 'auth.password.broker']);
+        // We'll remove the service we're about to bind against.
+        $app->removeDeferredServices(['auth.password']);
+
+        // I'm intentionally not removing the deferred service
+        // 'auth.password.broker' as it will proxy to our new 'auth.password'.
 
         // This is the actual thing we need.
         $app->singleton('auth.password', function ($app) {
             return new TenantAwarePasswordBrokerManager($app);
         });
+
+        // While it's unlikely that the password broker has been resolved,
+        // it's possible, and as it's shared, we'll make the container forget it.
+        if ($app->resolved('auth.password')) {
+            $app->forgetInstance('auth.password');
+        }
 
         // I would ideally also like to mark the password reset service provider
         // as loaded here, but that method is protected.
@@ -123,8 +110,16 @@ final class AuthOverride implements BootableServiceOverride, DeferrableServiceOv
      */
     private function forgetGuards(): void
     {
-        if ($this->authManager->hasResolvedGuards()) {
-            $this->authManager->forgetGuards();
+        // Since this class isn't deferred because it has to rely on
+        // multiple services, we only want to actually run this code if
+        // the auth manager has been resolved.
+        if (app()->resolved('auth')) {
+            /** @var \Illuminate\Auth\AuthManager $authManager */
+            $authManager = app(AuthManager::class);
+
+            if ($authManager->hasResolvedGuards()) {
+                $authManager->forgetGuards();
+            }
         }
     }
 
@@ -135,12 +130,16 @@ final class AuthOverride implements BootableServiceOverride, DeferrableServiceOv
      */
     private function flushPasswordBrokers(): void
     {
-        /** @var \Illuminate\Auth\Passwords\PasswordBrokerManager $passwordBroker */
-        $passwordBroker = app('auth.password');
+        // Same as with 'auth' above, we only want to run this code if the
+        // password broker has been resolved already.
+        if (app()->resolved('auth.password')) {
+            /** @var \Illuminate\Auth\Passwords\PasswordBrokerManager $passwordBroker */
+            $passwordBroker = app('auth.password');
 
-        // The flush method only exists on our custom implementation
-        if ($passwordBroker instanceof TenantAwarePasswordBrokerManager) {
-            $passwordBroker->flush();
+            // The flush method only exists on our custom implementation
+            if ($passwordBroker instanceof TenantAwarePasswordBrokerManager) {
+                $passwordBroker->flush();
+            }
         }
     }
 }
