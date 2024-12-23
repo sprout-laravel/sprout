@@ -203,12 +203,12 @@ final class CookieIdentityResolver extends BaseIdentityResolver
             $details['secure'] = $this->options['secure'];
         }
 
-        if (isset($this->options['httpOnly'])) {
-            $details['httpOnly'] = $this->options['httpOnly'];
+        if (isset($this->options['http_only'])) {
+            $details['http_only'] = $this->options['http_only'];
         }
 
-        if (isset($this->options['sameSite'])) {
-            $details['sameSite'] = $this->options['sameSite'];
+        if (isset($this->options['same_site'])) {
+            $details['same_site'] = $this->options['same_site'];
         }
 
         return $details;

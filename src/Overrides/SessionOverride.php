@@ -110,7 +110,7 @@ final class SessionOverride implements BootableServiceOverride, DeferrableServic
         }
 
         if ($settings->has(Settings::COOKIE_SAME_SITE)) {
-            $config->set('session.same_site', $settings->shouldCookeBeSameSite());
+            $config->set('session.same_site', $settings->getCookieSameSite());
         }
 
         $config->set('session.cookie', $this->getCookieName($tenancy, $tenant));
