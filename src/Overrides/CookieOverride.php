@@ -48,7 +48,7 @@ final class CookieOverride implements ServiceOverride, DeferrableServiceOverride
         $path     = settings()->getUrlPath(config('session.path') ?? '/');             // @phpstan-ignore-line
         $domain   = settings()->getUrlDomain(config('session.domain'));                // @phpstan-ignore-line
         $secure   = settings()->shouldCookieBeSecure(config('session.secure', false)); // @phpstan-ignore-line
-        $sameSite = settings()->shouldCookeBeSameSite(config('session.same_site'));    // @phpstan-ignore-line
+        $sameSite = settings()->getCookieSameSite(config('session.same_site'));        // @phpstan-ignore-line
 
         /**
          * This is here to make PHPStan quiet down

@@ -49,14 +49,22 @@ final class SettingsRepository extends Repository
         return $this->boolean(Settings::COOKIE_SECURE, $default);
     }
 
-    public function setCookieSameSite(bool $sameSite): void
+    public function setCookieSameSite(?string $sameSite): void
     {
         $this->set(Settings::COOKIE_SAME_SITE, $sameSite);
     }
 
-    public function shouldCookeBeSameSite(?bool $default = null): bool
+    public function getCookieSameSite(?string $default = null): ?string
     {
-        return $this->boolean(Settings::COOKIE_SAME_SITE, $default);
+        /**
+         * This is only here because the config repository has terrible support
+         * for typing, as you'd expect.
+         *
+         * @var string|null $sameSite
+         */
+        $sameSite = $this->get(Settings::COOKIE_SAME_SITE, $default);
+
+        return $sameSite;
     }
 
     public function doNotOverrideTheDatabase(): void
