@@ -22,7 +22,7 @@ use Sprout\Support\BaseTenantProvider;
  *
  * @package  Providers
  *
- * @internal New instances are created with {@see \Sprout\Managers\ProviderManager::createEloquentProvider()}, and shouldn't be created manually
+ * @internal New instances are created with {@see \Sprout\Managers\TenantProviderManager::createEloquentProvider()}, and shouldn't be created manually
  */
 final class EloquentTenantProvider extends BaseTenantProvider
 {

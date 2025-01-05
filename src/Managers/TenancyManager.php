@@ -18,17 +18,17 @@ use Sprout\Support\DefaultTenancy;
 final class TenancyManager extends BaseFactory
 {
     /**
-     * @var \Sprout\Managers\ProviderManager
+     * @var \Sprout\Managers\TenantProviderManager
      */
-    private ProviderManager $providerManager;
+    private TenantProviderManager $providerManager;
 
     /**
      * Create a new instance
      *
      * @param \Illuminate\Contracts\Foundation\Application $app
-     * @param \Sprout\Managers\ProviderManager             $providerManager
+     * @param \Sprout\Managers\TenantProviderManager       $providerManager
      */
-    public function __construct(Application $app, ProviderManager $providerManager)
+    public function __construct(Application $app, TenantProviderManager $providerManager)
     {
         parent::__construct($app);
 

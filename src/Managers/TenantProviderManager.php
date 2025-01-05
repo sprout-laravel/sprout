@@ -21,7 +21,7 @@ use Sprout\Support\GenericTenant;
  *
  * @package Core
  */
-final class ProviderManager extends BaseFactory
+final class TenantProviderManager extends BaseFactory
 {
     /**
      * Get the name used by this factory

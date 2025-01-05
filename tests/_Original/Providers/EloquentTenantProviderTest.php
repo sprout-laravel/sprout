@@ -8,7 +8,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Orchestra\Testbench\Concerns\WithWorkbench;
 use Orchestra\Testbench\TestCase;
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\Managers\ProviderManager;
+use Sprout\Managers\TenantProviderManager;
 use Sprout\Providers\EloquentTenantProvider;
 use Sprout\Sprout;
 use Workbench\App\Models\TenantModel;
@@ -29,7 +29,7 @@ class EloquentTenantProviderTest extends TestCase
     #[Test]
     public function isRegisteredCorrectly(): void
     {
-        $manager  = app(ProviderManager::class);
+        $manager  = app(TenantProviderManager::class);
         $provider = $manager->get('tenants');
 
         $this->assertNotNull($provider);

@@ -17,7 +17,7 @@ use Sprout\Listeners\PerformIdentityResolverSetup;
 use Sprout\Listeners\SetCurrentTenantContext;
 use Sprout\Listeners\SetCurrentTenantForJob;
 use Sprout\Managers\IdentityResolverManager;
-use Sprout\Managers\ProviderManager;
+use Sprout\Managers\TenantProviderManager;
 use Sprout\Managers\TenancyManager;
 use Sprout\Sprout;
 use Sprout\SproutServiceProvider;
@@ -60,17 +60,17 @@ class ServiceProviderTest extends TestCase
     #[Test]
     public function providerManagerIsRegistered(): void
     {
-        $this->assertTrue(app()->has(ProviderManager::class));
+        $this->assertTrue(app()->has(TenantProviderManager::class));
         $this->assertTrue(app()->has('sprout.providers'));
-        $this->assertTrue(app()->isShared(ProviderManager::class));
+        $this->assertTrue(app()->isShared(TenantProviderManager::class));
         $this->assertFalse(app()->isShared('sprout.providers'));
 
-        $this->assertSame(app()->make(ProviderManager::class), app()->make(ProviderManager::class));
+        $this->assertSame(app()->make(TenantProviderManager::class), app()->make(TenantProviderManager::class));
         $this->assertSame(app()->make('sprout.providers'), app()->make('sprout.providers'));
-        $this->assertSame(app()->make(ProviderManager::class), app()->make('sprout.providers'));
-        $this->assertSame(app()->make('sprout.providers'), app()->make(ProviderManager::class));
+        $this->assertSame(app()->make(TenantProviderManager::class), app()->make('sprout.providers'));
+        $this->assertSame(app()->make('sprout.providers'), app()->make(TenantProviderManager::class));
         $this->assertSame(app()->make(Sprout::class)->providers(), app()->make('sprout.providers'));
-        $this->assertSame(app()->make(Sprout::class)->providers(), app()->make(ProviderManager::class));
+        $this->assertSame(app()->make(Sprout::class)->providers(), app()->make(TenantProviderManager::class));
     }
 
     #[Test]
