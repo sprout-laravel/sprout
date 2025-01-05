@@ -165,6 +165,18 @@ trait HandlesServiceOverrides
     }
 
     /**
+     * Check if a service override is deferred
+     *
+     * @param class-string<\Sprout\Contracts\ServiceOverride> $class
+     *
+     * @return bool
+     */
+    public function isDeferrableOverride(string $class): bool
+    {
+        return isset($this->deferredOverrides[$class]);
+    }
+
+    /**
      * Check if a service override has been booted
      *
      * This method returns true if the service override has been booted, or
