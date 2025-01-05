@@ -8,7 +8,7 @@ use Sprout\Contracts\ServiceOverride;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 use Sprout\Managers\IdentityResolverManager;
-use Sprout\Managers\ProviderManager;
+use Sprout\Managers\TenantProviderManager;
 use Sprout\Support\ResolutionHook;
 
 /**
@@ -31,7 +31,7 @@ use Sprout\Support\ResolutionHook;
  * @method static bool isBootableOverride(string $class)
  * @method static \Sprout\Sprout markAsInContext()
  * @method static \Sprout\Sprout markAsOutsideContext()
- * @method static ProviderManager providers()
+ * @method static TenantProviderManager providers()
  * @method static \Sprout\Sprout registerOverride(string $class)
  * @method static IdentityResolverManager resolvers()
  * @method static string route(string $name, Tenant $tenant, string|null $resolver = null, string|null $tenancy = null, array $parameters = [], bool $absolute = true)
