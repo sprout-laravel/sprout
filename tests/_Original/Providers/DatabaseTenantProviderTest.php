@@ -10,7 +10,7 @@ use Illuminate\Support\Str;
 use Orchestra\Testbench\Concerns\WithWorkbench;
 use Orchestra\Testbench\TestCase;
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\Managers\ProviderManager;
+use Sprout\Managers\TenantProviderManager;
 use Sprout\Providers\DatabaseTenantProvider;
 use Sprout\Sprout;
 use Sprout\Support\GenericTenant;
@@ -34,7 +34,7 @@ class DatabaseTenantProviderTest extends TestCase
     #[Test]
     public function isRegisteredCorrectly(): void
     {
-        $manager  = app(ProviderManager::class);
+        $manager  = app(TenantProviderManager::class);
         $provider = $manager->get('backup');
 
         $this->assertNotNull($provider);

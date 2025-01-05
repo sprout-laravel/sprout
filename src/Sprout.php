@@ -8,7 +8,7 @@ use Sprout\Concerns\HandlesServiceOverrides;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 use Sprout\Managers\IdentityResolverManager;
-use Sprout\Managers\ProviderManager;
+use Sprout\Managers\TenantProviderManager;
 use Sprout\Managers\TenancyManager;
 use Sprout\Support\ResolutionHook;
 use Sprout\Support\SettingsRepository;
@@ -161,13 +161,13 @@ final class Sprout
     /**
      * Get the tenant providers manager
      *
-     * @return \Sprout\Managers\ProviderManager
+     * @return \Sprout\Managers\TenantProviderManager
      *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
      */
-    public function providers(): ProviderManager
+    public function providers(): TenantProviderManager
     {
-        return $this->app->make(ProviderManager::class);
+        return $this->app->make(TenantProviderManager::class);
     }
 
     /**
