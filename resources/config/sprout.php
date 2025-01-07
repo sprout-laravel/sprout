@@ -1,5 +1,7 @@
 <?php
 
+use Sprout\Support\Services;
+
 return [
 
     /*
@@ -53,22 +55,22 @@ return [
     'services' => [
         // This will override the storage by introducing a 'sprout' driver
         // that wraps any other storage drive in a tenant resource subdirectory.
-        \Sprout\Overrides\StorageOverride::class,
+        Services::STORAGE => \Sprout\Overrides\StorageOverride::class,
         // This will hydrate tenants when running jobs, based on the current
         // context.
-        \Sprout\Overrides\JobOverride::class,
+        Services::JOB     => \Sprout\Overrides\JobOverride::class,
         // This will override the cache by introducing a 'sprout' driver
         // that adds a prefix to cache stores for the current tenant.
-        \Sprout\Overrides\CacheOverride::class,
+        Services::CACHE   => \Sprout\Overrides\CacheOverride::class,
         // This is a simple override that removes all currently resolved
         // guards to prevent user auth leaking.
-        \Sprout\Overrides\AuthOverride::class,
+        Services::AUTH    => \Sprout\Overrides\AuthOverride::class,
         // This will override the cookie settings so that all created cookies
         // are specific to the tenant.
-        \Sprout\Overrides\CookieOverride::class,
+        Services::COOKIE  => \Sprout\Overrides\CookieOverride::class,
         // This will override the session by introducing a 'sprout' driver
         // that wraps any other session store.
-        \Sprout\Overrides\SessionOverride::class,
+        Services::SESSION => \Sprout\Overrides\SessionOverride::class,
     ],
 
 ];
