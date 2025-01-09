@@ -44,9 +44,9 @@ final class SettingsRepository extends Repository
         $this->set(Settings::COOKIE_SECURE, $secure);
     }
 
-    public function shouldCookieBeSecure(?bool $default = null): bool
+    public function shouldCookieBeSecure(?bool $default = null): ?bool
     {
-        return $this->boolean(Settings::COOKIE_SECURE, $default);
+        return $this->get(Settings::COOKIE_SECURE, $default);
     }
 
     public function setCookieSameSite(?string $sameSite): void
@@ -72,7 +72,7 @@ final class SettingsRepository extends Repository
         $this->set(Settings::NO_DATABASE_OVERRIDE, true);
     }
 
-    public function shouldNotOverrideTheDatabase(bool $default = null): bool
+    public function shouldNotOverrideTheDatabase(bool $default = false): bool
     {
         return $this->boolean(Settings::NO_DATABASE_OVERRIDE, $default);
     }
