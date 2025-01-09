@@ -146,8 +146,9 @@ class SproutServiceProviderTest extends UnitTestCase
     {
         $overrides = config('sprout.services');
 
-        foreach ($overrides as $override) {
+        foreach ($overrides as $service => $override) {
             $this->assertTrue(sprout()->hasRegisteredOverride($override));
+            $this->assertTrue(sprout()->isServiceBeingOverridden($service));
         }
     }
 
