@@ -11,9 +11,12 @@ use Illuminate\Routing\RouteRegistrar;
 use Illuminate\Support\Facades\Cookie;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
+use Sprout\Exceptions\CompatibilityException;
 use Sprout\Http\Middleware\TenantRoutes;
+use Sprout\Overrides\CookieOverride;
 use Sprout\Support\BaseIdentityResolver;
 use Sprout\Support\PlaceholderHelper;
+use function Sprout\sprout;
 
 /**
  * Cookie Identity Resolver
@@ -112,9 +115,15 @@ final class CookieIdentityResolver extends BaseIdentityResolver
      * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
      *
      * @return string|null
+     *
+     * @throws \Sprout\Exceptions\CompatibilityException
      */
     public function resolveFromRequest(Request $request, Tenancy $tenancy): ?string
     {
+        if (sprout()->hasOverride(CookieOverride::class)) {
+            throw CompatibilityException::make('resolver', $this->getName(), 'override', CookieOverride::class);
+        }
+
         /**
          * This is unfortunately here because of the ludicrous return type
          *
