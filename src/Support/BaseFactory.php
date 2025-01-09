@@ -153,10 +153,12 @@ abstract class BaseFactory
     protected function callCustomCreator(string $name, array $config): object
     {
         if (! isset(static::$customCreators[$name])) {
+            // @codeCoverageIgnoreStart
             throw MisconfigurationException::notFound(
                 'custom creator',
                 $this->getFactoryName() . '::' . $name
             );
+            // @codeCoverageIgnoreEnd
         }
 
         $creator = static::$customCreators[$name];
