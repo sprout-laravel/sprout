@@ -20,6 +20,7 @@ use Sprout\Overrides\CookieOverride;
 use Sprout\Overrides\JobOverride;
 use Sprout\Overrides\SessionOverride;
 use Sprout\Overrides\StorageOverride;
+use Sprout\Support\Services;
 use Workbench\App\Models\TenantModel;
 use function Sprout\sprout;
 
@@ -108,7 +109,7 @@ class SessionResolverTest extends TestCase
     #[Test]
     public function throwsExceptionIfSessionOverrideIsEnabled(): void
     {
-        sprout()->registerOverride(SessionOverride::class);
+        sprout()->registerOverride(Services::SESSION, SessionOverride::class);
         $tenant = TenantModel::factory()->createOne();
 
         $result = $this->withSession(['multitenancy' => ['tenants' => $tenant->getTenantIdentifier()]])->get(route('session.route'));

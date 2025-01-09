@@ -7,6 +7,7 @@ use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Routing\Router;
 use Illuminate\Support\ServiceProvider;
+use RuntimeException;
 use Sprout\Events\CurrentTenantChanged;
 use Sprout\Http\Middleware\TenantRoutes;
 use Sprout\Http\RouterMethods;
@@ -106,11 +107,15 @@ class SproutServiceProvider extends ServiceProvider
 
     private function registerServiceOverrides(): void
     {
-        /** @var array<class-string<\Sprout\Contracts\ServiceOverride>> $overrides */
+        /** @var array<string, class-string<\Sprout\Contracts\ServiceOverride>> $overrides */
         $overrides = config('sprout.services', []);
 
-        foreach ($overrides as $overrideClass) {
-            $this->sprout->registerOverride($overrideClass);
+        foreach ($overrides as $service => $overrideClass) {
+            if (! is_string($service)) {
+                throw new RuntimeException('Service overrides must be registered against a "service"');
+            }
+
+            $this->sprout->registerOverride($service, $overrideClass);
         }
     }
 

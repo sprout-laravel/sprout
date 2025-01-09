@@ -13,11 +13,12 @@ use Sprout\Events\ServiceOverrideBooted;
 use Sprout\Events\ServiceOverrideProcessed;
 use Sprout\Events\ServiceOverrideProcessing;
 use Sprout\Events\ServiceOverrideRegistered;
+use function Sprout\sprout;
 
 trait HandlesServiceOverrides
 {
     /**
-     * @var array<class-string<\Sprout\Contracts\ServiceOverride>>
+     * @var array<string, class-string<\Sprout\Contracts\ServiceOverride>>
      */
     private array $registeredOverrides = [];
 
@@ -54,20 +55,29 @@ trait HandlesServiceOverrides
     /**
      * Register a service override
      *
+     * @param string                                          $service
      * @param class-string<\Sprout\Contracts\ServiceOverride> $class
      *
      * @return static
      *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
      */
-    public function registerOverride(string $class): static
+    public function registerOverride(string $service, string $class): static
     {
         if (! is_subclass_of($class, ServiceOverride::class)) {
             throw new InvalidArgumentException('Provided service override [' . $class . '] does not implement ' . ServiceOverride::class);
         }
 
+        if ($this->isServiceBeingOverridden($service)) {
+            $originalClass = $this->registeredOverrides[$service];
+
+            if ($this->hasBootedOverride($originalClass) || $this->hasOverrideBeenSetup($originalClass)) {
+                throw new InvalidArgumentException('The service [' . $service . '] already has an override registered [' . $this->registeredOverrides[$service] . '] which has already been processed');
+            }
+        }
+
         // Flag the service override as being registered
-        $this->registeredOverrides[] = $class;
+        $this->registeredOverrides[$service] = $class;
 
         ServiceOverrideRegistered::dispatch($class);
 
@@ -258,6 +268,24 @@ trait HandlesServiceOverrides
     }
 
     /**
+     * Check if a service override has been set up for any tenancy
+     *
+     * @param class-string<\Sprout\Contracts\ServiceOverride> $class
+     *
+     * @return bool
+     */
+    public function hasOverrideBeenSetup(string $class): bool
+    {
+        foreach ($this->setupOverrides as $overrides) {
+            if (isset($overrides[$class])) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Set-up all available service overrides
      *
      * @template TenantClass of \Sprout\Contracts\Tenant
@@ -381,6 +409,18 @@ trait HandlesServiceOverrides
     public function hasRegisteredOverride(string $class): bool
     {
         return in_array($class, $this->registeredOverrides, true);
+    }
+
+    /**
+     * Check if a particular service is being overridden
+     *
+     * @param string $service
+     *
+     * @return bool
+     */
+    public function isServiceBeingOverridden(string $service): bool
+    {
+        return isset($this->registeredOverrides[$service]);
     }
 
     /**
