@@ -6,8 +6,6 @@ namespace Sprout\Tests\Unit\Managers;
 use Orchestra\Testbench\Attributes\DefineEnvironment;
 use PHPUnit\Framework\Attributes\Test;
 use Sprout\Exceptions\MisconfigurationException;
-use Sprout\Http\Resolvers\SubdomainIdentityResolver;
-use Sprout\Managers\IdentityResolverManager;
 use Sprout\Managers\TenantProviderManager;
 use Sprout\Providers\DatabaseTenantProvider;
 use Sprout\Providers\EloquentTenantProvider;
@@ -17,7 +15,7 @@ use Workbench\App\Models\NoResourcesTenantModel;
 use Workbench\App\Models\TenantModel;
 use function Sprout\sprout;
 
-class ProviderManagerTest extends UnitTestCase
+class TenantProviderManagerTest extends UnitTestCase
 {
     protected function defineEnvironment($app): void
     {
