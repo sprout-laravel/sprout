@@ -185,11 +185,6 @@ abstract class BaseFactory
             throw MisconfigurationException::notFound('config', $this->getFactoryName() . '::' . $name);
         }
 
-        // Ooo custom creation logic, let's use that
-        if (isset(static::$customCreators[$name])) {
-            return $this->callCustomCreator($name, $config);
-        }
-
         /** @var string|null $driver */
         $driver = $config['driver'] ?? null;
 
