@@ -3,12 +3,17 @@ declare(strict_types=1);
 
 namespace Sprout\Tests\Unit\Managers;
 
+use Orchestra\Testbench\Attributes\DefineEnvironment;
 use PHPUnit\Framework\Attributes\Test;
 use Sprout\Exceptions\MisconfigurationException;
+use Sprout\Http\Resolvers\SubdomainIdentityResolver;
+use Sprout\Managers\IdentityResolverManager;
+use Sprout\Managers\TenantProviderManager;
 use Sprout\Providers\DatabaseTenantProvider;
 use Sprout\Providers\EloquentTenantProvider;
 use Sprout\Tests\Unit\UnitTestCase;
 use stdClass;
+use Workbench\App\Models\NoResourcesTenantModel;
 use Workbench\App\Models\TenantModel;
 use function Sprout\sprout;
 
@@ -19,6 +24,20 @@ class ProviderManagerTest extends UnitTestCase
         tap($app['config'], static function ($config) {
             $config->set('multitenancy.providers.tenants.model', TenantModel::class);
             $config->set('multitenancy.providers.backup', ['driver' => 'database', 'table' => 'tenants']);
+        });
+    }
+
+    protected function withoutDefault($app): void
+    {
+        tap($app['config'], static function ($config) {
+            $config->set('multitenancy.defaults.provider', null);
+        });
+    }
+
+    protected function withoutConfig($app): void
+    {
+        tap($app['config'], static function ($config) {
+            $config->set('multitenancy.providers.database', null);
         });
     }
 
@@ -102,6 +121,17 @@ class ProviderManagerTest extends UnitTestCase
         $this->expectExceptionMessage('The config for [provider::missing] could not be found');
 
         $manager->get('missing');
+    }
+
+    #[Test, DefineEnvironment('withoutDefault')]
+    public function errorsIfTheresNoDefault(): void
+    {
+        $this->expectException(MisconfigurationException::class);
+        $this->expectExceptionMessage('There is no default provider set');
+
+        $manager = sprout()->providers();
+
+        $manager->get();
     }
 
     #[Test]
@@ -190,5 +220,29 @@ class ProviderManagerTest extends UnitTestCase
         $manager = sprout()->providers();
 
         $this->assertSame((new TenantModel())->getTable(), $manager->get('backup')->getTable());
+    }
+
+    #[Test]
+    public function allowsCustomCreators(): void
+    {
+        config()->set('multitenancy.providers.eloquent.driver', 'hello-there');
+
+        TenantProviderManager::register('hello-there', static function () {
+            return new EloquentTenantProvider('hello-there', NoResourcesTenantModel::class);
+        });
+
+        $manager = sprout()->providers();
+
+        $this->assertTrue($manager->hasDriver('hello-there'));
+        $this->assertFalse($manager->hasResolved('eloquent'));
+        $this->assertFalse($manager->hasResolved('database'));
+
+        $provider = $manager->get('eloquent');
+
+        $this->assertInstanceOf(EloquentTenantProvider::class, $provider);
+        $this->assertSame('hello-there', $provider->getName());
+        $this->assertSame(NoResourcesTenantModel::class, $provider->getModelClass());
+        $this->assertTrue($manager->hasResolved('eloquent'));
+        $this->assertFalse($manager->hasResolved('database'));
     }
 }

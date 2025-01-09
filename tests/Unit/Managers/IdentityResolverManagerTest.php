@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Sprout\Tests\Unit\Managers;
 
+use Orchestra\Testbench\Attributes\DefineEnvironment;
 use PHPUnit\Framework\Attributes\Test;
 use Sprout\Exceptions\MisconfigurationException;
 use Sprout\Http\Resolvers\CookieIdentityResolver;
@@ -12,6 +13,7 @@ use Sprout\Http\Resolvers\SessionIdentityResolver;
 use Sprout\Http\Resolvers\SubdomainIdentityResolver;
 use Sprout\Managers\IdentityResolverManager;
 use Sprout\Tests\Unit\UnitTestCase;
+use function Sprout\resolver;
 use function Sprout\sprout;
 
 class IdentityResolverManagerTest extends UnitTestCase
@@ -20,6 +22,20 @@ class IdentityResolverManagerTest extends UnitTestCase
     {
         tap($app['config'], static function ($config) {
             $config->set('multitenancy.resolvers.subdomain.domain', 'localhost');
+        });
+    }
+
+    protected function withoutDefault($app): void
+    {
+        tap($app['config'], static function ($config) {
+            $config->set('multitenancy.defaults.resolver', null);
+        });
+    }
+
+    protected function withoutConfig($app): void
+    {
+        tap($app['config'], static function ($config) {
+            $config->set('multitenancy.resolvers.path', null);
         });
     }
 
@@ -163,6 +179,17 @@ class IdentityResolverManagerTest extends UnitTestCase
         $this->expectExceptionMessage('The provided value for \'segment\' is not valid for resolver [path]');
 
         $manager->get('path');
+    }
+
+    #[Test, DefineEnvironment('withoutDefault')]
+    public function errorsIfTheresNoDefault(): void
+    {
+        $this->expectException(MisconfigurationException::class);
+        $this->expectExceptionMessage('There is no default resolver set');
+
+        $manager = sprout()->resolvers();
+
+        $manager->get();
     }
 
     #[Test]
