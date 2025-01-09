@@ -112,7 +112,7 @@ class SproutServiceProvider extends ServiceProvider
 
         foreach ($overrides as $service => $overrideClass) {
             if (! is_string($service)) {
-                throw new RuntimeException('Service overrides must be registered against a "service"');
+                throw new RuntimeException('Service overrides must be registered against a "service"'); // @codeCoverageIgnore
             }
 
             $this->sprout->registerOverride($service, $overrideClass);
