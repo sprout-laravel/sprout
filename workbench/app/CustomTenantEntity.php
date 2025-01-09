@@ -4,8 +4,9 @@ declare(strict_types=1);
 namespace Workbench\App;
 
 use Sprout\Contracts\Tenant;
+use Sprout\Contracts\TenantHasResources;
 
-class CustomTenantEntity implements Tenant
+class CustomTenantEntity implements Tenant, TenantHasResources
 {
     /**
      * All the tenant's attributes.
@@ -127,5 +128,25 @@ class CustomTenantEntity implements Tenant
     public function __unset(string $key): void
     {
         unset($this->attributes[$key]);
+    }
+
+    /**
+     * Get the resource key used to identify the tenants resources
+     *
+     * @return string
+     */
+    public function getTenantResourceKey(): string
+    {
+        return $this->attributes[$this->getTenantResourceKeyName()];
+    }
+
+    /**
+     * Gets the name of the resource key used to identify the tenants resources
+     *
+     * @return string
+     */
+    public function getTenantResourceKeyName(): string
+    {
+        return 'resource_key';
     }
 }

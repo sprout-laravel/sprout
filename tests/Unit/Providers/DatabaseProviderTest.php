@@ -5,8 +5,10 @@ namespace Sprout\Tests\Unit\Providers;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Orchestra\Testbench\Attributes\DefineEnvironment;
 use PHPUnit\Framework\Attributes\Test;
+use Sprout\Exceptions\MisconfigurationException;
 use Sprout\Providers\DatabaseTenantProvider;
 use Sprout\Support\GenericTenant;
 use Sprout\Tests\Unit\UnitTestCase;
@@ -116,5 +118,52 @@ class DatabaseProviderTest extends UnitTestCase
 
         $this->assertInstanceOf(DatabaseTenantProvider::class, $provider);
         $this->assertSame(CustomTenantEntity::class, $provider->getEntityClass());
+    }
+
+    #[Test, DefineEnvironment('withCustomTenantEntity')]
+    public function retrievesTenantsByTheirResourceKey(): void
+    {
+        $provider = provider('tenants');
+
+        $resourceKey = Str::uuid();
+
+        $tenantData = [
+            'name'         => 'Test Tenant',
+            'identifier'   => 'tenant-test',
+            'resource_key' => $resourceKey,
+            'active'       => true,
+        ];
+
+        $tenantData['id'] = DB::table('tenants')->insertGetId($tenantData);
+
+        $found = $provider->retrieveByResourceKey($resourceKey->toString());
+
+        $this->assertNotNull($found);
+        $this->assertInstanceOf(CustomTenantEntity::class, $found);
+        $this->assertSame($tenantData['identifier'], $found->getTenantIdentifier());
+        $this->assertSame($tenantData['id'], $found->getTenantKey());
+        $this->assertSame($tenantData['resource_key']->toString(), $found->getTenantResourceKey());
+
+        $this->assertNull($provider->retrieveByResourceKey(Str::uuid()->toString()));
+    }
+
+    #[Test]
+    public function throwsAnExceptionWhenTheTenantDoesNotSupportResources(): void
+    {
+        $provider = provider('tenants');
+
+        $resourceKey = Str::uuid();
+
+        DB::table('tenants')->insert([
+            'name'         => 'Test Tenant',
+            'identifier'   => 'tenant-test',
+            'resource_key' => $resourceKey,
+            'active'       => true,
+        ]);
+
+        $this->expectException(MisconfigurationException::class);
+        $this->expectExceptionMessage('The current tenant [' . GenericTenant::class . '] is not configured correctly for resources');
+
+        $provider->retrieveByResourceKey($resourceKey->toString());
     }
 }
