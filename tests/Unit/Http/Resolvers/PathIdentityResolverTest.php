@@ -14,6 +14,7 @@ use Sprout\Support\ResolutionHook;
 use Sprout\Tests\Unit\UnitTestCase;
 use Workbench\App\Models\TenantModel;
 use function Sprout\resolver;
+use function Sprout\sprout;
 use function Sprout\tenancy;
 
 class PathIdentityResolverTest extends UnitTestCase
@@ -22,6 +23,7 @@ class PathIdentityResolverTest extends UnitTestCase
     {
         tap($app['config'], static function ($config) {
             $config->set('multitenancy.providers.tenants.model', TenantModel::class);
+            $config->set('multitenancy.defaults.resolver', 'path');
         });
     }
 
@@ -178,5 +180,7 @@ class PathIdentityResolverTest extends UnitTestCase
 
         $this->assertSame('http://localhost/' . $tenant->getTenantIdentifier() . '/tenant', $resolver->route('tenant-route', $tenancy, $tenant));
         $this->assertSame('/' . $tenant->getTenantIdentifier() . '/tenant', $resolver->route('tenant-route', $tenancy, $tenant, absolute: false));
+        $this->assertSame('http://localhost/' . $tenant->getTenantIdentifier() . '/tenant', sprout()->route('tenant-route', $tenant, $resolver->getName(), $tenancy->getName()));
+        $this->assertSame('http://localhost/' . $tenant->getTenantIdentifier() . '/tenant', sprout()->route('tenant-route', $tenant));
     }
 }

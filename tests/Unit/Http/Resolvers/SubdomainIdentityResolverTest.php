@@ -14,6 +14,7 @@ use Sprout\Support\ResolutionHook;
 use Sprout\Tests\Unit\UnitTestCase;
 use Workbench\App\Models\TenantModel;
 use function Sprout\resolver;
+use function Sprout\sprout;
 use function Sprout\tenancy;
 
 class SubdomainIdentityResolverTest extends UnitTestCase
@@ -22,6 +23,7 @@ class SubdomainIdentityResolverTest extends UnitTestCase
     {
         tap($app['config'], static function ($config) {
             $config->set('multitenancy.providers.tenants.model', TenantModel::class);
+            $config->set('multitenancy.defaults.resolver', 'subdomain');
             $config->set('multitenancy.resolvers.subdomain.domain', 'localhost');
         });
     }
@@ -160,5 +162,7 @@ class SubdomainIdentityResolverTest extends UnitTestCase
 
         $this->assertSame('http://' . $tenant->getTenantIdentifier() . '.localhost/tenant', $resolver->route('tenant-route', $tenancy, $tenant));
         $this->assertSame('/tenant', $resolver->route('tenant-route', $tenancy, $tenant, absolute: false));
+        $this->assertSame('http://' . $tenant->getTenantIdentifier() . '.localhost/tenant', sprout()->route('tenant-route', $tenant, $resolver->getName(), $tenancy->getName()));
+        $this->assertSame('http://' . $tenant->getTenantIdentifier() . '.localhost/tenant', sprout()->route('tenant-route', $tenant));
     }
 }

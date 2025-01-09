@@ -12,6 +12,7 @@ use Sprout\Support\ResolutionHook;
 use Sprout\Tests\Unit\UnitTestCase;
 use Workbench\App\Models\TenantModel;
 use function Sprout\resolver;
+use function Sprout\sprout;
 use function Sprout\tenancy;
 
 class SessionIdentityResolverTest extends UnitTestCase
@@ -20,6 +21,7 @@ class SessionIdentityResolverTest extends UnitTestCase
     {
         tap($app['config'], static function ($config) {
             $config->set('multitenancy.providers.tenants.model', TenantModel::class);
+            $config->set('multitenancy.defaults.resolver', 'session');
         });
     }
 
@@ -112,5 +114,7 @@ class SessionIdentityResolverTest extends UnitTestCase
 
         $this->assertSame('http://localhost/tenant', $resolver->route('tenant-route', $tenancy, $tenant));
         $this->assertSame('/tenant', $resolver->route('tenant-route', $tenancy, $tenant, absolute: false));
+        $this->assertSame('http://localhost/tenant', sprout()->route('tenant-route', $tenant, $resolver->getName(), $tenancy->getName()));
+        $this->assertSame('http://localhost/tenant', sprout()->route('tenant-route', $tenant));
     }
 }
