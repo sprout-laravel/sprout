@@ -40,7 +40,7 @@ abstract class BaseFactory
      */
     public static function register(string $name, \Closure $callback): void
     {
-        static::$customCreators[$name] = $callback;
+        static::$customCreators[static::class][$name] = $callback;
     }
 
     /**
@@ -78,7 +78,7 @@ abstract class BaseFactory
      */
     public function hasDriver(string $name): bool
     {
-        return isset(static::$customCreators[$name])
+        return isset(static::$customCreators[static::class][$name])
                || method_exists($this, 'create' . ucfirst($name) . ucfirst($this->getFactoryName()));
     }
 
@@ -152,7 +152,7 @@ abstract class BaseFactory
      */
     protected function callCustomCreator(string $name, array $config): object
     {
-        if (! isset(static::$customCreators[$name])) {
+        if (! isset(static::$customCreators[static::class][$name])) {
             // @codeCoverageIgnoreStart
             throw MisconfigurationException::notFound(
                 'custom creator',
@@ -161,7 +161,7 @@ abstract class BaseFactory
             // @codeCoverageIgnoreEnd
         }
 
-        $creator = static::$customCreators[$name];
+        $creator = static::$customCreators[static::class][$name];
 
         return $creator($this->app, $config, $name);
     }
@@ -193,7 +193,7 @@ abstract class BaseFactory
         // Is there a driver?
         if ($driver !== null) {
             // Is there a custom creator for the driver?
-            if (isset(static::$customCreators[$driver])) {
+            if (isset(static::$customCreators[static::class][$driver])) {
                 return $this->callCustomCreator($driver, $config);
             }
 
