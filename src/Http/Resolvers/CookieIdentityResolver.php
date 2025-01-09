@@ -13,6 +13,7 @@ use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 use Sprout\Http\Middleware\TenantRoutes;
 use Sprout\Support\BaseIdentityResolver;
+use Sprout\Support\PlaceholderHelper;
 
 /**
  * Cookie Identity Resolver
@@ -91,10 +92,12 @@ final class CookieIdentityResolver extends BaseIdentityResolver
      */
     public function getRequestCookieName(Tenancy $tenancy): string
     {
-        return str_replace(
-            ['{tenancy}', '{resolver}', '{Tenancy}', '{Resolver}'],
-            [$tenancy->getName(), $this->getName(), ucfirst($tenancy->getName()), ucfirst($this->getName())],
-            $this->getCookieName()
+        return PlaceholderHelper::replace(
+            $this->getCookieName(),
+            [
+                'tenancy'  => $tenancy->getName(),
+                'resolver' => $this->getName(),
+            ]
         );
     }
 

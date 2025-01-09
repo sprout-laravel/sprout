@@ -12,6 +12,7 @@ use Sprout\Contracts\Tenant;
 use Sprout\Http\Middleware\AddTenantHeaderToResponse;
 use Sprout\Http\Middleware\TenantRoutes;
 use Sprout\Support\BaseIdentityResolver;
+use Sprout\Support\PlaceholderHelper;
 
 /**
  * Header Identity Resolver
@@ -71,10 +72,12 @@ final class HeaderIdentityResolver extends BaseIdentityResolver
      */
     public function getRequestHeaderName(Tenancy $tenancy): string
     {
-        return str_replace(
-            ['{tenancy}', '{resolver}', '{Tenancy}', '{Resolver}'],
-            [$tenancy->getName(), $this->getName(), ucfirst($tenancy->getName()), ucfirst($this->getName())],
-            $this->getHeaderName()
+        return PlaceholderHelper::replace(
+            $this->getHeaderName(),
+            [
+                'tenancy'  => $tenancy->getName(),
+                'resolver' => $this->getName(),
+            ]
         );
     }
 

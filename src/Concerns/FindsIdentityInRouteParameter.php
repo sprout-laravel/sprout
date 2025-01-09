@@ -9,6 +9,7 @@ use Illuminate\Routing\RouteRegistrar;
 use Illuminate\Support\Facades\URL;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
+use Sprout\Support\PlaceholderHelper;
 
 /**
  * Find Identity in Route Parameter
@@ -96,10 +97,12 @@ trait FindsIdentityInRouteParameter
      */
     public function getRouteParameterName(Tenancy $tenancy): string
     {
-        return str_replace(
-            ['{tenancy}', '{resolver}'],
-            [$tenancy->getName(), $this->getName()],
-            $this->getParameter()
+        return PlaceholderHelper::replace(
+            $this->getParameter(),
+            [
+                'tenancy'  => $tenancy->getName(),
+                'resolver' => $this->getName(),
+            ]
         );
     }
 
