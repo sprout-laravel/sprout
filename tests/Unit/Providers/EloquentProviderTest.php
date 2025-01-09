@@ -4,11 +4,17 @@ declare(strict_types=1);
 namespace Sprout\Tests\Unit\Providers;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
+use Orchestra\Testbench\Attributes\DefineEnvironment;
 use PHPUnit\Framework\Attributes\Test;
+use Sprout\Exceptions\MisconfigurationException;
 use Sprout\Providers\EloquentTenantProvider;
+use Sprout\Support\GenericTenant;
 use Sprout\Tests\Unit\UnitTestCase;
+use Workbench\App\Models\NoResourcesTenantModel;
 use Workbench\App\Models\TenantModel;
 use function Sprout\provider;
+use function Sprout\sprout;
 
 class EloquentProviderTest extends UnitTestCase
 {
@@ -67,5 +73,36 @@ class EloquentProviderTest extends UnitTestCase
         $this->assertTrue($tenant->is($found));
 
         $this->assertNull($provider->retrieveByKey(-999));
+    }
+
+    #[Test]
+    public function retrievesTenantsByTheirResourceKey(): void
+    {
+        $provider = provider('tenants');
+
+        $tenant = TenantModel::factory()->createOne();
+
+        $found = $provider->retrieveByResourceKey($tenant->getTenantResourceKey());
+
+        $this->assertNotNull($found);
+        $this->assertTrue($tenant->is($found));
+
+        $this->assertNull($provider->retrieveByResourceKey(Str::uuid()->toString()));
+    }
+
+    #[Test]
+    public function throwsAnExceptionWhenTheTenantDoesNotSupportResources(): void
+    {
+        // Oddly, testbench uses custom environments BEFORE the main define
+        // environment method on this class, so it overwrites everything, and we
+        // have to do this here...annoying
+        config()->set('multitenancy.providers.tenants.model', NoResourcesTenantModel::class);
+
+        $provider = provider('tenants');
+
+        $this->expectException(MisconfigurationException::class);
+        $this->expectExceptionMessage('The current tenant [' . NoResourcesTenantModel::class . '] is not configured correctly for resources');
+
+        $provider->retrieveByResourceKey(Str::uuid()->toString());
     }
 }
