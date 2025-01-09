@@ -7,7 +7,6 @@ use Closure;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Filesystem\FilesystemManager;
-use RuntimeException;
 use Sprout\Contracts\BootableServiceOverride;
 use Sprout\Contracts\DeferrableServiceOverride;
 use Sprout\Contracts\Tenancy;
@@ -16,6 +15,7 @@ use Sprout\Contracts\TenantHasResources;
 use Sprout\Exceptions\MisconfigurationException;
 use Sprout\Exceptions\TenantMissingException;
 use Sprout\Sprout;
+use Sprout\Support\PlaceholderHelper;
 
 /**
  * Storage Override
@@ -131,7 +131,7 @@ final class StorageOverride implements BootableServiceOverride, DeferrableServic
                 throw MisconfigurationException::misconfigured('tenant', $tenant::class, 'resources');
             }
 
-            $tenantConfig = self::getTenantStorageConfig($manager, $tenant, $config);
+            $tenantConfig = self::getTenantStorageConfig($manager, $tenancy, $tenant, $config);
 
             // Create a scoped driver for the new path
             return $manager->createScopedDriver($tenantConfig);
@@ -142,21 +142,22 @@ final class StorageOverride implements BootableServiceOverride, DeferrableServic
      * Tenantise the storage config
      *
      * @param \Illuminate\Filesystem\FilesystemManager $manager
+     * @param \Sprout\Contracts\Tenancy<*>             $tenancy
      * @param \Sprout\Contracts\TenantHasResources     $tenant
      * @param array<string, mixed>                     $config
      *
      * @return array<string, mixed>
      */
-    private static function getTenantStorageConfig(FilesystemManager $manager, TenantHasResources $tenant, array $config): array
+    private static function getTenantStorageConfig(FilesystemManager $manager, Tenancy $tenancy, TenantHasResources $tenant, array $config): array
     {
         /** @var string $pathPrefix */
-        $pathPrefix = $config['path'] ?? '{tenant}';
+        $pathPrefix = $config['path'] ?? ('{tenancy}' . DIRECTORY_SEPARATOR . '{tenant}');
 
         // Create the empty tenant config
         $tenantConfig = [];
 
         // Build up the path prefix with the tenant resource key
-        $tenantConfig['prefix'] = self::createTenantedPrefix($tenant, $pathPrefix);
+        $tenantConfig['prefix'] = self::createTenantedPrefix($tenancy, $tenant, $pathPrefix);
 
         // Set the disk config on the newly created tenant config, so that the
         // filesystem manager uses this, rather gets it straight from the config
@@ -168,14 +169,21 @@ final class StorageOverride implements BootableServiceOverride, DeferrableServic
     /**
      * Create a storage prefix using the current tenant
      *
+     * @param \Sprout\Contracts\Tenancy<*>         tenancy
      * @param \Sprout\Contracts\TenantHasResources $tenant
      * @param string                               $pathPrefix
      *
      * @return string
      */
-    private static function createTenantedPrefix(TenantHasResources $tenant, string $pathPrefix): string
+    private static function createTenantedPrefix(Tenancy $tenancy, TenantHasResources $tenant, string $pathPrefix): string
     {
-        return str_replace('{tenant}', $tenant->getTenantResourceKey(), $pathPrefix);
+        return PlaceholderHelper::replace(
+            $pathPrefix,
+            [
+                'tenancy' => $tenancy->getName(),
+                'tenant'  => $tenant->getTenantResourceKey(),
+            ]
+        );
     }
 
     /**

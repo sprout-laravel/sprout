@@ -13,6 +13,7 @@ use Sprout\Exceptions\CompatibilityException;
 use Sprout\Http\Middleware\TenantRoutes;
 use Sprout\Overrides\SessionOverride;
 use Sprout\Support\BaseIdentityResolver;
+use Sprout\Support\PlaceholderHelper;
 use Sprout\Support\ResolutionHook;
 use function Sprout\sprout;
 
@@ -73,10 +74,12 @@ final class SessionIdentityResolver extends BaseIdentityResolver
      */
     public function getRequestSessionName(Tenancy $tenancy): string
     {
-        return str_replace(
-            ['{tenancy}', '{resolver}', '{Tenancy}', '{Resolver}'],
-            [$tenancy->getName(), $this->getName(), ucfirst($tenancy->getName()), ucfirst($this->getName())],
-            $this->getSessionName()
+        return PlaceholderHelper::replace(
+            $this->getSessionName(),
+            [
+                'tenancy'  => $tenancy->getName(),
+                'resolver' => $this->getName(),
+            ]
         );
     }
 
