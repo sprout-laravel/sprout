@@ -6,6 +6,8 @@ namespace Sprout\Tests\Unit;
 use Illuminate\Config\Repository;
 use Orchestra\Testbench\Attributes\DefineEnvironment;
 use PHPUnit\Framework\Attributes\Test;
+use Sprout\Support\Settings;
+use Sprout\Support\SettingsRepository;
 use function Sprout\sprout;
 
 class SproutTest extends UnitTestCase
@@ -116,5 +118,19 @@ class SproutTest extends UnitTestCase
         sprout()->markAsOutsideContext();
 
         $this->assertFalse(sprout()->withinContext());
+    }
+
+    #[Test]
+    public function hasSettingsRepository(): void
+    {
+        $this->assertInstanceOf(SettingsRepository::class, sprout()->settings());
+        $this->assertSame(app()->make(SettingsRepository::class), sprout()->settings());
+    }
+
+    #[Test]
+    public function providesAccessToIndividualSettings(): void
+    {
+        $this->assertNull(sprout()->setting(Settings::URL_PATH));
+        $this->assertNull(sprout()->setting(Settings::URL_DOMAIN));
     }
 }
