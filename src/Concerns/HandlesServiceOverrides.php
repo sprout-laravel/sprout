@@ -320,9 +320,7 @@ trait HandlesServiceOverrides
     public function setupOverrides(Tenancy $tenancy, Tenant $tenant): void
     {
         foreach ($this->overrides as $overrideClass => $override) {
-            if (! $this->hasSetupOverride($tenancy, $overrideClass)) {
-                $this->setupOverride($overrideClass, $tenancy, $tenant);
-            }
+            $this->setupOverride($overrideClass, $tenancy, $tenant);
         }
     }
 
@@ -341,8 +339,10 @@ trait HandlesServiceOverrides
      */
     protected function setupOverride(string $overrideClass, Tenancy $tenancy, Tenant $tenant): void
     {
-        $this->overrides[$overrideClass]->setup($tenancy, $tenant);
-        $this->setupOverrides[$tenancy->getName()][$overrideClass] = true;
+        if (! $this->hasSetupOverride($tenancy, $overrideClass)) {
+            $this->overrides[$overrideClass]->setup($tenancy, $tenant);
+            $this->setupOverrides[$tenancy->getName()][$overrideClass] = true;
+        }
     }
 
     /**
