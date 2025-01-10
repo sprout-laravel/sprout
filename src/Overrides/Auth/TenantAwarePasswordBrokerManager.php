@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Sprout\Overrides\Auth;
 
-use Illuminate\Auth\Passwords\CacheTokenRepository;
 use Illuminate\Auth\Passwords\PasswordBrokerManager;
 use Illuminate\Auth\Passwords\TokenRepositoryInterface;
 
@@ -32,14 +31,16 @@ class TenantAwarePasswordBrokerManager extends PasswordBrokerManager
         // @phpstan-ignore-next-line
         $key = $this->app['config']['app.key'];
 
+        // @codeCoverageIgnoreStart
         if (str_starts_with($key, 'base64:')) {
             $key = base64_decode(substr($key, 7));
         }
+        // @codeCoverageIgnoreEnd
 
         if (isset($config['driver']) && $config['driver'] === 'cache') {
-            return new CacheTokenRepository(
+            return new TenantAwareCacheTokenRepository(
                 $this->app['cache']->store($config['store'] ?? null), // @phpstan-ignore-line
-                $this->app['hash'], // @phpstan-ignore-line
+                $this->app['hash'],                                   // @phpstan-ignore-line
                 $key,
                 ($config['expire'] ?? 60) * 60,
                 $config['throttle'] ?? 0, // @phpstan-ignore-line
@@ -57,6 +58,18 @@ class TenantAwarePasswordBrokerManager extends PasswordBrokerManager
             $config['expire'],// @phpstan-ignore-line
             $config['throttle'] ?? 0// @phpstan-ignore-line
         );
+    }
+
+    /**
+     * Check if a broker has been resolved
+     *
+     * @param string|null $name
+     *
+     * @return bool
+     */
+    public function isResolved(?string $name = null): bool
+    {
+        return isset($this->brokers[$name ?? $this->getDefaultDriver()]);
     }
 
     /**
