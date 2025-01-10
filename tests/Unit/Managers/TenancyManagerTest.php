@@ -6,12 +6,9 @@ namespace Sprout\Tests\Unit\Managers;
 use Orchestra\Testbench\Attributes\DefineEnvironment;
 use PHPUnit\Framework\Attributes\Test;
 use Sprout\Exceptions\MisconfigurationException;
-use Sprout\Managers\IdentityResolverManager;
 use Sprout\Managers\TenancyManager;
-use Sprout\Providers\EloquentTenantProvider;
 use Sprout\Support\DefaultTenancy;
 use Sprout\Tests\Unit\UnitTestCase;
-use Workbench\App\Models\NoResourcesTenantModel;
 use function Sprout\sprout;
 
 class TenancyManagerTest extends UnitTestCase

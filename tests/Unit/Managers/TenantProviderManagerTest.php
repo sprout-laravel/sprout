@@ -76,6 +76,7 @@ class TenantProviderManagerTest extends UnitTestCase
 
         $this->assertTrue($manager->hasDriver('eloquent'));
         $this->assertTrue($manager->hasDriver('database'));
+        $this->assertFalse($manager->hasDriver('fake-driver'));
 
         $this->assertFalse($manager->hasResolved());
 

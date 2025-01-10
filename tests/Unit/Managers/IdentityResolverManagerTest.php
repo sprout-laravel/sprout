@@ -79,6 +79,7 @@ class IdentityResolverManagerTest extends UnitTestCase
         $this->assertTrue($manager->hasDriver('header'));
         $this->assertTrue($manager->hasDriver('cookie'));
         $this->assertTrue($manager->hasDriver('session'));
+        $this->assertFalse($manager->hasDriver('fake-driver'));
 
         $this->assertFalse($manager->hasResolved());
 
