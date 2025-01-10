@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Sprout\Concerns;
 
-use InvalidArgumentException;
 use Sprout\Contracts\BootableServiceOverride;
 use Sprout\Contracts\DeferrableServiceOverride;
 use Sprout\Contracts\ServiceOverride;
@@ -13,7 +12,7 @@ use Sprout\Events\ServiceOverrideBooted;
 use Sprout\Events\ServiceOverrideProcessed;
 use Sprout\Events\ServiceOverrideProcessing;
 use Sprout\Events\ServiceOverrideRegistered;
-use function Sprout\sprout;
+use Sprout\Exceptions\ServiceOverrideException;
 
 trait HandlesServiceOverrides
 {
@@ -66,18 +65,19 @@ trait HandlesServiceOverrides
      * @return static
      *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws \Sprout\Exceptions\ServiceOverrideException
      */
     public function registerOverride(string $service, string $class): static
     {
         if (! is_subclass_of($class, ServiceOverride::class)) {
-            throw new InvalidArgumentException('Provided service override [' . $class . '] does not implement ' . ServiceOverride::class);
+            throw ServiceOverrideException::invalidClass($class);
         }
 
         if ($this->isServiceBeingOverridden($service)) {
             $originalClass = $this->registeredOverrides[$service];
 
             if ($this->hasBootedOverride($originalClass) || $this->hasOverrideBeenSetup($originalClass)) {
-                throw new InvalidArgumentException('The service [' . $service . '] already has an override registered [' . $this->registeredOverrides[$service] . '] which has already been processed');
+                throw ServiceOverrideException::alreadyProcessed($service, $this->registeredOverrides[$service]);
             }
         }
 
@@ -145,7 +145,7 @@ trait HandlesServiceOverrides
             }
         }
 
-        ServiceOverrideProcessed::dispatch($override);
+        ServiceOverrideProcessed::dispatch($this->getServiceForOverride($overrideClass), $override);
 
         return $this;
     }
@@ -156,6 +156,8 @@ trait HandlesServiceOverrides
      * @param class-string<\Sprout\Contracts\DeferrableServiceOverride> $overrideClass
      *
      * @return static
+     *
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
      */
     protected function registerDeferrableOverride(string $overrideClass): static
     {
