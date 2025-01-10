@@ -98,7 +98,14 @@ class TenantAwareCacheTokenRepository extends CacheTokenRepository
      */
     public function exists(CanResetPasswordContract $user, #[SensitiveParameter] $token): bool
     {
-        [$record, $createdAt] = $this->cache->get($this->getPrefix() . $user->getEmailForPasswordReset());
+        /** @var null|array{string, string} $result */
+        $result = $this->cache->get($this->getPrefix() . $user->getEmailForPasswordReset());
+
+        if ($result === null) {
+            return false;
+        }
+
+        [$record, $createdAt] = $result;
 
         return $record
                && ! $this->tokenExpired($createdAt)
@@ -117,7 +124,14 @@ class TenantAwareCacheTokenRepository extends CacheTokenRepository
      */
     public function recentlyCreatedToken(CanResetPasswordContract $user): bool
     {
-        [$record, $createdAt] = $this->cache->get($this->getPrefix() . $user->getEmailForPasswordReset());
+        /** @var null|array{string, string} $result */
+        $result = $this->cache->get($this->getPrefix() . $user->getEmailForPasswordReset());
+
+        if ($result === null) {
+            return false;
+        }
+
+        [$record, $createdAt] = $result;
 
         return $record && $this->tokenRecentlyCreated($createdAt);
     }

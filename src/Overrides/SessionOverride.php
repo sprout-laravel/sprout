@@ -40,7 +40,7 @@ final class SessionOverride implements BootableServiceOverride, DeferrableServic
      */
     public static function service(): string
     {
-        return SessionManager::class;
+        return 'session';
     }
 
     /**

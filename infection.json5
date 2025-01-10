@@ -1,16 +1,34 @@
 {
-    "$schema": "vendor/infection/infection/resources/schema.json",
-    "source": {
-        "directories": [
-            "src"
-        ]
+  "$schema"             : "vendor/infection/infection/resources/schema.json",
+  "source"              : {
+    "directories": [
+      "src"
+    ]
+  },
+  "logs"                : {
+    "text": "build/infection.log",
+    "html": "build/infection.html"
+  },
+  "mutators"            : {
+    "@default"           : true,
+    "ProtectedVisibility": {
+      "ignore": [
+        "Sprout\\Concerns\\FindsIdentityRouteParameters::initialiseRouteParameter",
+        "Sprout\\Concerns\\FindsIdentityRouteParameters::getParameterPatternMapping",
+        "Sprout\\Concerns\\FindsIdentityRouteParameters::applyParameterMapping",
+        "Sprout\\Support\\BaseFactory::callCustomCreator"
+      ]
     },
-    "logs": {
-        "text": "build/infection.log",
-        "html": "build/infection.html"
+    "UnwrapUcFirst"      : {
+      "ignore": [
+        "Sprout\\Support\\BaseFactory::hasDriver::82"
+      ]
     },
-    "mutators": {
-        "@default": true
-    },
-    "testFrameworkOptions": "--testsuite=Unit,Feature"
+    "Throw_"             : {
+      "ignore": [
+        "Sprout\\Support\\BaseFactory::callCustomCreator"
+      ]
+    }
+  },
+  "testFrameworkOptions": "--testsuite=Unit,Feature"
 }

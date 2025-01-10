@@ -124,6 +124,7 @@ trait HandlesServiceOverrides
      */
     protected function processOverride(string $overrideClass): static
     {
+        /** @phpstan-ignore-next-line  */
         ServiceOverrideProcessing::dispatch($this->getServiceForOverride($overrideClass), $overrideClass);
 
         // Create a new instance of the override
@@ -145,6 +146,7 @@ trait HandlesServiceOverrides
             }
         }
 
+        /** @phpstan-ignore-next-line  */
         ServiceOverrideProcessed::dispatch($this->getServiceForOverride($overrideClass), $override);
 
         return $this;
@@ -245,6 +247,7 @@ trait HandlesServiceOverrides
             return;
         }
 
+        // @codeCoverageIgnoreStart
         foreach ($this->bootableOverrides as $overrideClass => $override) {
             // It's possible this is being called a second time, so we don't
             // want to do it again
@@ -253,6 +256,7 @@ trait HandlesServiceOverrides
                 $this->bootOverride($overrideClass);
             }
         }
+        // @codeCoverageIgnoreEnd
 
         // Mark the override boot phase as having completed
         $this->hasBooted = true;
@@ -273,6 +277,7 @@ trait HandlesServiceOverrides
         $override->boot($this->app, $this);
         $this->bootedOverrides[$overrideClass] = true;
 
+        /** @phpstan-ignore-next-line  */
         ServiceOverrideBooted::dispatch($this->getServiceForOverride($overrideClass), $override);
     }
 

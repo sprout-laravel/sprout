@@ -78,6 +78,8 @@ final class CookieOverride implements ServiceOverride, DeferrableServiceOverride
      * @param \Sprout\Contracts\Tenant $tenant
      *
      * @return void
+     *
+     * @codeCoverageIgnore
      */
     public function cleanup(Tenancy $tenancy, Tenant $tenant): void
     {

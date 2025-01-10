@@ -24,7 +24,7 @@ abstract class BaseFactory
      *
      * @var array<string, \Closure>
      *
-     * @phpstan-var array<string, \Closure(Application, array<string, mixed>, string): FactoryClass>
+     * @phpstan-var array<class-string<\Sprout\Support\BaseFactory<FactoryClass>>, array<string, \Closure(Application, array<string, mixed>, string): FactoryClass>>
      */
     protected static array $customCreators = [];
 

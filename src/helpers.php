@@ -5,6 +5,9 @@ namespace Sprout;
 use Sprout\Contracts\IdentityResolver;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\TenantProvider;
+use Sprout\Managers\IdentityResolverManager;
+use Sprout\Managers\TenancyManager;
+use Sprout\Managers\TenantProviderManager;
 use Sprout\Support\SettingsRepository;
 
 /**
@@ -24,7 +27,7 @@ function sprout(): Sprout
  */
 function settings(): SettingsRepository
 {
-    return sprout()->settings();
+    return app(SettingsRepository::class);
 }
 
 /**
@@ -39,7 +42,7 @@ function settings(): SettingsRepository
  */
 function resolver(?string $name = null): IdentityResolver
 {
-    return sprout()->resolvers()->get($name);
+    return app(IdentityResolverManager::class)->get($name);
 }
 
 /**
@@ -54,7 +57,7 @@ function resolver(?string $name = null): IdentityResolver
  */
 function tenancy(?string $name = null): Tenancy
 {
-    return sprout()->tenancies()->get($name);
+    return app(TenancyManager::class)->get($name);
 }
 
 /**
@@ -69,5 +72,5 @@ function tenancy(?string $name = null): Tenancy
  */
 function provider(?string $name = null): TenantProvider
 {
-    return sprout()->providers()->get($name);
+    return app(TenantProviderManager::class)->get($name);
 }

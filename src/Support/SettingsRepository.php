@@ -46,7 +46,10 @@ final class SettingsRepository extends Repository
 
     public function shouldCookieBeSecure(?bool $default = null): ?bool
     {
-        return $this->get(Settings::COOKIE_SECURE, $default);
+        /** @var bool|null $value */
+        $value = $this->get(Settings::COOKIE_SECURE, $default);
+
+        return $value;
     }
 
     public function setCookieSameSite(?string $sameSite): void

@@ -108,7 +108,7 @@ final class AuthOverride implements BootableServiceOverride
      *
      * @return void
      */
-    private function forgetGuards(): void
+    protected function forgetGuards(): void
     {
         // Since this class isn't deferred because it has to rely on
         // multiple services, we only want to actually run this code if
@@ -128,7 +128,7 @@ final class AuthOverride implements BootableServiceOverride
      *
      * @return void
      */
-    private function flushPasswordBrokers(): void
+    protected function flushPasswordBrokers(): void
     {
         // Same as with 'auth' above, we only want to run this code if the
         // password broker has been resolved already.

@@ -169,7 +169,7 @@ final class StorageOverride implements BootableServiceOverride, DeferrableServic
     /**
      * Create a storage prefix using the current tenant
      *
-     * @param \Sprout\Contracts\Tenancy<*>         tenancy
+     * @param \Sprout\Contracts\Tenancy<*>         $tenancy
      * @param \Sprout\Contracts\TenantHasResources $tenant
      * @param string                               $pathPrefix
      *

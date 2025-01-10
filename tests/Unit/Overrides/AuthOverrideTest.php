@@ -3,7 +3,10 @@ declare(strict_types=1);
 
 namespace Sprout\Tests\Unit\Overrides;
 
+use Illuminate\Auth\AuthManager;
 use Illuminate\Config\Repository;
+use Mockery;
+use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\Test;
 use Sprout\Contracts\BootableServiceOverride;
 use Sprout\Contracts\DeferrableServiceOverride;
@@ -175,5 +178,61 @@ class AuthOverrideTest extends UnitTestCase
         $manager->flush();
 
         $this->assertFalse($manager->isResolved());
+    }
+
+    #[Test]
+    public function performsSetup(): void
+    {
+        $sprout = sprout();
+
+        $sprout->registerOverride(Services::AUTH, AuthOverride::class);
+
+        $override = $sprout->getOverrides()[AuthOverride::class];
+
+        $this->assertInstanceOf(AuthOverride::class, $override);
+
+        $tenant  = TenantModel::factory()->createOne();
+        $tenancy = $sprout->tenancies()->get();
+
+        $tenancy->setTenant($tenant);
+
+        $this->instance('auth', $this->spy(AuthManager::class, function (MockInterface $mock) {
+            $mock->shouldReceive('hasResolvedGuards')->once()->andReturn(true);
+            $mock->shouldReceive('forgetGuards')->once();
+        }));
+
+        $this->instance('auth.password', $this->spy(TenantAwarePasswordBrokerManager::class, function (MockInterface $mock) {
+            $mock->shouldReceive('flush')->once();
+        }));
+
+        $override->setup($tenancy, $tenant);
+    }
+
+    #[Test]
+    public function performsCleanup(): void
+    {
+        $sprout = sprout();
+
+        $sprout->registerOverride(Services::AUTH, AuthOverride::class);
+
+        $override = $sprout->getOverrides()[AuthOverride::class];
+
+        $this->assertInstanceOf(AuthOverride::class, $override);
+
+        $tenant  = TenantModel::factory()->createOne();
+        $tenancy = $sprout->tenancies()->get();
+
+        $tenancy->setTenant($tenant);
+
+        $this->instance('auth', $this->spy(AuthManager::class, function (MockInterface $mock) {
+            $mock->shouldReceive('hasResolvedGuards')->once()->andReturn(true);
+            $mock->shouldReceive('forgetGuards')->once();
+        }));
+
+        $this->instance('auth.password', $this->spy(TenantAwarePasswordBrokerManager::class, function (MockInterface $mock) {
+            $mock->shouldReceive('flush')->once();
+        }));
+
+        $override->cleanup($tenancy, $tenant);
     }
 }
