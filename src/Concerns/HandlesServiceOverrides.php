@@ -48,6 +48,11 @@ trait HandlesServiceOverrides
     private array $setupOverrides = [];
 
     /**
+     * @var array<class-string<\Sprout\Contracts\ServiceOverride>, string>
+     */
+    private array $serviceOverrideMapping = [];
+
+    /**
      * @var bool
      */
     private bool $hasBooted = false;
@@ -79,7 +84,10 @@ trait HandlesServiceOverrides
         // Flag the service override as being registered
         $this->registeredOverrides[$service] = $class;
 
-        ServiceOverrideRegistered::dispatch($class);
+        // Map the override class to the service it's overriding
+        $this->serviceOverrideMapping[$class] = $service;
+
+        ServiceOverrideRegistered::dispatch($service, $class);
 
         if (is_subclass_of($class, DeferrableServiceOverride::class)) {
             $this->registerDeferrableOverride($class);
@@ -88,6 +96,18 @@ trait HandlesServiceOverrides
         }
 
         return $this;
+    }
+
+    /**
+     * Get the service an override is overriding
+     *
+     * @param string $class
+     *
+     * @return string|null
+     */
+    public function getServiceForOverride(string $class): ?string
+    {
+        return $this->serviceOverrideMapping[$class] ?? null;
     }
 
     /**
@@ -104,7 +124,7 @@ trait HandlesServiceOverrides
      */
     protected function processOverride(string $overrideClass): static
     {
-        ServiceOverrideProcessing::dispatch($overrideClass);
+        ServiceOverrideProcessing::dispatch($this->getServiceForOverride($overrideClass), $overrideClass);
 
         // Create a new instance of the override
         $override = $this->app->make($overrideClass);
@@ -251,7 +271,7 @@ trait HandlesServiceOverrides
         $override->boot($this->app, $this);
         $this->bootedOverrides[$overrideClass] = true;
 
-        ServiceOverrideBooted::dispatch($override);
+        ServiceOverrideBooted::dispatch($this->getServiceForOverride($overrideClass), $override);
     }
 
     /**

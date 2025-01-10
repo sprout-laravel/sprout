@@ -10,22 +10,29 @@ namespace Sprout\Events;
  *
  * @package Overrides
  *
- * @method static self dispatch(string $override)
- * @method static self dispatchIf(bool $boolean, string $override)
- * @method static self dispatchUnless(bool $boolean, string $override)
+ * @method static self dispatch(string $service, string $override)
+ * @method static self dispatchIf(bool $boolean, string $service, string $override)
+ * @method static self dispatchUnless(bool $boolean, string $service, string $override)
  */
 final class ServiceOverrideProcessing extends ServiceOverrideEvent
 {
+    /**
+     * @var string
+     */
+    public readonly string $service;
+
     /**
      * @var class-string<\Sprout\Contracts\ServiceOverride>
      */
     public readonly string $override;
 
     /**
+     * @param string                                          $service
      * @param class-string<\Sprout\Contracts\ServiceOverride> $override
      */
-    public function __construct(string $override)
+    public function __construct(string $service, string $override)
     {
+        $this->service  = $service;
         $this->override = $override;
     }
 }
