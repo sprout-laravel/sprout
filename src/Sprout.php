@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace Sprout;
 
 use Illuminate\Contracts\Foundation\Application;
-use Sprout\Concerns\HandlesServiceOverrides;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 use Sprout\Managers\IdentityResolverManager;
@@ -23,8 +22,6 @@ use Sprout\Support\SettingsRepository;
  */
 final class Sprout
 {
-    use HandlesServiceOverrides;
-
     /**
      * @var \Illuminate\Contracts\Foundation\Application
      */
