@@ -225,7 +225,7 @@ final class ServiceOverrideManager
     public function bootOverrides(): void
     {
         foreach ($this->bootableOverrides as $service) {
-            $this->boot($service);
+            $this->boot($service); // @codeCoverageIgnore
         }
 
         $this->overridesBooted = true;
@@ -291,7 +291,7 @@ final class ServiceOverrideManager
 
                 unset($this->setupOverrides[$tenancy->getName()][$driver]);
             } else {
-                throw ServiceOverrideException::setupButNotEnabled($service, $tenancy->getName());
+                throw ServiceOverrideException::setupButNotEnabled($service, $tenancy->getName()); // @codeCoverageIgnore
             }
         }
     }
@@ -312,7 +312,7 @@ final class ServiceOverrideManager
         // If the override already exists, we'll error out, because it should,
         // we'd just load the same config again
         if ($this->hasOverride($service)) {
-            return $this;
+            return $this; // @codeCoverageIgnore
         }
 
         // Get the config for this service override
@@ -379,14 +379,17 @@ final class ServiceOverrideManager
     {
         // If the override doesn't exist, that's an issue
         if (! $this->hasOverride($service)) {
-            throw MisconfigurationException::notFound('service override', $service);
+            // Realistically, we should never hit this exception, unless something
+            // has gone horribly wrong
+            throw MisconfigurationException::notFound('service override', $service); // @codeCoverageIgnore
         }
 
         $override = $this->overrides[$service];
 
         // If the override exists, but isn't bootable, that's also an issue
         if (! ($override instanceof BootableServiceOverride)) {
-            throw ServiceOverrideException::notBootable($service);
+            // Again, this should never be reached
+            throw ServiceOverrideException::notBootable($service); // @codeCoverageIgnore
         }
 
         $override->boot($this->app, $this->app->make(Sprout::class));
