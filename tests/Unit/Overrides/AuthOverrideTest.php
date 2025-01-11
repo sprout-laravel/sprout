@@ -10,9 +10,9 @@ use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\Test;
 use Sprout\Contracts\BootableServiceOverride;
 use Sprout\Contracts\DeferrableServiceOverride;
-use Sprout\Overrides\Auth\TenantAwareCacheTokenRepository;
-use Sprout\Overrides\Auth\TenantAwareDatabaseTokenRepository;
-use Sprout\Overrides\Auth\TenantAwarePasswordBrokerManager;
+use Sprout\Overrides\Auth\SproutAuthCacheTokenRepository;
+use Sprout\Overrides\Auth\SproutAuthDatabaseTokenRepository;
+use Sprout\Overrides\Auth\SproutAuthPasswordBrokerManager;
 use Sprout\Overrides\AuthOverride;
 use Sprout\Overrides\CookieOverride;
 use Sprout\Support\Services;
@@ -69,7 +69,7 @@ class AuthOverrideTest extends UnitTestCase
         $this->assertTrue(app()->bound('auth.password'));
         $this->assertFalse(app()->resolved('auth.password'));
         $this->assertFalse(app()->resolved('auth.password.broker'));
-        $this->assertInstanceOf(TenantAwarePasswordBrokerManager::class, app()->make('auth.password'));
+        $this->assertInstanceOf(SproutAuthPasswordBrokerManager::class, app()->make('auth.password'));
         $this->assertTrue(app()->resolved('auth.password'));
         $this->assertFalse(app()->resolved('auth.password.broker'));
     }
@@ -82,7 +82,7 @@ class AuthOverrideTest extends UnitTestCase
         $sprout = sprout();
 
         app()->rebinding('auth.password', function ($app, $passwordBrokerManager) {
-            $this->assertInstanceOf(TenantAwarePasswordBrokerManager::class, $passwordBrokerManager);
+            $this->assertInstanceOf(SproutAuthPasswordBrokerManager::class, $passwordBrokerManager);
         });
 
         $sprout->registerOverride(Services::AUTH, AuthOverride::class);
@@ -96,12 +96,12 @@ class AuthOverrideTest extends UnitTestCase
         $sprout = sprout();
 
         $this->assertFalse(app()->resolved('auth.password'));
-        $this->assertNotInstanceOf(TenantAwarePasswordBrokerManager::class, app()->make('auth.password'));
+        $this->assertNotInstanceOf(SproutAuthPasswordBrokerManager::class, app()->make('auth.password'));
         $this->assertTrue(app()->resolved('auth.password'));
 
         $sprout->registerOverride(Services::AUTH, AuthOverride::class);
 
-        $this->assertInstanceOf(TenantAwarePasswordBrokerManager::class, app()->make('auth.password'));
+        $this->assertInstanceOf(SproutAuthPasswordBrokerManager::class, app()->make('auth.password'));
     }
 
     #[Test]
@@ -119,7 +119,7 @@ class AuthOverrideTest extends UnitTestCase
 
         $broker = app()->make('auth.password.broker');
 
-        $this->assertInstanceOf(TenantAwareDatabaseTokenRepository::class, $broker->getRepository());
+        $this->assertInstanceOf(SproutAuthDatabaseTokenRepository::class, $broker->getRepository());
 
         $tenant  = TenantModel::factory()->createOne();
         $tenancy = tenancy();
@@ -156,7 +156,7 @@ class AuthOverrideTest extends UnitTestCase
 
         $broker = app()->make('auth.password.broker');
 
-        $this->assertInstanceOf(TenantAwareCacheTokenRepository::class, $broker->getRepository());
+        $this->assertInstanceOf(SproutAuthCacheTokenRepository::class, $broker->getRepository());
 
         $tenant  = TenantModel::factory()->createOne();
         $tenancy = tenancy();
@@ -185,7 +185,7 @@ class AuthOverrideTest extends UnitTestCase
 
         $sprout->registerOverride(Services::AUTH, AuthOverride::class);
 
-        /** @var TenantAwarePasswordBrokerManager $manager */
+        /** @var SproutAuthPasswordBrokerManager $manager */
         $manager = app()->make('auth.password');
 
         $this->assertFalse($manager->isResolved());
@@ -222,7 +222,7 @@ class AuthOverrideTest extends UnitTestCase
             $mock->shouldReceive('forgetGuards')->once();
         }));
 
-        $this->instance('auth.password', $this->spy(TenantAwarePasswordBrokerManager::class, function (MockInterface $mock) {
+        $this->instance('auth.password', $this->spy(SproutAuthPasswordBrokerManager::class, function (MockInterface $mock) {
             $mock->shouldReceive('flush')->once();
         }));
 
@@ -252,7 +252,7 @@ class AuthOverrideTest extends UnitTestCase
             $mock->shouldReceive('forgetGuards')->once();
         }));
 
-        $this->instance('auth.password', $this->spy(TenantAwarePasswordBrokerManager::class, function (MockInterface $mock) {
+        $this->instance('auth.password', $this->spy(SproutAuthPasswordBrokerManager::class, function (MockInterface $mock) {
             $mock->shouldReceive('flush')->once();
         }));
 

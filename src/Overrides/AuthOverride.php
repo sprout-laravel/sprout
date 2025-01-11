@@ -8,7 +8,7 @@ use Illuminate\Contracts\Foundation\Application;
 use Sprout\Contracts\BootableServiceOverride;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
-use Sprout\Overrides\Auth\TenantAwarePasswordBrokerManager;
+use Sprout\Overrides\Auth\SproutAuthPasswordBrokerManager;
 use Sprout\Sprout;
 
 /**
@@ -50,7 +50,7 @@ final class AuthOverride extends BaseOverride implements BootableServiceOverride
 
         // This is the actual thing we need.
         $app->singleton('auth.password', function ($app) {
-            return new TenantAwarePasswordBrokerManager($app);
+            return new SproutAuthPasswordBrokerManager($app);
         });
 
         // While it's unlikely that the password broker has been resolved,
@@ -137,7 +137,7 @@ final class AuthOverride extends BaseOverride implements BootableServiceOverride
             $passwordBroker = app('auth.password');
 
             // The flush method only exists on our custom implementation
-            if ($passwordBroker instanceof TenantAwarePasswordBrokerManager) {
+            if ($passwordBroker instanceof SproutAuthPasswordBrokerManager) {
                 $passwordBroker->flush();
             }
         }

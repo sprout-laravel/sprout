@@ -48,9 +48,9 @@ final class SessionOverride extends BaseOverride implements BootableServiceOverr
             $overrideDatabase = $this->config['database'] ?? true;
 
             if (settings()->shouldNotOverrideTheDatabase($overrideDatabase) === false) {
-                $manager->extend('database', fn () => (new SproutSessionDatabaseDriverCreator(
+                $manager->extend('database', (new SproutSessionDatabaseDriverCreator(
                     $app, $manager, $sprout
-                ))());
+                ))(...));
             }
         });
     }

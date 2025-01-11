@@ -17,7 +17,7 @@ use Sprout\Events\ServiceOverrideProcessed;
 use Sprout\Events\ServiceOverrideProcessing;
 use Sprout\Events\ServiceOverrideRegistered;
 use Sprout\Listeners\SetCurrentTenantForJob;
-use Sprout\Overrides\Auth\TenantAwarePasswordBrokerManager;
+use Sprout\Overrides\Auth\SproutAuthPasswordBrokerManager;
 use Sprout\Overrides\AuthOverride;
 use Sprout\Overrides\CookieOverride;
 use Sprout\Overrides\JobOverride;
