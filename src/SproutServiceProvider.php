@@ -107,7 +107,7 @@ class SproutServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__ . '/../resources/config/sprout.php'       => config_path('sprout.php'),
             __DIR__ . '/../resources/config/multitenancy.php' => config_path('multitenancy.php'),
-            __DIR__ . '/../resources/config/overrides.php'    => config_path('sprout/overrides.php'),
+            __DIR__ . '/../resources/config/overrides.php'    => config_path('sprout-overrides.php'),
         ], ['config', 'sprout-config']);
     }
 
