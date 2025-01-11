@@ -376,7 +376,7 @@ final class ServiceOverrideManager
     protected function boot(string $service): self
     {
         // If the override doesn't exist, that's an issue
-        if ($this->hasOverride($service)) {
+        if (! $this->hasOverride($service)) {
             throw MisconfigurationException::notFound('service override', $service);
         }
 
