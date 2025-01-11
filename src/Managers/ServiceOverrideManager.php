@@ -12,9 +12,19 @@ use Sprout\Events\ServiceOverrideBooted;
 use Sprout\Events\ServiceOverrideRegistered;
 use Sprout\Exceptions\MisconfigurationException;
 use Sprout\Exceptions\ServiceOverrideException;
+use Sprout\Exceptions\TenancyMissingException;
 use Sprout\Sprout;
 use Sprout\TenancyOptions;
 
+/**
+ * Service Override Manager
+ *
+ * This manager is responsible for managing service overrides, from calling
+ * register and booting them, to integrating them into tenancy lifecycle
+ * events.
+ *
+ * @package Overrides
+ */
 final class ServiceOverrideManager
 {
     /**
@@ -39,6 +49,9 @@ final class ServiceOverrideManager
      */
     protected array $bootableOverrides = [];
 
+    /**
+     * @var bool
+     */
     protected bool $overridesBooted = false;
 
     /**
@@ -57,6 +70,8 @@ final class ServiceOverrideManager
     }
 
     /**
+     * Get the config for a service
+     *
      * @param string $service
      *
      * @return array<string, mixed>|null
@@ -71,14 +86,84 @@ final class ServiceOverrideManager
         return $config;
     }
 
+    /**
+     * Check if a service has an override
+     *
+     * @param string $service
+     *
+     * @return bool
+     */
     public function hasOverride(string $service): bool
     {
         return isset($this->overrides[$service]);
     }
 
+    /**
+     * Check if a services' override has been booted
+     *
+     * @param string $service
+     *
+     * @return bool
+     */
+    public function hasOverrideBooted(string $service): bool
+    {
+        return $this->haveOverridesBooted() && $this->isOverrideBootable($service);
+    }
+
+    /**
+     * Check if a service override has been set up for a tenancy
+     *
+     * @param string $service
+     * @param \Sprout\Contracts\Tenancy<*>|null $tenancy
+     *
+     * @return bool
+     *
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws \Sprout\Exceptions\TenancyMissingException
+     */
+    public function hasOverrideBeenSetUp(string $service, ?Tenancy $tenancy = null): bool
+    {
+        $tenancy ??= $this->app->make(Sprout::class)->getCurrentTenancy();
+
+        if ($tenancy === null) {
+            throw TenancyMissingException::make();
+        }
+
+        return in_array($service, $this->getSetupOverrides($tenancy), true);
+    }
+
+    /**
+     * Check if a services' override is bootable
+     *
+     * @param string $service
+     *
+     * @return bool
+     */
+    public function isOverrideBootable(string $service): bool
+    {
+        return in_array($service, $this->bootableOverrides, true);
+    }
+
+    /**
+     * Check if the service override boot stage has passed
+     *
+     * @return bool
+     */
     public function haveOverridesBooted(): bool
     {
         return $this->overridesBooted;
+    }
+
+    /**
+     * Get the driver class for a service
+     *
+     * @param string $service
+     *
+     * @return class-string<\Sprout\Contracts\ServiceOverride>|null
+     */
+    public function getOverrideClass(string $service): ?string
+    {
+        return $this->overrideClasses[$service] ?? null;
     }
 
     /**
@@ -222,7 +307,7 @@ final class ServiceOverrideManager
      */
     protected function register(string $service): self
     {
-        // If the override already exists, we'll error out, because it should
+        // If the override already exists, we'll error out, because it should,
         // we'd just load the same config again
         if ($this->hasOverride($service)) {
             return $this;
