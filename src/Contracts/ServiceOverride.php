@@ -13,6 +13,14 @@ namespace Sprout\Contracts;
 interface ServiceOverride
 {
     /**
+     * Create a new instance of the service override
+     *
+     * @param string               $service
+     * @param array<string, mixed> $config
+     */
+    public function __construct(string $service, array $config);
+
+    /**
      * Set up the service override
      *
      * This method should perform any necessary setup actions for the service
