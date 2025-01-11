@@ -20,7 +20,11 @@
 return [
 
     'filesystem' => [
-        'driver' => \Sprout\Overrides\StorageOverride::class,
+        'driver'  => \Sprout\Overrides\FilesystemOverride::class,
+        // This config option defines whether the filesystem override will
+        // override the filesystem manager with a Sprout version.
+        // The default value is 'true'
+        'manager' => true,
     ],
 
     'job' => [
