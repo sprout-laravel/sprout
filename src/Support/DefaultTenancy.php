@@ -48,7 +48,7 @@ final class DefaultTenancy implements Tenancy
     /**
      * @var list<string>
      */
-    private array $options;
+    private array $options = [];
 
     /**
      * @var array<string, array<array-key, mixed>>
