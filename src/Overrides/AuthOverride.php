@@ -24,7 +24,7 @@ use Sprout\Sprout;
  *
  * @package Overrides
  */
-final class AuthOverride implements BootableServiceOverride
+final class AuthOverride extends BaseOverride implements BootableServiceOverride
 {
     /**
      * Boot a service override
