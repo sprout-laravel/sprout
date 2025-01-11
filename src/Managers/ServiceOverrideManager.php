@@ -159,12 +159,13 @@ final class ServiceOverrideManager
     public function setupOverrides(Tenancy $tenancy, Tenant $tenant): void
     {
         // Get the overrides enabled for this tenancy
-        $enabled = TenancyOptions::enabledOverrides($tenancy) ?? [];
+        $enabled    = TenancyOptions::enabledOverrides($tenancy) ?? [];
+        $allEnabled = TenancyOptions::shouldEnableAllOverrides($tenancy);
 
         // Loop through all registered overrides
         foreach ($this->overrides as $service => $override) {
             // If the override is enabled
-            if (in_array($service, $enabled, true)) {
+            if ($allEnabled || in_array($service, $enabled, true)) {
                 // Perform the setup action
                 $override->setup($tenancy, $tenant);
                 // Keep track of the fact the override was set up
@@ -191,12 +192,13 @@ final class ServiceOverrideManager
     {
         // Get the overrides enabled for this tenancy
         $enabled        = TenancyOptions::enabledOverrides($tenancy) ?? [];
+        $allEnabled     = TenancyOptions::shouldEnableAllOverrides($tenancy);
         $setupOverrides = $this->getSetupOverrides($tenancy);
 
         // Loop through all registered overrides
         foreach ($setupOverrides as $driver => $service) {
             // If the override is enabled
-            if (in_array($service, $enabled, true)) {
+            if ($allEnabled || in_array($service, $enabled, true)) {
                 // Perform the setup action
                 $this->overrides[$service]->cleanup($tenancy, $tenant);
 
