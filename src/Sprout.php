@@ -8,8 +8,9 @@ use Sprout\Concerns\HandlesServiceOverrides;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 use Sprout\Managers\IdentityResolverManager;
-use Sprout\Managers\TenantProviderManager;
+use Sprout\Managers\ServiceOverrideManager;
 use Sprout\Managers\TenancyManager;
+use Sprout\Managers\TenantProviderManager;
 use Sprout\Support\ResolutionHook;
 use Sprout\Support\SettingsRepository;
 
@@ -180,6 +181,18 @@ final class Sprout
     public function tenancies(): TenancyManager
     {
         return $this->app->make(TenancyManager::class);
+    }
+
+    /**
+     * Get the service override manager
+     *
+     * @return \Sprout\Managers\ServiceOverrideManager
+     *
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     */
+    public function overrides(): ServiceOverrideManager
+    {
+        return $this->app->make(ServiceOverrideManager::class);
     }
 
     /**
