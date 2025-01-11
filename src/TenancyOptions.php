@@ -35,6 +35,18 @@ class TenancyOptions
     }
 
     /**
+     * @param list<string> $overrides
+     *
+     * @return array<string, list<string>>
+     */
+    public static function overrides(array $overrides): array
+    {
+        return [
+            'overrides' => $overrides,
+        ];
+    }
+
+    /**
      * @param \Sprout\Contracts\Tenancy<*> $tenancy
      *
      * @return bool
@@ -52,5 +64,15 @@ class TenancyOptions
     public static function shouldThrowIfNotRelated(Tenancy $tenancy): bool
     {
         return $tenancy->hasOption(static::throwIfNotRelated());
+    }
+
+    /**
+     * @param \Sprout\Contracts\Tenancy<*> $tenancy
+     *
+     * @return list<string>|null
+     */
+    public static function enabledOverrides(Tenancy $tenancy): array|null
+    {
+        return $tenancy->optionConfig('overrides');
     }
 }

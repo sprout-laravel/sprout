@@ -50,6 +50,14 @@ return [
             'options'  => [
                 TenancyOptions::hydrateTenantRelation(),
                 TenancyOptions::throwIfNotRelated(),
+                TenancyOptions::overrides([
+                    'filesystem',
+                    'job',
+                    'cache',
+                    'auth',
+                    'cookie',
+                    'session',
+                ]),
             ],
         ],
 
