@@ -105,7 +105,7 @@ class SproutServiceProvider extends ServiceProvider
     private function publishConfig(): void
     {
         $this->publishes([
-            __DIR__ . '/../resources/config/core.php'       => config_path('sprout/core.php'),
+            __DIR__ . '/../resources/config/core.php'         => config_path('sprout/core.php'),
             __DIR__ . '/../resources/config/multitenancy.php' => config_path('multitenancy.php'),
             __DIR__ . '/../resources/config/overrides.php'    => config_path('sprout/overrides.php'),
         ], ['config', 'sprout-config']);
@@ -133,7 +133,7 @@ class SproutServiceProvider extends ServiceProvider
         $events = $this->app->make(Dispatcher::class);
 
         /** @var array<class-string> $bootstrappers */
-        $bootstrappers = config('sprout.bootstrappers', []);
+        $bootstrappers = config('sprout.core.bootstrappers', []);
 
         foreach ($bootstrappers as $bootstrapper) {
             $events->listen(CurrentTenantChanged::class, $bootstrapper);

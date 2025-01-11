@@ -16,7 +16,6 @@ class SproutTest extends UnitTestCase
     protected function defineEnvironment($app): void
     {
         tap($app['config'], static function ($config) {
-            $config->set('sprout.services', []);
             $config->set('multitenancy.tenancies.tenants.model', TenantModel::class);
         });
     }
@@ -38,11 +37,11 @@ class SproutTest extends UnitTestCase
     #[Test]
     public function allowsAccessToCoreConfig(): void
     {
-        $this->assertSame(sprout()->config('hooks'), config('sprout.hooks'));
+        $this->assertSame(sprout()->config('core.hooks'), config('sprout.core.hooks'));
 
-        config()->set('sprout.hooks', []);
+        config()->set('sprout.core.hooks', []);
 
-        $this->assertSame(sprout()->config('hooks'), config('sprout.hooks'));
+        $this->assertSame(sprout()->config('core.hooks'), config('sprout.core.hooks'));
     }
 
     #[Test]
@@ -102,13 +101,13 @@ class SproutTest extends UnitTestCase
     #[Test]
     public function isAwareOfHooksToSupport(): void
     {
-        $hooks = config('sprout.hooks');
+        $hooks = config('sprout.core.hooks');
 
         foreach ($hooks as $hook) {
             $this->assertTrue(sprout()->supportsHook($hook));
         }
 
-        config()->set('sprout.hooks', []);
+        config()->set('sprout.core.hooks', []);
 
         foreach ($hooks as $hook) {
             $this->assertFalse(sprout()->supportsHook($hook));

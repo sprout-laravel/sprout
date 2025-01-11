@@ -27,7 +27,7 @@ class AuthOverrideTest extends UnitTestCase
     protected function defineEnvironment($app): void
     {
         tap($app['config'], static function (Repository $config) {
-            $config->set('sprout-overrides', []);
+            $config->set('sprout.overrides', []);
         });
     }
 
@@ -42,7 +42,7 @@ class AuthOverrideTest extends UnitTestCase
     {
         $sprout = sprout();
 
-        config()->set('sprout-overrides', [
+        config()->set('sprout.overrides', [
             'auth' => [
                 'driver' => AuthOverride::class,
             ],
@@ -233,7 +233,7 @@ class AuthOverrideTest extends UnitTestCase
     public function performsCleanup(): void
     {
         $this->markTestSkipped('This test needs to be updated');
-        
+
         $sprout = sprout();
 
         $sprout->registerOverride(Services::AUTH, AuthOverride::class);

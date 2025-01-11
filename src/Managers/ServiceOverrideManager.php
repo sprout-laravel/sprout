@@ -81,7 +81,7 @@ final class ServiceOverrideManager
     protected function getServiceConfig(string $service): ?array
     {
         /** @var array<string, mixed>|null $config */
-        $config = $this->app->make('config')->get('sprout-overrides.' . $service);
+        $config = $this->app->make('config')->get('sprout.overrides.' . $service);
 
         return $config;
     }
@@ -206,7 +206,7 @@ final class ServiceOverrideManager
     public function registerOverrides(): void
     {
         /** @var array<string, array<string, mixed>> $services */
-        $services = $this->app->make('config')->get('sprout-overrides', []);
+        $services = $this->app->make('config')->get('sprout.overrides', []);
 
         foreach ($services as $service => $config) {
             $this->register($service);

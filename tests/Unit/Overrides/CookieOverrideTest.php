@@ -32,7 +32,7 @@ class CookieOverrideTest extends UnitTestCase
     protected function defineEnvironment($app): void
     {
         tap($app['config'], static function (Repository $config) {
-            $config->set('sprout-overrides', []);
+            $config->set('sprout.overrides', []);
         });
     }
 
@@ -47,7 +47,7 @@ class CookieOverrideTest extends UnitTestCase
     {
         $sprout = sprout();
 
-        config()->set('sprout-overrides', [
+        config()->set('sprout.overrides', [
             'cookie' => [
                 'driver' => CookieOverride::class,
             ],

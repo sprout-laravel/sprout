@@ -157,13 +157,13 @@ class SproutServiceProviderTest extends UnitTestCase
     {
         $this->assertTrue(app()['config']->has('sprout'));
         $this->assertIsArray(app()['config']->get('sprout'));
-        $this->assertTrue(app()['config']->has('sprout.hooks'));
+        $this->assertTrue(app()['config']->has('sprout.core.hooks'));
     }
 
     #[Test]
     public function registersServiceOverrides(): void
     {
-        $overrides = config('sprout-overrides');
+        $overrides = config('sprout.overrides');
 
         $manager = $this->app->make(ServiceOverrideManager::class);
 
@@ -188,7 +188,7 @@ class SproutServiceProviderTest extends UnitTestCase
     #[Test]
     public function registersTenancyBootstrappers(): void
     {
-        $bootstrappers = config('sprout.bootstrappers');
+        $bootstrappers = config('sprout.core.bootstrappers');
 
         $dispatcher = app()->make(Dispatcher::class);
 

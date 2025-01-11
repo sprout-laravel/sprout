@@ -19,7 +19,7 @@ class JobOverrideTest extends UnitTestCase
     protected function defineEnvironment($app): void
     {
         tap($app['config'], static function (Repository $config) {
-            $config->set('sprout-overrides', []);
+            $config->set('sprout.overrides', []);
         });
     }
 
@@ -34,7 +34,7 @@ class JobOverrideTest extends UnitTestCase
     {
         $sprout = sprout();
 
-        config()->set('sprout-overrides', [
+        config()->set('sprout.overrides', [
             'job' => [
                 'driver' => JobOverride::class,
             ],
@@ -55,7 +55,7 @@ class JobOverrideTest extends UnitTestCase
 
         Event::fake();
 
-        config()->set('sprout-overrides', [
+        config()->set('sprout.overrides', [
             'job' => [
                 'driver' => JobOverride::class,
             ],

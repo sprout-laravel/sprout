@@ -204,7 +204,7 @@ final class Sprout
     public function supportsHook(ResolutionHook $hook): bool
     {
         /** @var array<ResolutionHook> $enabledHooks */
-        $enabledHooks = $this->config('hooks', []);
+        $enabledHooks = $this->config('core.hooks', []);
 
         return in_array($hook, $enabledHooks, true);
     }

@@ -23,7 +23,7 @@ class SessionOverrideTest extends UnitTestCase
     protected function defineEnvironment($app): void
     {
         tap($app['config'], static function (Repository $config) {
-            $config->set('sprout-overrides', []);
+            $config->set('sprout.overrides', []);
         });
     }
 
@@ -38,7 +38,7 @@ class SessionOverrideTest extends UnitTestCase
     {
         $sprout = sprout();
 
-        config()->set('sprout-overrides', [
+        config()->set('sprout.overrides', [
             'session' => [
                 'driver' => SessionOverride::class,
             ],
