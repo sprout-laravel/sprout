@@ -16,6 +16,7 @@ use Sprout\Overrides\SessionOverride;
 use Sprout\Support\Services;
 use Sprout\Tests\Unit\UnitTestCase;
 use Workbench\App\Models\TenantModel;
+use function Sprout\settings;
 use function Sprout\sprout;
 
 class SessionOverrideTest extends UnitTestCase
@@ -53,63 +54,15 @@ class SessionOverrideTest extends UnitTestCase
     }
 
     #[Test]
-    public function isDeferredCorrectly(): void
-    {
-        $this->markTestSkipped('This test needs to be updated');
-
-        $sprout = sprout();
-
-        Event::fake();
-
-        $sprout->registerOverride(Services::SESSION, SessionOverride::class);
-
-        Event::assertDispatched(ServiceOverrideRegistered::class);
-        Event::assertNotDispatched(ServiceOverrideProcessing::class);
-        Event::assertNotDispatched(ServiceOverrideProcessed::class);
-        Event::assertNotDispatched(ServiceOverrideBooted::class);
-
-        $this->assertTrue($sprout->hasRegisteredOverride(SessionOverride::class));
-        $this->assertFalse($sprout->hasOverride(SessionOverride::class));
-        $this->assertTrue($sprout->isServiceBeingOverridden(Services::SESSION));
-        $this->assertFalse($sprout->isBootableOverride(SessionOverride::class));
-        $this->assertTrue($sprout->isDeferrableOverride(SessionOverride::class));
-        $this->assertFalse($sprout->hasBootedOverride(SessionOverride::class));
-        $this->assertFalse($sprout->hasOverrideBeenSetup(SessionOverride::class));
-
-        $overrides = $sprout->getOverrides();
-
-        $this->assertEmpty($overrides);
-
-        $overrides = $sprout->getRegisteredOverrides();
-
-        $this->assertCount(1, $overrides);
-        $this->assertContains(SessionOverride::class, $overrides);
-
-        $this->instance(SessionManager::class, Mockery::mock(SessionManager::class, function (MockInterface $mock) {
-            $mock->shouldReceive('extend')->times(3);
-        }));
-
-        app()->make('session');
-
-        $overrides = $sprout->getOverrides();
-
-        $this->assertCount(1, $overrides);
-        $this->assertInstanceOf(SessionOverride::class, $overrides[SessionOverride::class]);
-
-        $this->assertTrue($sprout->isBootableOverride(SessionOverride::class));
-        $this->assertTrue($sprout->hasBootedOverride(SessionOverride::class));
-
-        Event::assertDispatched(ServiceOverrideProcessing::class);
-        Event::assertDispatched(ServiceOverrideProcessed::class);
-        Event::assertDispatched(ServiceOverrideBooted::class);
-    }
-
-    #[Test]
     public function performsSetup(): void
     {
-        $this->markTestSkipped('This test needs to be updated');
-
         $sprout = sprout();
+
+        config()->set('sprout.overrides', [
+            'session' => [
+                'driver' => SessionOverride::class,
+            ],
+        ]);
 
         $this->assertFalse(sprout()->settings()->has('original.session'));
 
@@ -128,11 +81,11 @@ class SessionOverrideTest extends UnitTestCase
 
         $tenancy->setTenant($tenant);
 
-        $sprout->registerOverride(Services::SESSION, SessionOverride::class);
+        $sprout->overrides()->registerOverrides();
 
         app()->make('session');
 
-        $override = $sprout->getOverrides()[SessionOverride::class];
+        $override = $sprout->overrides()->get('session');
 
         $this->assertInstanceOf(SessionOverride::class, $override);
 
@@ -142,9 +95,13 @@ class SessionOverrideTest extends UnitTestCase
     #[Test]
     public function performsCleanup(): void
     {
-        $this->markTestSkipped('This test needs to be updated');
-
         $sprout = sprout();
+
+        config()->set('sprout.overrides', [
+            'session' => [
+                'driver' => SessionOverride::class,
+            ],
+        ]);
 
         $this->assertFalse(sprout()->settings()->has('original.session'));
 
@@ -158,14 +115,57 @@ class SessionOverrideTest extends UnitTestCase
 
         $tenancy->setTenant($tenant);
 
-        $sprout->registerOverride(Services::SESSION, SessionOverride::class);
+        $sprout->overrides()->registerOverrides();
 
         app()->make('session');
 
-        $override = $sprout->getOverrides()[SessionOverride::class];
+        $override = $sprout->overrides()->get('session');
 
         $this->assertInstanceOf(SessionOverride::class, $override);
 
         $override->cleanup($tenancy, $tenant);
+    }
+
+    #[Test]
+    public function setSessionConfigFromSproutSettings(): void
+    {
+        $sprout = sprout();
+
+        config()->set('sprout.overrides', [
+            'session' => [
+                'driver' => SessionOverride::class,
+            ],
+        ]);
+
+        config()->set('session.path', '/test-path');
+        config()->set('session.domain', 'test-domain.localhost');
+        config()->set('session.secure', false);
+        config()->set('session.same_site', 'lax');
+
+        $tenant  = TenantModel::factory()->createOne();
+        $tenancy = $sprout->tenancies()->get();
+
+        $tenancy->setTenant($tenant);
+
+        $sprout->overrides()->registerOverrides();
+
+        $this->assertSame('/test-path', config('session.path'));
+        $this->assertSame('test-domain.localhost', config('session.domain'));
+        $this->assertFalse(config('session.secure'));
+        $this->assertSame('lax', config('session.same_site'));
+
+        $override = $sprout->overrides()->get('session');
+
+        settings()->setUrlPath('/test-path2');
+        settings()->setUrlDomain('test-domain2.localhost');
+        settings()->setCookieSecure(true);
+        settings()->setCookieSameSite('strict');
+
+        $override->setup($tenancy, $tenant);
+
+        $this->assertSame('/test-path2', config('session.path'));
+        $this->assertSame('test-domain2.localhost', config('session.domain'));
+        $this->assertTrue(config('session.secure'));
+        $this->assertSame('strict', config('session.same_site'));
     }
 }

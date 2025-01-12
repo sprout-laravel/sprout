@@ -48,6 +48,8 @@ class AuthOverrideTest extends UnitTestCase
             ],
         ]);
 
+        $this->assertFalse($sprout->overrides()->hasOverride('auth'));
+
         $sprout->overrides()->registerOverrides();
 
         $this->assertTrue($sprout->overrides()->hasOverride('auth'));
@@ -57,49 +59,39 @@ class AuthOverrideTest extends UnitTestCase
     }
 
     #[Test]
-    public function isBootedCorrectly(): void
-    {
-        $this->markTestSkipped('This test needs to be updated');
-
-        $sprout = sprout();
-
-        $sprout->registerOverride(Services::AUTH, AuthOverride::class);
-
-        $this->assertFalse(app()->isDeferredService('auth.password'));
-        $this->assertTrue(app()->bound('auth.password'));
-        $this->assertFalse(app()->resolved('auth.password'));
-        $this->assertFalse(app()->resolved('auth.password.broker'));
-        $this->assertInstanceOf(SproutAuthPasswordBrokerManager::class, app()->make('auth.password'));
-        $this->assertTrue(app()->resolved('auth.password'));
-        $this->assertFalse(app()->resolved('auth.password.broker'));
-    }
-
-    #[Test]
     public function rebindsAuthPassword(): void
     {
-        $this->markTestSkipped('This test needs to be updated');
-
         $sprout = sprout();
+
+        config()->set('sprout.overrides', [
+            'auth' => [
+                'driver' => AuthOverride::class,
+            ],
+        ]);
 
         app()->rebinding('auth.password', function ($app, $passwordBrokerManager) {
             $this->assertInstanceOf(SproutAuthPasswordBrokerManager::class, $passwordBrokerManager);
         });
 
-        $sprout->registerOverride(Services::AUTH, AuthOverride::class);
+        $sprout->overrides()->registerOverrides();
     }
 
     #[Test]
     public function forgetsAuthPasswordInstance(): void
     {
-        $this->markTestSkipped('This test needs to be updated');
-
         $sprout = sprout();
+
+        config()->set('sprout.overrides', [
+            'auth' => [
+                'driver' => AuthOverride::class,
+            ],
+        ]);
 
         $this->assertFalse(app()->resolved('auth.password'));
         $this->assertNotInstanceOf(SproutAuthPasswordBrokerManager::class, app()->make('auth.password'));
         $this->assertTrue(app()->resolved('auth.password'));
 
-        $sprout->registerOverride(Services::AUTH, AuthOverride::class);
+        $sprout->overrides()->registerOverrides();
 
         $this->assertInstanceOf(SproutAuthPasswordBrokerManager::class, app()->make('auth.password'));
     }
@@ -107,15 +99,19 @@ class AuthOverrideTest extends UnitTestCase
     #[Test]
     public function replacesTheDatabaseTokenRepositoryDriver(): void
     {
-        $this->markTestSkipped('This test needs to be updated');
-
         $sprout = sprout();
+
+        config()->set('sprout.overrides', [
+            'auth' => [
+                'driver' => AuthOverride::class,
+            ],
+        ]);
 
         config()->set('auth.passwords.users.driver', 'database');
         config()->set('auth.passwords.users.table', 'password_reset_tokens');
         config()->set('multitenancy.providers.eloquent.model', TenantModel::class);
 
-        $sprout->registerOverride(Services::AUTH, AuthOverride::class);
+        $sprout->overrides()->registerOverrides();
 
         $broker = app()->make('auth.password.broker');
 
@@ -144,15 +140,19 @@ class AuthOverrideTest extends UnitTestCase
     #[Test]
     public function replacesTheCacheTokenRepositoryDriver(): void
     {
-        $this->markTestSkipped('This test needs to be updated');
-
         $sprout = sprout();
+
+        config()->set('sprout.overrides', [
+            'auth' => [
+                'driver' => AuthOverride::class,
+            ],
+        ]);
 
         config()->set('auth.passwords.users.driver', 'cache');
         config()->set('auth.passwords.users.store', 'array');
         config()->set('multitenancy.providers.eloquent.model', TenantModel::class);
 
-        $sprout->registerOverride(Services::AUTH, AuthOverride::class);
+        $sprout->overrides()->registerOverrides();
 
         $broker = app()->make('auth.password.broker');
 
@@ -177,13 +177,17 @@ class AuthOverrideTest extends UnitTestCase
     #[Test]
     public function canFlushBrokers(): void
     {
-        $this->markTestSkipped('This test needs to be updated');
-
         $sprout = sprout();
+
+        config()->set('sprout.overrides', [
+            'auth' => [
+                'driver' => AuthOverride::class,
+            ],
+        ]);
 
         config()->set('auth.passwords.users.driver', 'database');
 
-        $sprout->registerOverride(Services::AUTH, AuthOverride::class);
+        $sprout->overrides()->registerOverrides();
 
         /** @var SproutAuthPasswordBrokerManager $manager */
         $manager = app()->make('auth.password');
@@ -202,13 +206,17 @@ class AuthOverrideTest extends UnitTestCase
     #[Test]
     public function performsSetup(): void
     {
-        $this->markTestSkipped('This test needs to be updated');
-
         $sprout = sprout();
 
-        $sprout->registerOverride(Services::AUTH, AuthOverride::class);
+        config()->set('sprout.overrides', [
+            'auth' => [
+                'driver' => AuthOverride::class,
+            ],
+        ]);
 
-        $override = $sprout->getOverrides()[AuthOverride::class];
+        $sprout->overrides()->registerOverrides();
+
+        $override = $sprout->overrides()->get('auth');
 
         $this->assertInstanceOf(AuthOverride::class, $override);
 
@@ -232,13 +240,17 @@ class AuthOverrideTest extends UnitTestCase
     #[Test]
     public function performsCleanup(): void
     {
-        $this->markTestSkipped('This test needs to be updated');
-
         $sprout = sprout();
 
-        $sprout->registerOverride(Services::AUTH, AuthOverride::class);
+        config()->set('sprout.overrides', [
+            'auth' => [
+                'driver' => AuthOverride::class,
+            ],
+        ]);
 
-        $override = $sprout->getOverrides()[AuthOverride::class];
+        $sprout->overrides()->registerOverrides();
+
+        $override = $sprout->overrides()->get('auth');
 
         $this->assertInstanceOf(AuthOverride::class, $override);
 
