@@ -43,12 +43,6 @@
       "@prepare",
       "@php vendor/bin/testbench package:discover --ansi"
     ],
-    "changelog"         : "conventional-changelog",
-    "release"           : "conventional-changelog --commit",
-    "release:patch"     : "conventional-changelog --patch --commit",
-    "release:minor"     : "conventional-changelog --minor --commit",
-    "release:major"     : "conventional-changelog --major --commit",
-    "phpstan"           : "@php vendor/bin/phpstan analyse --memory-limit=2G --verbose --ansi",
     "clear"             : "@php vendor/bin/testbench package:purge-skeleton --ansi",
     "prepare"           : "@php vendor/bin/testbench package:discover --ansi",
     "build"             : "@php vendor/bin/testbench workbench:build --ansi",
@@ -58,7 +52,7 @@
       "@php vendor/bin/testbench serve --ansi"
     ],
     "analyse"           : [
-      "phpstan"
+      "@php vendor/bin/phpstan analyse --memory-limit=2G --verbose --ansi"
     ],
     "test"              : [
       "@clear",
@@ -74,13 +68,16 @@
     ]
   },
   "extra"            : {
-    "laravel": {
+    "laravel"     : {
       "providers": [
         "Sprout\\SproutServiceProvider"
       ],
-      "facades":[
+      "facades"  : [
         "Sprout\\Facades\\Sprout"
       ]
+    },
+    "branch-alias": {
+      "dev-main": "1.x-dev"
     }
   },
   "config"           : {
