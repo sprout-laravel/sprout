@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Sprout\Overrides;
 
+use Closure;
 use Illuminate\Cache\CacheManager;
 use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Contracts\Foundation\Application;
@@ -32,16 +33,27 @@ final class CacheOverride extends BaseOverride implements BootableServiceOverrid
      */
     public function boot(Application $app, Sprout $sprout): void
     {
-        // We only want to add the driver if the filesystem service is
-        // resolved at some point
-        $app->afterResolving('cache', function (CacheManager $manager) use ($sprout) {
-            $manager->extend('sprout', function (Application $app, array $config) use ($manager, $sprout): Repository {
-                // The cache manager adds the store name to the config, so we'll
-                // _STORE_ that ;)
-                $this->drivers[] = $config['store'];
+        $tracker = fn(string $store) => $this->drivers[] = $store;
 
-                return (new SproutCacheDriverCreator($app, $manager, $config, $sprout))();
+        // If the cache manager has been resolved, we can add the driver
+        if ($app->resolved('cache')) {
+            $this->addDriver($app->make('cache'), $sprout, $tracker);
+        } else {
+            // But if it hasn't, we'll add it once it is
+            $app->afterResolving('cache', function (CacheManager $manager) use ($sprout, $tracker) {
+                $this->addDriver($manager, $sprout, $tracker);
             });
+        }
+    }
+
+    protected function addDriver(CacheManager $manager, Sprout $sprout, Closure $tracker): void
+    {
+        $manager->extend('sprout', function (Application $app, array $config) use ($manager, $sprout, $tracker): Repository {
+            // The cache manager adds the store name to the config, so we'll
+            // _STORE_ that ;)
+            $tracker($config['store']);
+
+            return (new SproutCacheDriverCreator($app, $manager, $config, $sprout))();
         });
     }
 
@@ -68,7 +80,9 @@ final class CacheOverride extends BaseOverride implements BootableServiceOverrid
     public function cleanup(Tenancy $tenancy, Tenant $tenant): void
     {
         if (! empty($this->drivers)) {
-            app(CacheManager::class)->forgetDriver($this->drivers);
+            app('cache')->forgetDriver($this->drivers);
+
+            $this->drivers = [];
         }
     }
 }
