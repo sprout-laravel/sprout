@@ -133,6 +133,27 @@ final class ServiceOverrideManager
     }
 
     /**
+     * Check if a tenancy has been set up
+     *
+     * @param \Sprout\Contracts\Tenancy<*>|null $tenancy
+     *
+     * @return bool
+     *
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws \Sprout\Exceptions\TenancyMissingException
+     */
+    public function hasTenancyBeenSetup(?Tenancy $tenancy = null): bool
+    {
+        $tenancy ??= $this->app->make(Sprout::class)->getCurrentTenancy();
+
+        if ($tenancy === null) {
+            throw TenancyMissingException::make();
+        }
+
+        return array_key_exists($tenancy->getName(), $this->setupOverrides);
+    }
+
+    /**
      * Check if a services' override is bootable
      *
      * @param string $service
@@ -249,6 +270,8 @@ final class ServiceOverrideManager
         $enabled    = TenancyOptions::enabledOverrides($tenancy) ?? [];
         $allEnabled = TenancyOptions::shouldEnableAllOverrides($tenancy);
 
+        $this->setupOverrides[$tenancy->getName()] = [];
+
         // Loop through all registered overrides
         foreach ($this->overrides as $service => $override) {
             // If the override is enabled
@@ -294,6 +317,8 @@ final class ServiceOverrideManager
                 throw ServiceOverrideException::setupButNotEnabled($service, $tenancy->getName()); // @codeCoverageIgnore
             }
         }
+
+        unset($this->setupOverrides[$tenancy->getName()]);
     }
 
     /**
