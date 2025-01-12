@@ -14,7 +14,7 @@ final class ServiceOverrideException extends SproutException
      */
     public static function notBootable(string $service): self
     {
-        return new self('The service override [' . $service . '] is not bootable');
+        return new self('The service override [' . $service . '] is not bootable'); // @codeCoverageIgnore
     }
 
     /**
@@ -28,6 +28,6 @@ final class ServiceOverrideException extends SproutException
      */
     public static function setupButNotEnabled(string $service, string $tenancy): self
     {
-        return new self('The service override [' . $service . '] has been set up for the tenancy [' . $tenancy . '] but it is not enabled for that tenancy');
+        return new self('The service override [' . $service . '] has been set up for the tenancy [' . $tenancy . '] but it is not enabled for that tenancy'); // @codeCoverageIgnore
     }
 }
