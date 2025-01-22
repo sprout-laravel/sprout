@@ -9,6 +9,8 @@ use InvalidArgumentException;
 
 final class SproutFilesystemManager extends FilesystemManager
 {
+    protected bool $syncedFromOriginal = false;
+
     public function __construct($app, ?FilesystemManager $original = null)
     {
         parent::__construct($app);
@@ -16,6 +18,16 @@ final class SproutFilesystemManager extends FilesystemManager
         if ($original) {
             $this->syncOriginal($original);
         }
+    }
+
+    /**
+     * Check if this manager override was synced from the original
+     *
+     * @return bool
+     */
+    public function wasSyncedFromOriginal(): bool
+    {
+        return $this->syncedFromOriginal;
     }
 
     /**
@@ -27,8 +39,9 @@ final class SproutFilesystemManager extends FilesystemManager
      */
     private function syncOriginal(FilesystemManager $original): void
     {
-        $this->disks          = array_merge($original->disks, $this->disks);
-        $this->customCreators = array_merge($original->customCreators, $this->customCreators);
+        $this->disks              = array_merge($original->disks, $this->disks);
+        $this->customCreators     = array_merge($original->customCreators, $this->customCreators);
+        $this->syncedFromOriginal = true;
     }
 
     /**
