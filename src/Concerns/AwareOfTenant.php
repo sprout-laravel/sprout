@@ -11,8 +11,14 @@ use Sprout\Contracts\Tenant;
  */
 trait AwareOfTenant
 {
+    /**
+     * @var \Sprout\Contracts\Tenant|null
+     */
     private ?Tenant $tenant;
 
+    /**
+     * @var \Sprout\Contracts\Tenancy<*>|null
+     */
     private ?Tenancy $tenancy;
 
     /**
