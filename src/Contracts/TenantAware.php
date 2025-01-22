@@ -8,6 +8,13 @@ namespace Sprout\Contracts;
 interface TenantAware
 {
     /**
+     * Should the tenancy and tenant be refreshed when they change?
+     *
+     * @return bool
+     */
+    public function shouldBeRefreshed(): bool;
+
+    /**
      * Get the tenant if there is one
      *
      * @return \Sprout\Contracts\Tenant|null

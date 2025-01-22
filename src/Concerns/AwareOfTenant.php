@@ -16,6 +16,16 @@ trait AwareOfTenant
     private ?Tenancy $tenancy;
 
     /**
+     * Should the tenancy and tenant be refreshed when they change?
+     *
+     * @return bool
+     */
+    public function shouldBeRefreshed(): bool
+    {
+        return true;
+    }
+
+    /**
      * Get the tenant if there is one
      *
      * @return \Sprout\Contracts\Tenant|null

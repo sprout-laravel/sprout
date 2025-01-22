@@ -7,6 +7,9 @@ use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Routing\Router;
 use Illuminate\Support\ServiceProvider;
+use Sprout\Contracts\Tenancy;
+use Sprout\Contracts\Tenant;
+use Sprout\Contracts\TenantAware;
 use Sprout\Events\CurrentTenantChanged;
 use Sprout\Http\Middleware\TenantRoutes;
 use Sprout\Http\RouterMethods;
@@ -34,6 +37,7 @@ class SproutServiceProvider extends ServiceProvider
         $this->registerMiddleware();
         $this->registerRouteMixin();
         $this->registerServiceOverrideBooting();
+        $this->registerTenantAwareHandling();
     }
 
     private function registerSprout(): void
@@ -92,6 +96,19 @@ class SproutServiceProvider extends ServiceProvider
     protected function registerServiceOverrideBooting(): void
     {
         $this->app->booted($this->sprout->overrides()->bootOverrides(...));
+    }
+
+    protected function registerTenantAwareHandling(): void
+    {
+        // If something is resolved, that is aware of tenants...
+        $this->app->afterResolving(TenantAware::class, function (TenantAware $tenantAware) {
+            // And it wants to be refreshed...
+            if ($tenantAware->shouldBeRefreshed()) {
+                // Make sure it's notified when the tenant or tenancy change
+                $this->app->refresh(Tenant::class, $tenantAware, 'setTenant');
+                $this->app->refresh(Tenancy::class, $tenantAware, 'setTenancy');
+            }
+        });
     }
 
     public function boot(): void

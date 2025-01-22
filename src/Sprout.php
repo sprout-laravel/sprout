@@ -105,6 +105,10 @@ final class Sprout
     {
         if ($this->getCurrentTenancy() !== $tenancy) {
             $this->tenancies[] = $tenancy;
+
+            // This is a bit of a cheat to enable the refreshing of the Tenancy
+            $this->app->forgetExtenders(Tenancy::class);
+            $this->app->extend(Tenancy::class, fn(?Tenancy $tenancy) => $tenancy);
         }
 
         $this->markAsInContext();

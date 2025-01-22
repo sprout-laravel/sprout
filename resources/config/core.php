@@ -40,6 +40,8 @@ return [
         \Sprout\Listeners\CleanupServiceOverrides::class,
         // Sets up service overrides for the current tenancy
         \Sprout\Listeners\SetupServiceOverrides::class,
+        // Refresh anything that's tenant-aware
+        \Sprout\Listeners\RefreshTenantAwareDependencies::class,
     ],
 
 ];
