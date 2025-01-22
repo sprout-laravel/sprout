@@ -9,6 +9,7 @@ use Illuminate\Support\Arr;
 use Sprout\Contracts\BootableServiceOverride;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
+use Sprout\Contracts\TenantAware;
 use Sprout\Overrides\Session\SproutSessionDatabaseDriverCreator;
 use Sprout\Overrides\Session\SproutSessionFileDriverCreator;
 use Sprout\Sprout;
@@ -38,21 +39,32 @@ final class SessionOverride extends BaseOverride implements BootableServiceOverr
      */
     public function boot(Application $app, Sprout $sprout): void
     {
-        app()->afterResolving('session', function (SessionManager $manager) use ($app, $sprout) {
-            $creator = new SproutSessionFileDriverCreator($app, $manager, $sprout);
+        // If the session manager has been resolved, we can add the driver
+        if ($app->resolved('session')) {
+            $manager = $app->make('session');
+            $this->addDriver($manager, $app, $sprout);
+            $manager->forgetDrivers();
+        } else {
+            // But if it hasn't, we'll add it once it is
+            $app->afterResolving('session', function (SessionManager $manager) use ($app, $sprout) {
+                $this->addDriver($manager, $app, $sprout);
+            });
+        }
+    }
 
-            $manager->extend('file', $creator(...));
-            $manager->extend('native', $creator(...));
+    protected function addDriver(SessionManager $manager, Application $app, Sprout $sprout): void
+    {
+        $creator = new SproutSessionFileDriverCreator($app, $sprout);
 
-            /** @var bool $overrideDatabase */
-            $overrideDatabase = $this->config['database'] ?? true;
+        $manager->extend('file', $creator(...));
+        $manager->extend('native', $creator(...));
 
-            if (settings()->shouldNotOverrideTheDatabase($overrideDatabase) === false) {
-                $manager->extend('database', (new SproutSessionDatabaseDriverCreator(
-                    $app, $manager, $sprout
-                ))(...));
-            }
-        });
+        /** @var bool $overrideDatabase */
+        $overrideDatabase = $this->config['database'] ?? true;
+
+        if (settings()->shouldNotOverrideTheDatabase($overrideDatabase) === false) {
+            $manager->extend('database', (new SproutSessionDatabaseDriverCreator($app, $sprout))(...));
+        }
     }
 
     /**
@@ -104,8 +116,7 @@ final class SessionOverride extends BaseOverride implements BootableServiceOverr
 
         $config->set('session.cookie', $this->getCookieName($tenancy, $tenant));
 
-        // Reset all the drivers
-        app(SessionManager::class)->forgetDrivers();
+        $this->refreshSessionStore($tenancy, $tenant);
     }
 
     /**
@@ -130,8 +141,7 @@ final class SessionOverride extends BaseOverride implements BootableServiceOverr
      */
     public function cleanup(Tenancy $tenancy, Tenant $tenant): void
     {
-        // Reset all the drivers
-        app(SessionManager::class)->forgetDrivers();
+        $this->refreshSessionStore();
     }
 
     /**
@@ -143,5 +153,45 @@ final class SessionOverride extends BaseOverride implements BootableServiceOverr
     private function getCookieName(Tenancy $tenancy, Tenant $tenant): string
     {
         return $tenancy->getName() . '_' . $tenant->getTenantIdentifier() . '_session';
+    }
+
+    /**
+     * Set the tenant details and refresh the session
+     *
+     * @template TenantClass of \Sprout\Contracts\Tenant
+     *
+     * @param \Sprout\Contracts\Tenancy<TenantClass>|null $tenancy
+     * @param \Sprout\Contracts\Tenant|null               $tenant
+     *
+     * @phpstan-param TenantClass|null                    $tenant
+     *
+     * @return void
+     */
+    private function refreshSessionStore(?Tenancy $tenancy = null, ?Tenant $tenant = null): void
+    {
+        // We only want to touch this if the session manager has actually been
+        // loaded, and is therefore most likely being used
+        if (app()->resolved('session')) {
+            $manager = app('session');
+
+            // If there are no loaded drivers, we can exit early
+            if (empty($manager->getDrivers())) {
+                return;
+            }
+
+            /** @var \Illuminate\Session\Store $driver */
+            $driver  = $manager->driver();
+            $handler = $driver->getHandler();
+
+            if ($handler instanceof TenantAware) {
+                // If the handler is one of our tenant-aware boyos, we'll set
+                // the tenancy and tenant
+                $handler->setTenancy($tenancy)->setTenant($tenant);
+
+                // Unfortunately, we can't call 'loadSession', so we have to settle
+                // for start
+                $driver->start();
+            }
+        }
     }
 }

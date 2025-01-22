@@ -10,6 +10,7 @@ use Mockery;
 use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\Test;
 use Sprout\Contracts\BootableServiceOverride;
+use Sprout\Contracts\TenantAware;
 use Sprout\Events\ServiceOverrideBooted;
 use Sprout\Events\ServiceOverrideRegistered;
 use Sprout\Overrides\SessionOverride;
@@ -58,6 +59,7 @@ class SessionOverrideTest extends UnitTestCase
     {
         $sprout = sprout();
 
+        config()->set('session.driver', 'file');
         config()->set('sprout.overrides', [
             'session' => [
                 'driver' => SessionOverride::class,
@@ -66,27 +68,32 @@ class SessionOverrideTest extends UnitTestCase
 
         $this->assertFalse(sprout()->settings()->has('original.session'));
 
-        $this->instance(SessionManager::class, Mockery::mock(SessionManager::class, function (MockInterface $mock) {
-            $mock->makePartial();
-            $mock->shouldReceive('forgetDrivers')->once();
-        }));
-
         $this->assertNull(sprout()->settings()->getUrlPath());
         $this->assertNull(sprout()->settings()->getUrlDomain());
         $this->assertNull(sprout()->settings()->shouldCookieBeSecure());
         $this->assertNull(sprout()->settings()->getCookieSameSite());
 
+        $session = app()->make('session');
+
+        $this->assertEmpty($session->getDrivers());
+
         $tenant  = TenantModel::factory()->createOne();
         $tenancy = $sprout->tenancies()->get();
 
-        $tenancy->setTenant($tenant);
-
         $sprout->overrides()->registerOverrides();
 
-        app()->make('session');
+        $sprout->setCurrentTenancy($tenancy);
+
+        $tenancy->setTenant($tenant);
 
         $override = $sprout->overrides()->get('session');
 
+        $driver = $session->driver();
+
+        $this->assertNotEmpty($session->getDrivers());
+        $this->assertInstanceOf(TenantAware::class, $driver->getHandler());
+        $this->assertTrue($driver->getHandler()->hasTenant());
+        $this->assertTrue($driver->getHandler()->hasTenancy());
         $this->assertInstanceOf(SessionOverride::class, $override);
 
         $override->setup($tenancy, $tenant);
@@ -97,6 +104,7 @@ class SessionOverrideTest extends UnitTestCase
     {
         $sprout = sprout();
 
+        config()->set('session.driver', 'file');
         config()->set('sprout.overrides', [
             'session' => [
                 'driver' => SessionOverride::class,
@@ -105,10 +113,7 @@ class SessionOverrideTest extends UnitTestCase
 
         $this->assertFalse(sprout()->settings()->has('original.session'));
 
-        $this->instance(SessionManager::class, Mockery::mock(SessionManager::class, function (MockInterface $mock) {
-            $mock->makePartial();
-            $mock->shouldReceive('forgetDrivers')->once();
-        }));
+        $session = app()->make('session');
 
         $tenant  = TenantModel::factory()->createOne();
         $tenancy = $sprout->tenancies()->get();
@@ -120,7 +125,12 @@ class SessionOverrideTest extends UnitTestCase
         app()->make('session');
 
         $override = $sprout->overrides()->get('session');
+        $driver = $session->driver();
 
+        $this->assertNotEmpty($session->getDrivers());
+        $this->assertInstanceOf(TenantAware::class, $driver->getHandler());
+        $this->assertFalse($driver->getHandler()->hasTenant());
+        $this->assertFalse($driver->getHandler()->hasTenancy());
         $this->assertInstanceOf(SessionOverride::class, $override);
 
         $override->cleanup($tenancy, $tenant);

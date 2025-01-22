@@ -5,6 +5,8 @@ namespace Sprout\Overrides\Session;
 
 use Illuminate\Database\Query\Builder;
 use Illuminate\Session\DatabaseSessionHandler;
+use Sprout\Concerns\AwareOfTenant;
+use Sprout\Contracts\TenantAware;
 use Sprout\Exceptions\TenancyMissingException;
 use Sprout\Exceptions\TenantMissingException;
 use function Sprout\sprout;
@@ -18,8 +20,10 @@ use function Sprout\sprout;
  *
  * @package Overrides
  */
-class SproutDatabaseSessionHandler extends DatabaseSessionHandler
+class SproutDatabaseSessionHandler extends DatabaseSessionHandler implements TenantAware
 {
+    use AwareOfTenant;
+
     /**
      * Get a fresh query builder instance for the table.
      *
@@ -30,19 +34,21 @@ class SproutDatabaseSessionHandler extends DatabaseSessionHandler
      */
     protected function getQuery(): Builder
     {
-        $tenancy = sprout()->getCurrentTenancy();
-
-        if ($tenancy === null) {
-            throw TenancyMissingException::make();
+        if (! $this->hasTenant()) {
+            return parent::getQuery();
         }
 
-        if ($tenancy->check() === false) {
-            throw TenantMissingException::make($tenancy->getName());
-        }
+        $tenancy = $this->getTenancy();
+        $tenant = $this->getTenant();
+
+        /**
+         * @var \Sprout\Contracts\Tenancy<*> $tenancy
+         * @var \Sprout\Contracts\Tenant $tenant
+         */
 
         return parent::getQuery()
                      ->where('tenancy', '=', $tenancy->getName())
-                     ->where('tenant_id', '=', $tenancy->key());
+                     ->where('tenant_id', '=', $tenant->getTenantKey());
     }
 
     /**
@@ -52,24 +58,23 @@ class SproutDatabaseSessionHandler extends DatabaseSessionHandler
      * @param array<string, mixed> $payload
      *
      * @return bool|null
-     *
-     * @throws \Sprout\Exceptions\TenancyMissingException
-     * @throws \Sprout\Exceptions\TenantMissingException
      */
     protected function performInsert($sessionId, $payload): ?bool
     {
-        $tenancy = sprout()->getCurrentTenancy();
-
-        if ($tenancy === null) {
-            throw TenancyMissingException::make();
+        if (! $this->hasTenant()) {
+            return parent::performInsert($sessionId, $payload);
         }
 
-        if ($tenancy->check() === false) {
-            throw TenantMissingException::make($tenancy->getName());
-        }
+        $tenancy = $this->getTenancy();
+        $tenant = $this->getTenant();
+
+        /**
+         * @var \Sprout\Contracts\Tenancy<*> $tenancy
+         * @var \Sprout\Contracts\Tenant $tenant
+         */
 
         $payload['tenancy']   = $tenancy->getName();
-        $payload['tenant_id'] = $tenancy->key();
+        $payload['tenant_id'] = $tenant->getTenantKey();
 
         return parent::performInsert($sessionId, $payload);
     }
