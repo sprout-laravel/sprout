@@ -10,8 +10,8 @@ use Sprout\Contracts\BootableServiceOverride;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 use Sprout\Contracts\TenantAware;
-use Sprout\Overrides\Session\SproutSessionDatabaseDriverCreator;
-use Sprout\Overrides\Session\SproutSessionFileDriverCreator;
+use Sprout\Overrides\Session\SproutDatabaseSessionHandlerCreator;
+use Sprout\Overrides\Session\SproutFileSessionHandlerCreator;
 use Sprout\Sprout;
 use Sprout\Support\Settings;
 use function Sprout\settings;
@@ -54,7 +54,7 @@ final class SessionOverride extends BaseOverride implements BootableServiceOverr
 
     protected function addDriver(SessionManager $manager, Application $app, Sprout $sprout): void
     {
-        $creator = new SproutSessionFileDriverCreator($app, $sprout);
+        $creator = new SproutFileSessionHandlerCreator($app, $sprout);
 
         $manager->extend('file', $creator(...));
         $manager->extend('native', $creator(...));
@@ -62,8 +62,8 @@ final class SessionOverride extends BaseOverride implements BootableServiceOverr
         /** @var bool $overrideDatabase */
         $overrideDatabase = $this->config['database'] ?? true;
 
-        if (settings()->shouldNotOverrideTheDatabase($overrideDatabase) === false) {
-            $manager->extend('database', (new SproutSessionDatabaseDriverCreator($app, $sprout))(...));
+        if ($sprout->settings()->shouldNotOverrideTheDatabase($overrideDatabase) === false) {
+            $manager->extend('database', (new SproutDatabaseSessionHandlerCreator($app, $sprout))(...));
         }
     }
 

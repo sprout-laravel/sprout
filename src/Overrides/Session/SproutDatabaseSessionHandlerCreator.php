@@ -4,10 +4,9 @@ declare(strict_types=1);
 namespace Sprout\Overrides\Session;
 
 use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Session\FileSessionHandler;
 use Sprout\Sprout;
 
-final class SproutSessionFileDriverCreator
+final class SproutDatabaseSessionHandlerCreator
 {
     /**
      * @var \Illuminate\Contracts\Foundation\Application
@@ -31,28 +30,29 @@ final class SproutSessionFileDriverCreator
     }
 
     /**
-     * Create the tenant-aware session file driver
+     * Create the tenant-aware session database driver
      *
-     * @return \Illuminate\Session\FileSessionHandler
+     * @return \Sprout\Overrides\Session\SproutDatabaseSessionHandler
      *
-     * @throws \Sprout\Exceptions\MisconfigurationException
-     * @throws \Sprout\Exceptions\TenancyMissingException
-     * @throws \Sprout\Exceptions\TenantMissingException
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
      */
-    public function __invoke(): FileSessionHandler
+    public function __invoke(): SproutDatabaseSessionHandler
     {
-        /** @var string $originalPath */
-        $originalPath = config('session.files');
-        $path         = rtrim($originalPath, '/') . DIRECTORY_SEPARATOR;
+        $table      = config('session.table');
+        $lifetime   = config('session.lifetime');
+        $connection = config('session.connection');
 
-        /** @var int $lifetime */
-        $lifetime = config('session.lifetime');
+        /**
+         * @var string|null $connection
+         * @var string      $table
+         * @var int         $lifetime
+         */
 
-        $handler = new SproutFileSessionHandler(
-            $this->app->make('files'),
-            $path,
-            $lifetime
+        $handler = new SproutDatabaseSessionHandler(
+            $this->app->make('db')->connection($connection),
+            $table,
+            $lifetime,
+            $this->app
         );
 
         if ($this->sprout->withinContext()) {

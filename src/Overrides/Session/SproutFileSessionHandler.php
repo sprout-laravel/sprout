@@ -89,6 +89,7 @@ final class SproutFileSessionHandler extends FileSessionHandler implements Tenan
      */
     public function gc($lifetime): int
     {
+        // @codeCoverageIgnoreStart
         $files = Finder::create()
                        ->in($this->getPath())
                        ->files()
@@ -103,5 +104,6 @@ final class SproutFileSessionHandler extends FileSessionHandler implements Tenan
         }
 
         return $deletedSessions;
+        // @codeCoverageIgnoreEnd
     }
 }
