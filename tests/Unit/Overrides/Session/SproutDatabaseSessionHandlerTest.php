@@ -255,8 +255,8 @@ class SproutDatabaseSessionHandlerTest extends UnitTestCase
         $tenant  = Mockery::mock(Tenant::class)->makePartial();
 
         return [
-            [null, null],
-            [$tenancy, $tenant],
+            'outside of tenant context' => [null, null],
+            'inside of tenant context' => [$tenancy, $tenant],
         ];
     }
 }

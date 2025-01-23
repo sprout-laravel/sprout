@@ -125,8 +125,8 @@ class SproutFileSessionHandlerTest extends UnitTestCase
         $tenant->shouldReceive('getTenantResourceKey')->andReturn('tenant-resource-key');
 
         return [
-            [null, null, $defaultPath],
-            [$tenancy, $tenant, $defaultPath . DIRECTORY_SEPARATOR . 'tenant-resource-key'],
+            'outside of tenant context' => [null, null, $defaultPath],
+            'inside of tenant context' => [$tenancy, $tenant, $defaultPath . DIRECTORY_SEPARATOR . 'tenant-resource-key'],
         ];
     }
 }
