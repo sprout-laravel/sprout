@@ -81,7 +81,7 @@ class SproutDatabaseSessionHandler extends DatabaseSessionHandler implements Ten
         try {
             return $this->getQuery(true)->insert(Arr::set($payload, 'id', $sessionId));
         } catch (QueryException) { // @codeCoverageIgnore
-            $this->performUpdate($sessionId, $payload); // @codeCoverageIgnore
+            return $this->performUpdate($sessionId, $payload) > 0; // @codeCoverageIgnore
         }
     }
 
