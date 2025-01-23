@@ -69,6 +69,8 @@ class SproutDatabaseSessionHandlerTest extends UnitTestCase
             if ($find) {
                 $mock->shouldReceive('find')->withArgs([$sessionId])->andReturn($returnValue)->once();
             }
+
+            $mock->shouldReceive('useWritePdo')->andReturnSelf();
         });
     }
 
