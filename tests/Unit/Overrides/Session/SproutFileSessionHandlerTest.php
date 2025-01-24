@@ -25,7 +25,7 @@ class SproutFileSessionHandlerTest extends UnitTestCase
 
     protected function createHandler(?Tenancy $tenancy = null, ?Tenant $tenant = null, ?Filesystem $files = null): SproutFileSessionHandler
     {
-        $defaultPath = '/default/path';
+        $defaultPath = '/default/path' . ($tenancy !== null ? '/' : '');
         $lifetime    = config('session.lifetime');
         $files       ??= Mockery::mock(Filesystem::class);
 
@@ -126,7 +126,7 @@ class SproutFileSessionHandlerTest extends UnitTestCase
 
         return [
             'outside of tenant context' => [null, null, $defaultPath],
-            'inside of tenant context' => [$tenancy, $tenant, $defaultPath . DIRECTORY_SEPARATOR . 'tenant-resource-key'],
+            'inside of tenant context'  => [$tenancy, $tenant, $defaultPath . DIRECTORY_SEPARATOR . 'tenant-resource-key'],
         ];
     }
 }

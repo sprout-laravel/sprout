@@ -8,7 +8,12 @@ use Illuminate\Foundation\PackageManifest;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Routing\Router;
 use Illuminate\Support\ServiceProvider;
+use Mockery;
+use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\Test;
+use Sprout\Contracts\Tenancy;
+use Sprout\Contracts\Tenant;
+use Sprout\Contracts\TenantAware;
 use Sprout\Events\CurrentTenantChanged;
 use Sprout\Http\Middleware\TenantRoutes;
 use Sprout\Listeners\IdentifyTenantOnRouting;
@@ -139,6 +144,23 @@ class SproutServiceProviderTest extends UnitTestCase
     public function registersRouterMixinMethods(): void
     {
         $this->assertTrue(Router::hasMacro('tenanted'));
+    }
+
+    #[Test]
+    public function registersTenantAwareHandling(): void
+    {
+        $tenantAware = Mockery::mock(TenantAware::class, static function (MockInterface $mock) {
+            $mock->shouldReceive('shouldBeRefreshed')->andReturn(true)->once();
+            $mock->shouldReceive('setTenant')->once();
+            $mock->shouldReceive('setTenancy')->once();
+        });
+
+        $this->app->singleton(TenantAware::class, fn() => $tenantAware);
+
+        $this->app->make(TenantAware::class);
+
+        $this->app->extend(Tenancy::class, fn(?Tenancy $tenancy) => $tenancy);
+        $this->app->extend(Tenant::class, fn(?Tenant $tenant) => $tenant);
     }
 
     #[Test]

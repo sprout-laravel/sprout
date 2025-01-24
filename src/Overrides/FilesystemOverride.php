@@ -4,15 +4,12 @@ declare(strict_types=1);
 namespace Sprout\Overrides;
 
 use Closure;
-use Illuminate\Cache\CacheManager;
-use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Filesystem\FilesystemManager;
 use Sprout\Contracts\BootableServiceOverride;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
-use Sprout\Overrides\Cache\SproutCacheDriverCreator;
 use Sprout\Overrides\Filesystem\SproutFilesystemDriverCreator;
 use Sprout\Overrides\Filesystem\SproutFilesystemManager;
 use Sprout\Sprout;
@@ -35,6 +32,16 @@ final class FilesystemOverride extends BaseOverride implements BootableServiceOv
     }
 
     /**
+     * Get the drivers that have been resolved
+     *
+     * @return array<string>
+     */
+    public function getDrivers(): array
+    {
+        return $this->drivers;
+    }
+
+    /**
      * Boot a service override
      *
      * This method should perform any initial steps required for the service
@@ -49,6 +56,8 @@ final class FilesystemOverride extends BaseOverride implements BootableServiceOv
      */
     public function boot(Application $app, Sprout $sprout): void
     {
+        $this->setApp($app)->setSprout($sprout);
+
         // If we're overriding the filesystem manager
         if ($this->shouldOverrideManager()) {
             $original = null;
@@ -65,7 +74,7 @@ final class FilesystemOverride extends BaseOverride implements BootableServiceOv
             $app->singleton('filesystem', fn ($app) => new SproutFilesystemManager($app, $original));
         }
 
-        $tracker = fn(string $store) => $this->drivers[] = $store;
+        $tracker = fn (string $store) => $this->drivers[] = $store;
 
         // If the filesystem manager has been resolved, we can add the driver
         if ($app->resolved('filesystem')) {
@@ -113,19 +122,19 @@ final class FilesystemOverride extends BaseOverride implements BootableServiceOv
      */
     public function cleanup(Tenancy $tenancy, Tenant $tenant): void
     {
-        /** @var array<string, array<string, mixed>> $diskConfig */
-        $diskConfig = config('filesystems.disks', []);
+        if ($this->getApp()->resolved('filesystem')) {
+            /** @var \Illuminate\Filesystem\FilesystemManager $filesystemManager */
+            $filesystemManager = $this->getApp()->make(FilesystemManager::class);
 
-        /** @var \Illuminate\Filesystem\FilesystemManager $filesystemManager */
-        $filesystemManager = app(FilesystemManager::class);
-
-        // If it's our custom filesystem manager, we know that we have the names
-        // of the created disks
-        if ($filesystemManager instanceof SproutFilesystemManager) {
-            if (! empty($this->drivers)) {
-                $filesystemManager->forgetDisk($this->drivers);
+            // If we're tracking some drivers we can simply forget those
+            if (! empty($this->getDrivers())) {
+                $filesystemManager->forgetDisk($this->getDrivers());
+                $this->drivers = [];
             }
-        } else {
+
+            /** @var array<string, array<string, mixed>> $diskConfig */
+            $diskConfig = $this->getApp()->make('config')->get('filesystems.disks', []);
+
             // But if we don't, we have to cycle through the config and pick out
             // any that have the 'sprout' driver
             foreach ($diskConfig as $disk => $config) {

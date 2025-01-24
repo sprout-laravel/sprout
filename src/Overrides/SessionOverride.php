@@ -39,6 +39,8 @@ final class SessionOverride extends BaseOverride implements BootableServiceOverr
      */
     public function boot(Application $app, Sprout $sprout): void
     {
+        $this->setApp($app)->setSprout($sprout);
+
         // If the session manager has been resolved, we can add the driver
         if ($app->resolved('session')) {
             $manager = $app->make('session');
@@ -86,8 +88,8 @@ final class SessionOverride extends BaseOverride implements BootableServiceOverr
     public function setup(Tenancy $tenancy, Tenant $tenant): void
     {
         /** @var \Illuminate\Contracts\Config\Repository $config */
-        $config   = config();
-        $settings = settings();
+        $config   = $this->app->make('config');
+        $settings = $this->sprout->settings();
 
         if (! $settings->has('original.session')) {
             /** @var array<string, mixed> $original */
@@ -171,7 +173,7 @@ final class SessionOverride extends BaseOverride implements BootableServiceOverr
     {
         // We only want to touch this if the session manager has actually been
         // loaded, and is therefore most likely being used
-        if (app()->resolved('session')) {
+        if ($this->app->resolved('session')) {
             $manager = app('session');
 
             // If there are no loaded drivers, we can exit early

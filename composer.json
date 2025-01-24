@@ -11,7 +11,8 @@
     "phpunit/phpunit"    : "^11.0.1",
     "orchestra/testbench": "^9.4",
     "larastan/larastan"  : "^2.9",
-    "infection/infection": "^0.29.8"
+    "infection/infection": "^0.29.8",
+    "brianium/paratest": "^7.7"
   },
   "license"          : "MIT",
   "autoload"         : {

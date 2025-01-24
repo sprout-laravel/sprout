@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Sprout\Overrides;
 
-use Illuminate\Foundation\Application;
+use Illuminate\Contracts\Foundation\Application;
 use Sprout\Contracts\ServiceOverride;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;

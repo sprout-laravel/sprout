@@ -33,6 +33,7 @@ class SproutServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->registerSprout();
+        $this->registerDefaultBindings();
         $this->registerManagers();
         $this->registerMiddleware();
         $this->registerRouteMixin();
@@ -49,6 +50,13 @@ class SproutServiceProvider extends ServiceProvider
 
         // Bind the settings repository too
         $this->app->bind(SettingsRepository::class, fn () => $this->sprout->settings());
+    }
+
+    private function registerDefaultBindings(): void
+    {
+        // Bind the tenancy and tenant contracts
+        $this->app->bind(Tenancy::class, fn () => $this->sprout->getCurrentTenancy());
+        $this->app->bind(Tenant::class, fn () => $this->sprout->getCurrentTenancy()?->tenant());
     }
 
     private function registerManagers(): void

@@ -7,25 +7,20 @@ use Closure;
 use Illuminate\Auth\AuthManager;
 use Illuminate\Auth\Passwords\PasswordBrokerManager;
 use Illuminate\Config\Repository;
+use Illuminate\Contracts\Foundation\Application;
 use Mockery;
 use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use Sprout\Contracts\BootableServiceOverride;
-use Sprout\Contracts\DeferrableServiceOverride;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
-use Sprout\Overrides\Auth\SproutAuthCacheTokenRepository;
-use Sprout\Overrides\Auth\SproutAuthDatabaseTokenRepository;
 use Sprout\Overrides\Auth\SproutAuthPasswordBrokerManager;
 use Sprout\Overrides\AuthOverride;
 use Sprout\Sprout;
 use Sprout\Support\SettingsRepository;
 use Sprout\Tests\Unit\UnitTestCase;
-use Workbench\App\Models\TenantModel;
-use Workbench\App\Models\User;
 use function Sprout\sprout;
-use function Sprout\tenancy;
 
 class AuthOverrideTest extends UnitTestCase
 {
@@ -94,6 +89,11 @@ class AuthOverrideTest extends UnitTestCase
         $sprout = new Sprout($app, new SettingsRepository());
 
         $override->boot($app, $sprout);
+
+        // These are only here because there would be errors if their
+        // corresponding setters were not called
+        $this->assertInstanceOf(Application::class, $override->getApp());
+        $this->assertInstanceOf(Sprout::class, $override->getSprout());
     }
 
     #[Test]

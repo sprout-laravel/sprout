@@ -33,7 +33,9 @@ final class CacheOverride extends BaseOverride implements BootableServiceOverrid
      */
     public function boot(Application $app, Sprout $sprout): void
     {
-        $tracker = fn(string $store) => $this->drivers[] = $store;
+        $this->setApp($app)->setSprout($sprout);
+
+        $tracker = fn (string $store) => $this->drivers[] = $store;
 
         // If the cache manager has been resolved, we can add the driver
         if ($app->resolved('cache')) {
@@ -55,6 +57,16 @@ final class CacheOverride extends BaseOverride implements BootableServiceOverrid
 
             return (new SproutCacheDriverCreator($app, $manager, $config, $sprout))();
         });
+    }
+
+    /**
+     * Get the drivers that have been resolved
+     *
+     * @return array<string>
+     */
+    public function getDrivers(): array
+    {
+        return $this->drivers;
     }
 
     /**
@@ -80,7 +92,7 @@ final class CacheOverride extends BaseOverride implements BootableServiceOverrid
     public function cleanup(Tenancy $tenancy, Tenant $tenant): void
     {
         if (! empty($this->drivers)) {
-            app('cache')->forgetDriver($this->drivers);
+            $this->getApp()->make('cache')->forgetDriver($this->drivers);
 
             $this->drivers = [];
         }

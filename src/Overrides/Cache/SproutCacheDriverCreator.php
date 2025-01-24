@@ -89,15 +89,15 @@ final class SproutCacheDriverCreator
 
         // We need to know which store we're overriding to make tenanted
         if (! isset($this->config['override'])) {
-            throw MisconfigurationException::missingConfig('override', self::class, 'service override');
+            throw MisconfigurationException::missingConfig('override', 'service override', 'cache');
         }
 
         // We need to get the config for that store
         /** @var array<string, mixed> $storeConfig */
-        $storeConfig = config('cache.stores.' . $this->config['override']);
+        $storeConfig = $this->app->make('config')->get('cache.stores.' . $this->config['override']);
 
         if (empty($storeConfig)) {
-            throw new InvalidArgumentException('Cache store [' . $this->config['override'] . '] is not defined.');
+            throw new InvalidArgumentException('Cache store [' . $this->config['override'] . '] is not defined');
         }
 
         // Get the prefix for the tenanted store based on the store config,

@@ -28,7 +28,7 @@ trait AwareOfTenant
      */
     public function shouldBeRefreshed(): bool
     {
-        return true;
+        return true; // @codeCoverageIgnore
     }
 
     /**

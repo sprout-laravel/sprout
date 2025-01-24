@@ -3,16 +3,22 @@ declare(strict_types=1);
 
 namespace Sprout\Tests\Unit\Overrides;
 
+use Closure;
 use Illuminate\Cache\CacheManager;
 use Illuminate\Config\Repository;
+use Illuminate\Foundation\Application;
+use Mockery;
 use Mockery\MockInterface;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use Sprout\Contracts\BootableServiceOverride;
+use Sprout\Contracts\Tenancy;
+use Sprout\Contracts\Tenant;
 use Sprout\Overrides\CacheOverride;
+use Sprout\Sprout;
+use Sprout\Support\SettingsRepository;
 use Sprout\Tests\Unit\UnitTestCase;
-use Workbench\App\Models\TenantModel;
 use function Sprout\sprout;
-use function Sprout\tenancy;
 
 class CacheOverrideTest extends UnitTestCase
 {
@@ -21,6 +27,23 @@ class CacheOverrideTest extends UnitTestCase
         tap($app['config'], static function (Repository $config) {
             $config->set('sprout.overrides', []);
         });
+    }
+
+    private function mockCacheManager(): CacheManager&MockInterface
+    {
+        /** @var CacheManager&MockInterface $app */
+        $app = Mockery::mock(CacheManager::class, static function (MockInterface $mock) {
+            $mock->shouldReceive('extend')
+                 ->withArgs([
+                     'sprout',
+                     Mockery::on(static function ($arg) {
+                         return is_callable($arg) && $arg instanceof Closure;
+                     }),
+                 ])
+                 ->once();
+        });
+
+        return $app;
     }
 
     #[Test]
@@ -50,79 +73,181 @@ class CacheOverrideTest extends UnitTestCase
         $this->assertTrue($sprout->overrides()->hasOverrideBooted('cache'));
     }
 
-    #[Test]
-    public function addsSproutDriverToCacheManager(): void
+    #[Test, DataProvider('cacheResolvedDataProvider')]
+    public function bootsCorrectly(bool $return): void
     {
-        $sprout = sprout();
+        $override = new CacheOverride('cache', []);
 
-        config()->set('sprout.overrides', [
-            'cache' => [
-                'driver' => CacheOverride::class,
-            ],
-        ]);
+        /** @var \Illuminate\Foundation\Application&MockInterface $app */
+        $app = Mockery::mock($this->app, function (MockInterface $mock) use ($return) {
+            $mock->makePartial();
+            $mock->shouldReceive('resolved')->withArgs(['cache'])->andReturn($return)->once();
 
-        config()->set('cache.stores.null', [
-            'driver' => 'null',
-        ]);
+            if ($return) {
+                $mock->shouldReceive('make')
+                     ->with('cache')
+                     ->andReturn($this->mockCacheManager())
+                     ->once();
+            } else {
+                $mock->shouldReceive('afterResolving')
+                     ->withArgs([
+                         'cache',
+                         Mockery::on(static function ($arg) {
+                             return is_callable($arg) && $arg instanceof Closure;
+                         }),
+                     ])
+                     ->once();
+            }
+        });
 
-        $sprout->overrides()->registerOverrides();
+        $sprout = new Sprout($app, new SettingsRepository());
 
-        $tenant  = TenantModel::factory()->createOne();
-        $tenancy = tenancy();
+        $override->boot($app, $sprout);
 
-        $tenancy->setTenant($tenant);
-        sprout()->setCurrentTenancy($tenancy);
-
-        $manager = $this->app->make('cache');
-
-        $disk = $manager->build([
-            'driver'   => 'sprout',
-            'override' => 'null',
-        ]);
-
-        $this->assertInstanceOf(\Illuminate\Contracts\Cache\Repository::class, $disk);
+        // These are only here because there would be errors if their
+        // corresponding setters were not called
+        $this->assertInstanceOf(\Illuminate\Contracts\Foundation\Application::class, $override->getApp());
+        $this->assertInstanceOf(Sprout::class, $override->getSprout());
     }
 
     #[Test]
-    public function performsCleanup(): void
+    public function addsDriverCacheManagerHasBeenResolved(): void
     {
-        $sprout = sprout();
+        $override = new CacheOverride('cache', []);
 
-        config()->set('sprout.overrides', [
-            'cache' => [
-                'driver' => CacheOverride::class,
-            ],
-        ]);
+        $app = Mockery::mock(Application::class, static function (MockInterface $mock) {
+            $mock->makePartial();
+        });
 
-        config()->set('cache.stores.null', [
-            'driver' => 'null',
-        ]);
+        $app->singleton('cache', function () {
+            return $this->mockCacheManager();
+        });
 
-        config()->set('cache.stores.sprout', [
+        $sprout = new Sprout($app, new SettingsRepository());
+
+        $override->boot($app, $sprout);
+
+        $app->make('cache');
+    }
+
+    #[Test]
+    public function keepsTrackOfResolvedSproutDrivers(): void
+    {
+        $override = new CacheOverride('cache', []);
+
+        /** @var \Illuminate\Foundation\Application&MockInterface $app */
+        $app = Mockery::mock($this->app, static function (MockInterface $mock) {
+            $mock->makePartial();
+        });
+
+        $sprout  = new Sprout($app, new SettingsRepository());
+        $tenant  = Mockery::mock(Tenant::class, static function (MockInterface $mock) {
+            $mock->shouldReceive('getTenantKey')->andReturn(7777)->once();
+        });
+        $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) use ($tenant) {
+            $mock->shouldReceive('check')->andReturnTrue()->once();
+            $mock->shouldReceive('tenant')->andReturn($tenant)->once();
+            $mock->shouldReceive('getName')->andReturn('my-tenancy')->once();
+        });
+
+        $sprout->setCurrentTenancy($tenancy);
+
+        $override->boot($app, $sprout);
+
+        $cache = $app->make('cache');
+
+        $cache->build([
             'driver'   => 'sprout',
-            'override' => 'null',
+            'override' => 'array',
         ]);
 
+        $this->assertNotEmpty($override->getDrivers());
+        $this->assertContains('ondemand', $override->getDrivers());
+    }
+
+    #[Test]
+    public function cleansUpResolvedDrivers(): void
+    {
+        $override = new CacheOverride('cache', []);
+        $cache = Mockery::mock($this->app->make('cache'), static function (MockInterface $mock) {
+            $mock->makePartial();
+            $mock->shouldReceive('forgetDriver')->once();
+        });
         $this->app->forgetInstance('cache');
 
-        $sprout->overrides()->registerOverrides();
+        /** @var \Illuminate\Foundation\Application&MockInterface $app */
+        $app = Mockery::mock($this->app, static function (MockInterface $mock) use ($cache) {
+            $mock->makePartial();
 
-        $override = $sprout->overrides()->get('cache');
+            $mock->shouldReceive('make')
+                 ->with('cache')
+                 ->andReturn($cache);
+        });
 
-        $this->assertInstanceOf(CacheOverride::class, $override);
+        $sprout  = new Sprout($app, new SettingsRepository());
+        $tenant  = Mockery::mock(Tenant::class, static function (MockInterface $mock) {
+            $mock->shouldReceive('getTenantKey')->andReturn(7777)->once();
+        });
+        $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) use ($tenant) {
+            $mock->shouldReceive('check')->andReturnTrue()->once();
+            $mock->shouldReceive('tenant')->andReturn($tenant)->once();
+            $mock->shouldReceive('getName')->andReturn('my-tenancy')->once();
+        });
 
-        $tenant  = TenantModel::factory()->createOne();
-        $tenancy = tenancy();
+        $sprout->setCurrentTenancy($tenancy);
 
-        $tenancy->setTenant($tenant);
-        sprout()->setCurrentTenancy($tenancy);
+        $override->boot($app, $sprout);
 
-        $this->app->make('cache')->store('sprout');
+        $cache->build([
+            'driver'   => 'sprout',
+            'override' => 'array',
+        ]);
 
-        $this->instance('cache', $this->spy(CacheManager::class, function (MockInterface $mock) {
-            $mock->shouldReceive('forgetDriver')->once()->withArgs([['sprout']]);
-        }));
+        $this->assertNotEmpty($override->getDrivers());
+        $this->assertContains('ondemand', $override->getDrivers());
 
         $override->cleanup($tenancy, $tenant);
+
+        $this->assertEmpty($override->getDrivers());
+    }
+
+    #[Test]
+    public function cleansUpNothingWithoutResolvedDrivers(): void
+    {
+        $override = new CacheOverride('cache', []);
+        $cache = Mockery::mock($this->app->make('cache'), static function (MockInterface $mock) {
+            $mock->makePartial();
+            $mock->shouldNotReceive('forgetDriver');
+        });
+        $this->app->forgetInstance('cache');
+
+        /** @var \Illuminate\Foundation\Application&MockInterface $app */
+        $app = Mockery::mock($this->app, static function (MockInterface $mock) use ($cache) {
+            $mock->makePartial();
+
+            $mock->shouldReceive('make')
+                 ->with('cache')
+                 ->andReturn($cache);
+        });
+
+        $sprout  = new Sprout($app, new SettingsRepository());
+        $tenant  = Mockery::mock(Tenant::class);
+        $tenancy = Mockery::mock(Tenancy::class);
+
+        $sprout->setCurrentTenancy($tenancy);
+
+        $override->boot($app, $sprout);
+
+        $this->assertEmpty($override->getDrivers());
+
+        $override->cleanup($tenancy, $tenant);
+    }
+
+    public static function cacheResolvedDataProvider(): array
+    {
+        return [
+            'cache resolved'     => [true],
+            'cache not resolved' => [false],
+        ];
     }
 }

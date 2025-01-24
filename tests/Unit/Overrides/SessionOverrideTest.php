@@ -242,6 +242,11 @@ class SessionOverrideTest extends UnitTestCase
         $sprout = new Sprout($app, new SettingsRepository());
 
         $override->boot($app, $sprout);
+
+        // These are only here because there would be errors if their
+        // corresponding setters were not called
+        $this->assertInstanceOf(\Illuminate\Contracts\Foundation\Application::class, $override->getApp());
+        $this->assertInstanceOf(Sprout::class, $override->getSprout());
     }
 
     #[Test, DataProvider('overrideDatabaseSetting')]

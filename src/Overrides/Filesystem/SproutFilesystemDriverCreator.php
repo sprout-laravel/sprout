@@ -162,9 +162,10 @@ final readonly class SproutFilesystemDriverCreator
         if (is_array($this->config['disk'])) {
             $diskConfig = $this->config['disk'];
         } else {
+            $config = $this->app->make('config');
             /** @var string $diskName */
-            $diskName   = $this->config['disk'] ?? config('filesystems.default');
-            $diskConfig = config('filesystems.disks.' . $diskName);
+            $diskName   = $this->config['disk'] ?? $config->get('filesystems.default');
+            $diskConfig = $config->get('filesystems.disks.' . $diskName);
         }
 
         /** @var array<string, mixed> $diskConfig */
