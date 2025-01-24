@@ -39,6 +39,10 @@ final class AuthOverride extends BaseOverride implements BootableServiceOverride
      */
     public function boot(Application $app, Sprout $sprout): void
     {
+        // Set the app and sprout instances, so we don't have to mess
+        // around with global helpers
+        $this->setApp($app)->setSprout($sprout);
+
         // Although this isn't strictly necessary, this is here to tidy up
         // the list of deferred services, just in case there's some weird gotcha
         // somewhere that causes the provider to be loaded anyway.
@@ -49,8 +53,8 @@ final class AuthOverride extends BaseOverride implements BootableServiceOverride
         // 'auth.password.broker' as it will proxy to our new 'auth.password'.
 
         // This is the actual thing we need.
-        $app->singleton('auth.password', function ($app) {
-            return new SproutAuthPasswordBrokerManager($app);
+        $app->singleton('auth.password', function ($app) use($sprout) {
+            return new SproutAuthPasswordBrokerManager($app, $sprout);
         });
 
         // While it's unlikely that the password broker has been resolved,
@@ -113,9 +117,9 @@ final class AuthOverride extends BaseOverride implements BootableServiceOverride
         // Since this class isn't deferred because it has to rely on
         // multiple services, we only want to actually run this code if
         // the auth manager has been resolved.
-        if (app()->resolved('auth')) {
+        if ($this->getApp()->resolved('auth')) {
             /** @var \Illuminate\Auth\AuthManager $authManager */
-            $authManager = app(AuthManager::class);
+            $authManager = $this->getApp()->make(AuthManager::class);
 
             if ($authManager->hasResolvedGuards()) {
                 $authManager->forgetGuards();
@@ -132,9 +136,9 @@ final class AuthOverride extends BaseOverride implements BootableServiceOverride
     {
         // Same as with 'auth' above, we only want to run this code if the
         // password broker has been resolved already.
-        if (app()->resolved('auth.password')) {
+        if ($this->getApp()->resolved('auth.password')) {
             /** @var \Illuminate\Auth\Passwords\PasswordBrokerManager $passwordBroker */
-            $passwordBroker = app('auth.password');
+            $passwordBroker = $this->getApp()->make('auth.password');
 
             // The flush method only exists on our custom implementation
             if ($passwordBroker instanceof SproutAuthPasswordBrokerManager) {

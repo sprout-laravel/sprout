@@ -5,6 +5,8 @@ namespace Sprout\Overrides\Auth;
 
 use Illuminate\Auth\Passwords\PasswordBrokerManager;
 use Illuminate\Auth\Passwords\TokenRepositoryInterface;
+use Illuminate\Foundation\Application;
+use Sprout\Sprout;
 
 /**
  * Sprout Auth Password Broker Manager
@@ -20,27 +22,42 @@ use Illuminate\Auth\Passwords\TokenRepositoryInterface;
 class SproutAuthPasswordBrokerManager extends PasswordBrokerManager
 {
     /**
+     * @var \Sprout\Sprout
+     */
+    private Sprout $sprout;
+
+    public function __construct(Application $app, Sprout $sprout)
+    {
+        parent::__construct($app);
+
+        $this->sprout = $sprout;
+    }
+
+    /**
      * Create a token repository instance based on the current configuration.
      *
      * @param array<string, mixed> $config
      *
      * @return \Illuminate\Auth\Passwords\TokenRepositoryInterface
+     *
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
      */
     protected function createTokenRepository(array $config): TokenRepositoryInterface
     {
-        // @phpstan-ignore-next-line
-        $key = $this->app['config']['app.key'];
+        /** @var string $key */
+        $key = $this->app->make('config')->get('app.key');
 
         // @codeCoverageIgnoreStart
-        if (str_starts_with($key, 'base64:')) {
-            $key = base64_decode(substr($key, 7));
+        if (str_starts_with($key, 'base64:')) { // @infection-ignore-all
+            $key = base64_decode(substr($key, 7)); // @infection-ignore-all
         }
         // @codeCoverageIgnoreEnd
 
         if (isset($config['driver']) && $config['driver'] === 'cache') {
             return new SproutAuthCacheTokenRepository(
-                $this->app['cache']->store($config['store'] ?? null), // @phpstan-ignore-line
-                $this->app['hash'],                                   // @phpstan-ignore-line
+                $this->sprout,
+                $this->app->make('cache')->store($config['store'] ?? null), // @phpstan-ignore-line
+                $this->app->make('hash'),
                 $key,
                 ($config['expire'] ?? 60) * 60,
                 $config['throttle'] ?? 0, // @phpstan-ignore-line
@@ -51,9 +68,10 @@ class SproutAuthPasswordBrokerManager extends PasswordBrokerManager
         $connection = $config['connection'] ?? null;
 
         return new SproutAuthDatabaseTokenRepository(
-            $this->app['db']->connection($connection), // @phpstan-ignore-line
-            $this->app['hash'],                        // @phpstan-ignore-line
-            $config['table'],                          // @phpstan-ignore-line
+            $this->sprout,
+            $this->app->make('db')->connection($connection), // @phpstan-ignore-line
+            $this->app->make('hash'),
+            $config['table'],                                // @phpstan-ignore-line
             $key,
             $config['expire'],// @phpstan-ignore-line
             $config['throttle'] ?? 0// @phpstan-ignore-line

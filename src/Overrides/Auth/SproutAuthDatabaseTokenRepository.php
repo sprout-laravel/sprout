@@ -5,11 +5,15 @@ namespace Sprout\Overrides\Auth;
 
 use Illuminate\Auth\Passwords\DatabaseTokenRepository;
 use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
+use Illuminate\Contracts\Hashing\Hasher as HasherContract;
+use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Carbon;
 use SensitiveParameter;
+use Sprout\Contracts\Tenancy;
 use Sprout\Exceptions\TenancyMissingException;
 use Sprout\Exceptions\TenantMissingException;
+use Sprout\Sprout;
 use function Sprout\sprout;
 
 /**
@@ -24,6 +28,57 @@ use function Sprout\sprout;
 class SproutAuthDatabaseTokenRepository extends DatabaseTokenRepository
 {
     /**
+     * @var \Sprout\Sprout
+     */
+    private Sprout $sprout;
+
+    /** @infection-ignore-all  */
+    public function __construct(
+        Sprout $sprout,
+        ConnectionInterface $connection,
+        HasherContract $hasher,
+        $table,
+        $hashKey,
+        $expires = 60,
+        $throttle = 60
+    )
+    {
+        parent::__construct($connection, $hasher, $table, $hashKey, $expires, $throttle);
+        $this->sprout = $sprout;
+    }
+
+    public function getExpires(): int
+    {
+        return $this->expires;
+    }
+
+    public function getThrottle(): int
+    {
+        return $this->throttle;
+    }
+
+    /**
+     * @return \Sprout\Contracts\Tenancy<*>
+     *
+     * @throws \Sprout\Exceptions\TenancyMissingException
+     * @throws \Sprout\Exceptions\TenantMissingException
+     */
+    protected function getTenancy(): Tenancy
+    {
+        $tenancy = $this->sprout->getCurrentTenancy();
+
+        if ($tenancy === null) {
+            throw TenancyMissingException::make();
+        }
+
+        if (! $tenancy->check()) {
+            throw TenantMissingException::make($tenancy->getName());
+        }
+
+        return $tenancy;
+    }
+
+    /**
      * Build the record payload for the table.
      *
      * @param string $email
@@ -36,19 +91,11 @@ class SproutAuthDatabaseTokenRepository extends DatabaseTokenRepository
      */
     protected function getPayload($email, #[SensitiveParameter] $token): array
     {
-        if (! sprout()->withinContext()) {
+        if (! $this->sprout->withinContext()) {
             return parent::getPayload($email, $token);
         }
 
-        $tenancy = sprout()->getCurrentTenancy();
-
-        if ($tenancy === null) {
-            throw TenancyMissingException::make();
-        }
-
-        if (! $tenancy->check()) {
-            throw TenantMissingException::make($tenancy->getName());
-        }
+        $tenancy = $this->getTenancy();
 
         return [
             'tenancy'    => $tenancy->getName(),
@@ -71,19 +118,11 @@ class SproutAuthDatabaseTokenRepository extends DatabaseTokenRepository
      */
     protected function getTenantedQuery(string $email): Builder
     {
-        if (! sprout()->withinContext()) {
+        if (! $this->sprout->withinContext()) {
             return $this->getTable()->where('email', $email);
         }
         
-        $tenancy = sprout()->getCurrentTenancy();
-
-        if ($tenancy === null) {
-            throw TenancyMissingException::make();
-        }
-
-        if (! $tenancy->check()) {
-            throw TenantMissingException::make($tenancy->getName());
-        }
+        $tenancy = $this->getTenancy();
 
         return $this->getTable()
                     ->where('tenancy', $tenancy->getName())

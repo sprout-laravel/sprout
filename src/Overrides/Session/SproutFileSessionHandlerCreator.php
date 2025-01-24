@@ -54,8 +54,8 @@ final class SproutFileSessionHandlerCreator
         if ($this->sprout->withinContext()) {
             $tenancy = $this->sprout->getCurrentTenancy();
 
-            $handler->setTenancy($tenancy)
-                    ->setTenant($tenancy?->tenant());
+            $handler->setTenancy($tenancy);
+            $handler->setTenant($tenancy?->tenant());
         }
 
         return $handler;

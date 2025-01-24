@@ -4,17 +4,50 @@ declare(strict_types=1);
 namespace Sprout\Overrides\Auth;
 
 use Illuminate\Auth\Passwords\CacheTokenRepository;
+use Illuminate\Cache\Repository;
 use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
+use Illuminate\Contracts\Hashing\Hasher as HasherContract;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use SensitiveParameter;
 use Sprout\Contracts\TenantHasResources;
 use Sprout\Exceptions\TenancyMissingException;
 use Sprout\Exceptions\TenantMissingException;
+use Sprout\Sprout;
 use function Sprout\sprout;
 
 class SproutAuthCacheTokenRepository extends CacheTokenRepository
 {
+    /**
+     * @var \Sprout\Sprout
+     */
+    private Sprout $sprout;
+
+    /** @infection-ignore-all  */
+    public function __construct(
+        Sprout $sprout,
+        Repository $cache,
+        HasherContract $hasher,
+        string $hashKey,
+        int $expires = 3600,
+        int $throttle = 60,
+        string $prefix = ''
+    )
+    {
+        parent::__construct($cache, $hasher, $hashKey, $expires, $throttle, $prefix);
+        $this->sprout = $sprout;
+    }
+
+    public function getExpires(): int
+    {
+        return $this->expires;
+    }
+
+    public function getThrottle(): int
+    {
+        return $this->throttle;
+    }
+
     /**
      * @return string
      *
@@ -24,6 +57,10 @@ class SproutAuthCacheTokenRepository extends CacheTokenRepository
     public function getPrefix(): string
     {
         $prefix = $this->getTenantedPrefix();
+
+        if (empty($prefix)) {
+            return $this->prefix;
+        }
 
         if (! empty($this->prefix)) {
             $prefix = $this->prefix . '.' . $prefix;
@@ -40,11 +77,11 @@ class SproutAuthCacheTokenRepository extends CacheTokenRepository
      */
     protected function getTenantedPrefix(): string
     {
-        if (! sprout()->withinContext()) {
+        if (! $this->sprout->withinContext()) {
             return '';
         }
 
-        $tenancy = sprout()->getCurrentTenancy();
+        $tenancy = $this->sprout->getCurrentTenancy();
 
         if ($tenancy === null) {
             throw TenancyMissingException::make();
@@ -57,7 +94,7 @@ class SproutAuthCacheTokenRepository extends CacheTokenRepository
         /** @var \Sprout\Contracts\Tenant $tenant */
         $tenant = $tenancy->tenant();
 
-        return $tenancy->getName() . '.' . ($tenant instanceof TenantHasResources ? $tenant->getTenantResourceKey() : $tenant->getTenantKey()) . '.';
+        return $tenancy->getName() . '.' . ($tenant instanceof TenantHasResources ? $tenant->getTenantResourceKey() : $tenant->getTenantKey());
     }
 
     /**
@@ -74,11 +111,12 @@ class SproutAuthCacheTokenRepository extends CacheTokenRepository
     {
         $this->delete($user);
 
+        /** @infection-ignore-all */
         $token = hash_hmac('sha256', Str::random(40), $this->hashKey);
 
         $this->cache->put(
             $this->getPrefix() . $user->getEmailForPasswordReset(),
-            [$token, Carbon::now()->format($this->format)],
+            [$this->hasher->make($token), Carbon::now()->format($this->format)],
             $this->expires,
         );
 

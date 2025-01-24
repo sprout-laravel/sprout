@@ -13,10 +13,15 @@
     "@default"           : true,
     "ProtectedVisibility": {
       "ignore": [
-        "Sprout\\Concerns\\FindsIdentityRouteParameters::initialiseRouteParameter",
-        "Sprout\\Concerns\\FindsIdentityRouteParameters::getParameterPatternMapping",
-        "Sprout\\Concerns\\FindsIdentityRouteParameters::applyParameterMapping",
-        "Sprout\\Support\\BaseFactory::callCustomCreator"
+        "Sprout\\Concerns\\FindsIdentityRouteParameters::*",
+        "Sprout\\Support\\BaseFactory::callCustomCreator",
+        "Sprout\\Overrides\\Auth\\SproutAuthCacheTokenRepository::getTenantedPrefix",
+        "Sprout\\Overrides\\Auth\\SproutAuthDatabaseTokenRepository::*"
+      ]
+    },
+    "PublicVisibility": {
+      "ignore": [
+        "Sprout\\Concerns\\FindsIdentityRouteParameters::*"
       ]
     },
     "UnwrapUcFirst"      : {

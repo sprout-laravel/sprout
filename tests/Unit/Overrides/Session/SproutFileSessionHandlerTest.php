@@ -102,7 +102,7 @@ class SproutFileSessionHandlerTest extends UnitTestCase
             $mock->shouldReceive('put')->withArgs([$expectedPath . DIRECTORY_SEPARATOR . $sessionId, 'my-session-data', true])->once();
         }))->setTenancy($tenancy)->setTenant($tenant);
 
-        $handler->write($sessionId, 'my-session-data');
+        $this->assertTrue($handler->write($sessionId, 'my-session-data'));
     }
 
     #[Test, DataProvider('fileSessionDataProvider')]
@@ -114,7 +114,7 @@ class SproutFileSessionHandlerTest extends UnitTestCase
             $mock->shouldReceive('delete')->withArgs([$expectedPath . DIRECTORY_SEPARATOR . $sessionId])->once();
         }))->setTenancy($tenancy)->setTenant($tenant);
 
-        $handler->destroy($sessionId);
+        $this->assertTrue($handler->destroy($sessionId));
     }
 
     public static function fileSessionDataProvider(): array
