@@ -27,7 +27,7 @@ final readonly class SproutFilesystemDriverCreator
     /**
      * @var \Illuminate\Contracts\Foundation\Application
      */
-    private Application $app; // @phpstan-ignore-line
+    private Application $app;
 
     /**
      * @var \Illuminate\Filesystem\FilesystemManager

@@ -19,7 +19,7 @@ final class SproutCacheDriverCreator
     /**
      * @var \Illuminate\Contracts\Foundation\Application
      */
-    private Application $app; // @phpstan-ignore-line
+    private Application $app;
 
     /**
      * @var \Illuminate\Cache\CacheManager
