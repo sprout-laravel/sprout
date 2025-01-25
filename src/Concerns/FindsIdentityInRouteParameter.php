@@ -97,12 +97,12 @@ trait FindsIdentityInRouteParameter
      */
     public function getRouteParameterName(Tenancy $tenancy): string
     {
-        return PlaceholderHelper::replace(
+        return PlaceholderHelper::replaceForParameter(
             $this->getParameter(),
             [
                 'tenancy'  => $tenancy->getName(),
                 'resolver' => $this->getName(),
-            ]
+            ],
         );
     }
 

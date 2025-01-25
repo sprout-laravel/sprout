@@ -11,7 +11,19 @@ final class PlaceholderHelper
      *
      * @return string
      */
-    public static function replace(string $pattern, array $placeholders = []): string
+    public static function replaceForParameter(string $pattern, array $placeholders = []): string
+    {
+        return self::replace($pattern, $placeholders, true);
+    }
+
+    /**
+     * @param string                                            $pattern
+     * @param array<lowercase-string, string|callable():string> $placeholders
+     * @param bool                                              $forParameter
+     *
+     * @return string
+     */
+    public static function replace(string $pattern, array $placeholders = [], bool $forParameter = false): string
     {
         $newString = $pattern;
 
@@ -19,7 +31,8 @@ final class PlaceholderHelper
             $newString = self::replacePlaceholder(
                 $newString,
                 $placeholder,
-                ! is_string($replacement) ? $replacement() : $replacement
+                ! is_string($replacement) ? $replacement() : $replacement,
+                $forParameter
             );
         }
 
@@ -33,21 +46,28 @@ final class PlaceholderHelper
      *
      * @return string
      */
-    private static function replacePlaceholder(string $string, string $placeholder, string $value): string
+    private static function replacePlaceholder(string $string, string $placeholder, string $value, bool $forParameter): string
     {
+        $search = [
+            '{' . strtolower($placeholder) . '}',
+            '{' . ucfirst($placeholder) . '}',
+            '{' . strtoupper($placeholder) . '}',
+        ];
+
+        $replace = [
+            $value,
+            ucfirst($value),
+            strtoupper($value),
+        ];
+
+        if ($forParameter) {
+            $search[]  = '-';
+            $replace[] = '_';
+        }
+
         return str_replace(
-            [
-                '-',
-                '{' . strtolower($placeholder) . '}',
-                '{' . ucfirst($placeholder) . '}',
-                '{' . strtoupper($placeholder) . '}',
-            ],
-            [
-                '_',
-                $value,
-                ucfirst($value),
-                strtoupper($value),
-            ],
+            $search,
+            $replace,
             $string
         );
     }
