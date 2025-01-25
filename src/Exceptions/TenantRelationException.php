@@ -12,6 +12,8 @@ use Throwable;
  * relations.
  *
  * @package Database\Eloquent
+ *
+ * @codeCoverageIgnore
  */
 final class TenantRelationException extends SproutException
 {

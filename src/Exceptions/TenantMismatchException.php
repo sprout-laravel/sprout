@@ -10,6 +10,8 @@ namespace Sprout\Exceptions;
  * the current one.
  *
  * @package Core
+ *
+ * @codeCoverageIgnore
  */
 final class TenantMismatchException extends SproutException
 {

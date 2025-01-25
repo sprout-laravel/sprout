@@ -10,6 +10,8 @@ namespace Sprout\Exceptions;
  * tenancy, and was required/necessary.
  *
  * @package Core
+ *
+ * @codeCoverageIgnore
  */
 final class NoTenantFoundException extends SproutException
 {

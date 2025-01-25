@@ -10,6 +10,8 @@ namespace Sprout\Exceptions;
  * another.
  *
  * @package Core
+ *
+ * @codeCoverageIgnore
  */
 final class CompatibilityException extends SproutException
 {

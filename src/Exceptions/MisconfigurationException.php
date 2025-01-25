@@ -14,6 +14,8 @@ use Sprout\Support\ResolutionHook;
  * expected, but not provided.
  *
  * @package Core
+ *
+ * @codeCoverageIgnore
  */
 final class MisconfigurationException extends SproutException
 {

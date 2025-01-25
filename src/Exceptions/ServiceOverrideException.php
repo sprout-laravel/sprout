@@ -3,6 +3,13 @@ declare(strict_types=1);
 
 namespace Sprout\Exceptions;
 
+/**
+ * Service Override Exceptions
+ *
+ * These are all the exceptions specific to the service override functionality.
+ *
+ * @codeCoverageIgnore
+ */
 final class ServiceOverrideException extends SproutException
 {
     /**
@@ -14,7 +21,7 @@ final class ServiceOverrideException extends SproutException
      */
     public static function notBootable(string $service): self
     {
-        return new self('The service override [' . $service . '] is not bootable'); // @codeCoverageIgnore
+        return new self('The service override [' . $service . '] is not bootable');
     }
 
     /**
@@ -28,6 +35,6 @@ final class ServiceOverrideException extends SproutException
      */
     public static function setupButNotEnabled(string $service, string $tenancy): self
     {
-        return new self('The service override [' . $service . '] has been set up for the tenancy [' . $tenancy . '] but it is not enabled for that tenancy'); // @codeCoverageIgnore
+        return new self('The service override [' . $service . '] has been set up for the tenancy [' . $tenancy . '] but it is not enabled for that tenancy');
     }
 }

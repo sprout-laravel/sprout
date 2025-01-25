@@ -10,6 +10,8 @@ namespace Sprout\Exceptions;
  * to Sprout.
  *
  * @package Core
+ *
+ * @codeCoverageIgnore
  */
 abstract class SproutException extends \Exception
 {

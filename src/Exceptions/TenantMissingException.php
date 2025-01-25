@@ -10,6 +10,8 @@ namespace Sprout\Exceptions;
  * is expected/required.
  *
  * @package Core
+ *
+ * @codeCoverageIgnore
  */
 final class TenantMissingException extends SproutException
 {
