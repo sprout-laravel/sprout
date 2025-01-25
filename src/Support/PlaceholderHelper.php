@@ -37,11 +37,13 @@ final class PlaceholderHelper
     {
         return str_replace(
             [
+                '-',
                 '{' . strtolower($placeholder) . '}',
                 '{' . ucfirst($placeholder) . '}',
                 '{' . strtoupper($placeholder) . '}',
             ],
             [
+                '_',
                 $value,
                 ucfirst($value),
                 strtoupper($value),
