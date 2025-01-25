@@ -12,7 +12,7 @@
     "orchestra/testbench": "^9.4",
     "larastan/larastan"  : "^2.9",
     "infection/infection": "^0.29.8",
-    "brianium/paratest": "^7.7"
+    "brianium/paratest"  : "^7.7"
   },
   "license"          : "MIT",
   "autoload"         : {
@@ -79,7 +79,7 @@
       "providers": [
         "Sprout\\SproutServiceProvider"
       ],
-      "facades":[
+      "facades"  : [
         "Sprout\\Facades\\Sprout"
       ]
     }
