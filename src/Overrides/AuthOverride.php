@@ -8,7 +8,7 @@ use Illuminate\Contracts\Foundation\Application;
 use Sprout\Contracts\BootableServiceOverride;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
-use Sprout\Overrides\Auth\TenantAwarePasswordBrokerManager;
+use Sprout\Overrides\Auth\SproutAuthPasswordBrokerManager;
 use Sprout\Sprout;
 
 /**
@@ -24,7 +24,7 @@ use Sprout\Sprout;
  *
  * @package Overrides
  */
-final class AuthOverride implements BootableServiceOverride
+final class AuthOverride extends BaseOverride implements BootableServiceOverride
 {
     /**
      * Boot a service override
@@ -39,6 +39,10 @@ final class AuthOverride implements BootableServiceOverride
      */
     public function boot(Application $app, Sprout $sprout): void
     {
+        // Set the app and sprout instances, so we don't have to mess
+        // around with global helpers
+        $this->setApp($app)->setSprout($sprout);
+
         // Although this isn't strictly necessary, this is here to tidy up
         // the list of deferred services, just in case there's some weird gotcha
         // somewhere that causes the provider to be loaded anyway.
@@ -49,8 +53,8 @@ final class AuthOverride implements BootableServiceOverride
         // 'auth.password.broker' as it will proxy to our new 'auth.password'.
 
         // This is the actual thing we need.
-        $app->singleton('auth.password', function ($app) {
-            return new TenantAwarePasswordBrokerManager($app);
+        $app->singleton('auth.password', function ($app) use($sprout) {
+            return new SproutAuthPasswordBrokerManager($app, $sprout);
         });
 
         // While it's unlikely that the password broker has been resolved,
@@ -113,9 +117,9 @@ final class AuthOverride implements BootableServiceOverride
         // Since this class isn't deferred because it has to rely on
         // multiple services, we only want to actually run this code if
         // the auth manager has been resolved.
-        if (app()->resolved('auth')) {
+        if ($this->getApp()->resolved('auth')) {
             /** @var \Illuminate\Auth\AuthManager $authManager */
-            $authManager = app(AuthManager::class);
+            $authManager = $this->getApp()->make(AuthManager::class);
 
             if ($authManager->hasResolvedGuards()) {
                 $authManager->forgetGuards();
@@ -132,12 +136,12 @@ final class AuthOverride implements BootableServiceOverride
     {
         // Same as with 'auth' above, we only want to run this code if the
         // password broker has been resolved already.
-        if (app()->resolved('auth.password')) {
+        if ($this->getApp()->resolved('auth.password')) {
             /** @var \Illuminate\Auth\Passwords\PasswordBrokerManager $passwordBroker */
-            $passwordBroker = app('auth.password');
+            $passwordBroker = $this->getApp()->make('auth.password');
 
             // The flush method only exists on our custom implementation
-            if ($passwordBroker instanceof TenantAwarePasswordBrokerManager) {
+            if ($passwordBroker instanceof SproutAuthPasswordBrokerManager) {
                 $passwordBroker->flush();
             }
         }

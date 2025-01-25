@@ -3,30 +3,31 @@ declare(strict_types=1);
 
 namespace Sprout\Tests\Unit\Overrides;
 
+use Closure;
 use Illuminate\Auth\AuthManager;
+use Illuminate\Auth\Passwords\PasswordBrokerManager;
 use Illuminate\Config\Repository;
+use Illuminate\Contracts\Foundation\Application;
 use Mockery;
 use Mockery\MockInterface;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use Sprout\Contracts\BootableServiceOverride;
-use Sprout\Contracts\DeferrableServiceOverride;
-use Sprout\Overrides\Auth\TenantAwareCacheTokenRepository;
-use Sprout\Overrides\Auth\TenantAwareDatabaseTokenRepository;
-use Sprout\Overrides\Auth\TenantAwarePasswordBrokerManager;
+use Sprout\Contracts\Tenancy;
+use Sprout\Contracts\Tenant;
+use Sprout\Overrides\Auth\SproutAuthPasswordBrokerManager;
 use Sprout\Overrides\AuthOverride;
-use Sprout\Support\Services;
+use Sprout\Sprout;
+use Sprout\Support\SettingsRepository;
 use Sprout\Tests\Unit\UnitTestCase;
-use Workbench\App\Models\TenantModel;
-use Workbench\App\Models\User;
 use function Sprout\sprout;
-use function Sprout\tenancy;
 
 class AuthOverrideTest extends UnitTestCase
 {
     protected function defineEnvironment($app): void
     {
         tap($app['config'], static function (Repository $config) {
-            $config->set('sprout.services', []);
+            $config->set('sprout.overrides', []);
         });
     }
 
@@ -34,7 +35,6 @@ class AuthOverrideTest extends UnitTestCase
     public function isBuiltCorrectly(): void
     {
         $this->assertTrue(is_subclass_of(AuthOverride::class, BootableServiceOverride::class));
-        $this->assertFalse(is_subclass_of(AuthOverride::class, DeferrableServiceOverride::class));
     }
 
     #[Test]
@@ -42,197 +42,256 @@ class AuthOverrideTest extends UnitTestCase
     {
         $sprout = sprout();
 
-        $sprout->registerOverride(Services::AUTH, AuthOverride::class);
+        config()->set('sprout.overrides', [
+            'auth' => [
+                'driver' => AuthOverride::class,
+            ],
+        ]);
 
-        $this->assertTrue($sprout->hasRegisteredOverride(AuthOverride::class));
-        $this->assertTrue($sprout->isBootableOverride(AuthOverride::class));
-        $this->assertFalse($sprout->isDeferrableOverride(AuthOverride::class));
+        $this->assertFalse($sprout->overrides()->hasOverride('auth'));
+
+        $sprout->overrides()->registerOverrides();
+
+        $this->assertTrue($sprout->overrides()->hasOverride('auth'));
+        $this->assertSame(AuthOverride::class, $sprout->overrides()->getOverrideClass('auth'));
+        $this->assertTrue($sprout->overrides()->isOverrideBootable('auth'));
+        $this->assertTrue($sprout->overrides()->hasOverrideBooted('auth'));
     }
 
-    #[Test]
-    public function isBootedCorrectly(): void
+    #[Test, DataProvider('authPasswordResolvedDataProvider')]
+    public function bootsCorrectly(bool $return): void
     {
-        $sprout = sprout();
+        $override = new AuthOverride('auth', []);
 
-        $sprout->registerOverride(Services::AUTH, AuthOverride::class);
+        /** @var \Illuminate\Foundation\Application&MockInterface $app */
+        $app = Mockery::mock($this->app, static function (MockInterface $mock) use ($return) {
+            $mock->makePartial();
+            $mock->shouldReceive('removeDeferredServices')
+                 ->withArgs([['auth.password']])
+                 ->once();
 
-        $this->assertFalse(app()->isDeferredService('auth.password'));
-        $this->assertTrue(app()->bound('auth.password'));
-        $this->assertFalse(app()->resolved('auth.password'));
-        $this->assertFalse(app()->resolved('auth.password.broker'));
-        $this->assertInstanceOf(TenantAwarePasswordBrokerManager::class, app()->make('auth.password'));
-        $this->assertTrue(app()->resolved('auth.password'));
-        $this->assertFalse(app()->resolved('auth.password.broker'));
-    }
+            $mock->shouldReceive('singleton')
+                 ->withArgs([
+                     'auth.password',
+                     Mockery::on(static function ($closure) {
+                         return is_callable($closure) && $closure instanceof Closure;
+                     }),
+                 ])
+                 ->once();
 
-    #[Test]
-    public function rebindsAuthPassword(): void
-    {
-        $sprout = sprout();
+            $mock->shouldReceive('resolved')->withArgs(['auth.password'])->once()->andReturn($return);
 
-        app()->rebinding('auth.password', function ($app, $passwordBrokerManager) {
-            $this->assertInstanceOf(TenantAwarePasswordBrokerManager::class, $passwordBrokerManager);
+            if ($return) {
+                $mock->shouldReceive('forgetInstance')->withArgs(['auth.password'])->once();
+            }
         });
 
-        $sprout->registerOverride(Services::AUTH, AuthOverride::class);
+        $sprout = new Sprout($app, new SettingsRepository());
+
+        $override->boot($app, $sprout);
+
+        // These are only here because there would be errors if their
+        // corresponding setters were not called
+        $this->assertInstanceOf(Application::class, $override->getApp());
+        $this->assertInstanceOf(Sprout::class, $override->getSprout());
     }
 
     #[Test]
-    public function forgetsAuthPasswordInstance(): void
+    public function overridesThePasswordBrokerManager(): void
     {
-        $sprout = sprout();
+        $override = new AuthOverride('auth', []);
 
-        $this->assertFalse(app()->resolved('auth.password'));
-        $this->assertNotInstanceOf(TenantAwarePasswordBrokerManager::class, app()->make('auth.password'));
-        $this->assertTrue(app()->resolved('auth.password'));
+        /** @var \Illuminate\Foundation\Application&MockInterface $app */
+        $app = Mockery::mock($this->app, static function (MockInterface $mock) {
+            $mock->makePartial();
+        });
 
-        $sprout->registerOverride(Services::AUTH, AuthOverride::class);
+        $sprout = new Sprout($app, new SettingsRepository());
 
-        $this->assertInstanceOf(TenantAwarePasswordBrokerManager::class, app()->make('auth.password'));
+        $override->boot($app, $sprout);
+
+        $manager = $app->make('auth.password');
+
+        $this->assertInstanceOf(SproutAuthPasswordBrokerManager::class, $manager);
     }
 
-    #[Test]
-    public function replacesTheDatabaseTokenRepositoryDriver(): void
+    #[Test, DataProvider('authResolvedDataProvider')]
+    public function setsUpForTheTenancy(bool $authReturn, bool $authPasswordReturn): void
     {
-        $sprout = sprout();
+        $override = new AuthOverride('auth', []);
 
-        config()->set('auth.passwords.users.driver', 'database');
-        config()->set('auth.passwords.users.table', 'password_reset_tokens');
-        config()->set('multitenancy.providers.eloquent.model', TenantModel::class);
+        /** @var \Illuminate\Foundation\Application&MockInterface $app */
+        $app = Mockery::mock($this->app, static function (MockInterface $mock) use ($authReturn, $authPasswordReturn) {
+            $mock->makePartial();
 
-        $sprout->registerOverride(Services::AUTH, AuthOverride::class);
+            $mock->shouldReceive('resolved')
+                 ->withArgs(['auth'])
+                 ->andReturn($authReturn)
+                 ->once();
 
-        $broker = app()->make('auth.password.broker');
+            if ($authReturn) {
+                $authManager = Mockery::mock(AuthManager::class, static function (MockInterface $mock) {
+                    $mock->shouldReceive('hasResolvedGuards')->once()->andReturn(true);
+                    $mock->shouldReceive('forgetGuards')->once();
+                });
 
-        $this->assertInstanceOf(TenantAwareDatabaseTokenRepository::class, $broker->getRepository());
+                $mock->shouldReceive('make')
+                     ->withArgs([AuthManager::class])
+                     ->andReturn($authManager)
+                     ->once();
+            }
 
-        $tenant  = TenantModel::factory()->createOne();
-        $tenancy = tenancy();
+            $mock->shouldReceive('resolved')
+                 ->withArgs(['auth.password'])
+                 ->andReturn($authPasswordReturn)
+                 ->atLeast()
+                 ->once();
 
-        $tenancy->setTenant($tenant);
-        sprout()->setCurrentTenancy($tenancy);
+            if ($authPasswordReturn) {
+                $passwordManager = Mockery::mock(SproutAuthPasswordBrokerManager::class, static function (MockInterface $mock) {
+                    $mock->shouldReceive('flush')->once();
+                });
 
-        $user     = User::factory()->createOne();
-        $token    = $broker->createToken($user);
-        $database = app()->make('db.connection');
+                $mock->shouldReceive('make')
+                     ->withArgs(['auth.password'])
+                     ->andReturn($passwordManager)
+                     ->once();
+            }
+        });
 
-        $dbEntry = $database->table('password_reset_tokens')
-                            ->where('email', '=', $user->getAttribute('email'))
-                            ->where('tenancy', '=', $tenancy->getName())
-                            ->where('tenant_id', '=', $tenant->getTenantKey())
-                            ->first();
+        $sprout = new Sprout($app, new SettingsRepository());
 
-        $this->assertNotNull($dbEntry);
-        $this->assertTrue(app()->make('hash')->check($token, $dbEntry->token));
+        $override->boot($app, $sprout);
+
+        $override->setup(
+            Mockery::mock(Tenancy::class),
+            Mockery::mock(Tenant::class)
+        );
     }
 
-    #[Test]
-    public function replacesTheCacheTokenRepositoryDriver(): void
+    #[Test, DataProvider('authResolvedDataProvider')]
+    public function cleansUpAfterTheTenancy(bool $authReturn, bool $authPasswordReturn): void
     {
-        $sprout = sprout();
+        $override = new AuthOverride('auth', []);
 
-        config()->set('auth.passwords.users.driver', 'cache');
-        config()->set('auth.passwords.users.store', 'array');
-        config()->set('multitenancy.providers.eloquent.model', TenantModel::class);
+        /** @var \Illuminate\Foundation\Application&MockInterface $app */
+        $app = Mockery::mock($this->app, static function (MockInterface $mock) use ($authReturn, $authPasswordReturn) {
+            $mock->makePartial();
 
-        $sprout->registerOverride(Services::AUTH, AuthOverride::class);
+            $mock->shouldReceive('resolved')
+                 ->withArgs(['auth'])
+                 ->andReturn($authReturn)
+                 ->once();
 
-        $broker = app()->make('auth.password.broker');
+            if ($authReturn) {
+                $authManager = Mockery::mock(AuthManager::class, static function (MockInterface $mock) {
+                    $mock->shouldReceive('hasResolvedGuards')->once()->andReturn(true);
+                    $mock->shouldReceive('forgetGuards')->once();
+                });
 
-        $this->assertInstanceOf(TenantAwareCacheTokenRepository::class, $broker->getRepository());
+                $mock->shouldReceive('make')
+                     ->withArgs([AuthManager::class])
+                     ->andReturn($authManager)
+                     ->once();
+            }
 
-        $tenant  = TenantModel::factory()->createOne();
-        $tenancy = tenancy();
+            $mock->shouldReceive('resolved')
+                 ->withArgs(['auth.password'])
+                 ->andReturn($authPasswordReturn)
+                 ->atLeast()
+                 ->once();
 
-        $tenancy->setTenant($tenant);
-        sprout()->setCurrentTenancy($tenancy);
+            if ($authPasswordReturn) {
+                $passwordManager = Mockery::mock(SproutAuthPasswordBrokerManager::class, static function (MockInterface $mock) {
+                    $mock->shouldReceive('flush')->once();
+                });
 
-        $user  = User::factory()->createOne();
-        $token = $broker->createToken($user);
-        $cache = app()->make('cache')->store('array');
+                $mock->shouldReceive('make')
+                     ->withArgs(['auth.password'])
+                     ->andReturn($passwordManager)
+                     ->once();
+            }
+        });
 
-        $cacheKey = $tenancy->getName() . '.' . $tenant->getTenantResourceKey() . '.' . $user->getAttribute('email');
+        $sprout = new Sprout($app, new SettingsRepository());
 
-        $this->assertTrue($cache->has($cacheKey));
-        $this->assertSame($token, $cache->get($cacheKey)[0]);
+        $override->boot($app, $sprout);
+
+        $override->cleanup(
+            Mockery::mock(Tenancy::class),
+            Mockery::mock(Tenant::class)
+        );
     }
 
-    #[Test]
-    public function canFlushBrokers(): void
+    #[Test, DataProvider('authResolvedDataProvider')]
+    public function cleansUpAfterTheTenancyWithoutOverriddenBrokerManager(bool $authReturn, bool $authPasswordReturn): void
     {
-        $sprout = sprout();
+        $override = new AuthOverride('auth', []);
 
-        config()->set('auth.passwords.users.driver', 'database');
+        /** @var \Illuminate\Foundation\Application&MockInterface $app */
+        $app = Mockery::mock($this->app, static function (MockInterface $mock) use ($authReturn, $authPasswordReturn) {
+            $mock->makePartial();
 
-        $sprout->registerOverride(Services::AUTH, AuthOverride::class);
+            $mock->shouldReceive('resolved')
+                 ->withArgs(['auth'])
+                 ->andReturn($authReturn)
+                 ->once();
 
-        /** @var TenantAwarePasswordBrokerManager $manager */
-        $manager = app()->make('auth.password');
+            if ($authReturn) {
+                $authManager = Mockery::mock(AuthManager::class, static function (MockInterface $mock) {
+                    $mock->shouldReceive('hasResolvedGuards')->once()->andReturn(true);
+                    $mock->shouldReceive('forgetGuards')->once();
+                });
 
-        $this->assertFalse($manager->isResolved());
+                $mock->shouldReceive('make')
+                     ->withArgs([AuthManager::class])
+                     ->andReturn($authManager)
+                     ->once();
+            }
 
-        $manager->broker();
+            $mock->shouldReceive('resolved')
+                 ->withArgs(['auth.password'])
+                 ->andReturn($authPasswordReturn)
+                 ->atLeast()
+                 ->once();
 
-        $this->assertTrue($manager->isResolved());
+            if ($authPasswordReturn) {
+                $passwordManager = Mockery::mock(PasswordBrokerManager::class, static function (MockInterface $mock) {
+                    $mock->shouldNotReceive('flush');
+                });
 
-        $manager->flush();
+                $mock->shouldReceive('make')
+                     ->withArgs(['auth.password'])
+                     ->andReturn($passwordManager)
+                     ->once();
+            }
+        });
 
-        $this->assertFalse($manager->isResolved());
+        $sprout = new Sprout($app, new SettingsRepository());
+
+        $override->boot($app, $sprout);
+
+        $override->cleanup(
+            Mockery::mock(Tenancy::class),
+            Mockery::mock(Tenant::class)
+        );
     }
 
-    #[Test]
-    public function performsSetup(): void
+    public static function authPasswordResolvedDataProvider(): array
     {
-        $sprout = sprout();
-
-        $sprout->registerOverride(Services::AUTH, AuthOverride::class);
-
-        $override = $sprout->getOverrides()[AuthOverride::class];
-
-        $this->assertInstanceOf(AuthOverride::class, $override);
-
-        $tenant  = TenantModel::factory()->createOne();
-        $tenancy = $sprout->tenancies()->get();
-
-        $tenancy->setTenant($tenant);
-
-        $this->instance('auth', $this->spy(AuthManager::class, function (MockInterface $mock) {
-            $mock->shouldReceive('hasResolvedGuards')->once()->andReturn(true);
-            $mock->shouldReceive('forgetGuards')->once();
-        }));
-
-        $this->instance('auth.password', $this->spy(TenantAwarePasswordBrokerManager::class, function (MockInterface $mock) {
-            $mock->shouldReceive('flush')->once();
-        }));
-
-        $override->setup($tenancy, $tenant);
+        return [
+            'auth.password resolved'     => [true],
+            'auth.password not resolved' => [false],
+        ];
     }
 
-    #[Test]
-    public function performsCleanup(): void
+    public static function authResolvedDataProvider(): array
     {
-        $sprout = sprout();
-
-        $sprout->registerOverride(Services::AUTH, AuthOverride::class);
-
-        $override = $sprout->getOverrides()[AuthOverride::class];
-
-        $this->assertInstanceOf(AuthOverride::class, $override);
-
-        $tenant  = TenantModel::factory()->createOne();
-        $tenancy = $sprout->tenancies()->get();
-
-        $tenancy->setTenant($tenant);
-
-        $this->instance('auth', $this->spy(AuthManager::class, function (MockInterface $mock) {
-            $mock->shouldReceive('hasResolvedGuards')->once()->andReturn(true);
-            $mock->shouldReceive('forgetGuards')->once();
-        }));
-
-        $this->instance('auth.password', $this->spy(TenantAwarePasswordBrokerManager::class, function (MockInterface $mock) {
-            $mock->shouldReceive('flush')->once();
-        }));
-
-        $override->cleanup($tenancy, $tenant);
+        return [
+            'auth resolved auth.password not resolved'     => [true, false],
+            'auth resolved auth.password resolved'         => [true, true],
+            'auth not resolved auth.password not resolved' => [false, false],
+            'auth not resolved auth.password resolved'     => [false, true],
+        ];
     }
 }

@@ -4,12 +4,12 @@ declare(strict_types=1);
 namespace Sprout;
 
 use Illuminate\Contracts\Foundation\Application;
-use Sprout\Concerns\HandlesServiceOverrides;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 use Sprout\Managers\IdentityResolverManager;
-use Sprout\Managers\TenantProviderManager;
+use Sprout\Managers\ServiceOverrideManager;
 use Sprout\Managers\TenancyManager;
+use Sprout\Managers\TenantProviderManager;
 use Sprout\Support\ResolutionHook;
 use Sprout\Support\SettingsRepository;
 
@@ -22,8 +22,6 @@ use Sprout\Support\SettingsRepository;
  */
 final class Sprout
 {
-    use HandlesServiceOverrides;
-
     /**
      * @var \Illuminate\Contracts\Foundation\Application
      */
@@ -107,6 +105,10 @@ final class Sprout
     {
         if ($this->getCurrentTenancy() !== $tenancy) {
             $this->tenancies[] = $tenancy;
+
+            // This is a bit of a cheat to enable the refreshing of the Tenancy
+            $this->app->forgetExtenders(Tenancy::class);
+            $this->app->extend(Tenancy::class, fn(?Tenancy $tenancy) => $tenancy);
         }
 
         $this->markAsInContext();
@@ -183,6 +185,18 @@ final class Sprout
     }
 
     /**
+     * Get the service override manager
+     *
+     * @return \Sprout\Managers\ServiceOverrideManager
+     *
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     */
+    public function overrides(): ServiceOverrideManager
+    {
+        return $this->app->make(ServiceOverrideManager::class);
+    }
+
+    /**
      * Check if a resolution hook is enabled
      *
      * @param \Sprout\Support\ResolutionHook $hook
@@ -194,7 +208,7 @@ final class Sprout
     public function supportsHook(ResolutionHook $hook): bool
     {
         /** @var array<ResolutionHook> $enabledHooks */
-        $enabledHooks = $this->config('hooks', []);
+        $enabledHooks = $this->config('core.hooks', []);
 
         return in_array($hook, $enabledHooks, true);
     }
