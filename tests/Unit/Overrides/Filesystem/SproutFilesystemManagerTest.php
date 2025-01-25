@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Tests\Unit\Overrides;
+namespace Sprout\Tests\Unit\Overrides\Filesystem;
 
 use Illuminate\Config\Repository;
 use Illuminate\Contracts\Filesystem\Filesystem;

@@ -74,7 +74,6 @@ final readonly class SproutFilesystemDriverCreator
         // If we're not within a multitenanted context, we need to error
         // out, as this driver shouldn't be hit without one
         if (! $this->sprout->withinContext()) {
-            // TODO: Create a better exception
             throw TenancyMissingException::make();
         }
 
@@ -96,7 +95,7 @@ final readonly class SproutFilesystemDriverCreator
 
         // If the tenant isn't configured for resources, this is another issue
         if (! ($tenant instanceof TenantHasResources)) {
-            throw MisconfigurationException::misconfigured('tenant', $tenant::class, 'resources');
+            throw MisconfigurationException::misconfigured('tenant', $tenancy->getName(), 'resources');
         }
 
         // Get a tenant-specific version of the store config
@@ -159,7 +158,7 @@ final readonly class SproutFilesystemDriverCreator
      */
     protected function getTrueDiskConfig(): array
     {
-        if (is_array($this->config['disk'])) {
+        if (isset($this->config['disk']) && is_array($this->config['disk'])) {
             $diskConfig = $this->config['disk'];
         } else {
             $config = $this->app->make('config');
