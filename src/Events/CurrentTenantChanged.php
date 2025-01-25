@@ -25,6 +25,8 @@ use Sprout\Contracts\Tenant;
  * @method static void dispatchUnless(bool $condition, Tenancy $tenancy, Tenant|null $previous, Tenant|null $current)
  *
  * @package Core
+ *
+ * @codeCoverageIgnore
  */
 final readonly class CurrentTenantChanged
 {

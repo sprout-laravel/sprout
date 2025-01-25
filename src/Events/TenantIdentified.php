@@ -15,6 +15,8 @@ namespace Sprout\Events;
  * @extends \Sprout\Events\TenantFound<TenantClass>
  *
  * @package Core
+ *
+ * @codeCoverageIgnore
  */
 final readonly class TenantIdentified extends TenantFound
 {

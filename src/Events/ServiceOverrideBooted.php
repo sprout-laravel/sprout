@@ -15,6 +15,8 @@ use Sprout\Contracts\ServiceOverride as ServiceOverrideClass;
  * @extends \Sprout\Events\ServiceOverrideEvent<OverrideClass>
  *
  * @package Overrides
+ *
+ * @codeCoverageIgnore
  */
 final class ServiceOverrideBooted extends ServiceOverrideEvent
 {

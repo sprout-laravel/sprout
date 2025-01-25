@@ -20,6 +20,8 @@ use Sprout\Contracts\ServiceOverride;
  * @method static self dispatchUnless(bool $boolean, string $service, ServiceOverride $override)
  *
  * @package Overrides
+ *
+ * @codeCoverageIgnore
  */
 abstract class ServiceOverrideEvent
 {

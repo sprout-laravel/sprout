@@ -23,6 +23,8 @@ use Sprout\Contracts\Tenant;
  * @method static void dispatch(Tenant $tenant, Tenancy $tenancy)
  * @method static void dispatchIf(bool $condition, Tenant $tenant, Tenancy $tenancy)
  * @method static void dispatchUnless(bool $condition, Tenant $tenant, Tenancy $tenancy)
+ *
+ * @codeCoverageIgnore
  */
 abstract readonly class TenantFound
 {
