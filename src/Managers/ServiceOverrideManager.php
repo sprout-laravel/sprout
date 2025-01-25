@@ -141,6 +141,8 @@ final class ServiceOverrideManager
      *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
      * @throws \Sprout\Exceptions\TenancyMissingException
+     *
+     * @codeCoverageIgnore
      */
     public function hasTenancyBeenSetup(?Tenancy $tenancy = null): bool
     {
