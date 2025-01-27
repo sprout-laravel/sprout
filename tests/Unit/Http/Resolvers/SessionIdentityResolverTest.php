@@ -12,6 +12,7 @@ use Mockery;
 use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\Test;
 use Sprout\Contracts\Tenancy;
+use Sprout\Contracts\Tenant;
 use Sprout\Exceptions\CompatibilityException;
 use Sprout\Http\Resolvers\SessionIdentityResolver;
 use Sprout\Sprout;
@@ -25,6 +26,15 @@ class SessionIdentityResolverTest extends UnitTestCase
     {
         tap($app['config'], static function ($config) {
             $config->set('multitenancy.defaults.resolver', 'session');
+        });
+    }
+
+    protected function defineRoutes($router)
+    {
+        $router->tenanted(function (Router $router) {
+            $router->get('/test-route', static function () {
+                return 'test';
+            })->name('test-route');
         });
     }
 
@@ -209,5 +219,31 @@ class SessionIdentityResolverTest extends UnitTestCase
         $this->assertFalse($resolver->canResolve($request, $tenancy, ResolutionHook::Booting));
         $this->assertFalse($resolver->canResolve($request, $tenancy, ResolutionHook::Routing));
         $this->assertFalse($resolver->canResolve($request, $tenancy, ResolutionHook::Middleware));
+    }
+
+    #[Test]
+    public function canGenerateRouteUrls(): void
+    {
+        $resolver = new SessionIdentityResolver('session');
+
+        $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) {
+            $mock->shouldNotReceive('getName');
+        });
+
+        $tenant1 = Mockery::mock(Tenant::class, static function (MockInterface $mock) {
+            $mock->shouldNotReceive('getTenantIdentifier');
+        });
+
+        $tenant2 = Mockery::mock(Tenant::class, static function (MockInterface $mock) {
+            $mock->shouldNotReceive('getTenantIdentifier');
+        });
+
+        $tenant3 = Mockery::mock(Tenant::class, static function (MockInterface $mock) {
+            $mock->shouldNotReceive('getTenantIdentifier');
+        });
+
+        $this->assertSame('/test-route', $resolver->route('test-route', $tenancy, $tenant1, absolute: false));
+        $this->assertSame('/test-route', $resolver->route('test-route', $tenancy, $tenant2, absolute: false));
+        $this->assertSame('/test-route', $resolver->route('test-route', $tenancy, $tenant3, absolute: false));
     }
 }

@@ -30,6 +30,15 @@ class CookieIdentityResolverTest extends UnitTestCase
         });
     }
 
+    protected function defineRoutes($router)
+    {
+        $router->tenanted(function (Router $router) {
+            $router->get('/test-route', static function () {
+                return 'test';
+            })->name('test-route');
+        });
+    }
+
     protected function mockApp(): Application&MockInterface
     {
         return Mockery::mock(Application::class, static function ($mock) {
@@ -219,5 +228,31 @@ class CookieIdentityResolverTest extends UnitTestCase
         $this->assertFalse($resolver->canResolve($request, $tenancy, ResolutionHook::Booting));
         $this->assertTrue($resolver->canResolve($request, $tenancy, ResolutionHook::Routing));
         $this->assertFalse($resolver->canResolve($request, $tenancy, ResolutionHook::Middleware));
+    }
+
+    #[Test]
+    public function canGenerateRouteUrls(): void
+    {
+        $resolver = new CookieIdentityResolver('cookie');
+
+        $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) {
+            $mock->shouldNotReceive('getName');
+        });
+
+        $tenant1 = Mockery::mock(Tenant::class, static function (MockInterface $mock) {
+            $mock->shouldNotReceive('getTenantIdentifier');
+        });
+
+        $tenant2 = Mockery::mock(Tenant::class, static function (MockInterface $mock) {
+            $mock->shouldNotReceive('getTenantIdentifier');
+        });
+
+        $tenant3 = Mockery::mock(Tenant::class, static function (MockInterface $mock) {
+            $mock->shouldNotReceive('getTenantIdentifier');
+        });
+
+        $this->assertSame('/test-route', $resolver->route('test-route', $tenancy, $tenant1, absolute: false));
+        $this->assertSame('/test-route', $resolver->route('test-route', $tenancy, $tenant2, absolute: false));
+        $this->assertSame('/test-route', $resolver->route('test-route', $tenancy, $tenant3, absolute: false));
     }
 }
