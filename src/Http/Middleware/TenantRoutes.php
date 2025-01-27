@@ -5,6 +5,7 @@ namespace Sprout\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Sprout\Exceptions\NoTenantFoundException;
 use Sprout\Sprout;
 use Sprout\Support\ResolutionHelper;
 use Sprout\Support\ResolutionHook;
@@ -56,9 +57,9 @@ final class TenantRoutes
      */
     public function handle(Request $request, Closure $next, string ...$options): Response
     {
-        if ($this->sprout->supportsHook(ResolutionHook::Middleware)) {
-            [$resolverName, $tenancyName] = ResolutionHelper::parseOptions($options);
+        [$resolverName, $tenancyName] = ResolutionHelper::parseOptions($options);
 
+        if ($this->sprout->supportsHook(ResolutionHook::Middleware)) {
             ResolutionHelper::handleResolution(
                 $request,
                 ResolutionHook::Middleware,
@@ -66,6 +67,10 @@ final class TenantRoutes
                 $resolverName,
                 $tenancyName,
             );
+        }
+
+        if (! $this->sprout->hasCurrentTenancy() || ! $this->sprout->getCurrentTenancy()?->check()) {
+            throw NoTenantFoundException::make($resolverName, $tenancyName);
         }
 
         return $next($request);
