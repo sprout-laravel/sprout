@@ -23,6 +23,7 @@ class SproutTest extends UnitTestCase
     {
         tap($app['config'], static function ($config) {
             $config->set('multitenancy.tenancies.tenants.model', TenantModel::class);
+            $config->set('multitenancy.resolvers.subdomain.domain', 'localhost');
         });
     }
 
@@ -38,6 +39,29 @@ class SproutTest extends UnitTestCase
                 'provider' => 'backup',
             ]);
         });
+    }
+
+    protected function defineRoutes($router): void
+    {
+        $router->tenanted(function ($router) {
+            $router->get('cookie', fn () => 'Test')->name('test.cookie');
+        }, 'cookie');
+
+        $router->tenanted(function ($router) {
+            $router->get('header', fn () => 'Test')->name('test.header');
+        }, 'header');
+
+        $router->tenanted(function ($router) {
+            $router->get('path', fn () => 'Test')->name('test.path');
+        }, 'path');
+
+        $router->tenanted(function ($router) {
+            $router->get('session', fn () => 'Test')->name('test.session');
+        }, 'session');
+
+        $router->tenanted(function ($router) {
+            $router->get('subdomain', fn () => 'Test')->name('test.subdomain');
+        }, 'subdomain');
     }
 
     #[Test]
@@ -218,5 +242,20 @@ class SproutTest extends UnitTestCase
         $this->assertFalse($sprout->isCurrentHook(ResolutionHook::Booting));
         $this->assertFalse($sprout->isCurrentHook(ResolutionHook::Routing));
         $this->assertFalse($sprout->isCurrentHook(ResolutionHook::Middleware));
+    }
+
+    #[Test]
+    public function canGenerateUrlsForTenantedRoutes(): void
+    {
+        $tenant = TenantModel::factory()->createOne();
+
+        $sprout = $this->app->make(Sprout::class);
+
+        $this->assertSame('http://localhost/cookie', $sprout->route('test.cookie', $tenant, 'cookie'));
+        $this->assertSame('http://localhost/header', $sprout->route('test.header', $tenant, 'header', 'tenants'));
+        $this->assertSame('http://localhost/' . $tenant->getTenantIdentifier() . '/path', $sprout->route('test.path', $tenant, 'path'));
+        $this->assertSame('http://localhost/session', $sprout->route('test.session', $tenant, 'session'));
+        $this->assertSame('http://' . $tenant->getTenantIdentifier() . '.localhost/subdomain', $sprout->route('test.subdomain', $tenant, 'subdomain'));
+        $this->assertSame('http://' . $tenant->getTenantIdentifier() . '.localhost/subdomain', $sprout->route('test.subdomain', $tenant));
     }
 }
