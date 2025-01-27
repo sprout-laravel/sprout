@@ -35,6 +35,11 @@ final class ServiceOverrideManager
     protected Application $app;
 
     /**
+     * @var \Sprout\Sprout
+     */
+    private Sprout $sprout;
+
+    /**
      * @var array<string, \Sprout\Contracts\ServiceOverride>
      */
     protected array $overrides = [];
@@ -64,9 +69,10 @@ final class ServiceOverrideManager
      *
      * @param \Illuminate\Contracts\Foundation\Application $app
      */
-    public function __construct(Application $app)
+    public function __construct(Application $app, Sprout $sprout)
     {
         $this->app = $app;
+        $this->sprout = $sprout;
     }
 
     /**
@@ -369,6 +375,14 @@ final class ServiceOverrideManager
         // Create a new instance of the service override with the service name
         // and config, as we know the constructor signature
         $override = $this->app->make($driver, compact('service', 'config'));
+
+        if (method_exists($override, 'setApp')) {
+            $override->setApp($this->app);
+        }
+
+        if (method_exists($override, 'setSprout')) {
+            $override->setSprout($this->sprout);
+        }
 
         // Store the override
         $this->overrides[$service] = $override;
