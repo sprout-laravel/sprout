@@ -70,7 +70,18 @@ final class TenantRoutes
         }
 
         if (! $this->sprout->hasCurrentTenancy() || ! $this->sprout->getCurrentTenancy()?->check()) {
-            throw NoTenantFoundException::make($resolverName, $tenancyName);
+            $defaultResolver = config('multitenancy.defaults.resolver');
+            $defaultTenancy  = config('multitenancy.defaults.tenancy');
+
+            /**
+             * @var string $defaultResolver
+             * @var string $defaultTenancy
+             */
+
+            throw NoTenantFoundException::make(
+                $resolverName ?? $defaultResolver,
+                $tenancyName ?? $defaultTenancy
+            );
         }
 
         return $next($request);
