@@ -8,6 +8,7 @@ use Illuminate\Routing\Route;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Sprout\Http\Middleware\TenantRoutes;
+use Sprout\Sprout;
 use Sprout\Support\ResolutionHelper;
 use Sprout\Support\ResolutionHook;
 
@@ -21,6 +22,16 @@ use Sprout\Support\ResolutionHook;
  */
 final class IdentifyTenantOnRouting
 {
+    /**
+     * @var \Sprout\Sprout
+     */
+    private Sprout $sprout;
+
+    public function __construct(Sprout $sprout)
+    {
+        $this->sprout = $sprout;
+    }
+
     /**
      * Handle the event
      *
@@ -43,6 +54,7 @@ final class IdentifyTenantOnRouting
         ResolutionHelper::handleResolution(
             $event->request,
             ResolutionHook::Routing,
+            $this->sprout,
             $resolverName,
             $tenancyName,
             false

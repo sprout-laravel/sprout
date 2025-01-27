@@ -43,6 +43,11 @@ final class Sprout
     private SettingsRepository $settings;
 
     /**
+     * @var \Sprout\Support\ResolutionHook|null
+     */
+    private ?ResolutionHook $currentHook;
+
+    /**
      * Create a new instance
      *
      * @param \Illuminate\Contracts\Foundation\Application $app
@@ -295,5 +300,41 @@ final class Sprout
         /** @var \Sprout\Contracts\IdentityResolver $resolverInstance */
 
         return $resolverInstance->route($name, $tenancyInstance, $tenant, $parameters, $absolute);
+    }
+
+    /**
+     * Set the current resolution hook
+     *
+     * @param \Sprout\Support\ResolutionHook|null $hook
+     *
+     * @return static
+     */
+    public function setCurrentHook(?ResolutionHook $hook): static
+    {
+        $this->currentHook = $hook;
+
+        return $this;
+    }
+
+    /**
+     * Get the current resolution hook
+     *
+     * @return \Sprout\Support\ResolutionHook|null
+     */
+    public function getCurrentHook(): ?ResolutionHook
+    {
+        return $this->currentHook;
+    }
+
+    /**
+     * Check if the current resolution hook is the provided
+     *
+     * @param \Sprout\Support\ResolutionHook|null $hook
+     *
+     * @return bool
+     */
+    public function isCurrentHook(?ResolutionHook $hook): bool
+    {
+        return $this->currentHook === $hook;
     }
 }

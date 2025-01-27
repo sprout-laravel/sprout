@@ -43,10 +43,10 @@ class ResolutionHelper
      * @throws \Sprout\Exceptions\MisconfigurationException
      * @throws \Sprout\Exceptions\NoTenantFoundException
      */
-    public static function handleResolution(Request $request, ResolutionHook $hook, ?string $resolverName = null, ?string $tenancyName = null, bool $throw = true): bool
+    public static function handleResolution(Request $request, ResolutionHook $hook, Sprout $sprout, ?string $resolverName = null, ?string $tenancyName = null, bool $throw = true): bool
     {
-        /** @var \Sprout\Sprout $sprout */
-        $sprout = app(Sprout::class);
+        // Set the current hook
+        $sprout->setCurrentHook($hook);
 
         // If the resolution hook is disabled, throw an exception
         if (! $sprout->supportsHook($hook)) {

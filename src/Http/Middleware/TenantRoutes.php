@@ -62,6 +62,7 @@ final class TenantRoutes
             ResolutionHelper::handleResolution(
                 $request,
                 ResolutionHook::Middleware,
+                $this->sprout,
                 $resolverName,
                 $tenancyName,
             );
