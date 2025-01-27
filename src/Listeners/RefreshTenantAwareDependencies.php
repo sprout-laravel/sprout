@@ -4,8 +4,6 @@ declare(strict_types=1);
 namespace Sprout\Listeners;
 
 use Illuminate\Foundation\Application;
-use Illuminate\Support\Facades\Context;
-use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 use Sprout\Events\CurrentTenantChanged;
 
@@ -41,7 +39,7 @@ final class RefreshTenantAwareDependencies
     {
         if ($event->current !== null) {
             $this->app->forgetExtenders(Tenant::class);
-            $this->app->extend(Tenant::class, fn(?Tenant $tenant) => $tenant);
+            $this->app->extend(Tenant::class, fn (?Tenant $tenant) => $tenant);
         }
     }
 }

@@ -4,183 +4,309 @@ declare(strict_types=1);
 namespace Sprout\Tests\Unit\Http\Resolvers;
 
 use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Http\Request;
+use Illuminate\Routing\Route;
 use Illuminate\Routing\Router;
-use Illuminate\Support\Facades\Route;
-use Orchestra\Testbench\Attributes\DefineEnvironment;
-use Orchestra\Testbench\Attributes\DefineRoute;
+use Illuminate\Routing\RouteRegistrar;
+use Illuminate\Support\Facades\URL;
+use Mockery;
+use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\Test;
+use Sprout\Contracts\Tenancy;
+use Sprout\Contracts\Tenant;
 use Sprout\Http\Resolvers\PathIdentityResolver;
+use Sprout\Sprout;
 use Sprout\Support\ResolutionHook;
+use Sprout\Support\SettingsRepository;
 use Sprout\Tests\Unit\UnitTestCase;
-use Workbench\App\Models\TenantModel;
-use function Sprout\resolver;
-use function Sprout\sprout;
-use function Sprout\tenancy;
 
 class PathIdentityResolverTest extends UnitTestCase
 {
     protected function defineEnvironment($app): void
     {
         tap($app['config'], static function ($config) {
-            $config->set('multitenancy.providers.tenants.model', TenantModel::class);
             $config->set('multitenancy.defaults.resolver', 'path');
         });
     }
 
-    protected function defineRoutes($router): void
+    protected function defineRoutes($router)
     {
-        $router->tenanted(function () {
-            Route::get('/tenant', function () {
-            })->name('tenant-route');
-        }, 'path');
-    }
-
-    protected function withCustomSegment(Application $app): void
-    {
-        tap($app['config'], static function ($config) {
-            $config->set('multitenancy.resolvers.path.segment', 2);
+        $router->tenanted(function (Router $router) {
+            $router->get('/test-route', static function () {
+                return 'test';
+            })->name('test-route');
         });
     }
 
-    protected function withCustomParameterPattern(Application $app): void
+    protected function mockApp(): Application&MockInterface
     {
-        tap($app['config'], static function ($config) {
-            $config->set('multitenancy.resolvers.path.pattern', '.*');
+        return Mockery::mock(Application::class, static function ($mock) {
+
         });
     }
 
-    protected function withCustomParameterName(Application $app): void
+    protected function getSprout(Application $app): Sprout
     {
-        tap($app['config'], static function ($config) {
-            $config->set('multitenancy.resolvers.path.parameter', 'custom_parameter_name');
-        });
-    }
-
-    protected function withCustomParameterNamePattern(Application $app): void
-    {
-        tap($app['config'], static function ($config) {
-            $config->set('multitenancy.resolvers.path.parameter', '{resolver}_{tenancy}');
-        });
-    }
-
-    protected function withCustomPathNamePattern(Application $app): void
-    {
-        tap($app['config'], static function ($config) {
-            $config->set('multitenancy.resolvers.path.path', '{Tenancy}-{tenancy}-{Resolver}-{resolver}');
-        });
-    }
-
-    protected function withTenantedRoute(Router $router): void
-    {
-        Route::tenanted(static function () {
-            Route::get('/tenant', function () {
-            })->name('tenant-route');
-        }, 'path');
+        return new Sprout($app, new SettingsRepository());
     }
 
     #[Test]
-    public function isRegisteredAndCanBeAccessed(): void
+    public function providesAccessToExpectedValues(): void
     {
-        $resolver = resolver('path');
+        $resolver = new PathIdentityResolver(
+            'path',
+            6,
+            '.*',
+            'yeah-boi-{tenancy}',
+            [ResolutionHook::Middleware]
+        );
 
-        $this->assertInstanceOf(PathIdentityResolver::class, $resolver);
-        $this->assertSame('{tenancy}_{resolver}', $resolver->getParameter());
-        $this->assertSame(1, $resolver->getSegment());
-        $this->assertNull($resolver->getPattern());
-        $this->assertSame([ResolutionHook::Routing], $resolver->getHooks());
-    }
-
-    #[Test]
-    public function replacesPlaceholdersInPathName(): void
-    {
-        $resolver = resolver('path');
-        $tenancy  = tenancy();
-
-        $this->assertInstanceOf(PathIdentityResolver::class, $resolver);
-        $this->assertSame('{tenancy}_{resolver}', $resolver->getParameter());
-        $this->assertSame(1, $resolver->getSegment());
-        $this->assertSame($tenancy->getName() . '_' . $resolver->getName(), $resolver->getRouteParameterName($tenancy));
-        $this->assertSame('{' . $tenancy->getName() . '_' . $resolver->getName() . '}', $resolver->getRoutePrefix($tenancy));
-        $this->assertNull($resolver->getPattern());
-        $this->assertSame([ResolutionHook::Routing], $resolver->getHooks());
-    }
-
-    #[Test, DefineEnvironment('withCustomSegment')]
-    public function acceptsCustomSegment(): void
-    {
-        $resolver = resolver('path');
-
-        $this->assertInstanceOf(PathIdentityResolver::class, $resolver);
-        $this->assertSame(2, $resolver->getSegment());
-        $this->assertSame('{tenancy}_{resolver}', $resolver->getParameter());
-        $this->assertNull($resolver->getPattern());
-        $this->assertSame([ResolutionHook::Routing], $resolver->getHooks());
-    }
-
-    #[Test, DefineEnvironment('withCustomParameterPattern')]
-    public function acceptsCustomParameterPattern(): void
-    {
-        $resolver = resolver('path');
-
-        $this->assertInstanceOf(PathIdentityResolver::class, $resolver);
-        $this->assertSame('{tenancy}_{resolver}', $resolver->getParameter());
-        $this->assertSame(1, $resolver->getSegment());
+        $this->assertSame('path', $resolver->getName());
+        $this->assertSame(6, $resolver->getSegment());
         $this->assertSame('.*', $resolver->getPattern());
-        $this->assertSame([ResolutionHook::Routing], $resolver->getHooks());
-    }
-
-    #[Test, DefineEnvironment('withCustomParameterName')]
-    public function acceptsCustomPathName(): void
-    {
-        $resolver = resolver('path');
-
-        $this->assertInstanceOf(PathIdentityResolver::class, $resolver);
-        $this->assertNotSame('{tenancy}_{resolver}', $resolver->getParameter());
-        $this->assertSame('custom_parameter_name', $resolver->getParameter());
-        $this->assertSame([ResolutionHook::Routing], $resolver->getHooks());
-    }
-
-    #[Test, DefineEnvironment('withCustomParameterNamePattern')]
-    public function replacesAllPlaceholdersInPathName(): void
-    {
-        $resolver = resolver('path');
-        $tenancy  = tenancy();
-
-        $this->assertInstanceOf(PathIdentityResolver::class, $resolver);
-        $this->assertSame('{resolver}_{tenancy}', $resolver->getParameter());
-        $this->assertSame(1, $resolver->getSegment());
-        $this->assertSame($resolver->getName() . '_' . $tenancy->getName(), $resolver->getRouteParameterName($tenancy));
-        $this->assertNull($resolver->getPattern());
-        $this->assertSame([ResolutionHook::Routing], $resolver->getHooks());
-    }
-
-    #[Test, DefineEnvironment('withCustomParameterPattern'), DefineRoute('withTenantedRoute')]
-    public function setsUpRouteProperly(): void
-    {
-        $resolver = resolver('path');
-        $tenancy  = tenancy();
-        $routes   = app(Router::class)->getRoutes();
-
+        $this->assertSame('yeah-boi-{tenancy}', $resolver->getParameter());
+        $this->assertSame([ResolutionHook::Middleware], $resolver->getHooks());
         $this->assertTrue($resolver->hasPattern());
-        $this->assertTrue($routes->hasNamedRoute('tenant-route'));
-
-        $route = $routes->getByName('tenant-route');
-
-        $this->assertContains($tenancy->getName() . '_' . $resolver->getName(), $route->parameterNames());
-        $this->assertArrayHasKey($tenancy->getName() . '_' . $resolver->getName(), $route->wheres);
-        $this->assertSame('.*', $route->wheres[$tenancy->getName() . '_' . $resolver->getName()]);
     }
 
     #[Test]
-    public function canGenerateRoutesForATenant(): void
+    public function hasSensibleDefaults(): void
     {
-        $resolver = resolver('path');
-        $tenancy  = tenancy();
-        $tenant   = TenantModel::factory()->createOne();
+        $resolver = new PathIdentityResolver('path');
 
-        $this->assertSame('http://localhost/' . $tenant->getTenantIdentifier() . '/tenant', $resolver->route('tenant-route', $tenancy, $tenant));
-        $this->assertSame('/' . $tenant->getTenantIdentifier() . '/tenant', $resolver->route('tenant-route', $tenancy, $tenant, absolute: false));
-        $this->assertSame('http://localhost/' . $tenant->getTenantIdentifier() . '/tenant', sprout()->route('tenant-route', $tenant, $resolver->getName(), $tenancy->getName()));
-        $this->assertSame('http://localhost/' . $tenant->getTenantIdentifier() . '/tenant', sprout()->route('tenant-route', $tenant));
+        $this->assertSame('path', $resolver->getName());
+        $this->assertSame(1, $resolver->getSegment());
+        $this->assertNull($resolver->getPattern());
+        $this->assertSame('{tenancy}_{resolver}', $resolver->getParameter());
+        $this->assertSame([ResolutionHook::Routing], $resolver->getHooks());
+        $this->assertFalse($resolver->hasPattern());
+    }
+
+    #[Test]
+    public function canGenerateTheRoutePrefixForATenancy(): void
+    {
+        $resolver = new PathIdentityResolver('path');
+
+        $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) {
+            $mock->shouldReceive('getName')->andReturn('my-tenancy')->times(3);
+            $mock->shouldReceive('check')->andReturn(true)->once();
+            $mock->shouldReceive('identifier')->andReturn('my-identifier');
+        });
+
+        $this->assertSame('{my_tenancy_path}', $resolver->getRoutePrefix($tenancy));
+        $this->assertSame('my-identifier', $resolver->getTenantRoutePrefix($tenancy));
+    }
+
+    #[Test]
+    public function createsRouteGroup(): void
+    {
+        $resolver = new PathIdentityResolver('path');
+
+        $tenancy = Mockery::mock(Tenancy::class, static function ($mock) {
+            $mock->shouldReceive('getName')->andReturn('my-tenancy')->twice();
+        });
+
+        $routes = static fn () => false;
+
+        /** @var \Illuminate\Routing\Router&\Mockery\MockInterface $router */
+        $router = Mockery::mock(Router::class, static function (MockInterface $mock) use ($routes) {
+            $mock->shouldReceive('middleware')
+                 ->with(['sprout.tenanted:path,my-tenancy'])
+                 ->andReturn(
+                     Mockery::mock(RouteRegistrar::class, static function (MockInterface $mock) use ($routes) {
+                         $mock->shouldReceive('prefix')
+                              ->with('{my_tenancy_path}')
+                              ->andReturnSelf()
+                              ->once();
+
+                         $mock->shouldReceive('group')
+                              ->with($routes)
+                              ->andReturnSelf()
+                              ->once();
+
+                         $mock->shouldNotReceive('where');
+                     })
+                 )
+                 ->once();
+        });
+
+        $resolver->routes($router, $routes, $tenancy);
+    }
+
+    #[Test]
+    public function createsRouteGroupWithPattern(): void
+    {
+        $resolver = new PathIdentityResolver('path', pattern: '.*');
+
+        $tenancy = Mockery::mock(Tenancy::class, static function ($mock) {
+            $mock->shouldReceive('getName')->andReturn('my-tenancy')->times(3);
+        });
+
+        $routes = static fn () => false;
+
+        /** @var \Illuminate\Routing\Router&\Mockery\MockInterface $router */
+        $router = Mockery::mock(Router::class, static function (MockInterface $mock) use ($routes) {
+            $mock->shouldReceive('middleware')
+                 ->with(['sprout.tenanted:path,my-tenancy'])
+                 ->andReturn(
+                     Mockery::mock(RouteRegistrar::class, static function (MockInterface $mock) use ($routes) {
+                         $mock->shouldReceive('prefix')
+                              ->with('{my_tenancy_path}')
+                              ->andReturnSelf()
+                              ->once();
+
+                         $mock->shouldReceive('group')
+                              ->with($routes)
+                              ->andReturnSelf()
+                              ->once();
+
+                         $mock->shouldReceive('where')
+                              ->with(['my_tenancy_path' => '.*'])
+                              ->andReturnSelf()
+                              ->once();
+                     })
+                 )
+                 ->once();
+        });
+
+        $resolver->routes($router, $routes, $tenancy);
+    }
+
+    #[Test]
+    public function performsSetUp(): void
+    {
+        $resolver = new PathIdentityResolver('path');
+
+        $tenant = Mockery::mock(Tenant::class, static function (MockInterface $mock) {
+            $mock->shouldReceive('getTenantIdentifier')->andReturn('my-identifier')->once();
+        });
+
+        /** @var \Sprout\Contracts\Tenancy&MockInterface $tenancy */
+        $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) {
+            $mock->shouldReceive('getName')->andReturn('my-tenancy')->times(3);
+            $mock->shouldReceive('check')->andReturn(true)->once();
+            $mock->shouldReceive('identifier')->andReturn('my-identifier')->once();
+        });
+
+        $app = $this->mockApp();
+
+        $sprout = $this->getSprout($app);
+
+        $resolver->setApp($app)->setSprout($sprout);
+
+        URL::shouldReceive('defaults')
+           ->with(['my_tenancy_path' => 'my-identifier'])
+           ->once();
+
+        $resolver->setup($tenancy, $tenant);
+
+        $this->assertSame('my-identifier', $sprout->settings()->getUrlPath());
+    }
+
+    #[Test]
+    public function performsSetUpWithoutSettingsIfNoTenant(): void
+    {
+        $resolver = new PathIdentityResolver('path');
+
+        /** @var \Sprout\Contracts\Tenancy&MockInterface $tenancy */
+        $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) {
+            $mock->shouldReceive('getName')->andReturn('my-tenancy')->once();
+        });
+
+        $app = $this->mockApp();
+
+        $sprout = $this->getSprout($app);
+
+        $resolver->setApp($app)->setSprout($sprout);
+
+        URL::shouldReceive('defaults')
+           ->with(['my_tenancy_path' => null])
+           ->once();
+
+        $resolver->setup($tenancy, null);
+
+        $this->assertNull($sprout->settings()->getUrlPath());
+    }
+
+    #[Test]
+    public function canResolveFromRequest(): void
+    {
+        $resolver = new PathIdentityResolver('path', 11);
+
+        /** @var \Sprout\Contracts\Tenancy&MockInterface $tenancy */
+        $tenancy = Mockery::mock(Tenancy::class);
+
+        $request = Mockery::mock(Request::class, static function (MockInterface $mock) {
+            $mock->shouldReceive('segment')
+                 ->with(11)
+                 ->andReturn('my-identifier')
+                 ->once();
+        });
+
+        $this->assertSame('my-identifier', $resolver->resolveFromRequest($request, $tenancy));
+    }
+
+    #[Test]
+    public function canResolveFromRoute(): void
+    {
+        $resolver = new PathIdentityResolver('path', 11);
+
+        /** @var \Sprout\Contracts\Tenancy&MockInterface $tenancy */
+        $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) {
+            $mock->shouldReceive('getName')->andReturn('my-tenancy')->once();
+        });
+
+        $request = Mockery::mock(Request::class);
+
+        $route = Mockery::mock(Route::class, static function (MockInterface $mock) {
+            $mock->shouldReceive('parameter')
+                 ->with('my_tenancy_path')
+                 ->andReturn('my-identifier')
+                 ->once();
+        });
+
+        $this->assertSame('my-identifier', $resolver->resolveFromRoute($route, $tenancy, $request));
+    }
+
+    #[Test]
+    public function reportsWhenItCanResolveCorrectly(): void
+    {
+        $resolver = new PathIdentityResolver('path', hooks: [ResolutionHook::Routing]);
+
+        $request = Mockery::mock(Request::class);
+
+        $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) {
+            $mock->shouldReceive('wasResolved')->andReturnFalse()->times(3);
+        });
+
+        $this->assertFalse($resolver->canResolve($request, $tenancy, ResolutionHook::Booting));
+        $this->assertTrue($resolver->canResolve($request, $tenancy, ResolutionHook::Routing));
+        $this->assertFalse($resolver->canResolve($request, $tenancy, ResolutionHook::Middleware));
+    }
+
+    #[Test]
+    public function canGenerateRouteUrls(): void
+    {
+        $resolver = new PathIdentityResolver('path');
+
+        $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) {
+            $mock->shouldReceive('getName')->andReturn('tenants')->times(3);
+        });
+
+        $tenant1 = Mockery::mock(Tenant::class, static function (MockInterface $mock) {
+            $mock->shouldReceive('getTenantIdentifier')->andReturn('my-identifier-1')->once();
+        });
+
+        $tenant2 = Mockery::mock(Tenant::class, static function (MockInterface $mock) {
+            $mock->shouldReceive('getTenantIdentifier')->andReturn('my-identifier-2')->once();
+        });
+
+        $tenant3 = Mockery::mock(Tenant::class, static function (MockInterface $mock) {
+            $mock->shouldReceive('getTenantIdentifier')->andReturn('my-identifier-3')->once();
+        });
+
+        $this->assertSame('/my-identifier-1/test-route', $resolver->route('test-route', $tenancy, $tenant1, absolute: false));
+        $this->assertSame('/my-identifier-2/test-route', $resolver->route('test-route', $tenancy, $tenant2, absolute: false));
+        $this->assertSame('/my-identifier-3/test-route', $resolver->route('test-route', $tenancy, $tenant3, absolute: false));
     }
 }

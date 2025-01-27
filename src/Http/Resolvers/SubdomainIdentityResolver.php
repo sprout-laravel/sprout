@@ -183,7 +183,7 @@ final class SubdomainIdentityResolver extends BaseIdentityResolver implements Id
         $this->parameterSetup($tenancy, $tenant);
 
         if ($tenant !== null) {
-            settings()->setUrlDomain($this->getTenantRouteDomain($tenancy));
+            $this->getSprout()->settings()->setUrlDomain($this->getTenantRouteDomain($tenancy));
         }
     }
 }

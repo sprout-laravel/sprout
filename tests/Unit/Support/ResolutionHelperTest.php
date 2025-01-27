@@ -3,15 +3,19 @@ declare(strict_types=1);
 
 namespace Sprout\Tests\Unit\Support;
 
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
+use Mockery;
 use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\Test;
 use Sprout\Exceptions\MisconfigurationException;
 use Sprout\Exceptions\NoTenantFoundException;
+use Sprout\Sprout;
 use Sprout\Support\ResolutionHelper;
 use Sprout\Support\ResolutionHook;
+use Sprout\Support\SettingsRepository;
 use Sprout\Tests\Unit\UnitTestCase;
 use Workbench\App\Models\TenantModel;
 use function Sprout\resolver;
@@ -29,6 +33,18 @@ class ResolutionHelperTest extends UnitTestCase
             $config->set('multitenancy.providers.tenants.model', TenantModel::class);
             $config->set('multitenancy.resolvers.subdomain.domain', 'localhost');
         });
+    }
+
+    protected function mockApp(): Application&MockInterface
+    {
+        return Mockery::mock(Application::class, static function ($mock) {
+
+        });
+    }
+
+    protected function getSprout(Application $app): Sprout
+    {
+        return new Sprout($app, new SettingsRepository());
     }
 
     #[Test]
@@ -60,9 +76,9 @@ class ResolutionHelperTest extends UnitTestCase
         $this->expectExceptionMessage('The resolution hook [Booting] is not supported');
 
         /** @var \Illuminate\Http\Request $fakeRequest */
-        $fakeRequest = $this->mock(Request::class);
+        $fakeRequest = Mockery::mock(Request::class);
 
-        ResolutionHelper::handleResolution($fakeRequest, ResolutionHook::Booting);
+        ResolutionHelper::handleResolution($fakeRequest, ResolutionHook::Booting, sprout());
     }
 
     #[Test]
@@ -81,7 +97,7 @@ class ResolutionHelperTest extends UnitTestCase
 
         $this->assertTrue($tenancy->check());
         $this->assertTrue($resolver->canResolve($fakeRequest, $tenancy, ResolutionHook::Routing));
-        $this->assertFalse(ResolutionHelper::handleResolution($fakeRequest, ResolutionHook::Routing, $resolver->getName(), $tenancy->getName()));
+        $this->assertFalse(ResolutionHelper::handleResolution($fakeRequest, ResolutionHook::Routing, sprout(), $resolver->getName(), $tenancy->getName()));
     }
 
     #[Test]
@@ -102,7 +118,7 @@ class ResolutionHelperTest extends UnitTestCase
 
         $this->assertTrue($tenancy->check());
         $this->assertFalse($resolver->canResolve($fakeRequest, $tenancy, ResolutionHook::Routing));
-        $this->assertFalse(ResolutionHelper::handleResolution($fakeRequest, ResolutionHook::Routing, $resolver->getName(), $tenancy->getName()));
+        $this->assertFalse(ResolutionHelper::handleResolution($fakeRequest, ResolutionHook::Routing, sprout(), $resolver->getName(), $tenancy->getName()));
     }
 
     #[Test]
@@ -137,7 +153,7 @@ class ResolutionHelperTest extends UnitTestCase
             $mock->shouldReceive('route')->andReturn($fakeRoute);
         });
 
-        $this->assertTrue(ResolutionHelper::handleResolution($fakeRequest, ResolutionHook::Routing, $resolver->getName(), $tenancy->getName()));
+        $this->assertTrue(ResolutionHelper::handleResolution($fakeRequest, ResolutionHook::Routing, sprout(), $resolver->getName(), $tenancy->getName()));
         $this->assertSame($tenancy, sprout()->getCurrentTenancy());
         $this->assertTrue($tenancy->check());
         $this->assertTrue($tenant->is($tenancy->tenant()));
@@ -147,7 +163,7 @@ class ResolutionHelperTest extends UnitTestCase
 
         $tenancy->setTenant(null);
 
-        $this->assertTrue(ResolutionHelper::handleResolution($fakeRequest, ResolutionHook::Routing));
+        $this->assertTrue(ResolutionHelper::handleResolution($fakeRequest, ResolutionHook::Routing, sprout()));
         $this->assertSame($tenancy, sprout()->getCurrentTenancy());
         $this->assertTrue($tenancy->check());
         $this->assertTrue($tenant->is($tenancy->tenant()));
@@ -189,12 +205,12 @@ class ResolutionHelperTest extends UnitTestCase
         $this->expectException(NoTenantFoundException::class);
         $this->expectExceptionMessage('No valid tenant [' . $tenancy->getName() . '] found [' . $resolver->getName() . ']');
 
-        ResolutionHelper::handleResolution($fakeRequest, ResolutionHook::Routing, $resolver->getName(), $tenancy->getName());
+        ResolutionHelper::handleResolution($fakeRequest, ResolutionHook::Routing, sprout(), $resolver->getName(), $tenancy->getName());
 
         $this->expectException(NoTenantFoundException::class);
         $this->expectExceptionMessage('No valid tenant [' . $tenancy->getName() . '] found [subdomain]');
 
-        ResolutionHelper::handleResolution($fakeRequest, ResolutionHook::Routing);
+        ResolutionHelper::handleResolution($fakeRequest, ResolutionHook::Routing, sprout());
     }
 
     #[Test]
@@ -227,14 +243,14 @@ class ResolutionHelperTest extends UnitTestCase
             $mock->shouldReceive('route')->andReturn($fakeRoute);
         });
 
-        $this->assertFalse(ResolutionHelper::handleResolution($fakeRequest, ResolutionHook::Routing, $resolver->getName(), $tenancy->getName(), false));
+        $this->assertFalse(ResolutionHelper::handleResolution($fakeRequest, ResolutionHook::Routing, sprout(), $resolver->getName(), $tenancy->getName(), false));
         $this->assertSame($tenancy, sprout()->getCurrentTenancy());
         $this->assertFalse($tenancy->check());
         $this->assertFalse($tenancy->wasResolved());
         $this->assertNull($tenancy->resolver());
         $this->assertNull($tenancy->hook());
 
-        $this->assertFalse(ResolutionHelper::handleResolution($fakeRequest, ResolutionHook::Routing, throw: false));
+        $this->assertFalse(ResolutionHelper::handleResolution($fakeRequest, ResolutionHook::Routing, sprout(), throw: false));
         $this->assertSame($tenancy, sprout()->getCurrentTenancy());
         $this->assertFalse($tenancy->check());
         $this->assertFalse($tenancy->wasResolved());
@@ -262,7 +278,7 @@ class ResolutionHelperTest extends UnitTestCase
                  ->andReturn($tenant->getTenantIdentifier());
         });
 
-        $this->assertTrue(ResolutionHelper::handleResolution($fakeRequest, ResolutionHook::Routing, $resolver->getName(), $tenancy->getName()));
+        $this->assertTrue(ResolutionHelper::handleResolution($fakeRequest, ResolutionHook::Routing, sprout(), $resolver->getName(), $tenancy->getName()));
         $this->assertSame($tenancy, sprout()->getCurrentTenancy());
         $this->assertTrue($tenancy->check());
         $this->assertTrue($tenant->is($tenancy->tenant()));
@@ -272,7 +288,7 @@ class ResolutionHelperTest extends UnitTestCase
 
         $tenancy->setTenant(null);
 
-        $this->assertTrue(ResolutionHelper::handleResolution($fakeRequest, ResolutionHook::Routing));
+        $this->assertTrue(ResolutionHelper::handleResolution($fakeRequest, ResolutionHook::Routing, sprout()));
         $this->assertSame($tenancy, sprout()->getCurrentTenancy());
         $this->assertTrue($tenancy->check());
         $this->assertTrue($tenant->is($tenancy->tenant()));
@@ -302,12 +318,12 @@ class ResolutionHelperTest extends UnitTestCase
         $this->expectException(NoTenantFoundException::class);
         $this->expectExceptionMessage('No valid tenant [' . $tenancy->getName() . '] found [' . $resolver->getName() . ']');
 
-        ResolutionHelper::handleResolution($fakeRequest, ResolutionHook::Routing, $resolver->getName(), $tenancy->getName());
+        ResolutionHelper::handleResolution($fakeRequest, ResolutionHook::Routing, sprout(), $resolver->getName(), $tenancy->getName());
 
         $this->expectException(NoTenantFoundException::class);
         $this->expectExceptionMessage('No valid tenant [' . $tenancy->getName() . '] found [subdomain]');
 
-        ResolutionHelper::handleResolution($fakeRequest, ResolutionHook::Routing);
+        ResolutionHelper::handleResolution($fakeRequest, ResolutionHook::Routing, sprout());
     }
 
     #[Test]
@@ -328,7 +344,7 @@ class ResolutionHelperTest extends UnitTestCase
                  ->andReturn('fake-identifier');
         });
 
-        $this->assertFalse(ResolutionHelper::handleResolution($fakeRequest, ResolutionHook::Routing, $resolver->getName(), $tenancy->getName(), false));
+        $this->assertFalse(ResolutionHelper::handleResolution($fakeRequest, ResolutionHook::Routing, sprout(), $resolver->getName(), $tenancy->getName(), false));
         $this->assertSame($tenancy, sprout()->getCurrentTenancy());
         $this->assertFalse($tenancy->check());
         $this->assertFalse($tenancy->wasResolved());
@@ -337,7 +353,7 @@ class ResolutionHelperTest extends UnitTestCase
 
         $tenancy->setTenant(null);
 
-        $this->assertFalse(ResolutionHelper::handleResolution($fakeRequest, ResolutionHook::Routing, throw: false));
+        $this->assertFalse(ResolutionHelper::handleResolution($fakeRequest, ResolutionHook::Routing, sprout(), throw: false));
         $this->assertSame($tenancy, sprout()->getCurrentTenancy());
         $this->assertFalse($tenancy->check());
         $this->assertFalse($tenancy->wasResolved());

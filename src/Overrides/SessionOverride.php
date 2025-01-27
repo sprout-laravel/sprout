@@ -14,7 +14,6 @@ use Sprout\Overrides\Session\SproutDatabaseSessionHandlerCreator;
 use Sprout\Overrides\Session\SproutFileSessionHandlerCreator;
 use Sprout\Sprout;
 use Sprout\Support\Settings;
-use function Sprout\settings;
 
 /**
  * Session Override
@@ -174,26 +173,16 @@ final class SessionOverride extends BaseOverride implements BootableServiceOverr
         // We only want to touch this if the session manager has actually been
         // loaded, and is therefore most likely being used
         if ($this->app->resolved('session')) {
-            $manager = app('session');
+            $manager = $this->getApp()->make('session');
 
             // If there are no loaded drivers, we can exit early
             if (empty($manager->getDrivers())) {
                 return;
             }
 
-            /** @var \Illuminate\Session\Store $driver */
-            $driver  = $manager->driver();
-            $handler = $driver->getHandler();
-
-            if ($handler instanceof TenantAware) {
-                // If the handler is one of our tenant-aware boyos, we'll set
-                // the tenancy and tenant
-                $handler->setTenancy($tenancy)->setTenant($tenant);
-
-                // Unfortunately, we can't call 'loadSession', so we have to settle
-                // for start
-                $driver->start();
-            }
+            // We need to forget the driver, so that they can be reloaded
+            // with new session data
+            $manager->forgetDrivers();
         }
     }
 }

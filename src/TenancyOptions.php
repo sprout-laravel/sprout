@@ -97,4 +97,16 @@ class TenancyOptions
     {
         return $tenancy->hasOption(static::allOverrides());
     }
+
+    /**
+     * @param \Sprout\Contracts\Tenancy<*> $tenancy
+     * @param string                    $service
+     *
+     * @return bool
+     */
+    public static function shouldEnableOverride(Tenancy $tenancy, string $service): bool
+    {
+        return self::shouldEnableAllOverrides($tenancy)
+               || in_array($service, self::enabledOverrides($tenancy) ?? [], true);
+    }
 }

@@ -15,6 +15,7 @@ use Sprout\Overrides\SessionOverride;
 use Sprout\Support\BaseIdentityResolver;
 use Sprout\Support\PlaceholderHelper;
 use Sprout\Support\ResolutionHook;
+use Sprout\TenancyOptions;
 use function Sprout\sprout;
 
 /**
@@ -99,7 +100,7 @@ final class SessionIdentityResolver extends BaseIdentityResolver
      */
     public function resolveFromRequest(Request $request, Tenancy $tenancy): ?string
     {
-        if (sprout()->overrides()->hasOverride('session')) {
+        if (TenancyOptions::shouldEnableOverride($tenancy, 'session')) {
             throw CompatibilityException::make('resolver', $this->getName(), 'service override', 'session');
         }
 
@@ -149,34 +150,6 @@ final class SessionIdentityResolver extends BaseIdentityResolver
      */
     public function canResolve(Request $request, Tenancy $tenancy, ResolutionHook $hook): bool
     {
-        return $request->hasSession() && $hook === ResolutionHook::Middleware;
-    }
-
-    /**
-     * Generate a URL for a tenanted route
-     *
-     * This method wraps Laravel's {@see \route()} helper to allow for
-     * identity resolvers that use route parameters.
-     * Route parameter names are dynamic and configurable, so hard-coding them
-     * is less than ideal.
-     *
-     * This method is only really useful for identity resolvers that use route
-     * parameters, but, it's here for backwards compatibility.
-     *
-     * @template TenantClass of \Sprout\Contracts\Tenant
-     *
-     * @param string                                 $name
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Contracts\Tenant               $tenant
-     * @param array<string, mixed>                   $parameters
-     * @param bool                                   $absolute
-     *
-     * @phpstan-param TenantClass                    $tenant
-     *
-     * @return string
-     */
-    public function route(string $name, Tenancy $tenancy, Tenant $tenant, array $parameters = [], bool $absolute = true): string
-    {
-        return route($name, $parameters, $absolute);
+        return ! $tenancy->wasResolved() && $request->hasSession() && $hook === ResolutionHook::Middleware;
     }
 }

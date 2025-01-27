@@ -154,6 +154,24 @@ final class Sprout
     }
 
     /**
+     * Reset all the current tenancies
+     *
+     * @return static
+     */
+    public function resetTenancies(): self
+    {
+        foreach (array_reverse($this->getAllCurrentTenancies()) as $tenancy) {
+            if ($tenancy->check()) {
+                $tenancy->setTenant(null);
+            }
+        }
+
+        $this->tenancies = [];
+
+        return $this;
+    }
+
+    /**
      * Get the identity resolver manager
      *
      * @return \Sprout\Managers\IdentityResolverManager

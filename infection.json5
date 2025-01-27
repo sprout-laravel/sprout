@@ -35,6 +35,5 @@
         "Sprout\\Support\\BaseFactory::callCustomCreator"
       ]
     }
-  },
-  "testFrameworkOptions": "--testsuite=Unit,Feature"
+  }
 }

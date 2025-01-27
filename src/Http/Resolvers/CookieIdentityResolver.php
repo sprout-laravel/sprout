@@ -4,7 +4,9 @@ declare(strict_types=1);
 namespace Sprout\Http\Resolvers;
 
 use Closure;
+use Illuminate\Contracts\Encryption\Encrypter;
 use Illuminate\Cookie\CookieJar;
+use Illuminate\Cookie\CookieValuePrefix;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Router;
 use Illuminate\Routing\RouteRegistrar;
@@ -13,10 +15,10 @@ use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 use Sprout\Exceptions\CompatibilityException;
 use Sprout\Http\Middleware\TenantRoutes;
-use Sprout\Overrides\CookieOverride;
 use Sprout\Support\BaseIdentityResolver;
 use Sprout\Support\PlaceholderHelper;
-use function Sprout\sprout;
+use Sprout\Support\ResolutionHook;
+use Sprout\TenancyOptions;
 
 /**
  * Cookie Identity Resolver
@@ -73,7 +75,7 @@ final class CookieIdentityResolver extends BaseIdentityResolver
      *
      * @return array<string, mixed>
      */
-    public function getOptions(): array
+    public function getCookieOptions(): array
     {
         return $this->options;
     }
@@ -120,7 +122,7 @@ final class CookieIdentityResolver extends BaseIdentityResolver
      */
     public function resolveFromRequest(Request $request, Tenancy $tenancy): ?string
     {
-        if (sprout()->overrides()->hasOverride('cookie')) {
+        if (TenancyOptions::shouldEnableOverride($tenancy, 'cookie')) {
             throw CompatibilityException::make('resolver', $this->getName(), 'service override', 'cookie');
         }
 
@@ -130,6 +132,12 @@ final class CookieIdentityResolver extends BaseIdentityResolver
          * @var string|null $cookie
          */
         $cookie = $request->cookie($this->getRequestCookieName($tenancy));
+
+        if ($cookie !== null && $this->getSprout()->isCurrentHook(ResolutionHook::Routing)) {
+            // If we're processing during the routing hook, the cookies aren't
+            // decrypted yet, so we have to manually decrypt them
+            $cookie = $this->decryptCookie($this->getRequestCookieName($tenancy), $cookie);
+        }
 
         return $cookie;
     }
@@ -184,7 +192,9 @@ final class CookieIdentityResolver extends BaseIdentityResolver
                 ]
             );
 
-            app(CookieJar::class)->queue(Cookie::make(...$details));
+            $this->getApp()
+                 ->make(CookieJar::class)
+                 ->queue(Cookie::make(...$details));
         }
     }
 
@@ -227,30 +237,33 @@ final class CookieIdentityResolver extends BaseIdentityResolver
     }
 
     /**
-     * Generate a URL for a tenanted route
+     * Decrypt a cookie value
      *
-     * This method wraps Laravel's {@see \route()} helper to allow for
-     * identity resolvers that use route parameters.
-     * Route parameter names are dynamic and configurable, so hard-coding them
-     * is less than ideal.
+     * @param string $key
+     * @param string $cookie
      *
-     * This method is only really useful for identity resolvers that use route
-     * parameters, but, it's here for backwards compatibility.
+     * @return string|null
      *
-     * @template TenantClass of \Sprout\Contracts\Tenant
-     *
-     * @param string                                 $name
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Contracts\Tenant               $tenant
-     * @param array<string, mixed>                   $parameters
-     * @param bool                                   $absolute
-     *
-     * @phpstan-param TenantClass                    $tenant
-     *
-     * @return string
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
      */
-    public function route(string $name, Tenancy $tenancy, Tenant $tenant, array $parameters = [], bool $absolute = true): string
+    private function decryptCookie(string $key, string $cookie): ?string
     {
-        return route($name, $parameters, $absolute);
+        // The cookie is passed as a base64 encoded JSON string
+        $cookieJson = base64_decode($cookie);
+
+        if (json_validate($cookieJson) === false) {
+            // This isn't JSON, so we can assume the original value is correct
+            return $cookie;
+        }
+
+        // Get the encrypter
+        $encrypter = $this->getApp()->make(Encrypter::class);
+
+        // Decrypt the actual cookie value
+        $value = $encrypter->decrypt($cookie, false);
+
+        // And then "validate it"? This actually strips the value, so I'm not
+        // sure validate is the correct name, but I didn't name it..
+        return CookieValuePrefix::validate($key, $value, $encrypter->getAllKeys());
     }
 }
