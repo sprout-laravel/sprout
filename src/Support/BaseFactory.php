@@ -5,6 +5,7 @@ namespace Sprout\Support;
 
 use Illuminate\Contracts\Foundation\Application;
 use Sprout\Exceptions\MisconfigurationException;
+use Sprout\Sprout;
 
 /**
  * Base Factory
@@ -176,6 +177,7 @@ abstract class BaseFactory
      * @phpstan-return FactoryClass
      *
      * @throws \Sprout\Exceptions\MisconfigurationException
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
      */
     protected function resolve(string $name): object
     {
@@ -194,7 +196,7 @@ abstract class BaseFactory
         if ($driver !== null) {
             // Is there a custom creator for the driver?
             if (isset(static::$customCreators[static::class][$driver])) {
-                return $this->callCustomCreator($driver, $config);
+                return $this->setupResolvedObject($this->callCustomCreator($driver, $config));
             }
 
             // This has a driver, so we'll see if we can create based on that
@@ -207,7 +209,7 @@ abstract class BaseFactory
         // Does the creator method exist?
         if (method_exists($this, $method)) {
             // It does, use it
-            return $this->{$method}($config, $name);
+            return $this->setupResolvedObject($this->{$method}($config, $name));
         }
 
         // There's no valid creator, so we'll complain
@@ -262,5 +264,30 @@ abstract class BaseFactory
         }
 
         return isset($this->objects[$name]);
+    }
+
+    /**
+     * Set up an object resolved by the factory
+     *
+     * @param object               $object
+     *
+     * @return object
+     *
+     * @phpstan-param FactoryClass $object
+     * @phpstan-return FactoryClass
+     *
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     */
+    protected function setupResolvedObject(object $object): object
+    {
+        if (method_exists($object, 'setApp')) {
+            $object->setApp($this->app);
+        }
+
+        if (method_exists($object, 'setSprout')) {
+            $object->setSprout($this->app->make(Sprout::class));
+        }
+
+        return $object;
     }
 }
