@@ -45,7 +45,7 @@ final class Sprout
     /**
      * @var \Sprout\Support\ResolutionHook|null
      */
-    private ?ResolutionHook $currentHook;
+    private ?ResolutionHook $currentHook = null;
 
     /**
      * Create a new instance

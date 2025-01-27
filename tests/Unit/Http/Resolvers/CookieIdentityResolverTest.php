@@ -163,6 +163,8 @@ class CookieIdentityResolverTest extends UnitTestCase
                  ->once();
         });
 
+        $resolver->setSprout($this->getSprout($this->mockApp()));
+
         $this->assertSame('my-identifier', $resolver->resolveFromRequest($request, $tenancy));
     }
 
