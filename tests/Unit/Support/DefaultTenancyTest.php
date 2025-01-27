@@ -5,7 +5,9 @@ namespace Sprout\Tests\Unit\Support;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
+use Mockery;
 use PHPUnit\Framework\Attributes\Test;
+use Sprout\Contracts\TenantProvider;
 use Sprout\Events\TenantIdentified;
 use Sprout\Events\TenantLoaded;
 use Sprout\Providers\EloquentTenantProvider;
@@ -146,12 +148,19 @@ class DefaultTenancyTest extends UnitTestCase
     #[Test]
     public function hasOptions(): void
     {
-        $this->markTestSkipped('Need to update for changes');
+        $options = [
+            TenancyOptions::hydrateTenantRelation(),
+            TenancyOptions::throwIfNotRelated(),
+            TenancyOptions::allOverrides(),
+        ];
 
-        /** @var \Sprout\Contracts\Tenancy $tenancy */
-        $tenancy = sprout()->tenancies()->get();
+        $tenancy = new DefaultTenancy(
+            'tenants',
+            Mockery::mock(TenantProvider::class),
+            $options
+        );
 
-        $this->assertSame(config('multitenancy.tenancies.tenants.options'), $tenancy->options());
+        $this->assertSame($options, $tenancy->options());
 
         $this->assertTrue($tenancy->hasOption(TenancyOptions::hydrateTenantRelation()));
         $this->assertTrue($tenancy->hasOption(TenancyOptions::throwIfNotRelated()));

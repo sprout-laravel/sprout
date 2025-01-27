@@ -77,7 +77,7 @@ class SproutServiceProvider extends ServiceProvider
         });
 
         $this->app->singleton(ServiceOverrideManager::class, function ($app) {
-            return new ServiceOverrideManager($app);
+            return new ServiceOverrideManager($app, $this->sprout);
         });
 
         // Alias the managers with simple names
