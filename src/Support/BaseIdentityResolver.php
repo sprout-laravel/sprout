@@ -4,6 +4,8 @@ declare(strict_types=1);
 namespace Sprout\Support;
 
 use Illuminate\Http\Request;
+use Sprout\Concerns\AwareOfApp;
+use Sprout\Concerns\AwareOfSprout;
 use Sprout\Contracts\IdentityResolver;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
@@ -18,6 +20,8 @@ use Sprout\Contracts\Tenant;
  */
 abstract class BaseIdentityResolver implements IdentityResolver
 {
+    use AwareOfSprout, AwareOfApp;
+
     /**
      * @var string
      */
