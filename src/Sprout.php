@@ -4,12 +4,14 @@ declare(strict_types=1);
 namespace Sprout;
 
 use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Routing\Router;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 use Sprout\Managers\IdentityResolverManager;
 use Sprout\Managers\ServiceOverrideManager;
 use Sprout\Managers\TenancyManager;
 use Sprout\Managers\TenantProviderManager;
+use Sprout\Support\ResolutionHelper;
 use Sprout\Support\ResolutionHook;
 use Sprout\Support\SettingsRepository;
 
@@ -30,7 +32,27 @@ final class Sprout
     /**
      * @var array<int, \Sprout\Contracts\Tenancy<\Sprout\Contracts\Tenant>>
      */
-    private array $tenancies = [];
+    private array $currentTenancies = [];
+
+    /**
+     * @var \Sprout\Managers\ServiceOverrideManager
+     */
+    private ServiceOverrideManager $overrides;
+
+    /**
+     * @var \Sprout\Managers\TenantProviderManager
+     */
+    private TenantProviderManager $providers;
+
+    /**
+     * @var \Sprout\Managers\IdentityResolverManager
+     */
+    private IdentityResolverManager $resolvers;
+
+    /**
+     * @var \Sprout\Managers\TenancyManager
+     */
+    private TenancyManager $tenancies;
 
     /**
      * @var bool
@@ -53,10 +75,21 @@ final class Sprout
      * @param \Illuminate\Contracts\Foundation\Application $app
      * @param \Sprout\Support\SettingsRepository           $settings
      */
-    public function __construct(Application $app, SettingsRepository $settings)
+    public function __construct(
+        Application              $app,
+        SettingsRepository       $settings,
+        ?TenantProviderManager   $providers = null,
+        ?IdentityResolverManager $resolvers = null,
+        ?TenancyManager          $tenancies = null,
+        ?ServiceOverrideManager  $overrides = null
+    )
     {
-        $this->app      = $app;
-        $this->settings = $settings;
+        $this->app       = $app;
+        $this->settings  = $settings;
+        $this->providers = $providers ?? new TenantProviderManager($app);
+        $this->resolvers = $resolvers ?? new IdentityResolverManager($app);
+        $this->tenancies = $tenancies ?? new TenancyManager($app, $this->providers);
+        $this->overrides = $overrides ?? (new ServiceOverrideManager($app))->setSprout($this);
     }
 
     /**
@@ -109,11 +142,11 @@ final class Sprout
     public function setCurrentTenancy(Tenancy $tenancy): void
     {
         if ($this->getCurrentTenancy() !== $tenancy) {
-            $this->tenancies[] = $tenancy;
+            $this->currentTenancies[] = $tenancy;
 
             // This is a bit of a cheat to enable the refreshing of the Tenancy
             $this->app->forgetExtenders(Tenancy::class);
-            $this->app->extend(Tenancy::class, fn(?Tenancy $tenancy) => $tenancy);
+            $this->app->extend(Tenancy::class, fn (?Tenancy $tenancy) => $tenancy);
         }
 
         $this->markAsInContext();
@@ -126,7 +159,7 @@ final class Sprout
      */
     public function hasCurrentTenancy(): bool
     {
-        return count($this->tenancies) > 0;
+        return count($this->currentTenancies) > 0;
     }
 
     /**
@@ -137,7 +170,7 @@ final class Sprout
     public function getCurrentTenancy(): ?Tenancy
     {
         if ($this->hasCurrentTenancy()) {
-            return $this->tenancies[count($this->tenancies) - 1];
+            return $this->currentTenancies[count($this->currentTenancies) - 1];
         }
 
         return null;
@@ -150,7 +183,7 @@ final class Sprout
      */
     public function getAllCurrentTenancies(): array
     {
-        return $this->tenancies;
+        return $this->currentTenancies;
     }
 
     /**
@@ -166,7 +199,7 @@ final class Sprout
             }
         }
 
-        $this->tenancies = [];
+        $this->currentTenancies = [];
 
         return $this;
     }
@@ -175,48 +208,40 @@ final class Sprout
      * Get the identity resolver manager
      *
      * @return \Sprout\Managers\IdentityResolverManager
-     *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
      */
     public function resolvers(): IdentityResolverManager
     {
-        return $this->app->make(IdentityResolverManager::class);
+        return $this->resolvers;
     }
 
     /**
      * Get the tenant providers manager
      *
      * @return \Sprout\Managers\TenantProviderManager
-     *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
      */
     public function providers(): TenantProviderManager
     {
-        return $this->app->make(TenantProviderManager::class);
+        return $this->providers;
     }
 
     /**
      * Get the tenancy manager
      *
      * @return \Sprout\Managers\TenancyManager
-     *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
      */
     public function tenancies(): TenancyManager
     {
-        return $this->app->make(TenancyManager::class);
+        return $this->tenancies;
     }
 
     /**
      * Get the service override manager
      *
      * @return \Sprout\Managers\ServiceOverrideManager
-     *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
      */
     public function overrides(): ServiceOverrideManager
     {
-        return $this->app->make(ServiceOverrideManager::class);
+        return $this->overrides;
     }
 
     /**
@@ -295,9 +320,7 @@ final class Sprout
      *
      * @return string
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
      * @throws \Sprout\Exceptions\MisconfigurationException
-     * @throws \Sprout\Exceptions\TenantMissingException
      */
     public function route(string $name, Tenant $tenant, ?string $resolver = null, ?string $tenancy = null, array $parameters = [], bool $absolute = true): string
     {

@@ -3,17 +3,17 @@
 namespace Sprout;
 
 use Sprout\Contracts\IdentityResolver;
+use Sprout\Contracts\ServiceOverride;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\TenantProvider;
-use Sprout\Managers\IdentityResolverManager;
-use Sprout\Managers\TenancyManager;
-use Sprout\Managers\TenantProviderManager;
 use Sprout\Support\SettingsRepository;
 
 /**
  * Get the core Sprout class
  *
  * @return \Sprout\Sprout
+ *
+ * @codeCoverageIgnore
  */
 function sprout(): Sprout
 {
@@ -24,10 +24,12 @@ function sprout(): Sprout
  * Get the Sprout settings repository
  *
  * @return \Sprout\Support\SettingsRepository
+ *
+ * @codeCoverageIgnore
  */
 function settings(): SettingsRepository
 {
-    return app(SettingsRepository::class);
+    return sprout()->settings();
 }
 
 /**
@@ -37,12 +39,13 @@ function settings(): SettingsRepository
  *
  * @return \Sprout\Contracts\IdentityResolver
  *
- * @throws \Illuminate\Contracts\Container\BindingResolutionException
  * @throws \Sprout\Exceptions\MisconfigurationException
+ *
+ * @codeCoverageIgnore
  */
 function resolver(?string $name = null): IdentityResolver
 {
-    return app(IdentityResolverManager::class)->get($name);
+    return sprout()->resolvers()->get($name);
 }
 
 /**
@@ -52,12 +55,13 @@ function resolver(?string $name = null): IdentityResolver
  *
  * @return \Sprout\Contracts\Tenancy<*>
  *
- * @throws \Illuminate\Contracts\Container\BindingResolutionException
  * @throws \Sprout\Exceptions\MisconfigurationException
+ *
+ * @codeCoverageIgnore
  */
 function tenancy(?string $name = null): Tenancy
 {
-    return app(TenancyManager::class)->get($name);
+    return sprout()->tenancies()->get($name);
 }
 
 /**
@@ -67,10 +71,25 @@ function tenancy(?string $name = null): Tenancy
  *
  * @return \Sprout\Contracts\TenantProvider<*>
  *
- * @throws \Illuminate\Contracts\Container\BindingResolutionException
  * @throws \Sprout\Exceptions\MisconfigurationException
+ *
+ * @codeCoverageIgnore
  */
 function provider(?string $name = null): TenantProvider
 {
-    return app(TenantProviderManager::class)->get($name);
+    return sprout()->providers()->get($name);
+}
+
+/**
+ * Get a service override
+ *
+ * @param string $service
+ *
+ * @return \Sprout\Contracts\ServiceOverride|null
+ *
+ * @codeCoverageIgnore
+ */
+function override(string $service): ?ServiceOverride
+{
+    return sprout()->overrides()->get($service);
 }

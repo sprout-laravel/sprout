@@ -19,7 +19,7 @@ trait AwareOfApp
         return $this;
     }
 
-    protected function getApp(): Application
+    public function getApp(): Application
     {
         return $this->app;
     }

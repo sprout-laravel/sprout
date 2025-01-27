@@ -19,7 +19,7 @@ trait AwareOfSprout
         return $this;
     }
 
-    protected function getSprout(): Sprout
+    public function getSprout(): Sprout
     {
         return $this->sprout;
     }

@@ -9,7 +9,6 @@ use Illuminate\Support\Arr;
 use Sprout\Contracts\BootableServiceOverride;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
-use Sprout\Contracts\TenantAware;
 use Sprout\Overrides\Session\SproutDatabaseSessionHandlerCreator;
 use Sprout\Overrides\Session\SproutFileSessionHandlerCreator;
 use Sprout\Sprout;
@@ -87,8 +86,8 @@ final class SessionOverride extends BaseOverride implements BootableServiceOverr
     public function setup(Tenancy $tenancy, Tenant $tenant): void
     {
         /** @var \Illuminate\Contracts\Config\Repository $config */
-        $config   = $this->app->make('config');
-        $settings = $this->sprout->settings();
+        $config   = $this->getApp()->make('config');
+        $settings = $this->getSprout()->settings();
 
         if (! $settings->has('original.session')) {
             /** @var array<string, mixed> $original */
@@ -172,7 +171,7 @@ final class SessionOverride extends BaseOverride implements BootableServiceOverr
     {
         // We only want to touch this if the session manager has actually been
         // loaded, and is therefore most likely being used
-        if ($this->app->resolved('session')) {
+        if ($this->getApp()->resolved('session')) {
             $manager = $this->getApp()->make('session');
 
             // If there are no loaded drivers, we can exit early

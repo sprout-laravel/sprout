@@ -4,6 +4,8 @@ declare(strict_types=1);
 namespace Sprout\Managers;
 
 use Illuminate\Contracts\Foundation\Application;
+use Sprout\Concerns\AwareOfApp;
+use Sprout\Concerns\AwareOfSprout;
 use Sprout\Contracts\BootableServiceOverride;
 use Sprout\Contracts\ServiceOverride;
 use Sprout\Contracts\Tenancy;
@@ -27,17 +29,7 @@ use Sprout\TenancyOptions;
  */
 final class ServiceOverrideManager
 {
-    /**
-     * The Laravel application
-     *
-     * @var \Illuminate\Contracts\Foundation\Application
-     */
-    protected Application $app;
-
-    /**
-     * @var \Sprout\Sprout
-     */
-    private Sprout $sprout;
+    use AwareOfApp, AwareOfSprout;
 
     /**
      * @var array<string, \Sprout\Contracts\ServiceOverride>
@@ -69,10 +61,9 @@ final class ServiceOverrideManager
      *
      * @param \Illuminate\Contracts\Foundation\Application $app
      */
-    public function __construct(Application $app, Sprout $sprout)
+    public function __construct(Application $app)
     {
         $this->app = $app;
-        $this->sprout = $sprout;
     }
 
     /**
@@ -375,6 +366,8 @@ final class ServiceOverrideManager
         // Create a new instance of the service override with the service name
         // and config, as we know the constructor signature
         $override = $this->app->make($driver, compact('service', 'config'));
+
+        /** @var \Sprout\Contracts\ServiceOverride $override */
 
         if (method_exists($override, 'setApp')) {
             $override->setApp($this->app);

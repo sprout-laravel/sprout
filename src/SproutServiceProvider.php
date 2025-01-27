@@ -62,23 +62,16 @@ class SproutServiceProvider extends ServiceProvider
     private function registerManagers(): void
     {
         // Register the tenant provider manager
-        $this->app->singleton(TenantProviderManager::class, function ($app) {
-            return new TenantProviderManager($app);
-        });
+        $this->app->singleton(TenantProviderManager::class, fn ($app) => $this->sprout->providers());
 
         // Register the identity resolver manager
-        $this->app->singleton(IdentityResolverManager::class, function ($app) {
-            return new IdentityResolverManager($app);
-        });
+        $this->app->singleton(IdentityResolverManager::class, fn ($app) => $this->sprout->resolvers());
 
         // Register the tenancy manager
-        $this->app->singleton(TenancyManager::class, function ($app) {
-            return new TenancyManager($app, $app->make(TenantProviderManager::class));
-        });
+        $this->app->singleton(TenancyManager::class, fn ($app) => $this->sprout->tenancies());
 
-        $this->app->singleton(ServiceOverrideManager::class, function ($app) {
-            return new ServiceOverrideManager($app, $this->sprout);
-        });
+        // Register the service override manager
+        $this->app->singleton(ServiceOverrideManager::class, fn ($app) => $this->sprout->overrides());
 
         // Alias the managers with simple names
         $this->app->alias(TenantProviderManager::class, 'sprout.providers');
