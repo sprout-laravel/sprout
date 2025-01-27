@@ -3,24 +3,22 @@ declare(strict_types=1);
 
 namespace Sprout\Overrides;
 
-use Illuminate\Contracts\Foundation\Application;
+use Sprout\Concerns\AwareOfApp;
+use Sprout\Concerns\AwareOfSprout;
 use Sprout\Contracts\ServiceOverride;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
-use Sprout\Sprout;
 
 abstract class BaseOverride implements ServiceOverride
 {
+    use AwareOfApp, AwareOfSprout;
+
     public readonly string $service;
 
     /**
      * @var array<string, mixed>
      */
     protected array $config;
-
-    protected Application $app;
-
-    protected Sprout $sprout;
 
     /**
      * Create a new instance of the service override
@@ -32,28 +30,6 @@ abstract class BaseOverride implements ServiceOverride
     {
         $this->config  = $config;
         $this->service = $service;
-    }
-
-    public function getApp(): Application
-    {
-        return $this->app;
-    }
-
-    public function setApp(Application $app): BaseOverride
-    {
-        $this->app = $app;
-        return $this;
-    }
-
-    public function getSprout(): Sprout
-    {
-        return $this->sprout;
-    }
-
-    public function setSprout(Sprout $sprout): BaseOverride
-    {
-        $this->sprout = $sprout;
-        return $this;
     }
 
     /**
