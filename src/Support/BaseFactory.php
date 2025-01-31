@@ -221,13 +221,13 @@ abstract class BaseFactory
      *
      * @param string|null $name
      *
-     * @return object|null
+     * @return object
      *
      * @phpstan-return FactoryClass
      *
      * @throws \Sprout\Exceptions\MisconfigurationException
      */
-    public function get(?string $name = null): ?object
+    public function get(?string $name = null): object
     {
         $name ??= $this->getDefaultName();
 
@@ -235,7 +235,7 @@ abstract class BaseFactory
             $this->objects[$name] = $this->resolve($name);
         }
 
-        return $this->objects[$name] ?? null;
+        return $this->objects[$name];
     }
 
     /**
