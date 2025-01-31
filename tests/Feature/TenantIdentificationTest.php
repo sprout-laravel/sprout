@@ -4,8 +4,12 @@ declare(strict_types=1);
 namespace Sprout\Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Exceptions;
 use PHPUnit\Framework\Attributes\Test;
 use Sprout\Contracts\Tenant;
+use Sprout\Exceptions\NoTenantFoundException;
+use Sprout\Http\Middleware\AddTenantHeaderToResponse;
+use Sprout\Support\ResolutionHook;
 use Sprout\TenancyOptions;
 use Workbench\App\Models\TenantModel;
 
@@ -41,6 +45,10 @@ class TenantIdentificationTest extends FeatureTestCase
                        })->name('header-test');
                    }, 'header');
 
+                   $router->get('/fake-header-route', function () {
+                       return 'fake-header-route';
+                   })->middleware(AddTenantHeaderToResponse::class)->name('fake-header-route');
+
                    $router->tenanted(function ($router) {
                        $router->get('/path-test', function (Tenant $tenant) {
                            return $tenant->getTenantIdentifier();
@@ -57,6 +65,12 @@ class TenantIdentificationTest extends FeatureTestCase
                        $router->get('/subdomain-test', function (Tenant $tenant) {
                            return $tenant->getTenantIdentifier();
                        })->name('subdomain-test');
+                   }, 'subdomain');
+
+                   $router->tenanted(function ($router) {
+                       $router->get('/subdomain-header-test', function (Tenant $tenant) {
+                           return $tenant->getTenantIdentifier();
+                       })->middleware(AddTenantHeaderToResponse::class)->name('subdomain-with-header-middleware-test');
                    }, 'subdomain');
                });
     }
@@ -81,6 +95,38 @@ class TenantIdentificationTest extends FeatureTestCase
              ->get('/header-test')
              ->assertOk()
              ->assertSee($tenant->getTenantIdentifier());
+    }
+
+    #[Test]
+    public function addsHeaderToResponse(): void
+    {
+        $tenant = TenantModel::factory()->createOne();
+
+        $this->withHeader('Tenants-Identifier', $tenant->getTenantIdentifier())
+             ->get('/header-test')
+             ->assertOk()
+             ->assertSee($tenant->getTenantIdentifier())
+             ->assertHeader('Tenants-Identifier', $tenant->getTenantIdentifier());
+    }
+
+    #[Test]
+    public function doesNotAddHeaderToResponseWithoutTenant(): void
+    {
+        $this->withHeader('Tenants-Identifier', 'fake-identifier')
+             ->get('/fake-header-route')
+             ->assertOk()
+             ->assertHeaderMissing('Tenants-Identifier');
+    }
+
+    #[Test]
+    public function doesNothingWhenTheHeaderMiddlewareIsAddedToRouteThatUseDifferentIdentityResolvers(): void
+    {
+        $tenant = TenantModel::factory()->createOne();
+
+        $this->withHeader('Tenants-Identifier', 'fake-identifier')
+             ->get(route('subdomain-with-header-middleware-test', $tenant->getTenantIdentifier()))
+             ->assertOk()
+             ->assertHeaderMissing('Tenants-Identifier');
     }
 
     #[Test]
@@ -112,5 +158,20 @@ class TenantIdentificationTest extends FeatureTestCase
         $this->get(route('subdomain-test', $tenant->getTenantIdentifier()))
              ->assertOk()
              ->assertSee($tenant->getTenantIdentifier());
+    }
+
+    #[Test]
+    public function errorsWhenThereIsNoTenancyAndMiddlewareIsNotSupported(): void
+    {
+        config()->set('sprout.core.hooks', [ResolutionHook::Routing]);
+
+        Exceptions::fake();
+
+        $this->get(route('subdomain-test', 'fake-identifier'))
+             ->assertServerError();
+
+        Exceptions::assertReported(function (NoTenantFoundException $exception) {
+            return $exception->getMessage() === 'No valid tenant [tenants] found [subdomain]';
+        });
     }
 }
