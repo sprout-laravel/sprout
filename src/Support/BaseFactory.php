@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Sprout\Support;
 
+use Closure;
 use Illuminate\Contracts\Foundation\Application;
 use Sprout\Exceptions\MisconfigurationException;
 use Sprout\Sprout;
@@ -33,15 +34,15 @@ abstract class BaseFactory
      * Register a custom creator
      *
      * @param string                                                                    $name
-     * @param \Closure                                                                  $callback
+     * @param \Closure                                                                  $creator
      *
-     * @phpstan-param \Closure(Application, array<string, mixed>, string): FactoryClass $callback
+     * @phpstan-param \Closure(Application, array<string, mixed>, string): FactoryClass $creator
      *
      * @return void
      */
-    public static function register(string $name, \Closure $callback): void
+    public static function register(string $name, Closure $creator): void
     {
-        static::$customCreators[static::class][$name] = $callback;
+        static::$customCreators[static::class][$name] = $creator;
     }
 
     /**
