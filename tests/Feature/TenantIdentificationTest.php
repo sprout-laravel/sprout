@@ -87,6 +87,17 @@ class TenantIdentificationTest extends FeatureTestCase
     }
 
     #[Test]
+    public function canIdentifyViaUnencryptedCookie(): void
+    {
+        $tenant = TenantModel::factory()->createOne();
+
+        $this->withUnencryptedCookie('Tenants-Identifier', $tenant->getTenantIdentifier())
+             ->get('/cookie-test')
+             ->assertOk()
+             ->assertSee($tenant->getTenantIdentifier());
+    }
+
+    #[Test]
     public function canIdentifyViaHeader(): void
     {
         $tenant = TenantModel::factory()->createOne();
