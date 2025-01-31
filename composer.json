@@ -74,7 +74,8 @@
         "Sprout\\SproutServiceProvider"
       ],
       "facades"  : [
-        "Sprout\\Facades\\Sprout"
+        "Sprout\\Facades\\Sprout",
+        "Sprout\\Facades\\Overrides"
       ]
     },
     "branch-alias": {
