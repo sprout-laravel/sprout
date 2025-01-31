@@ -16,6 +16,8 @@ use Sprout\Support\SettingsRepository;
 /**
  * Sprout Facade
  *
+ * This is the facade for the {@see \Sprout\Sprout} class.
+ *
  * @method static mixed config(string $key, mixed $default = null)
  * @method static array<Tenancy> getAllCurrentTenancies()
  * @method static ResolutionHook|null getCurrentHook()
