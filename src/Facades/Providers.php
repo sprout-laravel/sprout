@@ -26,6 +26,6 @@ final class Providers extends Facade
 {
     protected static function getFacadeAccessor(): string
     {
-        return TenantProvider::class;
+        return TenantProviderManager::class;
     }
 }

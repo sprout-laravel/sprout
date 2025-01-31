@@ -26,6 +26,6 @@ final class Resolvers extends Facade
 {
     protected static function getFacadeAccessor(): string
     {
-        return IdentityResolver::class;
+        return IdentityResolverManager::class;
     }
 }
