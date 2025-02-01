@@ -27,7 +27,7 @@ final class TenantMismatchException extends SproutException
     {
         return new self(
             'Model [' . $model . '] already has a tenant, but it is not the current tenant for the tenancy'
-            . ($tenancy ? '  [' . $tenancy . ']' : '')
+            . ($tenancy ? ' [' . $tenancy . ']' : '')
         );
     }
 }

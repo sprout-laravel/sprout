@@ -41,7 +41,7 @@ abstract class TenantChildScope implements Scope
         });
 
         foreach ($this->extensions as $macro => $method) {
-            $builder->macro($macro, $this->$method(...));
+            $builder->macro($macro, $this->$method(...)); // @codeCoverageIgnore
         }
     }
 }

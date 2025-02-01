@@ -28,6 +28,8 @@ use function Sprout\sprout;
  */
 class BelongsToManyTenantsObserver
 {
+    private bool $loadedRelation = false;
+
     /**
      * Check if a model already has a tenant set
      *
@@ -43,6 +45,7 @@ class BelongsToManyTenantsObserver
         if (! $model->relationLoaded($relation->getRelationName())) {
             // Load it
             $model->load($relation->getRelationName());
+            $this->loadedRelation = true;
         }
 
         /** @var \Illuminate\Database\Eloquent\Collection<int, TenantModel> $relatedModels */
@@ -90,6 +93,16 @@ class BelongsToManyTenantsObserver
      */
     private function passesInitialChecks(Model $model, Tenancy $tenancy, BelongsToMany $relation, bool $succeedOnMatch = false): bool
     {
+        /**
+         * If the model has opted to ignore tenant restrictions, we can exit early
+         * and return true.
+         *
+         * @phpstan-ignore-next-line
+         */
+        if ($model::shouldIgnoreTenantRestrictions()) {
+            return true;
+        }
+
         // If we don't have a current tenant, we may need to do something
         if (! $tenancy->check()) {
             // The model doesn't require a tenant, so we exit silently
@@ -170,8 +183,13 @@ class BelongsToManyTenantsObserver
 
         // If the initial checks do not pass
         if (! $this->passesInitialChecks($model, $tenancy, $relation)) {
-            // Just exit, an exception will have be thrown
+            // Just exit, an exception will have been thrown
             return;
+        }
+
+        if ($this->loadedRelation) {
+            $model->unsetRelation($relation->getRelationName());
+            $this->loadedRelation = false;
         }
 
         /**
@@ -182,6 +200,10 @@ class BelongsToManyTenantsObserver
 
         // Attach the tenant
         $relation->attach($tenant);
+
+        if (! TenancyOptions::shouldHydrateTenantRelation($tenancy)) {
+            return;
+        }
 
         // Set the relation to contain the tenant
         $this->setRelation($model, $relation, $tenant);
@@ -227,7 +249,12 @@ class BelongsToManyTenantsObserver
         }
 
         if (! TenancyOptions::shouldHydrateTenantRelation($tenancy)) {
-            return; // @codeCoverageIgnore
+            if ($this->loadedRelation) {
+                $model->unsetRelation($relation->getRelationName());
+                $this->loadedRelation = false;
+            }
+
+            return;
         }
 
         /**
@@ -235,6 +262,12 @@ class BelongsToManyTenantsObserver
          * @phpstan-var TenantModel                                          $tenant
          */
         $tenant = $tenancy->tenant();
+
+        if ($this->loadedRelation) {
+            $this->loadedRelation = false;
+
+            return;
+        }
 
         // Set the relation to contain the tenant
         $this->setRelation($model, $relation, $tenant);
