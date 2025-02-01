@@ -103,11 +103,7 @@ trait IsTenantChild
      */
     public static function isTenantOptional(): bool
     {
-        return is_subclass_of(static::class, OptionalTenant::class)
-               || (
-                   method_exists(static::class, 'shouldIgnoreTenantRestrictions')
-                   && static::shouldIgnoreTenantRestrictions() // @phpstan-ignore-line
-               );
+        return is_subclass_of(static::class, OptionalTenant::class);
     }
 
     /**
