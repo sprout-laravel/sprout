@@ -7,8 +7,8 @@ use PHPUnit\Framework\Attributes\Test;
 use Sprout\Exceptions\MisconfigurationException;
 use Sprout\Exceptions\TenancyMissingException;
 use Sprout\Managers\ServiceOverrideManager;
-use Sprout\Overrides\AuthOverride;
 use Sprout\Overrides\CookieOverride;
+use Sprout\Overrides\SessionOverride;
 use Sprout\TenancyOptions;
 use Sprout\Tests\Unit\UnitTestCase;
 use Workbench\App\Models\TenantModel;
@@ -47,30 +47,30 @@ class ServiceOverrideManagerTest extends UnitTestCase
     {
         $overrides = sprout()->overrides();
 
-        $this->assertFalse($overrides->hasOverride('auth'));
+        $this->assertFalse($overrides->hasOverride('session'));
 
-        config()->set('sprout.overrides.auth', [
-            'driver' => AuthOverride::class,
+        config()->set('sprout.overrides.session', [
+            'driver' => SessionOverride::class,
         ]);
 
         $overrides->registerOverrides();
 
-        $this->assertTrue($overrides->hasOverride('auth'));
+        $this->assertTrue($overrides->hasOverride('session'));
     }
 
     #[Test]
     public function keepsTrackOfWhichOverridesAreBootable(): void
     {
         config()->set('sprout.overrides', [
-            'auth'   => ['driver' => AuthOverride::class],
-            'cookie' => ['driver' => CookieOverride::class],
+            'session' => ['driver' => SessionOverride::class],
+            'cookie'  => ['driver' => CookieOverride::class],
         ]);
 
         $overrides = sprout()->overrides();
 
         $overrides->registerOverrides();
 
-        $this->assertTrue($overrides->isOverrideBootable('auth'));
+        $this->assertTrue($overrides->isOverrideBootable('session'));
         $this->assertFalse($overrides->isOverrideBootable('cookie'));
     }
 
@@ -78,18 +78,18 @@ class ServiceOverrideManagerTest extends UnitTestCase
     public function bootsBootableOverrides(): void
     {
         config()->set('sprout.overrides', [
-            'auth'   => ['driver' => AuthOverride::class],
-            'cookie' => ['driver' => CookieOverride::class],
+            'session' => ['driver' => SessionOverride::class],
+            'cookie'  => ['driver' => CookieOverride::class],
         ]);
 
         $overrides = sprout()->overrides();
 
         $overrides->registerOverrides();
 
-        $this->assertTrue($overrides->isOverrideBootable('auth'));
+        $this->assertTrue($overrides->isOverrideBootable('session'));
         $this->assertFalse($overrides->isOverrideBootable('cookie'));
         $this->assertTrue($overrides->haveOverridesBooted());
-        $this->assertTrue($overrides->hasOverrideBooted('auth'));
+        $this->assertTrue($overrides->hasOverrideBooted('session'));
         $this->assertFalse($overrides->hasOverrideBooted('cookie'));
     }
 
@@ -97,15 +97,15 @@ class ServiceOverrideManagerTest extends UnitTestCase
     public function canReturnServiceOverrides(): void
     {
         config()->set('sprout.overrides', [
-            'auth'   => ['driver' => AuthOverride::class],
-            'cookie' => ['driver' => CookieOverride::class],
+            'session' => ['driver' => SessionOverride::class],
+            'cookie'  => ['driver' => CookieOverride::class],
         ]);
 
         $overrides = sprout()->overrides();
 
         $overrides->registerOverrides();
 
-        $this->assertInstanceOf(AuthOverride::class, $overrides->get('auth'));
+        $this->assertInstanceOf(SessionOverride::class, $overrides->get('session'));
         $this->assertInstanceOf(CookieOverride::class, $overrides->get('cookie'));
         $this->assertNull($overrides->get('missing'));
     }
@@ -114,17 +114,17 @@ class ServiceOverrideManagerTest extends UnitTestCase
     public function mapsServicesToTheirDriverClass(): void
     {
         config()->set('sprout.overrides', [
-            'auth'   => ['driver' => AuthOverride::class],
-            'cookie' => ['driver' => CookieOverride::class],
+            'session' => ['driver' => SessionOverride::class],
+            'cookie'  => ['driver' => CookieOverride::class],
         ]);
 
         $overrides = sprout()->overrides();
 
         $overrides->registerOverrides();
 
-        $this->assertSame(AuthOverride::class, $overrides->getOverrideClass('auth'));
+        $this->assertSame(SessionOverride::class, $overrides->getOverrideClass('session'));
         $this->assertSame(CookieOverride::class, $overrides->getOverrideClass('cookie'));
-        $this->assertInstanceOf(AuthOverride::class, $overrides->get('auth'));
+        $this->assertInstanceOf(SessionOverride::class, $overrides->get('session'));
         $this->assertInstanceOf(CookieOverride::class, $overrides->get('cookie'));
     }
 
@@ -134,15 +134,15 @@ class ServiceOverrideManagerTest extends UnitTestCase
         $this->expectException(TenancyMissingException::class);
         $this->expectExceptionMessage('There is no current tenancy');
 
-        sprout()->overrides()->hasOverrideBeenSetUp('auth');
+        sprout()->overrides()->hasOverrideBeenSetUp('session');
     }
 
     #[Test]
     public function keepsTrackOfServiceOverridesThatHaveBeenSetupForEachTenancy(): void
     {
         config()->set('sprout.overrides', [
-            'auth'   => ['driver' => AuthOverride::class],
-            'cookie' => ['driver' => CookieOverride::class],
+            'session' => ['driver' => SessionOverride::class],
+            'cookie'  => ['driver' => CookieOverride::class],
         ]);
 
         $tenancy = sprout()->tenancies()->get();
@@ -153,7 +153,7 @@ class ServiceOverrideManagerTest extends UnitTestCase
 
         $overrides->registerOverrides();
 
-        $this->assertFalse($overrides->hasOverrideBeenSetUp('auth'));
+        $this->assertFalse($overrides->hasOverrideBeenSetUp('session'));
         $this->assertFalse($overrides->hasOverrideBeenSetUp('cookie'));
         $this->assertEmpty($overrides->getSetupOverrides($tenancy));
     }
@@ -162,8 +162,8 @@ class ServiceOverrideManagerTest extends UnitTestCase
     public function setsUpOverridesForTenancies(): void
     {
         config()->set('sprout.overrides', [
-            'auth'   => ['driver' => AuthOverride::class],
-            'cookie' => ['driver' => CookieOverride::class],
+            'session' => ['driver' => SessionOverride::class],
+            'cookie'  => ['driver' => CookieOverride::class],
         ]);
 
         $tenancy = sprout()->tenancies()->get();
@@ -178,25 +178,25 @@ class ServiceOverrideManagerTest extends UnitTestCase
 
         $overrides->registerOverrides();
 
-        $this->assertFalse($overrides->hasOverrideBeenSetUp('auth'));
+        $this->assertFalse($overrides->hasOverrideBeenSetUp('session'));
         $this->assertFalse($overrides->hasOverrideBeenSetUp('cookie'));
         $this->assertEmpty($overrides->getSetupOverrides($tenancy));
 
         $overrides->setupOverrides($tenancy, $tenant);
 
-        $this->assertTrue($overrides->hasOverrideBeenSetUp('auth'));
+        $this->assertTrue($overrides->hasOverrideBeenSetUp('session'));
         $this->assertTrue($overrides->hasOverrideBeenSetUp('cookie'));
-        $this->assertContains('auth', $overrides->getSetupOverrides($tenancy));
+        $this->assertContains('session', $overrides->getSetupOverrides($tenancy));
         $this->assertContains('cookie', $overrides->getSetupOverrides($tenancy));
-        $this->assertNotContains('session', $overrides->getSetupOverrides($tenancy));
+        $this->assertNotContains('auth', $overrides->getSetupOverrides($tenancy));
     }
 
     #[Test]
     public function onlySetsUpOverridesConfiguredForTenancy(): void
     {
         config()->set('sprout.overrides', [
-            'auth'   => ['driver' => AuthOverride::class],
-            'cookie' => ['driver' => CookieOverride::class],
+            'session' => ['driver' => SessionOverride::class],
+            'cookie'  => ['driver' => CookieOverride::class],
         ]);
 
         config()->set('multitenancy.tenancies.tenants.options', [TenancyOptions::overrides(['cookie'])]);
@@ -213,15 +213,15 @@ class ServiceOverrideManagerTest extends UnitTestCase
 
         $overrides->registerOverrides();
 
-        $this->assertFalse($overrides->hasOverrideBeenSetUp('auth'));
+        $this->assertFalse($overrides->hasOverrideBeenSetUp('session'));
         $this->assertFalse($overrides->hasOverrideBeenSetUp('cookie'));
         $this->assertEmpty($overrides->getSetupOverrides($tenancy));
 
         $overrides->setupOverrides($tenancy, $tenant);
 
-        $this->assertFalse($overrides->hasOverrideBeenSetUp('auth'));
+        $this->assertFalse($overrides->hasOverrideBeenSetUp('session'));
         $this->assertTrue($overrides->hasOverrideBeenSetUp('cookie'));
-        $this->assertNotContains('auth', $overrides->getSetupOverrides($tenancy));
+        $this->assertNotContains('session', $overrides->getSetupOverrides($tenancy));
         $this->assertContains('cookie', $overrides->getSetupOverrides($tenancy));
         $this->assertNotContains('session', $overrides->getSetupOverrides($tenancy));
     }
@@ -230,8 +230,8 @@ class ServiceOverrideManagerTest extends UnitTestCase
     public function setsUpAllOverridesIfConfiguredTo(): void
     {
         config()->set('sprout.overrides', [
-            'auth'   => ['driver' => AuthOverride::class],
-            'cookie' => ['driver' => CookieOverride::class],
+            'session' => ['driver' => SessionOverride::class],
+            'cookie'  => ['driver' => CookieOverride::class],
         ]);
 
         config()->set('multitenancy.tenancies.tenants.options', [TenancyOptions::allOverrides()]);
@@ -248,25 +248,25 @@ class ServiceOverrideManagerTest extends UnitTestCase
 
         $overrides->registerOverrides();
 
-        $this->assertFalse($overrides->hasOverrideBeenSetUp('auth'));
+        $this->assertFalse($overrides->hasOverrideBeenSetUp('session'));
         $this->assertFalse($overrides->hasOverrideBeenSetUp('cookie'));
         $this->assertEmpty($overrides->getSetupOverrides($tenancy));
 
         $overrides->setupOverrides($tenancy, $tenant);
 
-        $this->assertTrue($overrides->hasOverrideBeenSetUp('auth'));
+        $this->assertTrue($overrides->hasOverrideBeenSetUp('session'));
         $this->assertTrue($overrides->hasOverrideBeenSetUp('cookie'));
-        $this->assertContains('auth', $overrides->getSetupOverrides($tenancy));
+        $this->assertContains('session', $overrides->getSetupOverrides($tenancy));
         $this->assertContains('cookie', $overrides->getSetupOverrides($tenancy));
-        $this->assertNotContains('session', $overrides->getSetupOverrides($tenancy));
+        $this->assertNotContains('auth', $overrides->getSetupOverrides($tenancy));
     }
 
     #[Test]
     public function onlyCleansUpOverridesThatHaveAlreadyBeenSetUp(): void
     {
         config()->set('sprout.overrides', [
-            'auth'   => ['driver' => AuthOverride::class],
-            'cookie' => ['driver' => CookieOverride::class],
+            'session' => ['driver' => SessionOverride::class],
+            'cookie'  => ['driver' => CookieOverride::class],
         ]);
 
         config()->set('multitenancy.tenancies.tenants.options', [TenancyOptions::overrides(['cookie'])]);
@@ -283,21 +283,21 @@ class ServiceOverrideManagerTest extends UnitTestCase
 
         $overrides->registerOverrides();
 
-        $this->assertFalse($overrides->hasOverrideBeenSetUp('auth'));
+        $this->assertFalse($overrides->hasOverrideBeenSetUp('session'));
         $this->assertFalse($overrides->hasOverrideBeenSetUp('cookie'));
         $this->assertEmpty($overrides->getSetupOverrides($tenancy));
 
         $overrides->setupOverrides($tenancy, $tenant);
 
-        $this->assertFalse($overrides->hasOverrideBeenSetUp('auth'));
+        $this->assertFalse($overrides->hasOverrideBeenSetUp('session'));
         $this->assertTrue($overrides->hasOverrideBeenSetUp('cookie'));
-        $this->assertNotContains('auth', $overrides->getSetupOverrides($tenancy));
+        $this->assertNotContains('session', $overrides->getSetupOverrides($tenancy));
         $this->assertContains('cookie', $overrides->getSetupOverrides($tenancy));
         $this->assertNotContains('session', $overrides->getSetupOverrides($tenancy));
 
         $overrides->cleanupOverrides($tenancy, $tenant);
 
-        $this->assertFalse($overrides->hasOverrideBeenSetUp('auth'));
+        $this->assertFalse($overrides->hasOverrideBeenSetUp('session'));
         $this->assertFalse($overrides->hasOverrideBeenSetUp('cookie'));
         $this->assertEmpty($overrides->getSetupOverrides($tenancy));
     }
@@ -305,10 +305,10 @@ class ServiceOverrideManagerTest extends UnitTestCase
     #[Test]
     public function errorsWhenRegisteringOverrideWithoutConfig(): void
     {
-        config()->set('sprout.overrides', ['auth' => null]);
+        config()->set('sprout.overrides', ['session' => null]);
 
         $this->expectException(MisconfigurationException::class);
-        $this->expectExceptionMessage('The service override for [auth] could not be found');
+        $this->expectExceptionMessage('The service override for [session] could not be found');
 
         sprout()->overrides()->registerOverrides();
     }
@@ -316,10 +316,10 @@ class ServiceOverrideManagerTest extends UnitTestCase
     #[Test]
     public function errorsWhenRegisteringOverrideWithoutDriver(): void
     {
-        config()->set('sprout.overrides', ['auth' => []]);
+        config()->set('sprout.overrides', ['session' => []]);
 
         $this->expectException(MisconfigurationException::class);
-        $this->expectExceptionMessage('The service override [auth] is missing a required value for \'driver\'');
+        $this->expectExceptionMessage('The service override [session] is missing a required value for \'driver\'');
 
         sprout()->overrides()->registerOverrides();
     }
@@ -327,10 +327,10 @@ class ServiceOverrideManagerTest extends UnitTestCase
     #[Test]
     public function errorsWhenRegisteringOverrideWithInvalidDriver(): void
     {
-        config()->set('sprout.overrides', ['auth' => ['driver' => \stdClass::class]]);
+        config()->set('sprout.overrides', ['session' => ['driver' => \stdClass::class]]);
 
         $this->expectException(MisconfigurationException::class);
-        $this->expectExceptionMessage('The provided value for \'driver\' is not valid for service override [auth]');
+        $this->expectExceptionMessage('The provided value for \'driver\' [stdClass] is not valid for service override [session]');
 
         sprout()->overrides()->registerOverrides();
     }

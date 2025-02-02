@@ -33,6 +33,16 @@ abstract class BaseOverride implements ServiceOverride
     }
 
     /**
+     * Get the service config
+     *
+     * @return array<string, mixed>
+     */
+    public function getConfig(): array
+    {
+        return $this->config;
+    }
+
+    /**
      * Set up the service override
      *
      * This method should perform any necessary setup actions for the service
