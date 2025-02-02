@@ -36,7 +36,11 @@ return [
     ],
 
     'auth' => [
-        'driver' => \Sprout\Overrides\AuthOverride::class,
+        'driver'    => \Sprout\Overrides\StackedOverride::class,
+        'overrides' => [
+            \Sprout\Overrides\AuthGuardOverride::class,
+            \Sprout\Overrides\AuthPasswordOverride::class,
+        ],
     ],
 
     'cookie' => [

@@ -16,7 +16,9 @@ use Sprout\Contracts\BootableServiceOverride;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 use Sprout\Overrides\Auth\SproutAuthPasswordBrokerManager;
-use Sprout\Overrides\AuthOverride;
+use Sprout\Overrides\AuthGuardOverride;
+use Sprout\Overrides\AuthPasswordOverride;
+use Sprout\Overrides\StackedOverride;
 use Sprout\Sprout;
 use Sprout\Support\SettingsRepository;
 use Sprout\Tests\Unit\UnitTestCase;
@@ -34,7 +36,8 @@ class AuthOverrideTest extends UnitTestCase
     #[Test]
     public function isBuiltCorrectly(): void
     {
-        $this->assertTrue(is_subclass_of(AuthOverride::class, BootableServiceOverride::class));
+        $this->assertFalse(is_subclass_of(AuthGuardOverride::class, BootableServiceOverride::class));
+        $this->assertTrue(is_subclass_of(AuthPasswordOverride::class, BootableServiceOverride::class));
     }
 
     #[Test]
@@ -44,7 +47,11 @@ class AuthOverrideTest extends UnitTestCase
 
         config()->set('sprout.overrides', [
             'auth' => [
-                'driver' => AuthOverride::class,
+                'driver'    => StackedOverride::class,
+                'overrides' => [
+                    AuthGuardOverride::class,
+                    AuthPasswordOverride::class,
+                ],
             ],
         ]);
 
@@ -53,7 +60,7 @@ class AuthOverrideTest extends UnitTestCase
         $sprout->overrides()->registerOverrides();
 
         $this->assertTrue($sprout->overrides()->hasOverride('auth'));
-        $this->assertSame(AuthOverride::class, $sprout->overrides()->getOverrideClass('auth'));
+        $this->assertSame(StackedOverride::class, $sprout->overrides()->getOverrideClass('auth'));
         $this->assertTrue($sprout->overrides()->isOverrideBootable('auth'));
         $this->assertTrue($sprout->overrides()->hasOverrideBooted('auth'));
     }
@@ -61,7 +68,12 @@ class AuthOverrideTest extends UnitTestCase
     #[Test, DataProvider('authPasswordResolvedDataProvider')]
     public function bootsCorrectly(bool $return): void
     {
-        $override = new AuthOverride('auth', []);
+        $override = new StackedOverride('auth', [
+            'overrides' => [
+                AuthGuardOverride::class,
+                AuthPasswordOverride::class,
+            ],
+        ]);
 
         /** @var \Illuminate\Foundation\Application&MockInterface $app */
         $app = Mockery::mock($this->app, static function (MockInterface $mock) use ($return) {
@@ -88,6 +100,8 @@ class AuthOverrideTest extends UnitTestCase
 
         $sprout = new Sprout($app, new SettingsRepository());
 
+        $override->setApp($app)->setSprout($sprout);
+
         $override->boot($app, $sprout);
 
         // These are only here because there would be errors if their
@@ -99,7 +113,12 @@ class AuthOverrideTest extends UnitTestCase
     #[Test]
     public function overridesThePasswordBrokerManager(): void
     {
-        $override = new AuthOverride('auth', []);
+        $override = new StackedOverride('auth', [
+            'overrides' => [
+                AuthGuardOverride::class,
+                AuthPasswordOverride::class,
+            ],
+        ]);
 
         /** @var \Illuminate\Foundation\Application&MockInterface $app */
         $app = Mockery::mock($this->app, static function (MockInterface $mock) {
@@ -107,6 +126,8 @@ class AuthOverrideTest extends UnitTestCase
         });
 
         $sprout = new Sprout($app, new SettingsRepository());
+
+        $override->setApp($app)->setSprout($sprout);
 
         $override->boot($app, $sprout);
 
@@ -118,7 +139,12 @@ class AuthOverrideTest extends UnitTestCase
     #[Test, DataProvider('authResolvedDataProvider')]
     public function setsUpForTheTenancy(bool $authReturn, bool $authPasswordReturn): void
     {
-        $override = new AuthOverride('auth', []);
+        $override = new StackedOverride('auth', [
+            'overrides' => [
+                AuthGuardOverride::class,
+                AuthPasswordOverride::class,
+            ],
+        ]);
 
         /** @var \Illuminate\Foundation\Application&MockInterface $app */
         $app = Mockery::mock($this->app, static function (MockInterface $mock) use ($authReturn, $authPasswordReturn) {
@@ -160,6 +186,8 @@ class AuthOverrideTest extends UnitTestCase
         });
 
         $sprout = new Sprout($app, new SettingsRepository());
+
+        $override->setApp($app)->setSprout($sprout);
 
         $override->boot($app, $sprout);
 
@@ -172,7 +200,12 @@ class AuthOverrideTest extends UnitTestCase
     #[Test, DataProvider('authResolvedDataProvider')]
     public function cleansUpAfterTheTenancy(bool $authReturn, bool $authPasswordReturn): void
     {
-        $override = new AuthOverride('auth', []);
+        $override = new StackedOverride('auth', [
+            'overrides' => [
+                AuthGuardOverride::class,
+                AuthPasswordOverride::class,
+            ],
+        ]);
 
         /** @var \Illuminate\Foundation\Application&MockInterface $app */
         $app = Mockery::mock($this->app, static function (MockInterface $mock) use ($authReturn, $authPasswordReturn) {
@@ -215,6 +248,8 @@ class AuthOverrideTest extends UnitTestCase
 
         $sprout = new Sprout($app, new SettingsRepository());
 
+        $override->setApp($app)->setSprout($sprout);
+
         $override->boot($app, $sprout);
 
         $override->cleanup(
@@ -226,7 +261,12 @@ class AuthOverrideTest extends UnitTestCase
     #[Test, DataProvider('authResolvedDataProvider')]
     public function cleansUpAfterTheTenancyWithoutOverriddenBrokerManager(bool $authReturn, bool $authPasswordReturn): void
     {
-        $override = new AuthOverride('auth', []);
+        $override = new StackedOverride('auth', [
+            'overrides' => [
+                AuthGuardOverride::class,
+                AuthPasswordOverride::class,
+            ],
+        ]);
 
         /** @var \Illuminate\Foundation\Application&MockInterface $app */
         $app = Mockery::mock($this->app, static function (MockInterface $mock) use ($authReturn, $authPasswordReturn) {
@@ -268,6 +308,8 @@ class AuthOverrideTest extends UnitTestCase
         });
 
         $sprout = new Sprout($app, new SettingsRepository());
+
+        $override->setApp($app)->setSprout($sprout);
 
         $override->boot($app, $sprout);
 
