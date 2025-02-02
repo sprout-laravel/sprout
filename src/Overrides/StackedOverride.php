@@ -23,7 +23,7 @@ final class StackedOverride extends BaseOverride implements BootableServiceOverr
     private array $overridesClasses;
 
     /**
-     * @var list<OverrideClass>
+     * @var array<class-string<OverrideClass>, OverrideClass>
      */
     private array $overrides = [];
 
@@ -59,13 +59,14 @@ final class StackedOverride extends BaseOverride implements BootableServiceOverr
         }
 
         foreach ($this->overridesClasses as $value) {
-            $override = null;
+            $override = $overrideClass = null;
 
             if ($value instanceof ServiceOverride) {
                 // We might just have an instance of a service override,
                 // which is totally possible.
                 // Honest!
-                $override = $value;
+                $override      = $value;
+                $overrideClass = $override::class;
             } else if (is_string($value)) {
                 // We're either looking at a class name with no config
                 if (! is_subclass_of($value, ServiceOverride::class)) {
@@ -76,6 +77,8 @@ final class StackedOverride extends BaseOverride implements BootableServiceOverr
                     'service' => $this->service,
                     'config'  => [],
                 ]);
+
+                $overrideClass = $value;
             } else if (is_array($value)) {
                 if (! isset($value['driver'])) {
                     throw MisconfigurationException::missingConfig('overrides.*.driver', 'service override', $this->service);
@@ -90,6 +93,8 @@ final class StackedOverride extends BaseOverride implements BootableServiceOverr
                     'service' => $this->service,
                     'config'  => Arr::except($value, 'driver'),
                 ]);
+
+                $overrideClass = $value['driver'];
             }
 
             if ($override === null) {
@@ -106,18 +111,32 @@ final class StackedOverride extends BaseOverride implements BootableServiceOverr
                 $override->setSprout($sprout);
             }
 
-            $this->overrides[] = $override;
+            $this->overrides[$overrideClass] = $override;
         }
     }
 
     /**
      * Get the created overrides
      *
-     * @return list<OverrideClass>
+     * @return array<class-string<OverrideClass>, OverrideClass>
      */
     public function getOverrides(): array
     {
         return $this->overrides;
+    }
+
+    /**
+     * @template ServiceOverrideClass of OverrideClass
+     *
+     * @param class-string<ServiceOverrideClass> $class
+     *
+     * @return \Sprout\Contracts\ServiceOverride|null
+     *
+     * @phpstan-require-implements ServiceOverrideClass|null
+     */
+    public function getOverride(string $class): ?ServiceOverride
+    {
+        return $this->overrides[$class] ?? null;
     }
 
     /**

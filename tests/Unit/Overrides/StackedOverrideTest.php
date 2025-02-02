@@ -215,9 +215,9 @@ class StackedOverrideTest extends UnitTestCase
         $overrides = $override->getOverrides();
 
         $this->assertCount(2, $overrides);
-        $this->assertInstanceOf(AuthPasswordOverride::class, $overrides[0]);
-        $this->assertInstanceOf(AuthGuardOverride::class, $overrides[1]);
-        $this->assertSame(['test1' => 'value1'], $overrides[0]->getConfig());
-        $this->assertSame(['test2' => 'value2'], $overrides[1]->getConfig());
+        $this->assertInstanceOf(AuthPasswordOverride::class, $overrides[AuthPasswordOverride::class]);
+        $this->assertInstanceOf(AuthGuardOverride::class, $overrides[AuthGuardOverride::class]);
+        $this->assertSame(['test1' => 'value1'], $overrides[AuthPasswordOverride::class]->getConfig());
+        $this->assertSame(['test2' => 'value2'], $overrides[AuthGuardOverride::class]->getConfig());
     }
 }
