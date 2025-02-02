@@ -357,7 +357,7 @@ final class ServiceOverrideManager
         // If there is a driver, but it doesn't implement the correct interface,
         // that's also an issue
         if (! is_subclass_of($config['driver'], ServiceOverride::class)) {
-            throw MisconfigurationException::invalidConfig('driver', 'service override', $service);
+            throw MisconfigurationException::invalidConfig('driver', 'service override', $service, $config['driver']);
         }
 
         /** @var class-string<\Sprout\Contracts\ServiceOverride> $driver */

@@ -72,7 +72,7 @@ final class TenantProviderManager extends BaseFactory
             || ! is_subclass_of($config['model'], Model::class)
             || ! is_subclass_of($config['model'], Tenant::class)
         ) {
-            throw MisconfigurationException::invalidConfig('model', 'provider', $name);
+            throw MisconfigurationException::invalidConfig('model', 'provider', $name, $config['model']);
         }
 
         return new EloquentTenantProvider($name, $config['model']);
@@ -103,7 +103,7 @@ final class TenantProviderManager extends BaseFactory
                 || ! is_subclass_of($config['entity'], Tenant::class)
             )
         ) {
-            throw MisconfigurationException::invalidConfig('entity', 'provider', $name);
+            throw MisconfigurationException::invalidConfig('entity', 'provider', $name, $config['entity']);
         }
 
         if (! isset($config['table'])) {
@@ -116,7 +116,7 @@ final class TenantProviderManager extends BaseFactory
             // It's worth checking that the provided value is in fact a model,
             // otherwise things are going to get awkward
             if (! is_subclass_of($config['table'], Model::class)) {
-                throw MisconfigurationException::invalidConfig('table', 'provider', $name);
+                throw MisconfigurationException::invalidConfig('table', 'provider', $name, $config['table']);
             }
 
             $model      = new $config['table']();

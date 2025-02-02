@@ -167,7 +167,7 @@ class TenantProviderManagerTest extends UnitTestCase
         $manager = sprout()->providers();
 
         $this->expectException(MisconfigurationException::class);
-        $this->expectExceptionMessage('The provided value for \'model\' is not valid for provider [tenants]');
+        $this->expectExceptionMessage('The provided value for \'model\' [stdClass] is not valid for provider [tenants]');
 
         $manager->get('tenants');
     }
@@ -180,7 +180,7 @@ class TenantProviderManagerTest extends UnitTestCase
         $manager = sprout()->providers();
 
         $this->expectException(MisconfigurationException::class);
-        $this->expectExceptionMessage('The provided value for \'entity\' is not valid for provider [backup]');
+        $this->expectExceptionMessage('The provided value for \'entity\' [stdClass] is not valid for provider [backup]');
 
         $manager->get('backup');
     }
@@ -206,7 +206,7 @@ class TenantProviderManagerTest extends UnitTestCase
         $manager = sprout()->providers();
 
         $this->expectException(MisconfigurationException::class);
-        $this->expectExceptionMessage('The provided value for \'table\' is not valid for provider [backup]');
+        $this->expectExceptionMessage('The provided value for \'table\' [stdClass] is not valid for provider [backup]');
 
         $manager->get('backup');
     }

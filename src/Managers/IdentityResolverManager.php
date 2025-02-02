@@ -89,7 +89,7 @@ final class IdentityResolverManager extends BaseFactory
         $segment = $config['segment'] ?? 1;
 
         if ($segment < 1) {
-            throw MisconfigurationException::invalidConfig('segment', 'resolver', $name);
+            throw MisconfigurationException::invalidConfig('segment', 'resolver', $name, $segment);
         }
 
         return new PathIdentityResolver(
