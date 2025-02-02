@@ -58,12 +58,6 @@
       "@prepare",
       "@build",
       "@php vendor/bin/phpunit --testsuite=Unit,Feature"
-    ],
-    "mutation"          : [
-      "@clear",
-      "@prepare",
-      "@build",
-      "@php vendor/bin/infection --threads=12"
     ]
   },
   "extra"            : {
@@ -72,8 +66,11 @@
         "Sprout\\SproutServiceProvider"
       ],
       "facades"  : [
+        "Sprout\\Facades\\Overrides",
+        "Sprout\\Facades\\Providers",
+        "Sprout\\Facades\\Resolvers",
         "Sprout\\Facades\\Sprout",
-        "Sprout\\Facades\\Overrides"
+        "Sprout\\Facades\\Tenancies"
       ]
     },
     "branch-alias": {
@@ -81,8 +78,6 @@
     }
   },
   "config"           : {
-    "allow-plugins": {
-      "infection/extension-installer": true
-    }
+    "allow-plugins": {}
   }
 }
