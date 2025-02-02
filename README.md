@@ -22,34 +22,45 @@ the [documentation](https://sprout.ollieread.com/docs/1.x).
 
 Sprout comes out of the box with the following features:
 
-- **Tenant Identification**: Sprout can identify tenants by _subdomain_, _path_, _header_, _cookie_ or session.
+- **Tenant Identification**:
+  Sprout can identify tenants by _subdomain_, _path_, _header_, _cookie_ or session.
   It can do this immediately once a route is matched, or during the middleware stack.
-- **Multiple Tenancies**: Sprout can handle multiple tenancies, as in multiple different models that are tenants.
-- **Tenant Storage Disks**: Sprout comes with a service override that allows you to create a storage disk that 
+- **Multiple Tenancies**: 
+  Sprout can handle multiple tenancies, as in multiple different models that are tenants.
+- **Tenant Storage Disks**: 
+  Sprout comes with a service override that allows you to create a storage disk that 
   always points to the current tenant's storage directory.
-- **Tenant Sessions & Cookies**: If you're identifying tenants via a method that uses the URL (subdomain or path), 
+- **Tenant Sessions & Cookies**: 
+  If you're identifying tenants via a method that uses the URL (subdomain or path), 
   cookies, and therefore the session cookie, will be automatically scoped to the current tenant.
-- **Tenant Cache Stores**: Just like with storage disks, Sprout allows you to create a cache store that always 
+- **Tenant Cache Stores**: 
+  Just like with storage disks, Sprout allows you to create a cache store that always 
   returns the current tenants cache.
-- **Tenant Aware Jobs**: When a job is dispatched, Sprout will make sure that any tenancies that are active are 
+- **Tenant Aware Jobs**: 
+  When a job is dispatched, Sprout will make sure that any tenancies that are active are 
   recreated when the job is processing, along with their current tenants.
-- **Tenant Password Resets**: If you're following a model where users belong to a single tenant, you'll also want to 
+- **Tenant Password Resets**: 
+  If you're following a model where users belong to a single tenant, you'll also want to 
   make sure that password resets are scoped to the tenant.
   Sprout can do this for you.
-- **Automatic Scoping**: As well as all the automated scoping of storage disks, cache stores, jobs, password resets 
+- **Automatic Scoping**: 
+  As well as all the automated scoping of storage disks, cache stores, jobs, password resets 
   and so on, Sprout also comes with a set of functionality for automatically scoping models, during creation and 
   querying.
 
 There are also three upcoming first-party addons for Sprout:
 
-- [**Sprout Bud**](https://github.com/sprout-laravel/bud): Bud allows you to manage tenant-specific 
+- [**Sprout Bud**](https://github.com/sprout-laravel/bud): 
+  Bud allows you to manage tenant-specific 
   configuration, with built-in support for 
   dynamically configuring a whole of Laravels core connections and driver-based services.
-- [**Sprout Seedling**](https://github.com/sprout-laravel/seedling): Seedling builds on-top of the functionality 
+- [**Sprout Seedling**](https://github.com/sprout-laravel/seedling): 
+  Seedling builds on-top of the functionality 
   provided by Sprout Bud, to bring multi-tenant-specific database support to your Laravel application.
   As well as enabling the dynamic configuration of connections, it comes with a batch of supporting functionality to 
   make managing tenant-specific databases easier.
-- [**Sprout Terra**](https://github.com/sprout-laravel/terra): Terra brings _domain_-based identification to 
+- [**Sprout Terra**](https://github.com/sprout-laravel/terra): 
+  Terra brings _domain_-based identification to 
   Sprout, allowing you to identify tenants based on the domain they are accessing your application from.
   Just like with Seedling, it also comes with a bunch of supporting functionality for dealing with tenant domains.
 
