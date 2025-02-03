@@ -147,11 +147,11 @@ trait IsTenantChild
      */
     public function getTenantRelationName(): ?string
     {
-        if (! isset(self::$tenantRelationName, $this->tenantRelationNames[static::class])) {
-            self::$tenantRelationName = $this->findTenantRelationName();
+        if (! isset(static::$tenantRelationName)) {
+            static::$tenantRelationName = $this->findTenantRelationName();
         }
 
-        return self::$tenantRelationName ?? null;
+        return static::$tenantRelationName ?? null;
     }
 
     /**
