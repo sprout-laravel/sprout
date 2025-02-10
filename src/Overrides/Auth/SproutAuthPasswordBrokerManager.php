@@ -48,7 +48,7 @@ class SproutAuthPasswordBrokerManager extends PasswordBrokerManager
         $key = $this->app->make('config')->get('app.key');
 
         // @codeCoverageIgnoreStart
-        if (str_starts_with($key, 'base64:')) { // @infection-ignore-all
+        if (str_starts_with($key, 'base64:')) {    // @infection-ignore-all
             $key = base64_decode(substr($key, 7)); // @infection-ignore-all
         }
         // @codeCoverageIgnoreEnd

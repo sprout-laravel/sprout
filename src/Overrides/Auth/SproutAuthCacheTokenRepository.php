@@ -14,7 +14,6 @@ use Sprout\Contracts\TenantHasResources;
 use Sprout\Exceptions\TenancyMissingException;
 use Sprout\Exceptions\TenantMissingException;
 use Sprout\Sprout;
-use function Sprout\sprout;
 
 class SproutAuthCacheTokenRepository extends CacheTokenRepository
 {
@@ -23,15 +22,15 @@ class SproutAuthCacheTokenRepository extends CacheTokenRepository
      */
     private Sprout $sprout;
 
-    /** @infection-ignore-all  */
+    /** @infection-ignore-all */
     public function __construct(
-        Sprout $sprout,
-        Repository $cache,
+        Sprout         $sprout,
+        Repository     $cache,
         HasherContract $hasher,
-        string $hashKey,
-        int $expires = 3600,
-        int $throttle = 60,
-        string $prefix = ''
+        string         $hashKey,
+        int            $expires = 3600,
+        int            $throttle = 60,
+        string         $prefix = ''
     )
     {
         parent::__construct($cache, $hasher, $hashKey, $expires, $throttle, $prefix);

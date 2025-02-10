@@ -14,7 +14,6 @@ use Sprout\Contracts\Tenant;
 use Sprout\Exceptions\TenantMissingException;
 use Sprout\Http\Middleware\TenantRoutes;
 use Sprout\Support\BaseIdentityResolver;
-use function Sprout\settings;
 
 /**
  * Path Identity Resolver

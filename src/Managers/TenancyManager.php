@@ -60,8 +60,8 @@ final class TenancyManager extends BaseFactory
     /**
      * Create the default implementation
      *
-     * @param array<string, mixed>                                                  $config
-     * @param string                                                                $name
+     * @param array<string, mixed>                                          $config
+     * @param string                                                        $name
      *
      * @phpstan-param array{provider?: string|null, options?: list<string>} $config
      *

@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Sprout\Overrides;
 
-use Illuminate\Auth\AuthManager;
 use Illuminate\Contracts\Foundation\Application;
 use Sprout\Contracts\BootableServiceOverride;
 use Sprout\Contracts\Tenancy;
@@ -44,7 +43,7 @@ final class AuthPasswordOverride extends BaseOverride implements BootableService
         // 'auth.password.broker' as it will proxy to our new 'auth.password'.
 
         // This is the actual thing we need.
-        $app->singleton('auth.password', function ($app) use($sprout) {
+        $app->singleton('auth.password', function ($app) use ($sprout) {
             return new SproutAuthPasswordBrokerManager($app, $sprout);
         });
 
