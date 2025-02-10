@@ -15,7 +15,7 @@ trait AwareOfSprout
     public function setSprout(Sprout $sprout): static
     {
         $this->sprout = $sprout;
-        
+
         return $this;
     }
 

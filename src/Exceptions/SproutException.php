@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Sprout\Exceptions;
 
+use Exception;
+
 /**
  * Sprout Exception
  *
@@ -13,7 +15,7 @@ namespace Sprout\Exceptions;
  *
  * @codeCoverageIgnore
  */
-abstract class SproutException extends \Exception
+abstract class SproutException extends Exception
 {
 
 }

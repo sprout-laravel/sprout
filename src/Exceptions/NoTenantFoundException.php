@@ -18,8 +18,8 @@ final class NoTenantFoundException extends SproutException
     /**
      * Create the exception
      *
-     * @param string      $resolver
-     * @param string      $tenancy
+     * @param string $resolver
+     * @param string $tenancy
      *
      * @return self
      */

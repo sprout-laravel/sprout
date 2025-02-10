@@ -1,7 +1,5 @@
 <?php
 
-use Sprout\Support\Services;
-
 return [
 
     /*

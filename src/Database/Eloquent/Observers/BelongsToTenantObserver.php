@@ -72,6 +72,16 @@ class BelongsToTenantObserver
      */
     private function passesInitialChecks(Model $model, Tenancy $tenancy, BelongsTo $relation, bool $succeedOnMatch = false): bool
     {
+        /**
+         * If the model has opted to ignore tenant restrictions, we can exit early
+         * and return true.
+         *
+         * @phpstan-ignore-next-line
+         */
+        if ($model::shouldIgnoreTenantRestrictions()) {
+            return true;
+        }
+
         // If we don't have a current tenant, we may need to do something
         if (! $tenancy->check()) {
             // The model doesn't require a tenant, so we exit silently

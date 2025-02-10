@@ -15,7 +15,7 @@ trait AwareOfApp
     public function setApp(Application $app): static
     {
         $this->app = $app;
-        
+
         return $this;
     }
 

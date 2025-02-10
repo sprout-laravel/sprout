@@ -10,7 +10,7 @@
 | Service overrides are registered against a "service", which is an arbitrary
 | string value, used to prevent multiple overrides for a single service.
 |
-| All services overrides should have a "driver" which should contain an FQN
+| All service overrides should have a "driver" which should contain an FQN
 | for a class that implements the ServiceOverride interface.
 | Any other config options will depend on the individual service override
 | driver.
@@ -20,11 +20,11 @@
 return [
 
     'filesystem' => [
-        'driver'  => \Sprout\Overrides\FilesystemOverride::class,
-        // This config option defines whether the filesystem override will
-        // override the filesystem manager with a Sprout version.
-        // The default value is 'true'
-        'manager' => true,
+        'driver'    => \Sprout\Overrides\StackedOverride::class,
+        'overrides' => [
+            \Sprout\Overrides\FilesystemManagerOverride::class,
+            \Sprout\Overrides\FilesystemOverride::class,
+        ],
     ],
 
     'job' => [
@@ -36,7 +36,11 @@ return [
     ],
 
     'auth' => [
-        'driver' => \Sprout\Overrides\AuthOverride::class,
+        'driver'    => \Sprout\Overrides\StackedOverride::class,
+        'overrides' => [
+            \Sprout\Overrides\AuthGuardOverride::class,
+            \Sprout\Overrides\AuthPasswordOverride::class,
+        ],
     ],
 
     'cookie' => [

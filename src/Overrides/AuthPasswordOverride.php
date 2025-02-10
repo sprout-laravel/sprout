@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Sprout\Overrides;
 
-use Illuminate\Auth\AuthManager;
 use Illuminate\Contracts\Foundation\Application;
 use Sprout\Contracts\BootableServiceOverride;
 use Sprout\Contracts\Tenancy;
@@ -12,19 +11,14 @@ use Sprout\Overrides\Auth\SproutAuthPasswordBrokerManager;
 use Sprout\Sprout;
 
 /**
- * Auth Override
+ * Auth Password Override
  *
  * This class provides the override/multitenancy extension/features for Laravels
- * auth service.
- *
- * This override cannot be deferred as it works with several services, and it's
- * possible that one could be loaded without the other.
- * Instead, the code that deals with the various services is wrapped in a
- * condition to only run if the service itself has been loaded.
+ * auth password broker service.
  *
  * @package Overrides
  */
-final class AuthOverride extends BaseOverride implements BootableServiceOverride
+final class AuthPasswordOverride extends BaseOverride implements BootableServiceOverride
 {
     /**
      * Boot a service override
@@ -39,10 +33,6 @@ final class AuthOverride extends BaseOverride implements BootableServiceOverride
      */
     public function boot(Application $app, Sprout $sprout): void
     {
-        // Set the app and sprout instances, so we don't have to mess
-        // around with global helpers
-        $this->setApp($app)->setSprout($sprout);
-
         // Although this isn't strictly necessary, this is here to tidy up
         // the list of deferred services, just in case there's some weird gotcha
         // somewhere that causes the provider to be loaded anyway.
@@ -53,7 +43,7 @@ final class AuthOverride extends BaseOverride implements BootableServiceOverride
         // 'auth.password.broker' as it will proxy to our new 'auth.password'.
 
         // This is the actual thing we need.
-        $app->singleton('auth.password', function ($app) use($sprout) {
+        $app->singleton('auth.password', function ($app) use ($sprout) {
             return new SproutAuthPasswordBrokerManager($app, $sprout);
         });
 
@@ -81,7 +71,6 @@ final class AuthOverride extends BaseOverride implements BootableServiceOverride
      */
     public function setup(Tenancy $tenancy, Tenant $tenant): void
     {
-        $this->forgetGuards();
         $this->flushPasswordBrokers();
     }
 
@@ -103,28 +92,7 @@ final class AuthOverride extends BaseOverride implements BootableServiceOverride
      */
     public function cleanup(Tenancy $tenancy, Tenant $tenant): void
     {
-        $this->forgetGuards();
         $this->flushPasswordBrokers();
-    }
-
-    /**
-     * Forget all resolved guards
-     *
-     * @return void
-     */
-    protected function forgetGuards(): void
-    {
-        // Since this class isn't deferred because it has to rely on
-        // multiple services, we only want to actually run this code if
-        // the auth manager has been resolved.
-        if ($this->getApp()->resolved('auth')) {
-            /** @var \Illuminate\Auth\AuthManager $authManager */
-            $authManager = $this->getApp()->make(AuthManager::class);
-
-            if ($authManager->hasResolvedGuards()) {
-                $authManager->forgetGuards();
-            }
-        }
     }
 
     /**

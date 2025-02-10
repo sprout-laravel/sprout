@@ -25,7 +25,7 @@ class TenantChildren extends Model
      */
     public function tenants(): BelongsToMany
     {
-        return $this->belongsToMany(TenantModel::class, 'tenant_relations', 'tenant_id', 'tenant_child2_id');
+        return $this->belongsToMany(TenantModel::class, 'tenant_relations', 'tenant_child2_id', 'tenant_id');
     }
 
     public function getTenantRelationName(): string

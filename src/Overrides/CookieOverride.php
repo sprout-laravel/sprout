@@ -6,7 +6,6 @@ namespace Sprout\Overrides;
 use Illuminate\Cookie\CookieJar;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
-use function Sprout\settings;
 
 /**
  * Cookie Override

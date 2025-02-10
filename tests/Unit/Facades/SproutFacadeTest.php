@@ -12,8 +12,6 @@ class SproutFacadeTest extends UnitTestCase
     #[Test]
     public function usesCorrectInstance(): void
     {
-        $sprout = $this->app->make('sprout');
-
-        $this->assertEquals($sprout, Sprout::getFacadeRoot());
+        $this->assertEquals(\Sprout\sprout(), Sprout::getFacadeRoot());
     }
 }

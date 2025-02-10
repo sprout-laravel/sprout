@@ -8,7 +8,6 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Router;
 use Illuminate\Routing\RouteRegistrar;
 use Sprout\Contracts\Tenancy;
-use Sprout\Contracts\Tenant;
 use Sprout\Http\Middleware\AddTenantHeaderToResponse;
 use Sprout\Http\Middleware\TenantRoutes;
 use Sprout\Support\BaseIdentityResolver;
@@ -34,8 +33,8 @@ final class HeaderIdentityResolver extends BaseIdentityResolver
     /**
      * Create a new instance
      *
-     * @param string                                  $name
-     * @param string|null                             $header
+     * @param string                                $name
+     * @param string|null                           $header
      * @param array<\Sprout\Support\ResolutionHook> $hooks
      */
     public function __construct(string $name, ?string $header = null, array $hooks = [])

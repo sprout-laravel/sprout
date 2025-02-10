@@ -14,7 +14,6 @@ use Sprout\Contracts\Tenancy;
 use Sprout\Exceptions\TenancyMissingException;
 use Sprout\Exceptions\TenantMissingException;
 use Sprout\Sprout;
-use function Sprout\sprout;
 
 /**
  * Sprout Auth Database Token Repository
@@ -32,15 +31,15 @@ class SproutAuthDatabaseTokenRepository extends DatabaseTokenRepository
      */
     private Sprout $sprout;
 
-    /** @infection-ignore-all  */
+    /** @infection-ignore-all */
     public function __construct(
-        Sprout $sprout,
+        Sprout              $sprout,
         ConnectionInterface $connection,
-        HasherContract $hasher,
-        $table,
-        $hashKey,
-        $expires = 60,
-        $throttle = 60
+        HasherContract      $hasher,
+                            $table,
+                            $hashKey,
+                            $expires = 60,
+                            $throttle = 60
     )
     {
         parent::__construct($connection, $hasher, $table, $hashKey, $expires, $throttle);
@@ -121,7 +120,7 @@ class SproutAuthDatabaseTokenRepository extends DatabaseTokenRepository
         if (! $this->sprout->withinContext()) {
             return $this->getTable()->where('email', $email);
         }
-        
+
         $tenancy = $this->getTenancy();
 
         return $this->getTable()

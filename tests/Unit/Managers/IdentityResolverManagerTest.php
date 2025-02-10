@@ -177,7 +177,7 @@ class IdentityResolverManagerTest extends UnitTestCase
         $manager = sprout()->resolvers();
 
         $this->expectException(MisconfigurationException::class);
-        $this->expectExceptionMessage('The provided value for \'segment\' is not valid for resolver [path]');
+        $this->expectExceptionMessage('The provided value for \'segment\' [-7] is not valid for resolver [path]');
 
         $manager->get('path');
     }

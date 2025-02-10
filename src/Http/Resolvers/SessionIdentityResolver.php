@@ -8,15 +8,12 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Router;
 use Illuminate\Routing\RouteRegistrar;
 use Sprout\Contracts\Tenancy;
-use Sprout\Contracts\Tenant;
 use Sprout\Exceptions\CompatibilityException;
 use Sprout\Http\Middleware\TenantRoutes;
-use Sprout\Overrides\SessionOverride;
 use Sprout\Support\BaseIdentityResolver;
 use Sprout\Support\PlaceholderHelper;
 use Sprout\Support\ResolutionHook;
 use Sprout\TenancyOptions;
-use function Sprout\sprout;
 
 /**
  * Session Identity Resolver

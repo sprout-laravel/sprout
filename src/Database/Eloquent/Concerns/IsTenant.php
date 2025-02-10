@@ -75,6 +75,6 @@ trait IsTenant
      */
     public function getTenantKeyName(): string
     {
-        return $this->getKeyName();
+        return $this->getKeyName(); // @codeCoverageIgnore
     }
 }

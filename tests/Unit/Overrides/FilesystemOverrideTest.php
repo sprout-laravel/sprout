@@ -15,7 +15,9 @@ use Sprout\Contracts\BootableServiceOverride;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 use Sprout\Contracts\TenantHasResources;
+use Sprout\Overrides\FilesystemManagerOverride;
 use Sprout\Overrides\FilesystemOverride;
+use Sprout\Overrides\StackedOverride;
 use Sprout\Sprout;
 use Sprout\Support\SettingsRepository;
 use Sprout\Tests\Unit\UnitTestCase;
@@ -45,6 +47,7 @@ class FilesystemOverrideTest extends UnitTestCase
     public function isBuiltCorrectly(): void
     {
         $this->assertTrue(is_subclass_of(FilesystemOverride::class, BootableServiceOverride::class));
+        $this->assertTrue(is_subclass_of(FilesystemManagerOverride::class, BootableServiceOverride::class));
     }
 
     #[Test]
@@ -54,7 +57,11 @@ class FilesystemOverrideTest extends UnitTestCase
 
         config()->set('sprout.overrides', [
             'filesystem' => [
-                'driver' => FilesystemOverride::class,
+                'driver'    => StackedOverride::class,
+                'overrides' => [
+                    FilesystemManagerOverride::class,
+                    FilesystemOverride::class,
+                ],
             ],
         ]);
 
@@ -63,7 +70,7 @@ class FilesystemOverrideTest extends UnitTestCase
         $sprout->overrides()->registerOverrides();
 
         $this->assertTrue($sprout->overrides()->hasOverride('filesystem'));
-        $this->assertSame(FilesystemOverride::class, $sprout->overrides()->getOverrideClass('filesystem'));
+        $this->assertSame(StackedOverride::class, $sprout->overrides()->getOverrideClass('filesystem'));
         $this->assertTrue($sprout->overrides()->isOverrideBootable('filesystem'));
         $this->assertTrue($sprout->overrides()->hasOverrideBooted('filesystem'));
     }
@@ -71,7 +78,18 @@ class FilesystemOverrideTest extends UnitTestCase
     #[Test, DataProvider('filesystemResolvedDataProvider')]
     public function bootsCorrectly(bool $return, bool $overrideManager): void
     {
-        $override = new FilesystemOverride('filesystem', ['manager' => $overrideManager]);
+        if ($overrideManager) {
+            $overrides = [
+                FilesystemManagerOverride::class,
+                FilesystemOverride::class,
+            ];
+        } else {
+            $overrides = [
+                FilesystemOverride::class,
+            ];
+        }
+
+        $override = new StackedOverride('filesystem', compact('overrides'));
 
         /** @var \Illuminate\Foundation\Application&MockInterface $app */
         $app = Mockery::mock($this->app, function (MockInterface $mock) use ($return, $overrideManager) {
@@ -110,6 +128,8 @@ class FilesystemOverrideTest extends UnitTestCase
 
         $sprout = new Sprout($app, new SettingsRepository());
 
+        $override->setApp($app)->setSprout($sprout);
+
         $override->boot($app, $sprout);
 
         // These are only here because there would be errors if their
@@ -119,30 +139,14 @@ class FilesystemOverrideTest extends UnitTestCase
     }
 
     #[Test]
-    public function addsDriverCacheManagerHasBeenResolved(): void
-    {
-        $override = new FilesystemOverride('filesystem', [
-            'manager' => false,
-        ]);
-
-        /** @var \Illuminate\Foundation\Application&MockInterface $app */
-        $app = Mockery::mock($this->app, static function (MockInterface $mock) {
-            $mock->makePartial();
-        });
-
-        $app->singleton('filesystem', fn () => $this->mockFilesystemManager());
-
-        $sprout = new Sprout($app, new SettingsRepository());
-
-        $override->boot($app, $sprout);
-
-        $app->make('filesystem');
-    }
-
-    #[Test]
     public function keepsTrackOfResolvedSproutDrivers(): void
     {
-        $override = new FilesystemOverride('filesystem', []);
+        $override = new StackedOverride('filesystem', [
+            'overrides' => [
+                FilesystemManagerOverride::class,
+                FilesystemOverride::class,
+            ],
+        ]);
 
         /** @var \Illuminate\Foundation\Application&MockInterface $app */
         $app = Mockery::mock($this->app, static function (MockInterface $mock) {
@@ -161,6 +165,8 @@ class FilesystemOverrideTest extends UnitTestCase
 
         $sprout->setCurrentTenancy($tenancy);
 
+        $override->setApp($app)->setSprout($sprout);
+
         $override->boot($app, $sprout);
 
         $filesystem = $app->make('filesystem');
@@ -170,14 +176,19 @@ class FilesystemOverrideTest extends UnitTestCase
             'disk'   => 'local',
         ]);
 
-        $this->assertNotEmpty($override->getDrivers());
-        $this->assertContains('ondemand', $override->getDrivers());
+        $this->assertNotEmpty($override->getOverrides()[FilesystemOverride::class]->getDrivers());
+        $this->assertContains('ondemand', $override->getOverrides()[FilesystemOverride::class]->getDrivers());
     }
 
     #[Test]
     public function cleansUpResolvedDrivers(): void
     {
-        $override = new FilesystemOverride('filesystem', []);
+        $override = new StackedOverride('filesystem', [
+            'overrides' => [
+                FilesystemManagerOverride::class,
+                FilesystemOverride::class,
+            ],
+        ]);
 
         $this->app->forgetInstance('filesystem');
 
@@ -198,9 +209,13 @@ class FilesystemOverrideTest extends UnitTestCase
 
         $sprout->setCurrentTenancy($tenancy);
 
+        $override->setApp($app)->setSprout($sprout);
+
         $override->boot($app, $sprout);
 
-        $this->assertEmpty($override->getDrivers());
+        $filesystemOverride = $override->getOverride(FilesystemOverride::class);
+
+        $this->assertEmpty($filesystemOverride->getDrivers());
 
         $filesystem = $app->make('filesystem');
 
@@ -209,18 +224,23 @@ class FilesystemOverrideTest extends UnitTestCase
             'disk'   => 'local',
         ]);
 
-        $this->assertNotEmpty($override->getDrivers());
-        $this->assertContains('ondemand', $override->getDrivers());
+        $this->assertNotEmpty($filesystemOverride->getDrivers());
+        $this->assertContains('ondemand', $filesystemOverride->getDrivers());
 
         $override->cleanup($tenancy, $tenant);
 
-        $this->assertEmpty($override->getDrivers());
+        $this->assertEmpty($filesystemOverride->getDrivers());
     }
 
     #[Test]
     public function cleansUpResolvedDriversFromPreconfiguredDisks(): void
     {
-        $override = new FilesystemOverride('filesystem', []);
+        $override = new StackedOverride('filesystem', [
+            'overrides' => [
+                FilesystemManagerOverride::class,
+                FilesystemOverride::class,
+            ],
+        ]);
 
         $this->app->forgetInstance('filesystem');
 
@@ -231,7 +251,7 @@ class FilesystemOverrideTest extends UnitTestCase
 
         $app->make('config')->set('filesystems.disks.my-disk', [
             'driver' => 'sprout',
-            'disk' => 'local'
+            'disk'   => 'local',
         ]);
 
         $sprout  = new Sprout($app, new SettingsRepository());
@@ -246,26 +266,35 @@ class FilesystemOverrideTest extends UnitTestCase
 
         $sprout->setCurrentTenancy($tenancy);
 
+        $override->setApp($app)->setSprout($sprout);
+
         $override->boot($app, $sprout);
 
-        $this->assertEmpty($override->getDrivers());
+        $filesystemOverride = $override->getOverride(FilesystemOverride::class);
+
+        $this->assertEmpty($filesystemOverride->getDrivers());
 
         $filesystem = $app->make('filesystem');
 
         $filesystem->disk('my-disk');
 
-        $this->assertNotEmpty($override->getDrivers());
-        $this->assertContains('my-disk', $override->getDrivers());
+        $this->assertNotEmpty($filesystemOverride->getDrivers());
+        $this->assertContains('my-disk', $filesystemOverride->getDrivers());
 
         $override->cleanup($tenancy, $tenant);
 
-        $this->assertEmpty($override->getDrivers());
+        $this->assertEmpty($filesystemOverride->getDrivers());
     }
 
     #[Test]
     public function cleansUpNothingWithoutResolvedDrivers(): void
     {
-        $override = new FilesystemOverride('filesystem', []);
+        $override = new StackedOverride('filesystem', [
+            'overrides' => [
+                FilesystemManagerOverride::class,
+                FilesystemOverride::class,
+            ],
+        ]);
 
         $this->app->forgetInstance('filesystem');
 
@@ -280,17 +309,21 @@ class FilesystemOverrideTest extends UnitTestCase
 
         $sprout->setCurrentTenancy($tenancy);
 
+        $override->setApp($app)->setSprout($sprout);
+
         $override->boot($app, $sprout);
 
-        $this->assertEmpty($override->getDrivers());
+        $filesystemOverride = $override->getOverride(FilesystemOverride::class);
+
+        $this->assertEmpty($filesystemOverride->getDrivers());
 
         $app->make('filesystem');
 
-        $this->assertEmpty($override->getDrivers());
+        $this->assertEmpty($filesystemOverride->getDrivers());
 
         $override->cleanup($tenancy, $tenant);
 
-        $this->assertEmpty($override->getDrivers());
+        $this->assertEmpty($filesystemOverride->getDrivers());
     }
 
     public static function filesystemResolvedDataProvider(): array

@@ -103,11 +103,7 @@ trait IsTenantChild
      */
     public static function isTenantOptional(): bool
     {
-        return is_subclass_of(static::class, OptionalTenant::class)
-               || (
-                   method_exists(static::class, 'shouldIgnoreTenantRestrictions')
-                   && static::shouldIgnoreTenantRestrictions() // @phpstan-ignore-line
-               );
+        return is_subclass_of(static::class, OptionalTenant::class);
     }
 
     /**
@@ -151,11 +147,11 @@ trait IsTenantChild
      */
     public function getTenantRelationName(): ?string
     {
-        if (! isset(self::$tenantRelationName, $this->tenantRelationNames[static::class])) {
-            self::$tenantRelationName = $this->findTenantRelationName();
+        if (! isset(static::$tenantRelationName)) {
+            static::$tenantRelationName = $this->findTenantRelationName();
         }
 
-        return self::$tenantRelationName ?? null;
+        return static::$tenantRelationName ?? null;
     }
 
     /**

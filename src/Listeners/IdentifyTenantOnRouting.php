@@ -67,6 +67,8 @@ final class IdentifyTenantOnRouting
      * @param \Illuminate\Routing\Route $route
      *
      * @return array<int, string|null>|null
+     *
+     * @codeCoverageIgnore
      */
     private function parseTenantMiddleware(Route $route): ?array
     {

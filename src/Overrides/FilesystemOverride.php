@@ -11,7 +11,6 @@ use Sprout\Contracts\BootableServiceOverride;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 use Sprout\Overrides\Filesystem\SproutFilesystemDriverCreator;
-use Sprout\Overrides\Filesystem\SproutFilesystemManager;
 use Sprout\Sprout;
 
 final class FilesystemOverride extends BaseOverride implements BootableServiceOverride
@@ -20,16 +19,6 @@ final class FilesystemOverride extends BaseOverride implements BootableServiceOv
      * @var list<string>
      */
     protected array $drivers = [];
-
-    /**
-     * Should the manager be overridden?
-     *
-     * @return bool
-     */
-    protected function shouldOverrideManager(): bool
-    {
-        return $this->config['manager'] ?? true; // @phpstan-ignore-line
-    }
 
     /**
      * Get the drivers that have been resolved
@@ -56,24 +45,6 @@ final class FilesystemOverride extends BaseOverride implements BootableServiceOv
      */
     public function boot(Application $app, Sprout $sprout): void
     {
-        $this->setApp($app)->setSprout($sprout);
-
-        // If we're overriding the filesystem manager
-        if ($this->shouldOverrideManager()) {
-            $original = null;
-
-            // If the filesystem has already been resolved
-            if ($app->resolved('filesystem')) {
-                // We'll grab the manager
-                $original = $app->make('filesystem');
-                // and then tell the container to forget it
-                $app->forgetInstance('filesystem');
-            }
-
-            // Bind a replacement filesystem manager to enable Sprout features
-            $app->singleton('filesystem', fn ($app) => new SproutFilesystemManager($app, $original));
-        }
-
         $tracker = fn (string $store) => $this->drivers[] = $store;
 
         // If the filesystem manager has been resolved, we can add the driver
