@@ -21,7 +21,7 @@ class TenantChild extends Model
     protected static string $factory = TenantChildFactory::class;
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\Workbench\App\Models\TenantModel, self>
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\Workbench\App\Models\TenantModel, $this>
      */
     #[TenantRelation]
     public function tenant(): BelongsTo

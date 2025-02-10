@@ -3,11 +3,7 @@ declare(strict_types=1);
 
 namespace Sprout\Listeners;
 
-use Illuminate\Support\Facades\Context;
-use Sprout\Contracts\Tenancy;
-use Sprout\Contracts\Tenant;
 use Sprout\Events\CurrentTenantChanged;
-use Sprout\Sprout;
 
 /**
  * Perform Identity Resolver Setup

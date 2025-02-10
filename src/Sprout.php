@@ -4,14 +4,12 @@ declare(strict_types=1);
 namespace Sprout;
 
 use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Routing\Router;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 use Sprout\Managers\IdentityResolverManager;
 use Sprout\Managers\ServiceOverrideManager;
 use Sprout\Managers\TenancyManager;
 use Sprout\Managers\TenantProviderManager;
-use Sprout\Support\ResolutionHelper;
 use Sprout\Support\ResolutionHook;
 use Sprout\Support\SettingsRepository;
 

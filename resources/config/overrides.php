@@ -10,7 +10,7 @@
 | Service overrides are registered against a "service", which is an arbitrary
 | string value, used to prevent multiple overrides for a single service.
 |
-| All services overrides should have a "driver" which should contain an FQN
+| All service overrides should have a "driver" which should contain an FQN
 | for a class that implements the ServiceOverride interface.
 | Any other config options will depend on the individual service override
 | driver.

@@ -13,11 +13,7 @@ use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 use Sprout\Exceptions\TenantMissingException;
 use Sprout\Http\Middleware\TenantRoutes;
-use Sprout\Overrides\CookieOverride;
-use Sprout\Overrides\SessionOverride;
 use Sprout\Support\BaseIdentityResolver;
-use Sprout\Support\Settings;
-use function Sprout\settings;
 
 /**
  * The Subdomain Identity Resolver
