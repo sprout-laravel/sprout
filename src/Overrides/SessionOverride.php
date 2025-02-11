@@ -89,7 +89,7 @@ final class SessionOverride extends BaseOverride implements BootableServiceOverr
         $config   = $this->getApp()->make('config');
         $settings = $this->getSprout()->settings();
 
-        if (! $settings->has('original.session')) {
+        if (empty($settings->array('original.session', []))) {
             /** @var array<string, mixed> $original */
             $original = $config->get('session');
             $settings->set(
@@ -145,9 +145,10 @@ final class SessionOverride extends BaseOverride implements BootableServiceOverr
         $config   = $this->getApp()->make('config');
         $settings = $this->getSprout()->settings();
 
-        if ($settings->has('original.session')) {
-            /** @var array<string, mixed> $original */
-            $original = $settings->get('original.session');
+        /** @var array<string, mixed> $original */
+        $original = $settings->array('original.session', []);
+
+        if (! empty($original)) {
             $config->set('session.path', $original['path']);
             $config->set('session.domain', $original['domain']);
 
@@ -158,6 +159,8 @@ final class SessionOverride extends BaseOverride implements BootableServiceOverr
             if (array_key_exists('same_site', $original)) {
                 $config->set('session.same_site', $original['same_site']);
             }
+
+            $settings->set('original.session', []);
         }
 
         $this->refreshSessionStore();
