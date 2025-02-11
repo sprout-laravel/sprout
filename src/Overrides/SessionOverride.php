@@ -116,7 +116,7 @@ final class SessionOverride extends BaseOverride implements BootableServiceOverr
 
         $config->set('session.cookie', $this->getCookieName($tenancy, $tenant));
 
-        $this->refreshSessionStore($tenancy, $tenant);
+        $this->refreshSessionStore();
     }
 
     /**
@@ -141,6 +141,25 @@ final class SessionOverride extends BaseOverride implements BootableServiceOverr
      */
     public function cleanup(Tenancy $tenancy, Tenant $tenant): void
     {
+        /** @var \Illuminate\Contracts\Config\Repository $config */
+        $config   = $this->getApp()->make('config');
+        $settings = $this->getSprout()->settings();
+
+        if ($settings->has('original.session')) {
+            /** @var array<string, mixed> $original */
+            $original = $settings->get('original.session');
+            $config->set('session.path', $original['path']);
+            $config->set('session.domain', $original['domain']);
+
+            if (array_key_exists('secure', $original)) {
+                $config->set('session.secure', $original['secure']);
+            }
+
+            if (array_key_exists('same_site', $original)) {
+                $config->set('session.same_site', $original['same_site']);
+            }
+        }
+
         $this->refreshSessionStore();
     }
 
@@ -167,7 +186,7 @@ final class SessionOverride extends BaseOverride implements BootableServiceOverr
      *
      * @return void
      */
-    private function refreshSessionStore(?Tenancy $tenancy = null, ?Tenant $tenant = null): void
+    private function refreshSessionStore(): void
     {
         // We only want to touch this if the session manager has actually been
         // loaded, and is therefore most likely being used
