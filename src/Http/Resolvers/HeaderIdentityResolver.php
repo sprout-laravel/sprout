@@ -9,7 +9,7 @@ use Illuminate\Routing\Router;
 use Illuminate\Routing\RouteRegistrar;
 use Sprout\Contracts\Tenancy;
 use Sprout\Http\Middleware\AddTenantHeaderToResponse;
-use Sprout\Http\Middleware\TenantRoutes;
+use Sprout\Http\Middleware\SproutTenantContextMiddleware;
 use Sprout\Support\BaseIdentityResolver;
 use Sprout\Support\PlaceholderHelper;
 
@@ -114,7 +114,7 @@ final class HeaderIdentityResolver extends BaseIdentityResolver
     public function routes(Router $router, Closure $groupRoutes, Tenancy $tenancy): RouteRegistrar
     {
         return $router->middleware([
-            TenantRoutes::ALIAS . ':' . $this->getName() . ',' . $tenancy->getName(),
+            SproutTenantContextMiddleware::ALIAS . ':' . $this->getName() . ',' . $tenancy->getName(),
             AddTenantHeaderToResponse::class . ':' . $this->getName() . ',' . $tenancy->getName(),
         ])->group($groupRoutes);
     }

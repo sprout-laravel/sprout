@@ -12,7 +12,7 @@ use Sprout\Contracts\IdentityResolverUsesParameters;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 use Sprout\Exceptions\TenantMissingException;
-use Sprout\Http\Middleware\TenantRoutes;
+use Sprout\Http\Middleware\SproutTenantContextMiddleware;
 use Sprout\Support\BaseIdentityResolver;
 
 /**
@@ -119,7 +119,7 @@ final class SubdomainIdentityResolver extends BaseIdentityResolver implements Id
     {
         return $this->applyParameterPatternMapping(
             $router->domain($this->getRouteDomain($tenancy))
-                   ->middleware([TenantRoutes::ALIAS . ':' . $this->getName() . ',' . $tenancy->getName()]),
+                   ->middleware([SproutTenantContextMiddleware::ALIAS . ':' . $this->getName() . ',' . $tenancy->getName()]),
             $tenancy
         )->group($groupRoutes);
     }
