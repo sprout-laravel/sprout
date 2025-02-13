@@ -15,7 +15,7 @@ use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 use Sprout\Contracts\TenantAware;
 use Sprout\Events\CurrentTenantChanged;
-use Sprout\Http\Middleware\TenantRoutes;
+use Sprout\Http\Middleware\SproutTenantContextMiddleware;
 use Sprout\Listeners\IdentifyTenantOnRouting;
 use Sprout\Managers\IdentityResolverManager;
 use Sprout\Managers\ServiceOverrideManager;
@@ -135,9 +135,9 @@ class SproutServiceProviderTest extends UnitTestCase
         $router     = $this->app->make(Router::class);
         $middleware = $router->getMiddleware();
 
-        $this->assertTrue(isset($middleware[TenantRoutes::ALIAS]));
-        $this->assertSame(TenantRoutes::class, $middleware[TenantRoutes::ALIAS]);
-        $this->assertContains(TenantRoutes::class, $middleware);
+        $this->assertTrue(isset($middleware[SproutTenantContextMiddleware::ALIAS]));
+        $this->assertSame(SproutTenantContextMiddleware::class, $middleware[SproutTenantContextMiddleware::ALIAS]);
+        $this->assertContains(SproutTenantContextMiddleware::class, $middleware);
     }
 
     #[Test]

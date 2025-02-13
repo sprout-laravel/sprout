@@ -7,7 +7,7 @@ use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Routing\Route;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
-use Sprout\Http\Middleware\TenantRoutes;
+use Sprout\Http\Middleware\SproutTenantContextMiddleware;
 use Sprout\Sprout;
 use Sprout\Support\ResolutionHelper;
 use Sprout\Support\ResolutionHook;
@@ -73,8 +73,8 @@ final class IdentifyTenantOnRouting
     private function parseTenantMiddleware(Route $route): ?array
     {
         foreach (Arr::wrap($route->middleware()) as $item) {
-            if ($item === TenantRoutes::ALIAS || Str::startsWith($item, TenantRoutes::ALIAS . ':')) {
-                if (! Str::startsWith($item, TenantRoutes::ALIAS . ':')) {
+            if ($item === SproutTenantContextMiddleware::ALIAS || Str::startsWith($item, SproutTenantContextMiddleware::ALIAS . ':')) {
+                if (! Str::startsWith($item, SproutTenantContextMiddleware::ALIAS . ':')) {
                     return [null, null];
                 }
 

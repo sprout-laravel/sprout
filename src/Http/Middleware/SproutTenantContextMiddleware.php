@@ -12,7 +12,7 @@ use Sprout\Support\ResolutionHook;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Tenant Routes Middleware
+ * Sprout Tenant Context Middleware
  *
  * This piece of middleware has a dual function.
  * It marks routes as being multitenanted if resolving during routing, and it
@@ -20,7 +20,7 @@ use Symfony\Component\HttpFoundation\Response;
  *
  * @package Core
  */
-final class TenantRoutes
+final class SproutTenantContextMiddleware
 {
     /**
      * The alias for this middleware

@@ -12,7 +12,7 @@ use Sprout\Contracts\IdentityResolverUsesParameters;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 use Sprout\Exceptions\TenantMissingException;
-use Sprout\Http\Middleware\TenantRoutes;
+use Sprout\Http\Middleware\SproutTenantContextMiddleware;
 use Sprout\Support\BaseIdentityResolver;
 
 /**
@@ -100,7 +100,7 @@ final class PathIdentityResolver extends BaseIdentityResolver implements Identit
     public function routes(Router $router, Closure $groupRoutes, Tenancy $tenancy): RouteRegistrar
     {
         return $this->applyParameterPatternMapping(
-            $router->middleware([TenantRoutes::ALIAS . ':' . $this->getName() . ',' . $tenancy->getName()])
+            $router->middleware([SproutTenantContextMiddleware::ALIAS . ':' . $this->getName() . ',' . $tenancy->getName()])
                    ->prefix($this->getRoutePrefix($tenancy)),
             $tenancy
         )->group($groupRoutes);
