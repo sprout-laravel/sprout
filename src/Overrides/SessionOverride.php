@@ -180,14 +180,9 @@ final class SessionOverride extends BaseOverride implements BootableServiceOverr
     /**
      * Set the tenant details and refresh the session
      *
-     * @template TenantClass of \Sprout\Contracts\Tenant
-     *
-     * @param \Sprout\Contracts\Tenancy<TenantClass>|null $tenancy
-     * @param \Sprout\Contracts\Tenant|null               $tenant
-     *
-     * @phpstan-param TenantClass|null                    $tenant
-     *
      * @return void
+     *
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
      */
     private function refreshSessionStore(): void
     {
