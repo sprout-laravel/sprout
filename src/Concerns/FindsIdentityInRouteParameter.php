@@ -216,6 +216,12 @@ trait FindsIdentityInRouteParameter
      */
     public function resolveFromRoute(Route $route, Tenancy $tenancy, Request $request): ?string
     {
+        // If the parameter isn't present on the request...
+        if ($route->hasParameter($this->getRouteParameterName($tenancy)) === false) {
+            // ...we can fall back to resolving using the request itself
+            return $this->resolveFromRequest($request, $tenancy);
+        }
+
         $identifier = $route->parameter($this->getRouteParameterName($tenancy));
 
         if (is_string($identifier)) {
