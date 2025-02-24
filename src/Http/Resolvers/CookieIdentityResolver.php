@@ -178,6 +178,8 @@ final class CookieIdentityResolver extends BaseIdentityResolver
      * @phpstan-param Tenant|null                    $tenant
      *
      * @return void
+     *
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
      */
     public function setup(Tenancy $tenancy, ?Tenant $tenant): void
     {
@@ -195,6 +197,10 @@ final class CookieIdentityResolver extends BaseIdentityResolver
             $this->getApp()
                  ->make(CookieJar::class)
                  ->queue(Cookie::make(...$details));
+        } else if ($tenant === null) {
+            $this->getApp()
+                 ->make(CookieJar::class)
+                 ->expire($this->getRequestCookieName($tenancy));
         }
     }
 
