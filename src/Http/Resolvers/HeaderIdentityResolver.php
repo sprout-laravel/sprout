@@ -110,6 +110,8 @@ final class HeaderIdentityResolver extends BaseIdentityResolver
      * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
      *
      * @return \Illuminate\Routing\RouteRegistrar
+     *
+     * @deprecated Use {@see self::configureRoute()} instead
      */
     public function routes(Router $router, Closure $groupRoutes, Tenancy $tenancy): RouteRegistrar
     {
@@ -117,5 +119,23 @@ final class HeaderIdentityResolver extends BaseIdentityResolver
             SproutTenantContextMiddleware::ALIAS . ':' . $this->getName() . ',' . $tenancy->getName(),
             AddTenantHeaderToResponse::class . ':' . $this->getName() . ',' . $tenancy->getName(),
         ])->group($groupRoutes);
+    }
+
+    /**
+     * Configure the provided route for the resolver
+     *
+     * Configures a provided route to work with itself, adding parameters,
+     * middleware, and anything else required, besides the default middleware.
+     *
+     * @param \Illuminate\Routing\RouteRegistrar                  $route
+     * @param \Sprout\Contracts\Tenancy<\Sprout\Contracts\Tenant> $tenancy
+     *
+     * @return void
+     */
+    public function configureRoute(RouteRegistrar $route, Tenancy $tenancy): void
+    {
+        $route->middleware([
+            AddTenantHeaderToResponse::class . ':' . $this->getName() . ',' . $tenancy->getName(),
+        ]);
     }
 }

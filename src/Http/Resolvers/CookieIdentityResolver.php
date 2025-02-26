@@ -155,6 +155,8 @@ final class CookieIdentityResolver extends BaseIdentityResolver
      * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
      *
      * @return \Illuminate\Routing\RouteRegistrar
+     *
+     * @deprecated Use {@see self::configureRoute()} instead
      */
     public function routes(Router $router, Closure $groupRoutes, Tenancy $tenancy): RouteRegistrar
     {
