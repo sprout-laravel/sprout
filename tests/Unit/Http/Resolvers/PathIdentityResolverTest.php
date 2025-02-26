@@ -253,12 +253,17 @@ class PathIdentityResolverTest extends UnitTestCase
 
         /** @var \Sprout\Contracts\Tenancy&MockInterface $tenancy */
         $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) {
-            $mock->shouldReceive('getName')->andReturn('my-tenancy')->once();
+            $mock->shouldReceive('getName')->andReturn('my-tenancy')->twice();
         });
 
         $request = Mockery::mock(Request::class);
 
         $route = Mockery::mock(Route::class, static function (MockInterface $mock) {
+            $mock->shouldReceive('hasParameter')
+                 ->with('my_tenancy_path')
+                 ->andReturn(true)
+                 ->once();
+
             $mock->shouldReceive('parameter')
                  ->with('my_tenancy_path')
                  ->andReturn('my-identifier')
