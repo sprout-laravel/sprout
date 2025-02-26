@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Sprout\Support;
 
 use Illuminate\Http\Request;
+use Illuminate\Routing\RouteRegistrar;
 use Sprout\Concerns\AwareOfApp;
 use Sprout\Concerns\AwareOfSprout;
 use Sprout\Contracts\IdentityResolver;
@@ -131,5 +132,21 @@ abstract class BaseIdentityResolver implements IdentityResolver
     public function route(string $name, Tenancy $tenancy, Tenant $tenant, array $parameters = [], bool $absolute = true): string
     {
         return route($name, $parameters, $absolute);
+    }
+
+    /**
+     * Configure the provided route for the resolver
+     *
+     * Configures a provided route to work with itself, adding parameters,
+     * middleware, and anything else required, besides the default middleware.
+     *
+     * @param \Illuminate\Routing\RouteRegistrar                  $route
+     * @param \Sprout\Contracts\Tenancy<\Sprout\Contracts\Tenant> $tenancy
+     *
+     * @return void
+     */
+    public function configureRoute(RouteRegistrar $route, Tenancy $tenancy): void
+    {
+        // This is intentionally empty
     }
 }

@@ -29,4 +29,16 @@ final class CompatibilityException extends SproutException
     {
         return new self('Cannot use ' . $firstType . ' [' . $firstName . '] with ' . $secondType . ' [' . $secondName . ']');
     }
+
+    /**
+     * Create an exception for incompatible optional middleware usage
+     *
+     * @param string $resolver
+     *
+     * @return self
+     */
+    public static function optionalMiddleware(string $resolver): self
+    {
+        return new self('Cannot use optional tenant middleware with the non-parameter based resolver [' . $resolver . '].');
+    }
 }
