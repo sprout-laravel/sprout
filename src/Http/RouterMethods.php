@@ -4,7 +4,13 @@ declare(strict_types=1);
 namespace Sprout\Http;
 
 use Closure;
+use Illuminate\Routing\Router;
 use Illuminate\Routing\RouteRegistrar;
+use Illuminate\Support\Facades\Route;
+use Sprout\Contracts\IdentityResolverUsesParameters;
+use Sprout\Exceptions\CompatibilityException;
+use Sprout\Http\Middleware\SproutOptionalTenantContextMiddleware;
+use Sprout\Http\Middleware\SproutTenantContextMiddleware;
 use Sprout\Managers\IdentityResolverManager;
 use Sprout\Managers\TenancyManager;
 
@@ -34,13 +40,27 @@ class RouterMethods
     public function tenanted(): Closure
     {
         return function (Closure $routes, ?string $resolver = null, ?string $tenancy = null): RouteRegistrar {
-            return app()->make(IdentityResolverManager::class)
-                        ->get($resolver)
-                        ->routes(
-                            $this, // @phpstan-ignore-line
-                            $routes,
-                            app()->make(TenancyManager::class)->get($tenancy)
-                        );
+            return RouteCreator::create($routes, $resolver, $tenancy);
+        };
+    }
+
+    /**
+     * Create possibly tenanted routes
+     *
+     * @param Closure     $routes
+     * @param string|null $resolver
+     * @param string|null $tenancy
+     *
+     * @return \Illuminate\Routing\RouteRegistrar
+     *
+     * @noinspection   PhpDocSignatureInspection
+     *
+     * @phpstan-ignore parameter.notFound,parameter.notFound,parameter.notFound,return.phpDocType
+     */
+    public function possiblyTenanted(): Closure
+    {
+        return function (Closure $routes, ?string $resolver = null, ?string $tenancy = null): RouteRegistrar {
+            return RouteCreator::create($routes, $resolver, $tenancy, true);
         };
     }
 }

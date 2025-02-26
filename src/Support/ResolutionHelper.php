@@ -43,7 +43,15 @@ class ResolutionHelper
      * @throws \Sprout\Exceptions\MisconfigurationException
      * @throws \Sprout\Exceptions\NoTenantFoundException
      */
-    public static function handleResolution(Request $request, ResolutionHook $hook, Sprout $sprout, ?string $resolverName = null, ?string $tenancyName = null, bool $throw = true): bool
+    public static function handleResolution(
+        Request $request,
+        ResolutionHook $hook,
+        Sprout $sprout,
+        ?string $resolverName = null,
+        ?string $tenancyName = null,
+        bool $throw = true,
+        bool $optional = false
+    ): bool
     {
         // Set the current hook
         $sprout->setCurrentHook($hook);
@@ -86,7 +94,14 @@ class ResolutionHelper
             $identity = $resolver->resolveFromRequest($request, $tenancy);
         }
 
-        // Make sure the tenancy knows which resolver resolved it
+        // If there's no identity, and this is an optional resolution, we will
+        // just return early
+        if ($identity === null && $optional) {
+            return false;
+        }
+
+        // Make sure the tenancy is aware of the resolver that was used to
+        // resolve its tenant
         $tenancy->resolvedVia($resolver)->resolvedAt($hook);
 
         if ($identity === null || $tenancy->identify($identity) === false) {
