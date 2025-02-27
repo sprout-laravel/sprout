@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Sprout\Support;
 
 use Closure;
+use Illuminate\Contracts\Config\Repository;
 use Illuminate\Contracts\Foundation\Application;
 use Sprout\Exceptions\MisconfigurationException;
 use Sprout\Sprout;
@@ -51,6 +52,13 @@ abstract class BaseFactory
      * @var \Illuminate\Contracts\Foundation\Application
      */
     protected Application $app;
+
+    /**
+     * The Laravel config
+     *
+     * @var \Illuminate\Contracts\Config\Repository
+     */
+    private Repository $config;
 
     /**
      * Previously created objects
@@ -109,11 +117,8 @@ abstract class BaseFactory
      */
     public function getDefaultName(): string
     {
-        /** @var \Illuminate\Config\Repository $config */
-        $config = app('config');
-
         /** @var string|null $name */
-        $name = $config->get('multitenancy.defaults.' . $this->getFactoryName());
+        $name = $this->getAppConfig()->get('multitenancy.defaults.' . $this->getFactoryName());
 
         if ($name === null) {
             throw MisconfigurationException::noDefault($this->getFactoryName());
@@ -131,11 +136,8 @@ abstract class BaseFactory
      */
     protected function getConfig(string $name): ?array
     {
-        /** @var \Illuminate\Config\Repository $repo */
-        $repo = app('config');
-
         /** @var array<string,mixed>|null $config */
-        $config = $repo->get($this->getConfigKey($name));
+        $config = $this->getAppConfig()->get($this->getConfigKey($name));
 
         return $config;
     }
@@ -290,5 +292,21 @@ abstract class BaseFactory
         }
 
         return $object;
+    }
+
+    /**
+     * Get the application config
+     *
+     * @return \Illuminate\Contracts\Config\Repository
+     *
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     */
+    protected function getAppConfig(): Repository
+    {
+        if (! isset($this->config)) {
+            $this->config = $this->app->make('config');
+        }
+
+        return $this->config;
     }
 }
