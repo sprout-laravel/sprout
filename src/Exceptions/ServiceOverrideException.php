@@ -37,4 +37,18 @@ final class ServiceOverrideException extends SproutException
     {
         return new self('The service override [' . $service . '] has been set up for the tenancy [' . $tenancy . '] but it is not enabled for that tenancy');
     }
+
+    /**
+     * Create an exception for when a service override is specific to a
+     * tenancy and that tenancy isn't present.
+     *
+     * @param string $service
+     * @param string $tenancy
+     *
+     * @return self
+     */
+    public static function tenancyMismatch(string $service, string $tenancy): self
+    {
+        return new self('The service override [' . $service . '] requires the tenancy [' . $tenancy . ']');
+    }
 }

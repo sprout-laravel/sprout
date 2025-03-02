@@ -10,6 +10,7 @@ use InvalidArgumentException;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 use Sprout\Exceptions\MisconfigurationException;
+use Sprout\Exceptions\ServiceOverrideException;
 use Sprout\Exceptions\TenancyMissingException;
 use Sprout\Exceptions\TenantMissingException;
 use Sprout\Sprout;
@@ -27,7 +28,7 @@ final class SproutCacheDriverCreator
     private CacheManager $manager;
 
     /**
-     * @var array<string, mixed>
+     * @var array<string, mixed>|array{tenancy?:string|null}
      */
     private array $config;
 
@@ -37,19 +38,26 @@ final class SproutCacheDriverCreator
     private Sprout $sprout;
 
     /**
+     * @var string
+     */
+    private string $service;
+
+    /**
      * Create a new instance
      *
-     * @param \Illuminate\Contracts\Foundation\Application $app
-     * @param \Illuminate\Cache\CacheManager               $manager
-     * @param array<string, mixed>                         $config
-     * @param \Sprout\Sprout                               $sprout
+     * @param \Illuminate\Contracts\Foundation\Application     $app
+     * @param \Illuminate\Cache\CacheManager                   $manager
+     * @param array<string, mixed>|array{tenancy?:string|null} $config
+     * @param \Sprout\Sprout                                   $sprout
+     * @param string                                           $service
      */
-    public function __construct(Application $app, CacheManager $manager, array $config, Sprout $sprout)
+    public function __construct(Application $app, CacheManager $manager, array $config, Sprout $sprout, string $service)
     {
         $this->app     = $app;
         $this->config  = $config;
         $this->manager = $manager;
         $this->sprout  = $sprout;
+        $this->service = $service;
     }
 
     /**
@@ -57,7 +65,9 @@ final class SproutCacheDriverCreator
      *
      * @return \Illuminate\Contracts\Cache\Repository
      *
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
      * @throws \Sprout\Exceptions\MisconfigurationException
+     * @throws \Sprout\Exceptions\ServiceOverrideException
      * @throws \Sprout\Exceptions\TenancyMissingException
      * @throws \Sprout\Exceptions\TenantMissingException
      */
@@ -76,6 +86,15 @@ final class SproutCacheDriverCreator
         // If there isn't one, that's an issue as we need a tenancy
         if ($tenancy === null) {
             throw TenancyMissingException::make();
+        }
+
+        // Get the name of the tenancy this should be locked to, or null
+        /** @var string|null $tenancyLock */
+        $tenancyLock = $this->config['tenancy'] ?? null;
+
+        // If this should be tenancy-specific, check
+        if ($tenancyLock && $tenancy->getName() !== $tenancyLock) {
+            throw ServiceOverrideException::tenancyMismatch($this->service, $tenancyLock);
         }
 
         // If there is a tenancy, but it doesn't have a tenant, that's also

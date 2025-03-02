@@ -55,7 +55,13 @@ final class CacheOverride extends BaseOverride implements BootableServiceOverrid
             // _STORE_ that ;)
             $tracker($config['store']);
 
-            return (new SproutCacheDriverCreator($app, $manager, $config, $sprout))();
+            return (new SproutCacheDriverCreator(
+                $app,
+                $manager,
+                $config,
+                $sprout,
+                $this->service,
+            ))();
         });
     }
 
