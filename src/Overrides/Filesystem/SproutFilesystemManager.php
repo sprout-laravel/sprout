@@ -7,7 +7,7 @@ use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Filesystem\FilesystemManager;
 use InvalidArgumentException;
 
-final class SproutFilesystemManager extends FilesystemManager
+class SproutFilesystemManager extends FilesystemManager
 {
     protected bool $syncedFromOriginal = false;
 
