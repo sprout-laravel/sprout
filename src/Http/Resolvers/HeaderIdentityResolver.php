@@ -111,10 +111,18 @@ final class HeaderIdentityResolver extends BaseIdentityResolver
      *
      * @return \Illuminate\Routing\RouteRegistrar
      *
-     * @deprecated Use {@see self::configureRoute()} instead
+     * @deprecated since 1.1.0, will be removed in 2.0.0. Use Route::tenanted() or {@see self::configureRoute()} instead.
      */
     public function routes(Router $router, Closure $groupRoutes, Tenancy $tenancy): RouteRegistrar
     {
+        @trigger_error(
+            sprintf(
+                'The "%s::routes()" method is deprecated since Sprout 1.1 and will be removed in 2.0. Use Route::tenanted() or configureRoute() instead.',
+                static::class
+            ),
+            E_USER_DEPRECATED
+        );
+
         return $router->middleware([
             SproutTenantContextMiddleware::ALIAS . ':' . $this->getName() . ',' . $tenancy->getName(),
             AddTenantHeaderToResponse::class . ':' . $this->getName() . ',' . $tenancy->getName(),

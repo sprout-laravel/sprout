@@ -54,7 +54,7 @@ interface IdentityResolver
      *
      * @return \Illuminate\Routing\RouteRegistrar
      *
-     * @deprecated Use {@see self::configureRoute()} instead
+     * @deprecated since 1.1.0, will be removed in 2.0.0. Use Route::tenanted() or {@see self::configureRoute()} instead.
      */
     public function routes(Router $router, Closure $groupRoutes, Tenancy $tenancy): RouteRegistrar;
 
