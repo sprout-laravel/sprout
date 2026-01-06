@@ -87,11 +87,11 @@ trait IsTenantChild
     {
         self::ignoreTenantRestrictions();
 
-        $return = $callback();
-
-        self::resetTenantRestrictions();
-
-        return $return;
+        try {
+            return $callback();
+        } finally {
+            self::resetTenantRestrictions();
+        }
     }
 
     /**
