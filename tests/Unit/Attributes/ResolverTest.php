@@ -4,14 +4,10 @@ declare(strict_types=1);
 namespace Sprout\Tests\Unit\Attributes;
 
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\Attributes\Override;
 use Sprout\Attributes\Resolver;
 use Sprout\Contracts\IdentityResolver;
-use Sprout\Contracts\ServiceOverride;
 use Sprout\Managers\IdentityResolverManager;
-use Sprout\Managers\ServiceOverrideManager;
 use Sprout\Tests\Unit\UnitTestCase;
-use Workbench\App\Models\TenantModel;
 
 class ResolverTest extends UnitTestCase
 {

@@ -168,7 +168,7 @@ final class SessionOverride extends BaseOverride implements BootableServiceOverr
 
     /**
      * @param \Sprout\Contracts\Tenancy<*> $tenancy
-     * @param \Sprout\Contracts\Tenant $tenant
+     * @param \Sprout\Contracts\Tenant     $tenant
      *
      * @return string
      */

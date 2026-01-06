@@ -5,7 +5,6 @@ namespace Sprout\Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\Database\Eloquent\Scopes\BelongsToManyTenantsScope;
 use Sprout\Exceptions\TenantMismatchException;
 use Sprout\Exceptions\TenantMissingException;
 use Sprout\Managers\TenancyManager;

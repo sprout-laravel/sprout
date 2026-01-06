@@ -294,9 +294,9 @@ class SubdomainIdentityResolverTest extends UnitTestCase
 
         $route = Mockery::mock(Route::class, static function (MockInterface $mock) {
             $mock->shouldReceive('hasParameter')
-                ->with('my_tenancy_subdomain')
-                ->andReturn(true)
-                ->once();
+                 ->with('my_tenancy_subdomain')
+                 ->andReturn(true)
+                 ->once();
 
             $mock->shouldReceive('parameter')
                  ->with('my_tenancy_subdomain')

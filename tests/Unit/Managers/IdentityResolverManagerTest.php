@@ -13,7 +13,6 @@ use Sprout\Http\Resolvers\SessionIdentityResolver;
 use Sprout\Http\Resolvers\SubdomainIdentityResolver;
 use Sprout\Managers\IdentityResolverManager;
 use Sprout\Tests\Unit\UnitTestCase;
-use function Sprout\resolver;
 use function Sprout\sprout;
 
 class IdentityResolverManagerTest extends UnitTestCase

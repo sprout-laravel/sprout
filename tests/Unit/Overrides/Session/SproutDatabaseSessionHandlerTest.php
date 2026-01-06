@@ -258,7 +258,7 @@ class SproutDatabaseSessionHandlerTest extends UnitTestCase
 
         return [
             'outside of tenant context' => [null, null],
-            'inside of tenant context' => [$tenancy, $tenant],
+            'inside of tenant context'  => [$tenancy, $tenant],
         ];
     }
 }

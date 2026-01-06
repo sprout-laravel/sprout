@@ -5,16 +5,13 @@ namespace Sprout\Tests\Unit\Providers;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
-use Orchestra\Testbench\Attributes\DefineEnvironment;
 use PHPUnit\Framework\Attributes\Test;
 use Sprout\Exceptions\MisconfigurationException;
 use Sprout\Providers\EloquentTenantProvider;
-use Sprout\Support\GenericTenant;
 use Sprout\Tests\Unit\UnitTestCase;
 use Workbench\App\Models\NoResourcesTenantModel;
 use Workbench\App\Models\TenantModel;
 use function Sprout\provider;
-use function Sprout\sprout;
 
 class EloquentProviderTest extends UnitTestCase
 {

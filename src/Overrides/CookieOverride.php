@@ -25,7 +25,7 @@ final class CookieOverride extends BaseOverride
      * It is called when a new tenant is marked as the current tenant.
      *
      * @param \Sprout\Contracts\Tenancy<*> $tenancy
-     * @param \Sprout\Contracts\Tenant $tenant
+     * @param \Sprout\Contracts\Tenant     $tenant
      *
      * @return void
      */

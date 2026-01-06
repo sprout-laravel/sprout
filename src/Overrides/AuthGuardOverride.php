@@ -30,7 +30,7 @@ final class AuthGuardOverride extends BaseOverride
      * It is called when a new tenant is marked as the current tenant.
      *
      * @param \Sprout\Contracts\Tenancy<*> $tenancy
-     * @param \Sprout\Contracts\Tenant $tenant
+     * @param \Sprout\Contracts\Tenant     $tenant
      *
      * @return void
      */
@@ -51,7 +51,7 @@ final class AuthGuardOverride extends BaseOverride
      * tenant was not null.
      *
      * @param \Sprout\Contracts\Tenancy<*> $tenancy
-     * @param \Sprout\Contracts\Tenant $tenant
+     * @param \Sprout\Contracts\Tenant     $tenant
      *
      * @return void
      */

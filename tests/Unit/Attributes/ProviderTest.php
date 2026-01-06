@@ -5,9 +5,7 @@ namespace Sprout\Tests\Unit\Attributes;
 
 use PHPUnit\Framework\Attributes\Test;
 use Sprout\Attributes\Provider;
-use Sprout\Attributes\Tenancy;
 use Sprout\Contracts\TenantProvider;
-use Sprout\Managers\TenancyManager;
 use Sprout\Managers\TenantProviderManager;
 use Sprout\Tests\Unit\UnitTestCase;
 use Workbench\App\Models\TenantModel;

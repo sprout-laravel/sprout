@@ -169,7 +169,7 @@ class CacheOverrideTest extends UnitTestCase
     public function cleansUpResolvedDrivers(): void
     {
         $override = new CacheOverride('cache', []);
-        $cache = Mockery::mock($this->app->make('cache'), static function (MockInterface $mock) {
+        $cache    = Mockery::mock($this->app->make('cache'), static function (MockInterface $mock) {
             $mock->makePartial();
             $mock->shouldReceive('forgetDriver')->once();
         });
@@ -215,7 +215,7 @@ class CacheOverrideTest extends UnitTestCase
     public function cleansUpNothingWithoutResolvedDrivers(): void
     {
         $override = new CacheOverride('cache', []);
-        $cache = Mockery::mock($this->app->make('cache'), static function (MockInterface $mock) {
+        $cache    = Mockery::mock($this->app->make('cache'), static function (MockInterface $mock) {
             $mock->makePartial();
             $mock->shouldNotReceive('forgetDriver');
         });

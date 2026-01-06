@@ -44,13 +44,13 @@ class ResolutionHelper
      * @throws \Sprout\Exceptions\NoTenantFoundException
      */
     public static function handleResolution(
-        Request $request,
+        Request        $request,
         ResolutionHook $hook,
-        Sprout $sprout,
-        ?string $resolverName = null,
-        ?string $tenancyName = null,
-        bool $throw = true,
-        bool $optional = false
+        Sprout         $sprout,
+        ?string        $resolverName = null,
+        ?string        $tenancyName = null,
+        bool           $throw = true,
+        bool           $optional = false
     ): bool
     {
         // Set the current hook

@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Sprout\Tests\Unit;
 
+use Closure;
 use Illuminate\Config\Repository;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Event;
@@ -133,7 +134,7 @@ class SproutTest extends UnitTestCase
     {
         $app = Mockery::mock(Application::class, static function (Mockery\MockInterface $mock) {
             $mock->shouldReceive('forgetExtenders')->with(Tenancy::class)->twice();
-            $mock->shouldReceive('extend')->with(Tenancy::class, Mockery::on(fn ($arg) => $arg instanceof \Closure))->twice();
+            $mock->shouldReceive('extend')->with(Tenancy::class, Mockery::on(fn ($arg) => $arg instanceof Closure))->twice();
         });
 
         $sprout = new Sprout($app, new SettingsRepository());

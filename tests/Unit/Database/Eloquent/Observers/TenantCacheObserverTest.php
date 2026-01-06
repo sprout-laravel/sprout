@@ -8,6 +8,7 @@ use Illuminate\Contracts\Foundation\Application;
 use Mockery;
 use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\Test;
+use ReflectionClass;
 use Sprout\Contracts\Tenant;
 use Sprout\Contracts\TenantProvider;
 use Sprout\Database\Eloquent\Observers\TenantCacheObserver;
@@ -46,7 +47,8 @@ class TenantCacheObserverTest extends UnitTestCase
     private function createCacheStoreWithTags(): object
     {
         return new class {
-            public function tags(): void {
+            public function tags(): void
+            {
                 // Mock tags method
             }
         };
@@ -64,7 +66,7 @@ class TenantCacheObserverTest extends UnitTestCase
         $cachingProvider = new CachingTenantProvider($mockBaseProvider, $this->mockCache, 3600);
 
         // Inject the provider into the manager using reflection
-        $reflection = new \ReflectionClass($this->providerManager);
+        $reflection = new ReflectionClass($this->providerManager);
         $property   = $reflection->getProperty('objects');
         $property->setAccessible(true);
         $property->setValue($this->providerManager, ['tenants' => $cachingProvider]);
@@ -88,7 +90,7 @@ class TenantCacheObserverTest extends UnitTestCase
         $cachingProvider = new CachingTenantProvider($mockBaseProvider, $this->mockCache, 3600);
 
         // Inject the provider into the manager using reflection
-        $reflection = new \ReflectionClass($this->providerManager);
+        $reflection = new ReflectionClass($this->providerManager);
         $property   = $reflection->getProperty('objects');
         $property->setAccessible(true);
         $property->setValue($this->providerManager, ['tenants' => $cachingProvider]);
@@ -112,7 +114,7 @@ class TenantCacheObserverTest extends UnitTestCase
         $cachingProvider = new CachingTenantProvider($mockBaseProvider, $this->mockCache, 3600);
 
         // Inject the provider into the manager using reflection
-        $reflection = new \ReflectionClass($this->providerManager);
+        $reflection = new ReflectionClass($this->providerManager);
         $property   = $reflection->getProperty('objects');
         $property->setAccessible(true);
         $property->setValue($this->providerManager, ['tenants' => $cachingProvider]);

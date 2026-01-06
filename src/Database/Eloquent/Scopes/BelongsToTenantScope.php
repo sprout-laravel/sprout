@@ -92,7 +92,7 @@ final class BelongsToTenantScope extends TenantChildScope
      *
      * @param \Illuminate\Database\Eloquent\Builder<ModelClass>                                      $builder
      * @param \Illuminate\Database\Eloquent\Model&\Sprout\Database\Eloquent\Concerns\BelongsToTenant $model
-     * @param \Sprout\Contracts\Tenancy<*>                                                  $tenancy
+     * @param \Sprout\Contracts\Tenancy<*>                                                           $tenancy
      *
      * @phpstan-param ModelClass                                                                     $model
      *

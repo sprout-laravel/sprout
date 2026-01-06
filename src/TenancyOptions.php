@@ -100,7 +100,7 @@ class TenancyOptions
 
     /**
      * @param \Sprout\Contracts\Tenancy<*> $tenancy
-     * @param string $service
+     * @param string                       $service
      *
      * @return bool
      */

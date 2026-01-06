@@ -155,12 +155,12 @@ class SproutServiceProviderTest extends UnitTestCase
             $mock->shouldReceive('setTenancy')->once();
         });
 
-        $this->app->singleton(TenantAware::class, fn() => $tenantAware);
+        $this->app->singleton(TenantAware::class, fn () => $tenantAware);
 
         $this->app->make(TenantAware::class);
 
-        $this->app->extend(Tenancy::class, fn(?Tenancy $tenancy) => $tenancy);
-        $this->app->extend(Tenant::class, fn(?Tenant $tenant) => $tenant);
+        $this->app->extend(Tenancy::class, fn (?Tenancy $tenancy) => $tenancy);
+        $this->app->extend(Tenant::class, fn (?Tenant $tenant) => $tenant);
     }
 
     #[Test]

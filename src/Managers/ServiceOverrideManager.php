@@ -110,7 +110,7 @@ final class ServiceOverrideManager
     /**
      * Check if a service override has been set up for a tenancy
      *
-     * @param string $service
+     * @param string                            $service
      * @param \Sprout\Contracts\Tenancy<*>|null $tenancy
      *
      * @return bool

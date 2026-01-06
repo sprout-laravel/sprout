@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Sprout\Tests\Unit\Overrides\Auth;
 
 use Carbon\Carbon;
+use Closure;
 use Illuminate\Cache\Repository;
 use Illuminate\Contracts\Auth\CanResetPassword;
 use Illuminate\Foundation\Application;
@@ -52,7 +53,7 @@ class SproutAuthCacheTokenRepositoryTest extends UnitTestCase
         });
     }
 
-    private function mockStoreGet(?Tenancy $tenancy, string $token, $hasher, bool $return = true, ?\Closure $expiryAdjuster = null): Repository&MockInterface
+    private function mockStoreGet(?Tenancy $tenancy, string $token, $hasher, bool $return = true, ?Closure $expiryAdjuster = null): Repository&MockInterface
     {
         $storedToken = $return ? $hasher->make($token) : null;
 
@@ -327,7 +328,7 @@ class SproutAuthCacheTokenRepositoryTest extends UnitTestCase
             $token,
             $hasher,
             true,
-            fn(Carbon $carbon) => $carbon->subMinutes(3700)
+            fn (Carbon $carbon) => $carbon->subMinutes(3700)
         );
 
         $repository = new SproutAuthCacheTokenRepository(
@@ -392,7 +393,7 @@ class SproutAuthCacheTokenRepositoryTest extends UnitTestCase
             $token,
             $hasher,
             true,
-            fn(Carbon $carbon) => $carbon->subSeconds(10)
+            fn (Carbon $carbon) => $carbon->subSeconds(10)
         );
 
         $repository = new SproutAuthCacheTokenRepository(
@@ -425,7 +426,7 @@ class SproutAuthCacheTokenRepositoryTest extends UnitTestCase
             $token,
             $hasher,
             true,
-            fn(Carbon $carbon) => $carbon->subMinute()
+            fn (Carbon $carbon) => $carbon->subMinute()
         );
 
         $repository = new SproutAuthCacheTokenRepository(
@@ -458,7 +459,7 @@ class SproutAuthCacheTokenRepositoryTest extends UnitTestCase
             $token,
             $hasher,
             true,
-            fn(Carbon $carbon) => $carbon->subMinutes(3700)
+            fn (Carbon $carbon) => $carbon->subMinutes(3700)
         );
 
         $repository = new SproutAuthCacheTokenRepository(
@@ -516,7 +517,7 @@ class SproutAuthCacheTokenRepositoryTest extends UnitTestCase
 
         $sprout = $this->getSprout($app, $tenancy, $tenant);
         $user   = $this->mockUser();
-        $store = Mockery::mock(Repository::class, static function (MockInterface $mock) use ($tenancy) {
+        $store  = Mockery::mock(Repository::class, static function (MockInterface $mock) use ($tenancy) {
             $mock->shouldReceive('forget')
                  ->withArgs([
                      'my-prefix' . ($tenancy !== null ? '.my-tenancy.7' : '') . 'test@email.com',

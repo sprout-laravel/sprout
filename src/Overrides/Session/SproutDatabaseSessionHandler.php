@@ -42,7 +42,7 @@ class SproutDatabaseSessionHandler extends DatabaseSessionHandler implements Ten
 
         /**
          * @var \Sprout\Contracts\Tenancy<*> $tenancy
-         * @var \Sprout\Contracts\Tenant $tenant
+         * @var \Sprout\Contracts\Tenant     $tenant
          */
 
         $query = parent::getQuery();
@@ -71,7 +71,7 @@ class SproutDatabaseSessionHandler extends DatabaseSessionHandler implements Ten
 
             /**
              * @var \Sprout\Contracts\Tenancy<*> $tenancy
-             * @var \Sprout\Contracts\Tenant $tenant
+             * @var \Sprout\Contracts\Tenant     $tenant
              */
 
             $payload['tenancy']   = $tenancy->getName();

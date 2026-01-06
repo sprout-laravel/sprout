@@ -295,7 +295,7 @@ class SessionOverrideTest extends UnitTestCase
     {
         return [
             'do not override the database' => [true],
-            'override the database' => [false],
+            'override the database'        => [false],
         ];
     }
 }
