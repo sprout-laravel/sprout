@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace Sprout\Support;
 
 use Illuminate\Contracts\Cache\Repository;
-use ReflectionClass;
 use Sprout\Contracts\Tenant;
 use Sprout\Managers\TenantProviderManager;
 
@@ -118,16 +117,6 @@ final class TenantCacheInvalidator
      */
     private function getResolvedProviders(): array
     {
-        $providers = [];
-
-        // Use reflection to access the protected $objects property
-        $reflection = new ReflectionClass($this->providerManager);
-        $property   = $reflection->getProperty('objects');
-        $property->setAccessible(true);
-
-        /** @var array<string, \Sprout\Contracts\TenantProvider<*>> $objects */
-        $objects = $property->getValue($this->providerManager);
-
-        return $objects;
+        return $this->providerManager->getResolvedProviders();
     }
 }

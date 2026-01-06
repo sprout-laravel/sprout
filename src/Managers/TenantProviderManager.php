@@ -198,4 +198,16 @@ final class TenantProviderManager extends BaseFactory
 
         return new CachingTenantProvider($provider, $cache, $ttl);
     }
+
+    /**
+     * Get all resolved tenant providers
+     *
+     * This returns all providers that have been instantiated by this manager.
+     *
+     * @return array<string, \Sprout\Contracts\TenantProvider<*>>
+     */
+    public function getResolvedProviders(): array
+    {
+        return $this->objects;
+    }
 }
