@@ -164,6 +164,7 @@ final class TenantProviderManager extends BaseFactory
         $config = $this->getConfig($name);
 
         if (isset($config['cache']) && is_array($config['cache'])) {
+            /** @phpstan-ignore argument.type, argument.templateType */
             $provider = $this->wrapWithCaching($provider, $config['cache']);
         }
 
