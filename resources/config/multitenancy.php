@@ -71,6 +71,14 @@ return [
     |
     | Supported: "database", "eloquent"
     |
+    | Caching: You can optionally enable caching for tenant providers to reduce
+    | database queries. Cache configuration is per-provider and supports the
+    | following options:
+    |   - ttl: Cache duration in seconds (null for indefinite)
+    |   - store: Cache store name (null for default)
+    |
+    | Note: The cache store must support tagging (redis, memcached, dynamodb, array).
+    |
     */
 
     'providers' => [
@@ -78,6 +86,12 @@ return [
         'tenants' => [
             'driver' => 'eloquent',
             'model'  => \Sprout\Database\Eloquent\Tenant::class,
+
+            // Optional: Enable caching to improve performance
+            // 'cache' => [
+            //     'ttl'   => 3600, // 1 hour in seconds
+            //     'store' => null, // null = default cache store
+            // ],
         ],
 
         // 'backup' => [

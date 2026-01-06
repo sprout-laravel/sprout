@@ -1,0 +1,179 @@
+<?php
+declare(strict_types=1);
+
+namespace Sprout\Tests\Unit\Support;
+
+use Illuminate\Contracts\Cache\Repository;
+use Illuminate\Contracts\Foundation\Application;
+use Mockery;
+use Mockery\MockInterface;
+use PHPUnit\Framework\Attributes\Test;
+use ReflectionClass;
+use Sprout\Contracts\Tenant;
+use Sprout\Contracts\TenantProvider;
+use Sprout\Managers\TenantProviderManager;
+use Sprout\Support\CachingTenantProvider;
+use Sprout\Support\TenantCacheInvalidator;
+use Sprout\Tests\Unit\UnitTestCase;
+use stdClass;
+
+class TenantCacheInvalidatorTest extends UnitTestCase
+{
+    private TenantProviderManager    $providerManager;
+    private Repository&MockInterface $mockCache;
+    private Tenant&MockInterface     $mockTenant;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $mockApp = Mockery::mock(Application::class);
+        $mockApp->shouldReceive('get')->with('config')->andReturn($mockApp);
+        $mockApp->shouldReceive('get')->with('multitenancy', Mockery::any())->andReturn([]);
+
+        $this->providerManager = new TenantProviderManager($mockApp, 'config');
+        $this->mockCache       = Mockery::mock(Repository::class);
+        $this->mockTenant      = Mockery::mock(Tenant::class);
+
+        $this->mockTenant->shouldReceive('getTenantIdentifier')->andReturn('test-123');
+        $this->mockTenant->shouldReceive('getTenantKey')->andReturn(456);
+    }
+
+    /**
+     * Create a mock cache store that supports tags
+     */
+    private function createCacheStoreWithTags(): object
+    {
+        return new class {
+            public function tags(): void
+            {
+                // Mock tags method
+            }
+        };
+    }
+
+    #[Test]
+    public function invalidateCallsInvalidateOnCachingProvider(): void
+    {
+        $mockBaseProvider = Mockery::mock(TenantProvider::class);
+        $mockBaseProvider->shouldReceive('getName')->andReturn('test');
+
+        // getStore() is called in constructor for validation
+        $this->mockCache->shouldReceive('getStore')->andReturn($this->createCacheStoreWithTags());
+
+        $cachingProvider = new CachingTenantProvider($mockBaseProvider, $this->mockCache, 3600);
+
+        // Inject the provider into the manager using reflection
+        $reflection = new ReflectionClass($this->providerManager);
+        $property   = $reflection->getProperty('objects');
+        $property->setAccessible(true);
+        $property->setValue($this->providerManager, ['tenants' => $cachingProvider]);
+
+        $this->mockCache->shouldReceive('tags')
+                        ->times(2)
+                        ->andReturnSelf();
+        $this->mockCache->shouldReceive('forget')->twice();
+
+        $invalidator = new TenantCacheInvalidator($this->providerManager, $this->mockCache);
+        $invalidator->invalidate('tenants', $this->mockTenant);
+    }
+
+    #[Test]
+    public function invalidateDoesNothingForNonCachingProvider(): void
+    {
+        $mockProvider = Mockery::mock(TenantProvider::class);
+
+        // Inject the provider into the manager using reflection
+        $reflection = new ReflectionClass($this->providerManager);
+        $property   = $reflection->getProperty('objects');
+        $property->setAccessible(true);
+        $property->setValue($this->providerManager, ['tenants' => $mockProvider]);
+
+        $invalidator = new TenantCacheInvalidator($this->providerManager, $this->mockCache);
+
+        // Should not throw an exception
+        $invalidator->invalidate('tenants', $this->mockTenant);
+
+        $this->assertTrue(true);
+    }
+
+    #[Test]
+    public function flushProviderCallsFlushOnCachingProvider(): void
+    {
+        $mockBaseProvider = Mockery::mock(TenantProvider::class);
+        $mockBaseProvider->shouldReceive('getName')->andReturn('test');
+
+        // getStore() is called in constructor for validation
+        $this->mockCache->shouldReceive('getStore')->andReturn($this->createCacheStoreWithTags());
+
+        $cachingProvider = new CachingTenantProvider($mockBaseProvider, $this->mockCache, 3600);
+
+        // Inject the provider into the manager using reflection
+        $reflection = new ReflectionClass($this->providerManager);
+        $property   = $reflection->getProperty('objects');
+        $property->setAccessible(true);
+        $property->setValue($this->providerManager, ['tenants' => $cachingProvider]);
+
+        $this->mockCache->shouldReceive('tags')->once()->andReturnSelf();
+        $this->mockCache->shouldReceive('flush')->once();
+
+        $invalidator = new TenantCacheInvalidator($this->providerManager, $this->mockCache);
+        $invalidator->flushProvider('tenants');
+    }
+
+    #[Test]
+    public function flushProviderDoesNothingForNonCachingProvider(): void
+    {
+        $mockProvider = Mockery::mock(TenantProvider::class);
+
+        // Inject the provider into the manager using reflection
+        $reflection = new ReflectionClass($this->providerManager);
+        $property   = $reflection->getProperty('objects');
+        $property->setAccessible(true);
+        $property->setValue($this->providerManager, ['tenants' => $mockProvider]);
+
+        $invalidator = new TenantCacheInvalidator($this->providerManager, $this->mockCache);
+
+        // Should not throw an exception
+        $invalidator->flushProvider('tenants');
+
+        $this->assertTrue(true);
+    }
+
+    #[Test]
+    public function flushAllUsesTagsToFlushAllTenantCaches(): void
+    {
+        $this->mockCache->shouldReceive('getStore')
+                        ->once()
+                        ->andReturn($this->createCacheStoreWithTags());
+
+        $this->mockCache->shouldReceive('tags')
+                        ->once()
+                        ->with(['sprout:tenants'])
+                        ->andReturnSelf();
+
+        $this->mockCache->shouldReceive('flush')
+                        ->once();
+
+        $invalidator = new TenantCacheInvalidator($this->providerManager, $this->mockCache);
+        $invalidator->flushAll();
+    }
+
+    #[Test]
+    public function flushAllDoesNothingWhenCacheDoesNotSupportTags(): void
+    {
+        $cacheStore = Mockery::mock(stdClass::class);
+        // No tags method
+
+        $this->mockCache->shouldReceive('getStore')
+                        ->once()
+                        ->andReturn($cacheStore);
+
+        $invalidator = new TenantCacheInvalidator($this->providerManager, $this->mockCache);
+
+        // Should not throw an exception
+        $invalidator->flushAll();
+
+        $this->assertTrue(true);
+    }
+}

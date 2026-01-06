@@ -5,10 +5,12 @@ namespace Sprout\Managers;
 
 use Illuminate\Database\Eloquent\Model;
 use Sprout\Contracts\Tenant;
+use Sprout\Contracts\TenantProvider;
 use Sprout\Exceptions\MisconfigurationException;
 use Sprout\Providers\DatabaseTenantProvider;
 use Sprout\Providers\EloquentTenantProvider;
 use Sprout\Support\BaseFactory;
+use Sprout\Support\CachingTenantProvider;
 use Sprout\Support\GenericTenant;
 
 /**
@@ -139,5 +141,61 @@ final class TenantProviderManager extends BaseFactory
             $table,
             $config['entity'] ?? GenericTenant::class
         );
+    }
+
+    /**
+     * Resolve a tenant provider by name
+     *
+     * This method wraps the base resolve method to add optional caching support.
+     *
+     * @param string $name
+     *
+     * @return \Sprout\Contracts\TenantProvider<*>
+     *
+     * @throws \Sprout\Exceptions\MisconfigurationException
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     */
+    protected function resolve(string $name): object
+    {
+        /** @var \Sprout\Contracts\TenantProvider<*> $provider */
+        $provider = parent::resolve($name);
+
+        // Check if caching is configured for this provider
+        $config = $this->getConfig($name);
+
+        if (isset($config['cache']) && is_array($config['cache'])) {
+            $provider = $this->wrapWithCaching($provider, $config['cache']);
+        }
+
+        return $provider;
+    }
+
+    /**
+     * Wrap a tenant provider with caching
+     *
+     * @template TenantClass of \Sprout\Contracts\Tenant
+     *
+     * @param \Sprout\Contracts\TenantProvider<TenantClass>      $provider
+     * @param array<string, mixed>                               $cacheConfig
+     *
+     * @phpstan-param array{ttl?: int|null, store?: string|null} $cacheConfig
+     *
+     * @return \Sprout\Support\CachingTenantProvider<TenantClass>
+     *
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws \Sprout\Exceptions\MisconfigurationException
+     */
+    private function wrapWithCaching(TenantProvider $provider, array $cacheConfig): CachingTenantProvider
+    {
+        $ttl       = $cacheConfig['ttl'] ?? null;
+        $storeName = $cacheConfig['store'] ?? null;
+
+        /** @var \Illuminate\Cache\CacheManager $cacheManager */
+        $cacheManager = $this->app->make('cache');
+
+        /** @var \Illuminate\Contracts\Cache\Repository $cache */
+        $cache = $cacheManager->store($storeName);
+
+        return new CachingTenantProvider($provider, $cache, $ttl);
     }
 }

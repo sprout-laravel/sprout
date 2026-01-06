@@ -7,6 +7,7 @@ use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Routing\Router;
 use Illuminate\Support\ServiceProvider;
+use Sprout\Console\Commands\ClearTenantCache;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 use Sprout\Contracts\TenantAware;
@@ -21,6 +22,7 @@ use Sprout\Managers\TenancyManager;
 use Sprout\Managers\TenantProviderManager;
 use Sprout\Support\ResolutionHook;
 use Sprout\Support\SettingsRepository;
+use Sprout\Support\TenantCacheInvalidator;
 
 /**
  * Sprout Service Provider
@@ -40,6 +42,7 @@ class SproutServiceProvider extends ServiceProvider
         $this->registerRouteMixin();
         $this->registerServiceOverrideBooting();
         $this->registerTenantAwareHandling();
+        $this->registerCacheInvalidator();
     }
 
     private function registerSprout(): void
@@ -122,6 +125,7 @@ class SproutServiceProvider extends ServiceProvider
         $this->registerServiceOverrides();
         $this->registerEventListeners();
         $this->registerTenancyBootstrappers();
+        $this->registerCommands();
     }
 
     private function publishConfig(): void
@@ -159,6 +163,25 @@ class SproutServiceProvider extends ServiceProvider
 
         foreach ($bootstrappers as $bootstrapper) {
             $events->listen(CurrentTenantChanged::class, $bootstrapper);
+        }
+    }
+
+    private function registerCacheInvalidator(): void
+    {
+        $this->app->singleton(TenantCacheInvalidator::class, function ($app) {
+            return new TenantCacheInvalidator(
+                $app->make(TenantProviderManager::class),
+                $app->make('cache')->store()
+            );
+        });
+    }
+
+    private function registerCommands(): void
+    {
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                ClearTenantCache::class,
+            ]);
         }
     }
 }
