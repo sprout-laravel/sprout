@@ -15,7 +15,7 @@ use Sprout\Managers\IdentityResolverManager;
  * This is a contextual attribute that allows for the auto-injection of an
  * identity resolver using its registered name, or the default.
  *
- * @see     https://laravel.com/docs/11.x/container#contextual-attributes
+ * @see     https://laravel.com/docs/12.x/container#contextual-attributes
  *
  * @package Core
  */
@@ -43,12 +43,12 @@ final readonly class Resolver implements ContextualAttribute
      * @param \Sprout\Attributes\Resolver     $attribute
      * @param \Illuminate\Container\Container $container
      *
-     * @return \Sprout\Contracts\IdentityResolver|null
+     * @return \Sprout\Contracts\IdentityResolver
      *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
      * @throws \Sprout\Exceptions\MisconfigurationException
      */
-    public function resolve(Resolver $attribute, Container $container): ?IdentityResolver
+    public function resolve(self $attribute, Container $container): IdentityResolver
     {
         /**
          * It's not nullable, it'll be an exception

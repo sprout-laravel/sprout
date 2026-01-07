@@ -15,7 +15,7 @@ use Sprout\Managers\TenancyManager;
  * This is a contextual attribute that allows for the auto-injection of the
  * current tenant for the default, or a given tenancy.
  *
- * @see     https://laravel.com/docs/11.x/container#contextual-attributes
+ * @see     https://laravel.com/docs/12.x/container#contextual-attributes
  *
  * @package Core
  */
@@ -48,7 +48,7 @@ final readonly class CurrentTenant implements ContextualAttribute
      * @return \Sprout\Contracts\Tenant|null
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
      */
-    public function resolve(CurrentTenant $tenant, Container $container): ?Tenant
+    public function resolve(self $tenant, Container $container): ?Tenant
     {
         /**
          * It's not nullable, it'll be an exception

@@ -15,7 +15,7 @@ use Sprout\Managers\TenantProviderManager;
  * This is a contextual attribute that allows for the auto-injection of a
  * tenant provider using its registered name, or the default.
  *
- * @see     https://laravel.com/docs/11.x/container#contextual-attributes
+ * @see     https://laravel.com/docs/12.x/container#contextual-attributes
  *
  * @package Core
  */
@@ -43,12 +43,12 @@ final readonly class Provider implements ContextualAttribute
      * @param \Sprout\Attributes\Provider     $attribute
      * @param \Illuminate\Container\Container $container
      *
-     * @return \Sprout\Contracts\TenantProvider<*>|null
+     * @return \Sprout\Contracts\TenantProvider<*>
      *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
      * @throws \Sprout\Exceptions\MisconfigurationException
      */
-    public function resolve(Provider $attribute, Container $container): ?TenantProvider
+    public function resolve(self $attribute, Container $container): TenantProvider
     {
         /**
          * It's not nullable, it'll be an exception

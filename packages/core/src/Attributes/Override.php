@@ -15,7 +15,7 @@ use Sprout\Managers\ServiceOverrideManager;
  * This is a contextual attribute that allows for the auto-injection of a
  * service override using its registered name.
  *
- * @see     https://laravel.com/docs/11.x/container#contextual-attributes
+ * @see     https://laravel.com/docs/12.x/container#contextual-attributes
  *
  * @package Core
  */
@@ -49,7 +49,7 @@ final readonly class Override implements ContextualAttribute
      *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
      */
-    public function resolve(Override $attribute, Container $container): ?ServiceOverride
+    public function resolve(self $attribute, Container $container): ?ServiceOverride
     {
         /**
          * It's not nullable, it'll be an exception

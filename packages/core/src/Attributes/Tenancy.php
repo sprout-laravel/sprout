@@ -15,7 +15,7 @@ use Sprout\Managers\TenancyManager;
  * This is a contextual attribute that allows for the auto-injection of the
  * tenancy, either using its registered name or the default.
  *
- * @see     https://laravel.com/docs/11.x/container#contextual-attributes
+ * @see     https://laravel.com/docs/12.x/container#contextual-attributes
  *
  * @package Core
  */
@@ -43,12 +43,12 @@ final readonly class Tenancy implements ContextualAttribute
      * @param \Sprout\Attributes\Tenancy      $attribute
      * @param \Illuminate\Container\Container $container
      *
-     * @return \Sprout\Contracts\Tenancy<*>|null
+     * @return \Sprout\Contracts\Tenancy<*>
      *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
      * @throws \Sprout\Exceptions\MisconfigurationException
      */
-    public function resolve(Tenancy $attribute, Container $container): ?TenancyContract
+    public function resolve(self $attribute, Container $container): TenancyContract
     {
         /**
          * It's not nullable, it'll be an exception
