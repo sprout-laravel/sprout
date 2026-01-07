@@ -53,9 +53,9 @@ class SproutAuthPasswordBrokerManager extends PasswordBrokerManager
             $key = base64_decode(substr($key, 7)); // @infection-ignore-all
         }
         // @codeCoverageIgnoreEnd
+        $expiry = $config['expire'] !== 0 && is_numeric($config['expire']) ? (int)$config['expire'] : 60;
 
         if (isset($config['driver']) && $config['driver'] === 'cache') {
-            $expiry = isset($config['expiry']) && is_numeric($config['expiry']) ? (int)$config['expiry'] : 60;
 
             return new SproutAuthCacheTokenRepository(
                 $this->sprout,
@@ -76,25 +76,9 @@ class SproutAuthPasswordBrokerManager extends PasswordBrokerManager
             $this->app->make('hash'),
             $config['table'], // @phpstan-ignore-line
             $key,
-            $this->laravelVersionedExpiry($config['expire']),// @phpstan-ignore-line
+            $expiry * 60,
             $config['throttle'] ?? 0// @phpstan-ignore-line
         );
-    }
-
-    /**
-     * Create the token expiry based on the Laravel version
-     *
-     * @param int|null $expiry
-     *
-     * @return int|null
-     */
-    private function laravelVersionedExpiry(?int $expiry): ?int
-    {
-        if (! Str::startsWith($this->app->version(), '11.')) {
-            return ($expiry ?? 60) * 60;
-        }
-
-        return $expiry;
     }
 
     /**
