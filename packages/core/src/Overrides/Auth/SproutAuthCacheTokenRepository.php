@@ -7,9 +7,6 @@ use Illuminate\Auth\Passwords\CacheTokenRepository;
 use Illuminate\Cache\Repository;
 use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
 use Illuminate\Contracts\Hashing\Hasher as HasherContract;
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Str;
-use SensitiveParameter;
 use Sprout\Contracts\TenantHasResources;
 use Sprout\Exceptions\TenancyMissingException;
 use Sprout\Exceptions\TenantMissingException;
@@ -22,6 +19,8 @@ class SproutAuthCacheTokenRepository extends CacheTokenRepository
      */
     private Sprout $sprout;
 
+    private string $prefix;
+
     /** @infection-ignore-all */
     public function __construct(
         Sprout         $sprout,
@@ -33,7 +32,9 @@ class SproutAuthCacheTokenRepository extends CacheTokenRepository
         string         $prefix = ''
     )
     {
-        parent::__construct($cache, $hasher, $hashKey, $expires, $throttle, $prefix);
+        parent::__construct($cache, $hasher, $hashKey, $expires, $throttle);
+
+        $this->prefix = $prefix;
         $this->sprout = $sprout;
     }
 
@@ -97,7 +98,7 @@ class SproutAuthCacheTokenRepository extends CacheTokenRepository
     }
 
     /**
-     * Create a new token.
+     * Determine the cache key for the given user.
      *
      * @param \Illuminate\Contracts\Auth\CanResetPassword $user
      *
@@ -106,85 +107,8 @@ class SproutAuthCacheTokenRepository extends CacheTokenRepository
      * @throws \Sprout\Exceptions\TenancyMissingException
      * @throws \Sprout\Exceptions\TenantMissingException
      */
-    public function create(CanResetPasswordContract $user): string
+    public function cacheKey(CanResetPasswordContract $user): string
     {
-        $this->delete($user);
-
-        /** @infection-ignore-all */
-        $token = hash_hmac('sha256', Str::random(40), $this->hashKey);
-
-        $this->cache->put(
-            $this->getPrefix() . $user->getEmailForPasswordReset(),
-            [$this->hasher->make($token), Carbon::now()->format($this->format)],
-            $this->expires,
-        );
-
-        return $token;
-    }
-
-    /**
-     * Determine if a token record exists and is valid.
-     *
-     * @param \Illuminate\Contracts\Auth\CanResetPassword $user
-     * @param string                                      $token
-     *
-     * @return bool
-     *
-     * @throws \Sprout\Exceptions\TenancyMissingException
-     * @throws \Sprout\Exceptions\TenantMissingException
-     */
-    public function exists(CanResetPasswordContract $user, #[SensitiveParameter] $token): bool
-    {
-        /** @var null|array{string, string} $result */
-        $result = $this->cache->get($this->getPrefix() . $user->getEmailForPasswordReset());
-
-        if ($result === null) {
-            return false;
-        }
-
-        [$record, $createdAt] = $result;
-
-        return $record
-               && ! $this->tokenExpired($createdAt)
-               && $this->hasher->check($token, $record);
-    }
-
-    /**
-     * Determine if the given user recently created a password reset token.
-     *
-     * @param \Illuminate\Contracts\Auth\CanResetPassword $user
-     *
-     * @return bool
-     *
-     * @throws \Sprout\Exceptions\TenancyMissingException
-     * @throws \Sprout\Exceptions\TenantMissingException
-     */
-    public function recentlyCreatedToken(CanResetPasswordContract $user): bool
-    {
-        /** @var null|array{string, string} $result */
-        $result = $this->cache->get($this->getPrefix() . $user->getEmailForPasswordReset());
-
-        if ($result === null) {
-            return false;
-        }
-
-        [$record, $createdAt] = $result;
-
-        return $record && $this->tokenRecentlyCreated($createdAt);
-    }
-
-    /**
-     * Delete a token record.
-     *
-     * @param \Illuminate\Contracts\Auth\CanResetPassword $user
-     *
-     * @return void
-     *
-     * @throws \Sprout\Exceptions\TenancyMissingException
-     * @throws \Sprout\Exceptions\TenantMissingException
-     */
-    public function delete(CanResetPasswordContract $user): void
-    {
-        $this->cache->forget($this->getPrefix() . $user->getEmailForPasswordReset());
+        return hash('sha256', $this->getPrefix() . $user->getEmailForPasswordReset());
     }
 }
