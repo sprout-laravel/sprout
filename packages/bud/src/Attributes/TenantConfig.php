@@ -14,7 +14,7 @@ use Sprout\Bud\Bud;
  * This is a contextual attribute that allows for the auto-injection of
  * tenant config, using the name of the service and the name of the config.
  *
- * @see     https://laravel.com/docs/11.x/container#contextual-attributes
+ * @see     https://laravel.com/docs/12.x/container#contextual-attributes
  *
  * @package Core
  */

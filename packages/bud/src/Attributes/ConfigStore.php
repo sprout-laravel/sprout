@@ -15,7 +15,7 @@ use Sprout\Bud\Managers\ConfigStoreManager;
  * This is a contextual attribute that allows for the auto-injection of a
  * config store, either using its registered name or the default.
  *
- * @see     https://laravel.com/docs/11.x/container#contextual-attributes
+ * @see     https://laravel.com/docs/12.x/container#contextual-attributes
  *
  * @package Core
  */
