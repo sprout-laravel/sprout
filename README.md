@@ -4,11 +4,15 @@
 ![Packagist PHP Version Support](https://img.shields.io/packagist/php-v/sprout/sprout)
 
 ![GitHub](https://img.shields.io/github/license/sprout-laravel/sprout)
-![Laravel](https://img.shields.io/badge/laravel-11.x-red.svg)
+![Laravel](https://img.shields.io/badge/laravel-12.x-red.svg)
 [![codecov](https://codecov.io/gh/sprout-laravel/sprout/branch/1.x/graph/badge.svg?token=FHJ41NQMTA)](https://codecov.io/gh/sprout-laravel/sprout)
 
 ![Unit Tests](https://github.com/sprout-laravel/sprout/actions/workflows/tests.yml/badge.svg)
 ![Static Analysis](https://github.com/sprout-laravel/sprout/actions/workflows/static-analysis.yml/badge.svg)
+
+> [!WARNING]
+> You are viewing the upcoming `2.0` release, which includes a whole host of new features, and a significant 
+> change in the repository structure.
 
 # Sprout for Laravel
 A flexible, seamless, and easy to use multitenancy solution for Laravel
