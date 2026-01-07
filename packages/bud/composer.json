@@ -1,11 +1,11 @@
 {
-  "name"             : "sprout/sprout",
-  "description"      : "A flexible, seamless and easy to use multitenancy solution for Laravel",
+  "name"             : "sprout/bud",
+  "description"      : "Tenant-specific Laravel service config for your Sprout powered Laravel application",
   "type"             : "library",
   "require"          : {
-    "php"                            : "^8.3",
-    "laravel/framework"              : "^12.45.2",
-    "league/flysystem-path-prefixing": "^3.0"
+    "php"              : "^8.3",
+    "laravel/framework": "^12.45.2",
+    "sprout/sprout"    : "^2.0-dev"
   },
   "require-dev"      : {
     "phpunit/phpunit"    : "^11.0",
@@ -15,17 +15,13 @@
   "license"          : "MIT",
   "autoload"         : {
     "psr-4": {
-      "Sprout\\"     : "packages/core/src/",
-      "Sprout\\Bud\\": "packages/bud/src/"
+      "Sprout\\Bud\\": "src/"
     },
-    "files": [
-      "packages/core/src/helpers.php"
-    ]
+    "files": []
   },
   "autoload-dev"     : {
     "psr-4": {
-      "Sprout\\Tests\\"                 : "packages/core/tests",
-      "Sprout\\Bud\\Tests\\"            : "packages/bud/tests",
+      "Sprout\\Bud\\Tests\\"            : "tests",
       "Workbench\\App\\"                : "workbench/app/",
       "Workbench\\Database\\Factories\\": "workbench/database/factories/",
       "Workbench\\Database\\Seeders\\"  : "workbench/database/seeders/"
@@ -59,25 +55,18 @@
       "@clear",
       "@prepare",
       "@build",
-      "@php vendor/bin/phpunit"
+      "@php vendor/bin/phpunit --testsuite=Unit,Feature"
     ]
   },
   "extra"            : {
     "laravel"     : {
       "providers": [
-        "Sprout\\SproutServiceProvider",
         "Sprout\\Bud\\BudServiceProvider"
       ],
-      "facades"  : [
-        "Sprout\\Facades\\Overrides",
-        "Sprout\\Facades\\Providers",
-        "Sprout\\Facades\\Resolvers",
-        "Sprout\\Facades\\Sprout",
-        "Sprout\\Facades\\Tenancies"
-      ]
+      "facades"  : []
     },
     "branch-alias": {
-      "dev-main": "2.x-dev"
+      "dev-main": "1.x-dev"
     }
   },
   "config"           : {
