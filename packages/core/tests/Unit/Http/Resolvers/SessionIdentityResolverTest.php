@@ -6,7 +6,6 @@ namespace Sprout\Tests\Unit\Http\Resolvers;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Router;
-use Illuminate\Routing\RouteRegistrar;
 use Illuminate\Session\Store;
 use Mockery;
 use Mockery\MockInterface;
@@ -83,35 +82,6 @@ class SessionIdentityResolverTest extends UnitTestCase
         });
 
         $this->assertSame('multitenancy.my-tenancy', $resolver->getRequestSessionName($tenancy));
-    }
-
-    #[Test]
-    public function createsRouteGroup(): void
-    {
-        $resolver = new SessionIdentityResolver('session');
-
-        $tenancy = Mockery::mock(Tenancy::class, static function ($mock) {
-            $mock->shouldReceive('getName')->andReturn('my-tenancy')->once();
-        });
-
-        $routes = static fn () => false;
-
-        /** @var \Illuminate\Routing\Router&\Mockery\MockInterface $router */
-        $router = Mockery::mock(Router::class, static function (MockInterface $mock) use ($routes) {
-            $mock->shouldReceive('middleware')
-                 ->with(['sprout.tenanted:session,my-tenancy'])
-                 ->andReturn(
-                     Mockery::mock(RouteRegistrar::class, static function (MockInterface $mock) use ($routes) {
-                         $mock->shouldReceive('group')
-                              ->with($routes)
-                              ->andReturnSelf()
-                              ->once();
-                     })
-                 )
-                 ->once();
-        });
-
-        $resolver->routes($router, $routes, $tenancy);
     }
 
     #[Test]

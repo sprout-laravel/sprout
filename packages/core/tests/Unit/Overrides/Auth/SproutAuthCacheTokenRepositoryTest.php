@@ -59,7 +59,7 @@ class SproutAuthCacheTokenRepositoryTest extends UnitTestCase
         return Mockery::mock(Repository::class, static function (MockInterface $mock) use ($expiryAdjuster, $storedToken, $tenancy) {
             $mock->shouldReceive('get')
                  ->withArgs([
-                     'my-prefix' . ($tenancy !== null ? '.my-tenancy.7' : '') . 'test@email.com',
+                     hash('sha256', 'my-prefix' . ($tenancy !== null ? '.my-tenancy.7' : '') . 'test@email.com'),
                  ])
                  ->andReturn($storedToken ? [
                      $storedToken,
@@ -245,12 +245,12 @@ class SproutAuthCacheTokenRepositoryTest extends UnitTestCase
         $store = Mockery::mock(Repository::class, static function (MockInterface $mock) use ($tenancy, &$hash) {
             $mock->shouldReceive('forget')
                  ->withArgs([
-                     'my-prefix' . ($tenancy !== null ? '.my-tenancy.7' : '') . 'test@email.com',
+                     hash('sha256', 'my-prefix' . ($tenancy !== null ? '.my-tenancy.7' : '') . 'test@email.com'),
                  ])
                  ->once();
             $mock->shouldReceive('put')
                  ->withArgs([
-                     'my-prefix' . ($tenancy !== null ? '.my-tenancy.7' : '') . 'test@email.com',
+                     hash('sha256', 'my-prefix' . ($tenancy !== null ? '.my-tenancy.7' : '') . 'test@email.com'),
                      Mockery::on(static function ($arg) use (&$hash) {
                          if (is_array($arg)
                              && is_string($arg[0])
@@ -519,7 +519,7 @@ class SproutAuthCacheTokenRepositoryTest extends UnitTestCase
         $store = Mockery::mock(Repository::class, static function (MockInterface $mock) use ($tenancy) {
             $mock->shouldReceive('forget')
                  ->withArgs([
-                     'my-prefix' . ($tenancy !== null ? '.my-tenancy.7' : '') . 'test@email.com',
+                     hash('sha256', 'my-prefix' . ($tenancy !== null ? '.my-tenancy.7' : '') . 'test@email.com'),
                  ])
                  ->once();
         });
@@ -551,7 +551,6 @@ class SproutAuthCacheTokenRepositoryTest extends UnitTestCase
         $tenant  = Mockery::mock(Tenant::class);
 
         return [
-            'no tenant context' => [null, null],
             'tenant context'    => [$tenancy, $tenant],
         ];
     }

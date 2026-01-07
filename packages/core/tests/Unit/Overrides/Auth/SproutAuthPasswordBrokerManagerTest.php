@@ -59,6 +59,11 @@ class SproutAuthPasswordBrokerManagerTest extends UnitTestCase
                      ->withArgs(['auth.passwords.my-passwords'])
                      ->once()
                      ->andReturn($config);
+
+                $mock->shouldReceive('get')
+                     ->withArgs(['auth.timebox_duration', 200000])
+                     ->andReturn(200000)
+                     ->once();
             });
 
             $mock->shouldReceive('offsetGet')
@@ -108,7 +113,7 @@ class SproutAuthPasswordBrokerManagerTest extends UnitTestCase
         $this->assertInstanceOf(SproutAuthDatabaseTokenRepository::class, $repository);
         $this->assertTrue($manager->isResolved('my-passwords'));
         $this->assertFalse($manager->isResolved());
-        $this->assertSame(($expire ?? 0) * 60, $repository->getExpires());
+        $this->assertSame(($expire ?? 60) * 60, $repository->getExpires());
         $this->assertSame($throttle ?? 0, $repository->getThrottle());
     }
 

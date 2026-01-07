@@ -99,78 +99,50 @@ class SubdomainIdentityResolverTest extends UnitTestCase
     }
 
     #[Test]
-    public function createsRouteGroup(): void
+    public function configuresRoute(): void
     {
         $resolver = new SubdomainIdentityResolver('subdomain', 'my-app.com');
+
+        $tenancy = Mockery::mock(Tenancy::class, static function ($mock) {
+            $mock->shouldReceive('getName')->andReturn('my-tenancy')->once();
+        });
+
+        /** @var \Illuminate\Routing\RouteRegistrar&\Mockery\MockInterface $route */
+        $route = Mockery::mock(RouteRegistrar::class, static function (MockInterface $mock) {
+            $mock->shouldReceive('domain')
+                 ->with('{my_tenancy_subdomain}.my-app.com')
+                 ->andReturnSelf()
+                 ->once();
+
+            $mock->shouldNotReceive('where');
+        });
+
+        $resolver->configureRoute($route, $tenancy);
+    }
+
+    #[Test]
+    public function configuresRouteWithPattern(): void
+    {
+        $resolver = new SubdomainIdentityResolver('subdomain', 'my-app.com', pattern: '.*');
 
         $tenancy = Mockery::mock(Tenancy::class, static function ($mock) {
             $mock->shouldReceive('getName')->andReturn('my-tenancy')->twice();
         });
 
-        $routes = static fn () => false;
-
-        /** @var \Illuminate\Routing\Router&\Mockery\MockInterface $router */
-        $router = Mockery::mock(Router::class, static function (MockInterface $mock) use ($routes) {
+        /** @var \Illuminate\Routing\RouteRegistrar&\Mockery\MockInterface $route */
+        $route = Mockery::mock(RouteRegistrar::class, static function (MockInterface $mock) {
             $mock->shouldReceive('domain')
                  ->with('{my_tenancy_subdomain}.my-app.com')
-                 ->andReturn(
-                     Mockery::mock(RouteRegistrar::class, static function (MockInterface $mock) use ($routes) {
-                         $mock->shouldReceive('middleware')
-                              ->with(['sprout.tenanted:subdomain,my-tenancy'])
-                              ->andReturnSelf()
-                              ->once();
+                 ->andReturnSelf()
+                 ->once();
 
-                         $mock->shouldReceive('group')
-                              ->with($routes)
-                              ->andReturnSelf()
-                              ->once();
-
-                         $mock->shouldNotReceive('where');
-                     })
-                 )
+            $mock->shouldReceive('where')
+                 ->with(['my_tenancy_subdomain' => '.*'])
+                 ->andReturnSelf()
                  ->once();
         });
 
-        $resolver->routes($router, $routes, $tenancy);
-    }
-
-    #[Test]
-    public function createsRouteGroupWithPattern(): void
-    {
-        $resolver = new SubdomainIdentityResolver('subdomain', 'my-app.com', pattern: '.*');
-
-        $tenancy = Mockery::mock(Tenancy::class, static function ($mock) {
-            $mock->shouldReceive('getName')->andReturn('my-tenancy')->times(3);
-        });
-
-        $routes = static fn () => false;
-
-        /** @var \Illuminate\Routing\Router&\Mockery\MockInterface $router */
-        $router = Mockery::mock(Router::class, static function (MockInterface $mock) use ($routes) {
-            $mock->shouldReceive('domain')
-                 ->with('{my_tenancy_subdomain}.my-app.com')
-                 ->andReturn(
-                     Mockery::mock(RouteRegistrar::class, static function (MockInterface $mock) use ($routes) {
-                         $mock->shouldReceive('middleware')
-                              ->with(['sprout.tenanted:subdomain,my-tenancy'])
-                              ->andReturnSelf()
-                              ->once();
-
-                         $mock->shouldReceive('group')
-                              ->with($routes)
-                              ->andReturnSelf()
-                              ->once();
-
-                         $mock->shouldReceive('where')
-                              ->with(['my_tenancy_subdomain' => '.*'])
-                              ->andReturnSelf()
-                              ->once();
-                     })
-                 )
-                 ->once();
-        });
-
-        $resolver->routes($router, $routes, $tenancy);
+        $resolver->configureRoute($route, $tenancy);
     }
 
     #[Test]

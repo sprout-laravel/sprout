@@ -5,8 +5,8 @@ namespace Sprout\Tests\Unit\Http\Resolvers;
 
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\Request;
-use Illuminate\Routing\Router;
 use Illuminate\Routing\RouteRegistrar;
+use Illuminate\Routing\Router;
 use Mockery;
 use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\Test;
@@ -86,35 +86,23 @@ class HeaderIdentityResolverTest extends UnitTestCase
     }
 
     #[Test]
-    public function createsRouteGroup(): void
+    public function configuresRoute(): void
     {
         $resolver = new HeaderIdentityResolver('header');
 
         $tenancy = Mockery::mock(Tenancy::class, static function ($mock) {
-            $mock->shouldReceive('getName')->andReturn('my-tenancy')->twice();
+            $mock->shouldReceive('getName')->andReturn('my-tenancy')->once();
         });
 
-        $routes = static fn () => false;
-
-        /** @var \Illuminate\Routing\Router&\Mockery\MockInterface $router */
-        $router = Mockery::mock(Router::class, static function (MockInterface $mock) use ($routes) {
+        /** @var \Illuminate\Routing\RouteRegistrar&\Mockery\MockInterface $route */
+        $route = Mockery::mock(RouteRegistrar::class, static function (MockInterface $mock) {
             $mock->shouldReceive('middleware')
-                 ->with([
-                     'sprout.tenanted:header,my-tenancy',
-                     AddTenantHeaderToResponse::class . ':header,my-tenancy',
-                 ])
-                 ->andReturn(
-                     Mockery::mock(RouteRegistrar::class, static function (MockInterface $mock) use ($routes) {
-                         $mock->shouldReceive('group')
-                              ->with($routes)
-                              ->andReturnSelf()
-                              ->once();
-                     })
-                 )
+                 ->with([AddTenantHeaderToResponse::class . ':header,my-tenancy'])
+                 ->andReturnSelf()
                  ->once();
         });
 
-        $resolver->routes($router, $routes, $tenancy);
+        $resolver->configureRoute($route, $tenancy);
     }
 
     #[Test]

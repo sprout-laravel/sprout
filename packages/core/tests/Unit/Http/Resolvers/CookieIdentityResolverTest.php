@@ -7,7 +7,6 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Cookie\CookieJar;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Router;
-use Illuminate\Routing\RouteRegistrar;
 use Illuminate\Support\Facades\Cookie;
 use Mockery;
 use Mockery\MockInterface;
@@ -88,35 +87,6 @@ class CookieIdentityResolverTest extends UnitTestCase
         });
 
         $this->assertSame('My-tenancy-Identifier', $resolver->getRequestCookieName($tenancy));
-    }
-
-    #[Test]
-    public function createsRouteGroup(): void
-    {
-        $resolver = new CookieIdentityResolver('cookie');
-
-        $tenancy = Mockery::mock(Tenancy::class, static function ($mock) {
-            $mock->shouldReceive('getName')->andReturn('my-tenancy')->once();
-        });
-
-        $routes = static fn () => false;
-
-        /** @var \Illuminate\Routing\Router&\Mockery\MockInterface $router */
-        $router = Mockery::mock(Router::class, static function (MockInterface $mock) use ($routes) {
-            $mock->shouldReceive('middleware')
-                 ->with(['sprout.tenanted:cookie,my-tenancy'])
-                 ->andReturn(
-                     Mockery::mock(RouteRegistrar::class, static function (MockInterface $mock) use ($routes) {
-                         $mock->shouldReceive('group')
-                              ->with($routes)
-                              ->andReturnSelf()
-                              ->once();
-                     })
-                 )
-                 ->once();
-        });
-
-        $resolver->routes($router, $routes, $tenancy);
     }
 
     #[Test]

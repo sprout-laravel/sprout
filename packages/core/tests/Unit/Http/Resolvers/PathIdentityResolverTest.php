@@ -6,8 +6,8 @@ namespace Sprout\Tests\Unit\Http\Resolvers;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
-use Illuminate\Routing\Router;
 use Illuminate\Routing\RouteRegistrar;
+use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\URL;
 use Mockery;
 use Mockery\MockInterface;
@@ -98,78 +98,50 @@ class PathIdentityResolverTest extends UnitTestCase
     }
 
     #[Test]
-    public function createsRouteGroup(): void
+    public function configuresRoute(): void
     {
         $resolver = new PathIdentityResolver('path');
+
+        $tenancy = Mockery::mock(Tenancy::class, static function ($mock) {
+            $mock->shouldReceive('getName')->andReturn('my-tenancy')->once();
+        });
+
+        /** @var \Illuminate\Routing\RouteRegistrar&\Mockery\MockInterface $route */
+        $route = Mockery::mock(RouteRegistrar::class, static function (MockInterface $mock) {
+            $mock->shouldReceive('prefix')
+                 ->with('{my_tenancy_path}')
+                 ->andReturnSelf()
+                 ->once();
+
+            $mock->shouldNotReceive('where');
+        });
+
+        $resolver->configureRoute($route, $tenancy);
+    }
+
+    #[Test]
+    public function configuresRouteWithPattern(): void
+    {
+        $resolver = new PathIdentityResolver('path', pattern: '.*');
 
         $tenancy = Mockery::mock(Tenancy::class, static function ($mock) {
             $mock->shouldReceive('getName')->andReturn('my-tenancy')->twice();
         });
 
-        $routes = static fn () => false;
+        /** @var \Illuminate\Routing\RouteRegistrar&\Mockery\MockInterface $route */
+        $route = Mockery::mock(RouteRegistrar::class, static function (MockInterface $mock) {
+            $mock->shouldReceive('prefix')
+                 ->with('{my_tenancy_path}')
+                 ->andReturnSelf()
+                 ->once();
 
-        /** @var \Illuminate\Routing\Router&\Mockery\MockInterface $router */
-        $router = Mockery::mock(Router::class, static function (MockInterface $mock) use ($routes) {
-            $mock->shouldReceive('middleware')
-                 ->with(['sprout.tenanted:path,my-tenancy'])
-                 ->andReturn(
-                     Mockery::mock(RouteRegistrar::class, static function (MockInterface $mock) use ($routes) {
-                         $mock->shouldReceive('prefix')
-                              ->with('{my_tenancy_path}')
-                              ->andReturnSelf()
-                              ->once();
-
-                         $mock->shouldReceive('group')
-                              ->with($routes)
-                              ->andReturnSelf()
-                              ->once();
-
-                         $mock->shouldNotReceive('where');
-                     })
-                 )
+            $mock->shouldReceive('where')
+                 ->with(['my_tenancy_path' => '.*'])
+                 ->andReturnSelf()
                  ->once();
         });
 
-        $resolver->routes($router, $routes, $tenancy);
-    }
-
-    #[Test]
-    public function createsRouteGroupWithPattern(): void
-    {
-        $resolver = new PathIdentityResolver('path', pattern: '.*');
-
-        $tenancy = Mockery::mock(Tenancy::class, static function ($mock) {
-            $mock->shouldReceive('getName')->andReturn('my-tenancy')->times(3);
-        });
-
-        $routes = static fn () => false;
-
-        /** @var \Illuminate\Routing\Router&\Mockery\MockInterface $router */
-        $router = Mockery::mock(Router::class, static function (MockInterface $mock) use ($routes) {
-            $mock->shouldReceive('middleware')
-                 ->with(['sprout.tenanted:path,my-tenancy'])
-                 ->andReturn(
-                     Mockery::mock(RouteRegistrar::class, static function (MockInterface $mock) use ($routes) {
-                         $mock->shouldReceive('prefix')
-                              ->with('{my_tenancy_path}')
-                              ->andReturnSelf()
-                              ->once();
-
-                         $mock->shouldReceive('group')
-                              ->with($routes)
-                              ->andReturnSelf()
-                              ->once();
-
-                         $mock->shouldReceive('where')
-                              ->with(['my_tenancy_path' => '.*'])
-                              ->andReturnSelf()
-                              ->once();
-                     })
-                 )
-                 ->once();
-        });
-
-        $resolver->routes($router, $routes, $tenancy);
+        $resolver->configureRoute($route, $tenancy);
     }
 
     #[Test]
