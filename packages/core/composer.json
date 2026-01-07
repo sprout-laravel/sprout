@@ -1,5 +1,5 @@
 {
-  "name"             : "sprout/sprout",
+  "name"             : "sprout/core",
   "description"      : "A flexible, seamless and easy to use multitenancy solution for Laravel",
   "type"             : "library",
   "require"          : {
@@ -15,10 +15,10 @@
   "license"          : "MIT",
   "autoload"         : {
     "psr-4": {
-      "Sprout\\": "packages/core/src/"
+      "Sprout\\": "src/"
     },
     "files": [
-      "packages/core/src/helpers.php"
+      "src/helpers.php"
     ]
   },
   "autoload-dev"     : {
@@ -74,7 +74,7 @@
       ]
     },
     "branch-alias": {
-      "dev-main": "2.x-dev"
+      "dev-main": "1.x-dev"
     }
   },
   "config"           : {
