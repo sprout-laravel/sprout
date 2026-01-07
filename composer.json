@@ -23,7 +23,7 @@
   },
   "autoload-dev"     : {
     "psr-4": {
-      "Sprout\\Tests\\"                 : "tests",
+      "Sprout\\Tests\\"                 : "packages/core/tests",
       "Workbench\\App\\"                : "workbench/app/",
       "Workbench\\Database\\Factories\\": "workbench/database/factories/",
       "Workbench\\Database\\Seeders\\"  : "workbench/database/seeders/"
@@ -57,7 +57,7 @@
       "@clear",
       "@prepare",
       "@build",
-      "@php vendor/bin/phpunit --testsuite=Unit,Feature"
+      "@php vendor/bin/phpunit"
     ]
   },
   "extra"            : {
