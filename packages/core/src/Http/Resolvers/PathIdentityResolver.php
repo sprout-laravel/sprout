@@ -26,7 +26,7 @@ use Sprout\Support\BaseIdentityResolver;
 final class PathIdentityResolver extends BaseIdentityResolver implements IdentityResolverUsesParameters
 {
     use FindsIdentityInRouteParameter {
-        setup as parameterSetup;
+        FindsIdentityInRouteParameter::setup as parameterSetup;
     }
 
     /**
