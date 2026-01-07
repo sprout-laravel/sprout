@@ -33,9 +33,6 @@ jobs:
           max_attempts: 5
           command: composer install --dev --no-interaction --no-progress
 
-      - name: Prepare testbench
-        run: composer clear && composer prepare && composer build
-
       - name: Execute tests
         run: composer test
 
