@@ -114,36 +114,6 @@ final class SessionIdentityResolver extends BaseIdentityResolver
     }
 
     /**
-     * Create a route group for the resolver
-     *
-     * Creates and configures a route group with the necessary settings to
-     * support identity resolution.
-     *
-     * @template TenantClass of \Sprout\Contracts\Tenant
-     *
-     * @param \Illuminate\Routing\Router             $router
-     * @param \Closure                               $groupRoutes
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     *
-     * @return \Illuminate\Routing\RouteRegistrar
-     *
-     * @deprecated since 1.1.0, will be removed in 2.0.0. Use Route::tenanted() or {@see self::configureRoute()} instead.
-     */
-    public function routes(Router $router, Closure $groupRoutes, Tenancy $tenancy): RouteRegistrar
-    {
-        @trigger_error(
-            sprintf(
-                'The "%s::routes()" method is deprecated since Sprout 1.1 and will be removed in 2.0. Use Route::tenanted() or configureRoute() instead.',
-                static::class
-            ),
-            E_USER_DEPRECATED
-        );
-
-        return $router->middleware([SproutTenantContextMiddleware::ALIAS . ':' . $this->getName() . ',' . $tenancy->getName()])
-                      ->group($groupRoutes);
-    }
-
-    /**
      * Perform setup actions for the tenant
      *
      * When a tenant is marked as the current tenant within a tenancy, this

@@ -84,39 +84,6 @@ final class PathIdentityResolver extends BaseIdentityResolver implements Identit
     }
 
     /**
-     * Create a route group for the resolver
-     *
-     * Creates and configures a route group with the necessary settings to
-     * support identity resolution.
-     *
-     * @template TenantClass of \Sprout\Contracts\Tenant
-     *
-     * @param \Illuminate\Routing\Router             $router
-     * @param \Closure                               $groupRoutes
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     *
-     * @return \Illuminate\Routing\RouteRegistrar
-     *
-     * @deprecated since 1.1.0, will be removed in 2.0.0. Use Route::tenanted() or {@see self::configureRoute()} instead.
-     */
-    public function routes(Router $router, Closure $groupRoutes, Tenancy $tenancy): RouteRegistrar
-    {
-        @trigger_error(
-            sprintf(
-                'The "%s::routes()" method is deprecated since Sprout 1.1 and will be removed in 2.0. Use Route::tenanted() or configureRoute() instead.',
-                static::class
-            ),
-            E_USER_DEPRECATED
-        );
-
-        return $this->applyParameterPatternMapping(
-            $router->middleware([SproutTenantContextMiddleware::ALIAS . ':' . $this->getName() . ',' . $tenancy->getName()])
-                   ->prefix($this->getRoutePrefix($tenancy)),
-            $tenancy
-        )->group($groupRoutes);
-    }
-
-    /**
      * Configure the provided route for the resolver
      *
      * Configures a provided route to work with itself, adding parameters,
