@@ -5,10 +5,10 @@
 
 ![GitHub](https://img.shields.io/github/license/sprout-laravel/sprout)
 ![Laravel](https://img.shields.io/badge/laravel-12.x-red.svg)
-[![codecov](https://codecov.io/gh/sprout-laravel/sprout/branch/1.x/graph/badge.svg?token=FHJ41NQMTA)](https://codecov.io/gh/sprout-laravel/sprout)
+[![codecov](https://codecov.io/gh/sprout-laravel/sprout/branch/main/graph/badge.svg?token=FHJ41NQMTA)](https://codecov.io/gh/sprout-laravel/sprout)
 
-![Unit Tests](https://github.com/sprout-laravel/sprout/actions/workflows/tests.yml/badge.svg)
-![Static Analysis](https://github.com/sprout-laravel/sprout/actions/workflows/static-analysis.yml/badge.svg)
+![Unit Tests](https://github.com/sprout-laravel/sprout/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/sprout-laravel/sprout/actions/workflows/tests.yml)
+![Static Analysis](https://github.com/sprout-laravel/sprout/actions/workflows/static-analysis.yml/badge.svg?branch=main)
 
 > [!WARNING]
 > You are viewing the upcoming `2.0` release, which includes a whole host of new features, and a significant 
