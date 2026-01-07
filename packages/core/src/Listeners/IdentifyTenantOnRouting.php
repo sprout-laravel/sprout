@@ -40,6 +40,8 @@ final class IdentifyTenantOnRouting
      *
      * @return void
      *
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws \Sprout\Exceptions\MisconfigurationException
      * @throws \Sprout\Exceptions\NoTenantFoundException
      */
     public function handle(RouteMatched $event): void
@@ -76,6 +78,7 @@ final class IdentifyTenantOnRouting
         $middleware = null;
         $found      = false;
 
+        /** @var string $item */
         foreach (Arr::wrap($route->middleware()) as $item) {
             // If it's the normal middleware, we'll get that
             if (

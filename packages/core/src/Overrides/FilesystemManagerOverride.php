@@ -36,6 +36,6 @@ final class FilesystemManagerOverride extends BaseOverride implements BootableSe
         }
 
         // Bind a replacement filesystem manager to enable Sprout features
-        $app->singleton('filesystem', fn ($app) => new SproutFilesystemManager($app, $original));
+        $app->singleton('filesystem', fn (Application $app) => new SproutFilesystemManager($app, $original));
     }
 }

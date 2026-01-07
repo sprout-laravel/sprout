@@ -60,6 +60,7 @@ final class BelongsToManyTenantsScope extends TenantChildScope
             return;
         }
 
+        /** @var \Sprout\Contracts\Tenancy<*> $tenancy */
         $tenancy = $model->getTenancy();
 
         // If there's no current tenant
@@ -76,11 +77,13 @@ final class BelongsToManyTenantsScope extends TenantChildScope
         // Finally, add the clause so that all queries are scoped to the
         // current tenant.
         if ($model::isTenantOptional()) {
+            /** @var string $relationName */
+            $relationName = $model->getTenantRelationName();
             // If the tenant is optional, we wrap the clause with an OR for those
             // that have no tenant
-            $builder->where(function (Builder $query) use ($tenancy, $model) {
+            $builder->where(function (Builder $query) use ($relationName, $tenancy, $model) {
                 $this->applyTenantClause($query, $model, $tenancy);
-                $query->orDoesntHave($model->getTenantRelationName());
+                $query->orDoesntHave($relationName);
             });
         } else {
             // And if not, we just add the clause
@@ -106,7 +109,6 @@ final class BelongsToManyTenantsScope extends TenantChildScope
      */
     protected function applyTenantClause(Builder $builder, Model $model, Tenancy $tenancy): void
     {
-        /** @phpstan-ignore-next-line */
         /**
          * This has to be here because it errors if it's in the method docblock,
          * though I've no idea why.
@@ -114,8 +116,11 @@ final class BelongsToManyTenantsScope extends TenantChildScope
          * @var ModelClass&\Sprout\Database\Eloquent\Concerns\BelongsToTenant $model
          */
 
+        /** @var string $relationName */
+        $relationName = $model->getTenantRelationName();
+
         $builder->whereHas(
-            $model->getTenantRelationName(),
+            $relationName,
             function (Builder $builder) use ($tenancy) {
                 $builder->whereKey($tenancy->key());
             },

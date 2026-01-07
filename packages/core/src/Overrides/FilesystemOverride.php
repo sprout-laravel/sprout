@@ -67,6 +67,8 @@ final class FilesystemOverride extends BaseOverride implements BootableServiceOv
                 $tracker($config['name']);
             }
 
+            /** @var array<string, mixed> $config */
+
             return (new SproutFilesystemDriverCreator($app, $manager, $config, $sprout))();
         });
     }

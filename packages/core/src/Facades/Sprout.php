@@ -30,7 +30,7 @@ use Sprout\Support\SettingsRepository;
  * @method static TenantProviderManager providers()
  * @method static \Sprout\Sprout resetTenancies()
  * @method static IdentityResolverManager resolvers()
- * @method static string route(string $name, Tenant $tenant, string|null $resolver = null, string|null $tenancy = null, array $parameters = [], bool $absolute = true)
+ * @method static string route(string $name, Tenant $tenant, string|null $resolver = null, string|null $tenancy = null, array<mixed> $parameters = [], bool $absolute = true)
  * @method static \Sprout\Sprout setCurrentHook(ResolutionHook|null $hook)
  * @method static void setCurrentTenancy(Tenancy $tenancy)
  * @method static mixed setting(string $key, mixed $default = null)
@@ -38,6 +38,8 @@ use Sprout\Support\SettingsRepository;
  * @method static bool supportsHook(ResolutionHook $hook)
  * @method static TenancyManager tenancies()
  * @method static bool withinContext()
+ *
+ * @phpstan-ignore missingType.generics, missingType.generics, missingType.generics
  */
 final class Sprout extends Facade
 {

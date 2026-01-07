@@ -27,6 +27,8 @@ use Sprout\Managers\ServiceOverrideManager;
  * @method static bool isOverrideBootable(string $service)
  * @method static void registerOverrides()
  * @method static void setupOverrides(Tenancy $tenancy, Tenant $tenant)
+ *
+ * @phpstan-ignore missingType.generics, missingType.generics, missingType.generics, missingType.generics, missingType.generics, missingType.iterableValue
  */
 final class Overrides extends Facade
 {

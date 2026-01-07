@@ -5,7 +5,7 @@ namespace Sprout\Overrides\Auth;
 
 use Illuminate\Auth\Passwords\PasswordBrokerManager;
 use Illuminate\Auth\Passwords\TokenRepositoryInterface;
-use Illuminate\Foundation\Application;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\Str;
 use Sprout\Sprout;
 
@@ -55,12 +55,14 @@ class SproutAuthPasswordBrokerManager extends PasswordBrokerManager
         // @codeCoverageIgnoreEnd
 
         if (isset($config['driver']) && $config['driver'] === 'cache') {
+            $expiry = isset($config['expiry']) && is_numeric($config['expiry']) ? (int)$config['expiry'] : 60;
+
             return new SproutAuthCacheTokenRepository(
                 $this->sprout,
                 $this->app->make('cache')->store($config['store'] ?? null), // @phpstan-ignore-line
                 $this->app->make('hash'),
                 $key,
-                ($config['expire'] ?? 60) * 60,
+                $expiry * 60,
                 $config['throttle'] ?? 0, // @phpstan-ignore-line
                 $config['prefix'] ?? '', // @phpstan-ignore-line
             );
@@ -72,7 +74,7 @@ class SproutAuthPasswordBrokerManager extends PasswordBrokerManager
             $this->sprout,
             $this->app->make('db')->connection($connection), // @phpstan-ignore-line
             $this->app->make('hash'),
-            $config['table'],                                // @phpstan-ignore-line
+            $config['table'], // @phpstan-ignore-line
             $key,
             $this->laravelVersionedExpiry($config['expire']),// @phpstan-ignore-line
             $config['throttle'] ?? 0// @phpstan-ignore-line

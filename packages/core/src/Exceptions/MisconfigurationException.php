@@ -39,6 +39,7 @@ final class MisconfigurationException extends SproutException
      * @param string $value
      * @param string $type
      * @param string $name
+     * @param scalar $realValue
      *
      * @return self
      */

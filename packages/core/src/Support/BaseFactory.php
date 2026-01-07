@@ -212,6 +212,7 @@ abstract class BaseFactory
         // Does the creator method exist?
         if (method_exists($this, $method)) {
             // It does, use it
+            /** @phpstan-ignore argument.type */
             return $this->setupResolvedObject($this->{$method}($config, $name));
         }
 

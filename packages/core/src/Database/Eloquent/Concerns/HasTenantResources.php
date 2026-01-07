@@ -19,6 +19,8 @@ use Sprout\Contracts\TenantHasResources;
  * @phpstan-require-extends \Illuminate\Database\Eloquent\Model
  *
  * @package Database\Eloquent
+ *
+ * @phpstan-ignore trait.unused
  */
 trait HasTenantResources
 {

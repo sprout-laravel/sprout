@@ -66,7 +66,6 @@ final class SproutCacheDriverCreator
         // If we're not within a multitenanted context, we need to error
         // out, as this driver shouldn't be hit without one
         if (! $this->sprout->withinContext()) {
-            // TODO: Create a better exception
             throw TenancyMissingException::make();
         }
 
@@ -88,7 +87,7 @@ final class SproutCacheDriverCreator
         $tenant = $tenancy->tenant();
 
         // We need to know which store we're overriding to make tenanted
-        if (! isset($this->config['override'])) {
+        if (! isset($this->config['override']) || ! is_string($this->config['override'])) {
             throw MisconfigurationException::missingConfig('override', 'service override', 'cache');
         }
 
@@ -122,7 +121,7 @@ final class SproutCacheDriverCreator
      */
     protected function getStorePrefix(array $config, Tenancy $tenancy, Tenant $tenant): string
     {
-        return (isset($config['prefix']) ? $config['prefix'] . '_' : '')
+        return (isset($config['prefix']) && is_string($config['prefix']) ? $config['prefix'] . '_' : '')
                . $tenancy->getName()
                . '_'
                . $tenant->getTenantKey();

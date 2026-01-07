@@ -14,6 +14,8 @@ use Sprout\Database\Eloquent\Scopes\BelongsToTenantScope;
  * using a belongs to relationship.
  *
  * @package Database\Eloquent
+ *
+ * @phpstan-ignore trait.unused
  */
 trait BelongsToTenant
 {

@@ -21,6 +21,8 @@ use Sprout\Managers\TenancyManager;
  * @method static bool hasDriver(string $name)
  * @method static bool hasResolved(string|null $name)
  * @method static void register(string $name, Closure $creator)
+ *
+ * @phpstan-ignore missingType.generics
  */
 final class Tenancies extends Facade
 {

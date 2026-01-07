@@ -14,6 +14,8 @@ use Sprout\Database\Eloquent\Scopes\BelongsToManyTenantsScope;
  * using a belongs to many relationship.
  *
  * @package Database\Eloquent
+ *
+ * @phpstan-ignore trait.unused
  */
 trait BelongsToManyTenants
 {

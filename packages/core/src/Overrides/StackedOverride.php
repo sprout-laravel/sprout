@@ -69,6 +69,7 @@ final class StackedOverride extends BaseOverride implements BootableServiceOverr
                 $overrideClass = $override::class;
             } else if (is_string($value)) {
                 // We're either looking at a class name with no config
+                /** @phpstan-ignore function.alreadyNarrowedType */
                 if (! is_subclass_of($value, ServiceOverride::class)) {
                     throw MisconfigurationException::invalidConfig('overrides.*.driver', 'service override', $this->service, $value);
                 }
@@ -79,7 +80,10 @@ final class StackedOverride extends BaseOverride implements BootableServiceOverr
                 ]);
 
                 $overrideClass = $value;
+                /** @phpstan-ignore function.alreadyNarrowedType */
             } else if (is_array($value)) {
+                /** @var array{driver?: scalar} $value */
+
                 if (! isset($value['driver'])) {
                     throw MisconfigurationException::missingConfig('overrides.*.driver', 'service override', $this->service);
                 }

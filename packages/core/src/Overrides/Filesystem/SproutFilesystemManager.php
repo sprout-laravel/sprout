@@ -58,7 +58,7 @@ class SproutFilesystemManager extends FilesystemManager
     {
         $config ??= $this->getConfig($name);
 
-        if (empty($config['driver'])) {
+        if (empty($config['driver']) || ! is_string($config['driver'])) {
             throw new InvalidArgumentException("Disk [{$name}] does not have a configured driver.");
         }
 
@@ -76,6 +76,7 @@ class SproutFilesystemManager extends FilesystemManager
             throw new InvalidArgumentException("Driver [{$driver}] is not supported.");
         }
 
+        /** @var \Illuminate\Contracts\Filesystem\Filesystem */
         return $this->{$driverMethod}($config, $name);
     }
 }

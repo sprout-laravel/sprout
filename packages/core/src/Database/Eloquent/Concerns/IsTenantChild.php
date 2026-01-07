@@ -25,6 +25,8 @@ use Sprout\Managers\TenancyManager;
  * @mixin \Illuminate\Database\Eloquent\Model
  *
  * @package Database\Eloquent
+ *
+ * @phpstan-ignore trait.unused
  */
 trait IsTenantChild
 {

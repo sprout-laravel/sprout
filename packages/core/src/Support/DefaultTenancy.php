@@ -46,12 +46,12 @@ final class DefaultTenancy implements Tenancy
     private ?Tenant $tenant = null;
 
     /**
-     * @var list<string>
+     * @var array<int<0, max>, string>
      */
     private array $options = [];
 
     /**
-     * @var array<string, array<array-key, mixed>>
+     * @var array<string, array<array-key, scalar>>
      */
     private array $optionConfig = [];
 
@@ -63,21 +63,25 @@ final class DefaultTenancy implements Tenancy
     /**
      * Create a new instance
      *
-     * @param string                                              $name
-     * @param \Sprout\Contracts\TenantProvider<TenantClass>       $provider
-     * @param list<string|array<string, array<array-key, mixed>>> $options
+     * @param string                                                           $name
+     * @param \Sprout\Contracts\TenantProvider<TenantClass>                    $provider
+     * @param array<array-key, string|array<string, array<array-key, scalar>>> $options
      */
     public function __construct(string $name, TenantProvider $provider, array $options)
     {
         $this->name     = $name;
         $this->provider = $provider;
 
-        /** @var string|array<string, array<array-key, mixed>> $value */
+        $options = array_values($options);
+
+        /** @var string|array<string, array<array-key, scalar>> $value */
         foreach ($options as $value) {
             if (is_array($value)) {
+                /** @var string $option */
                 $option                      = array_keys($value)[0];
                 $this->options[]             = $option;
                 $this->optionConfig[$option] = $value[$option];
+                /** @phpstan-ignore function.alreadyNarrowedType */
             } else if (is_string($value)) {
                 $this->options[] = $value;
             }
@@ -287,6 +291,7 @@ final class DefaultTenancy implements Tenancy
      */
     public function options(): array
     {
+        /** @var list<string> */
         return $this->options;
     }
 

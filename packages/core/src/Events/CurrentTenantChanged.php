@@ -27,6 +27,8 @@ use Sprout\Contracts\Tenant;
  * @package Core
  *
  * @codeCoverageIgnore
+ *
+ * @phpstan-ignore missingType.generics, missingType.generics, missingType.generics
  */
 final readonly class CurrentTenantChanged
 {

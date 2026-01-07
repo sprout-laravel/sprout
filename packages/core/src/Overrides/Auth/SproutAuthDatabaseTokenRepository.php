@@ -36,10 +36,10 @@ class SproutAuthDatabaseTokenRepository extends DatabaseTokenRepository
         Sprout              $sprout,
         ConnectionInterface $connection,
         HasherContract      $hasher,
-                            $table,
-                            $hashKey,
-                            $expires = 60,
-                            $throttle = 60
+        string              $table,
+        string              $hashKey,
+        int                 $expires = 60,
+        int                 $throttle = 60
     )
     {
         parent::__construct($connection, $hasher, $table, $hashKey, $expires, $throttle);
@@ -91,6 +91,7 @@ class SproutAuthDatabaseTokenRepository extends DatabaseTokenRepository
     protected function getPayload($email, #[SensitiveParameter] $token): array
     {
         if (! $this->sprout->withinContext()) {
+            /** @var array<string, mixed> */
             return parent::getPayload($email, $token);
         }
 
@@ -172,9 +173,10 @@ class SproutAuthDatabaseTokenRepository extends DatabaseTokenRepository
      */
     public function exists(CanResetPasswordContract $user, #[SensitiveParameter] $token): bool
     {
+        /** @var array{token?: string, created_at?: string} $record */
         $record = (array)$this->getExistingTenantedRecord($user);
 
-        return $record &&
+        return ! empty($record) &&
                ! $this->tokenExpired($record['created_at']) &&
                $this->hasher->check($token, $record['token']);
     }
@@ -191,8 +193,9 @@ class SproutAuthDatabaseTokenRepository extends DatabaseTokenRepository
      */
     public function recentlyCreatedToken(CanResetPasswordContract $user): bool
     {
+        /** @var array{token?: string, created_at?: string} $record */
         $record = (array)$this->getExistingTenantedRecord($user);
 
-        return $record && $this->tokenRecentlyCreated($record['created_at']);
+        return ! empty($record) && $this->tokenRecentlyCreated($record['created_at']);
     }
 }

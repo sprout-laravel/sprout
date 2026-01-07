@@ -84,6 +84,7 @@ final class SproutTenantContextMiddleware
             );
         }
 
+        /** @phpstan-ignore return.type */
         return $next($request);
     }
 }

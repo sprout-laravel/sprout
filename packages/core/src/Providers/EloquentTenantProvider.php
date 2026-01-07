@@ -106,6 +106,7 @@ final class EloquentTenantProvider extends BaseTenantProvider
     {
         $model = $this->getModel();
 
+        /** @var TenantModel|null */
         return $model->newModelQuery()
                      ->where($model->getTenantIdentifierName(), $identifier)
                      ->first();
@@ -130,6 +131,7 @@ final class EloquentTenantProvider extends BaseTenantProvider
     {
         $model = $this->getModel();
 
+        /** @var TenantModel|null */
         return $model->newModelQuery()
                      ->where($model->getTenantKeyName(), $key)
                      ->first();
@@ -162,6 +164,7 @@ final class EloquentTenantProvider extends BaseTenantProvider
             throw MisconfigurationException::misconfigured('tenant', $model::class, 'resources');
         }
 
+        /** @var (TenantModel&\Sprout\Contracts\TenantHasResources)|null */
         return $model->newModelQuery()
                      ->where($model->getTenantResourceKeyName(), $resourceKey)
                      ->first();

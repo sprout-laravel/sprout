@@ -55,6 +55,7 @@ final class BelongsToTenantScope extends TenantChildScope
             return;
         }
 
+        /** @var \Sprout\Contracts\Tenancy<*> $tenancy */
         $tenancy = $model->getTenancy();
 
         // If there's no current tenant
@@ -71,11 +72,14 @@ final class BelongsToTenantScope extends TenantChildScope
         // Finally, add the clause so that all queries are scoped to the
         // current tenant.
         if ($model::isTenantOptional()) {
+            /** @var \Illuminate\Database\Eloquent\Relations\BelongsTo<*, *> $relation */
+            $relation = $model->getTenantRelation();
+
             // If the tenant is optional, we wrap the clause with an OR for those
             // that have no tenant
-            $builder->where(function (Builder $query) use ($tenancy, $model) {
+            $builder->where(function (Builder $query) use ($relation, $tenancy, $model) {
                 $this->applyTenantClause($query, $model, $tenancy);
-                $query->orWhereNull($model->getTenantRelation()->getForeignKeyName());
+                $query->orWhereNull($relation->getForeignKeyName());
             });
         } else {
             // And if not, we just add the clause
@@ -92,7 +96,7 @@ final class BelongsToTenantScope extends TenantChildScope
      *
      * @param \Illuminate\Database\Eloquent\Builder<ModelClass>                                      $builder
      * @param \Illuminate\Database\Eloquent\Model&\Sprout\Database\Eloquent\Concerns\BelongsToTenant $model
-     * @param \Sprout\Contracts\Tenancy<*>                                                  $tenancy
+     * @param \Sprout\Contracts\Tenancy<*>                                                           $tenancy
      *
      * @phpstan-param ModelClass                                                                     $model
      *
@@ -100,7 +104,6 @@ final class BelongsToTenantScope extends TenantChildScope
      */
     protected function applyTenantClause(Builder $builder, Model $model, Tenancy $tenancy): void
     {
-        /** @phpstan-ignore-next-line */
         /**
          * This has to be here because it errors if it's in the method docblock,
          * though I've no idea why.
@@ -108,8 +111,11 @@ final class BelongsToTenantScope extends TenantChildScope
          * @var ModelClass&\Sprout\Database\Eloquent\Concerns\BelongsToTenant $model
          */
 
+        /** @var \Illuminate\Database\Eloquent\Relations\BelongsTo<*, *> $relation */
+        $relation = $model->getTenantRelation();
+
         $builder->where(
-            $model->getTenantRelation()->getForeignKeyName(),
+            $relation->getForeignKeyName(),
             '=',
             $tenancy->key()
         );

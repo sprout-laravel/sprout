@@ -43,7 +43,7 @@ final class AuthPasswordOverride extends BaseOverride implements BootableService
         // 'auth.password.broker' as it will proxy to our new 'auth.password'.
 
         // This is the actual thing we need.
-        $app->singleton('auth.password', function ($app) use ($sprout) {
+        $app->singleton('auth.password', function (Application $app) use ($sprout) {
             return new SproutAuthPasswordBrokerManager($app, $sprout);
         });
 
@@ -65,7 +65,7 @@ final class AuthPasswordOverride extends BaseOverride implements BootableService
      * It is called when a new tenant is marked as the current tenant.
      *
      * @param \Sprout\Contracts\Tenancy<*> $tenancy
-     * @param \Sprout\Contracts\Tenant $tenant
+     * @param \Sprout\Contracts\Tenant     $tenant
      *
      * @return void
      */
@@ -86,7 +86,7 @@ final class AuthPasswordOverride extends BaseOverride implements BootableService
      * tenant was not null.
      *
      * @param \Sprout\Contracts\Tenancy<*> $tenancy
-     * @param \Sprout\Contracts\Tenant $tenant
+     * @param \Sprout\Contracts\Tenant     $tenant
      *
      * @return void
      */
