@@ -12,7 +12,7 @@ use Sprout\Contracts\IdentityResolverUsesParameters;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 use Sprout\Exceptions\TenantMissingException;
-use Sprout\Http\Middleware\TenantRoutes;
+use Sprout\Http\Middleware\SproutTenantContextMiddleware;
 use Sprout\Support\BaseIdentityResolver;
 
 /**
@@ -114,14 +114,43 @@ final class SubdomainIdentityResolver extends BaseIdentityResolver implements Id
      * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
      *
      * @return \Illuminate\Routing\RouteRegistrar
+     *
+     * @deprecated since 1.1.0, will be removed in 2.0.0. Use Route::tenanted() or {@see self::configureRoute()} instead.
      */
     public function routes(Router $router, Closure $groupRoutes, Tenancy $tenancy): RouteRegistrar
     {
+        @trigger_error(
+            sprintf(
+                'The "%s::routes()" method is deprecated since Sprout 1.1 and will be removed in 2.0. Use Route::tenanted() or configureRoute() instead.',
+                static::class
+            ),
+            E_USER_DEPRECATED
+        );
+
         return $this->applyParameterPatternMapping(
             $router->domain($this->getRouteDomain($tenancy))
-                   ->middleware([TenantRoutes::ALIAS . ':' . $this->getName() . ',' . $tenancy->getName()]),
+                   ->middleware([SproutTenantContextMiddleware::ALIAS . ':' . $this->getName() . ',' . $tenancy->getName()]),
             $tenancy
         )->group($groupRoutes);
+    }
+
+    /**
+     * Configure the provided route for the resolver
+     *
+     * Configures a provided route to work with itself, adding parameters,
+     * middleware, and anything else required, besides the default middleware.
+     *
+     * @param \Illuminate\Routing\RouteRegistrar                  $route
+     * @param \Sprout\Contracts\Tenancy<\Sprout\Contracts\Tenant> $tenancy
+     *
+     * @return void
+     */
+    public function configureRoute(RouteRegistrar $route, Tenancy $tenancy): void
+    {
+        $this->applyParameterPatternMapping(
+            $route->domain($this->getRouteDomain($tenancy)),
+            $tenancy
+        );
     }
 
     /**

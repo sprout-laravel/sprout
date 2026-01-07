@@ -7,7 +7,8 @@ use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Routing\Route;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
-use Sprout\Http\Middleware\TenantRoutes;
+use Sprout\Http\Middleware\SproutOptionalTenantContextMiddleware;
+use Sprout\Http\Middleware\SproutTenantContextMiddleware;
 use Sprout\Sprout;
 use Sprout\Support\ResolutionHelper;
 use Sprout\Support\ResolutionHook;
@@ -72,21 +73,44 @@ final class IdentifyTenantOnRouting
      */
     private function parseTenantMiddleware(Route $route): ?array
     {
+        $middleware = null;
+        $found      = false;
+
         foreach (Arr::wrap($route->middleware()) as $item) {
-            if ($item === TenantRoutes::ALIAS || Str::startsWith($item, TenantRoutes::ALIAS . ':')) {
-                if (! Str::startsWith($item, TenantRoutes::ALIAS . ':')) {
-                    return [null, null];
-                }
-
-                if (Str::contains($item, ',')) {
-                    return explode(',', Str::after($item, ':'), 2);
-                }
-
-                return [
-                    Str::after($item, ':'),
-                    null,
-                ];
+            // If it's the normal middleware, we'll get that
+            if (
+                $item === SproutTenantContextMiddleware::ALIAS
+                || Str::startsWith($item, SproutTenantContextMiddleware::ALIAS . ':')
+            ) {
+                $middleware = Str::trim(Str::after($item, SproutTenantContextMiddleware::ALIAS), ':');
+                $found      = true;
+                break;
             }
+
+            // If it's the optional middleware, we'll get that
+            if (
+                $item === SproutOptionalTenantContextMiddleware::ALIAS
+                || Str::startsWith($item, SproutOptionalTenantContextMiddleware::ALIAS . ':')
+            ) {
+                $middleware = Str::trim(Str::after($item, SproutOptionalTenantContextMiddleware::ALIAS), ':');
+                $found      = true;
+                break;
+            }
+        }
+
+        if ($found === true) {
+            if (empty($middleware)) {
+                return [null, null];
+            }
+
+            if (Str::contains($middleware, ',')) {
+                return explode(',', Str::after($middleware, ':'), 2);
+            }
+
+            return [
+                $middleware,
+                null,
+            ];
         }
 
         return null;

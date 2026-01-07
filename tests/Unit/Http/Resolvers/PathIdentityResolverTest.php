@@ -259,6 +259,11 @@ class PathIdentityResolverTest extends UnitTestCase
         $request = Mockery::mock(Request::class);
 
         $route = Mockery::mock(Route::class, static function (MockInterface $mock) {
+            $mock->shouldReceive('hasParameter')
+                 ->with('my_tenancy_path')
+                 ->andReturn(true)
+                 ->once();
+
             $mock->shouldReceive('parameter')
                  ->with('my_tenancy_path')
                  ->andReturn('my-identifier')

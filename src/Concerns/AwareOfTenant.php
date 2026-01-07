@@ -45,6 +45,9 @@ trait AwareOfTenant
      * Check if there is a tenant
      *
      * @return bool
+     *
+     * @phpstan-assert-if-true !null $this->tenant
+     * @phpstan-assert-if-false null $this->tenant
      */
     public function hasTenant(): bool
     {
@@ -79,6 +82,9 @@ trait AwareOfTenant
      * Check if there is a tenancy
      *
      * @return bool
+     *
+     * @phpstan-assert-if-true !null $this->tenancy
+     * @phpstan-assert-if-false null $this->tenancy
      */
     public function hasTenancy(): bool
     {

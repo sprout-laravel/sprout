@@ -11,7 +11,8 @@ use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 use Sprout\Contracts\TenantAware;
 use Sprout\Events\CurrentTenantChanged;
-use Sprout\Http\Middleware\TenantRoutes;
+use Sprout\Http\Middleware\SproutOptionalTenantContextMiddleware;
+use Sprout\Http\Middleware\SproutTenantContextMiddleware;
 use Sprout\Http\RouterMethods;
 use Sprout\Listeners\IdentifyTenantOnRouting;
 use Sprout\Managers\IdentityResolverManager;
@@ -86,7 +87,10 @@ class SproutServiceProvider extends ServiceProvider
         $router = $this->app->make(Router::class);
 
         // Alias the basic tenant middleware
-        $router->aliasMiddleware(TenantRoutes::ALIAS, TenantRoutes::class);
+        $router->aliasMiddleware(SproutTenantContextMiddleware::ALIAS, SproutTenantContextMiddleware::class);
+
+        // Alias the optional tenant middleware
+        $router->aliasMiddleware(SproutOptionalTenantContextMiddleware::ALIAS, SproutOptionalTenantContextMiddleware::class);
     }
 
     protected function registerRouteMixin(): void

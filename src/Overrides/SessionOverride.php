@@ -89,7 +89,7 @@ final class SessionOverride extends BaseOverride implements BootableServiceOverr
         $config   = $this->getApp()->make('config');
         $settings = $this->getSprout()->settings();
 
-        if (! $settings->has('original.session')) {
+        if (empty($settings->array('original.session', []))) {
             /** @var array<string, mixed> $original */
             $original = $config->get('session');
             $settings->set(
@@ -116,7 +116,7 @@ final class SessionOverride extends BaseOverride implements BootableServiceOverr
 
         $config->set('session.cookie', $this->getCookieName($tenancy, $tenant));
 
-        $this->refreshSessionStore($tenancy, $tenant);
+        $this->refreshSessionStore();
     }
 
     /**
@@ -141,6 +141,28 @@ final class SessionOverride extends BaseOverride implements BootableServiceOverr
      */
     public function cleanup(Tenancy $tenancy, Tenant $tenant): void
     {
+        /** @var \Illuminate\Contracts\Config\Repository $config */
+        $config   = $this->getApp()->make('config');
+        $settings = $this->getSprout()->settings();
+
+        /** @var array<string, mixed> $original */
+        $original = $settings->array('original.session', []);
+
+        if (! empty($original)) {
+            $config->set('session.path', $original['path']);
+            $config->set('session.domain', $original['domain']);
+
+            if (array_key_exists('secure', $original)) {
+                $config->set('session.secure', $original['secure']);
+            }
+
+            if (array_key_exists('same_site', $original)) {
+                $config->set('session.same_site', $original['same_site']);
+            }
+
+            $settings->set('original.session', []);
+        }
+
         $this->refreshSessionStore();
     }
 
@@ -158,16 +180,11 @@ final class SessionOverride extends BaseOverride implements BootableServiceOverr
     /**
      * Set the tenant details and refresh the session
      *
-     * @template TenantClass of \Sprout\Contracts\Tenant
-     *
-     * @param \Sprout\Contracts\Tenancy<TenantClass>|null $tenancy
-     * @param \Sprout\Contracts\Tenant|null               $tenant
-     *
-     * @phpstan-param TenantClass|null                    $tenant
-     *
      * @return void
+     *
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
      */
-    private function refreshSessionStore(?Tenancy $tenancy = null, ?Tenant $tenant = null): void
+    private function refreshSessionStore(): void
     {
         // We only want to touch this if the session manager has actually been
         // loaded, and is therefore most likely being used

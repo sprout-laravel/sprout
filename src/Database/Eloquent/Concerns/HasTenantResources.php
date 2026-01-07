@@ -33,10 +33,22 @@ trait HasTenantResources
             if ($model->getAttribute($model->getTenantResourceKeyName()) === null) {
                 $model->setAttribute(
                     $model->getTenantResourceKeyName(),
-                    Str::uuid()
+                    method_exists($model, 'generateNewResourceKey')
+                        ? $model->generateNewResourceKey()
+                        : Str::uuid()
                 );
             }
         });
+    }
+
+    /**
+     * Generate a new resource key
+     *
+     * @return mixed
+     */
+    public function generateNewResourceKey(): mixed
+    {
+        return Str::uuid();
     }
 
     /**

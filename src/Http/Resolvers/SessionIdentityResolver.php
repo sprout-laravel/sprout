@@ -7,9 +7,11 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Router;
 use Illuminate\Routing\RouteRegistrar;
+use Illuminate\Session\SessionManager;
 use Sprout\Contracts\Tenancy;
+use Sprout\Contracts\Tenant;
 use Sprout\Exceptions\CompatibilityException;
-use Sprout\Http\Middleware\TenantRoutes;
+use Sprout\Http\Middleware\SproutTenantContextMiddleware;
 use Sprout\Support\BaseIdentityResolver;
 use Sprout\Support\PlaceholderHelper;
 use Sprout\Support\ResolutionHook;
@@ -124,11 +126,53 @@ final class SessionIdentityResolver extends BaseIdentityResolver
      * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
      *
      * @return \Illuminate\Routing\RouteRegistrar
+     *
+     * @deprecated since 1.1.0, will be removed in 2.0.0. Use Route::tenanted() or {@see self::configureRoute()} instead.
      */
     public function routes(Router $router, Closure $groupRoutes, Tenancy $tenancy): RouteRegistrar
     {
-        return $router->middleware([TenantRoutes::ALIAS . ':' . $this->getName() . ',' . $tenancy->getName()])
+        @trigger_error(
+            sprintf(
+                'The "%s::routes()" method is deprecated since Sprout 1.1 and will be removed in 2.0. Use Route::tenanted() or configureRoute() instead.',
+                static::class
+            ),
+            E_USER_DEPRECATED
+        );
+
+        return $router->middleware([SproutTenantContextMiddleware::ALIAS . ':' . $this->getName() . ',' . $tenancy->getName()])
                       ->group($groupRoutes);
+    }
+
+    /**
+     * Perform setup actions for the tenant
+     *
+     * When a tenant is marked as the current tenant within a tenancy, this
+     * method will be called to perform any necessary setup actions.
+     * This method is also called if there is no current tenant, as there may
+     * be actions needed.
+     *
+     * @template TenantClass of \Sprout\Contracts\Tenant
+     *
+     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Sprout\Contracts\Tenant|null          $tenant
+     *
+     * @phpstan-param Tenant|null                    $tenant
+     *
+     * @return void
+     *
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     */
+    public function setup(Tenancy $tenancy, ?Tenant $tenant): void
+    {
+        if ($tenant !== null && $tenancy->check()) {
+            $this->getApp()
+                 ->make(SessionManager::class)
+                 ->put($this->getRequestSessionName($tenancy), $tenant->getTenantIdentifier());
+        } else if ($tenant === null) {
+            $this->getApp()
+                 ->make(SessionManager::class)
+                 ->forget($this->getRequestSessionName($tenancy));
+        }
     }
 
     /**

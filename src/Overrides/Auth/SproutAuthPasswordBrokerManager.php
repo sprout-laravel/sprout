@@ -6,6 +6,7 @@ namespace Sprout\Overrides\Auth;
 use Illuminate\Auth\Passwords\PasswordBrokerManager;
 use Illuminate\Auth\Passwords\TokenRepositoryInterface;
 use Illuminate\Foundation\Application;
+use Illuminate\Support\Str;
 use Sprout\Sprout;
 
 /**
@@ -73,9 +74,25 @@ class SproutAuthPasswordBrokerManager extends PasswordBrokerManager
             $this->app->make('hash'),
             $config['table'],                                // @phpstan-ignore-line
             $key,
-            $config['expire'],// @phpstan-ignore-line
+            $this->laravelVersionedExpiry($config['expire']),// @phpstan-ignore-line
             $config['throttle'] ?? 0// @phpstan-ignore-line
         );
+    }
+
+    /**
+     * Create the token expiry based on the Laravel version
+     *
+     * @param int|null $expiry
+     *
+     * @return int|null
+     */
+    private function laravelVersionedExpiry(?int $expiry): ?int
+    {
+        if (! Str::startsWith($this->app->version(), '11.')) {
+            return ($expiry ?? 60) * 60;
+        }
+
+        return $expiry;
     }
 
     /**
