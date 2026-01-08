@@ -15,30 +15,16 @@
         testdox="true"
 >
     <testsuites>
-        <testsuite name="Core Unit">
-            <directory>./packages/core/tests/Unit</directory>
+        <testsuite name="Feature">
+            <directory>./tests/Feature</directory>
         </testsuite>
-        <testsuite name="Core Feature">
-            <directory>./packages/core/tests/Feature</directory>
-        </testsuite>
-        <testsuite name="Bud Unit">
-            <directory>./packages/bud/tests/Unit</directory>
-        </testsuite>
-        <testsuite name="Bud Feature">
-            <directory>./packages/bud/tests/Feature</directory>
-        </testsuite>
-        <testsuite name="Seedling Unit">
-            <directory>./packages/seedling/tests/Unit</directory>
-        </testsuite>
-        <testsuite name="Seedling Feature">
-            <directory>./packages/seedling/tests/Feature</directory>
+        <testsuite name="Unit">
+            <directory>./tests/Unit</directory>
         </testsuite>
     </testsuites>
     <source>
         <include>
-            <directory>./packages/core/src</directory>
-            <directory>./packages/bud/src</directory>
-            <directory>./packages/seedling/src</directory>
+            <directory>./src</directory>
         </include>
     </source>
     <coverage>

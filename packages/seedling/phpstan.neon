@@ -5,7 +5,5 @@ includes:
 parameters:
   level: max
   paths:
-    - packages/core/src
-    - packages/bud/src
-    - packages/seedling/src
+    - src
   ignoreErrors:
