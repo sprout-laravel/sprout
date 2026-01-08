@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Tests\Unit\Overrides\Auth;
+namespace Sprout\Core\Tests\Unit\Overrides\Auth;
 
 use Carbon\Carbon;
 use Illuminate\Cache\Repository;
@@ -12,15 +12,15 @@ use Mockery;
 use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\Contracts\Tenancy;
-use Sprout\Contracts\Tenant;
-use Sprout\Contracts\TenantHasResources;
-use Sprout\Exceptions\TenancyMissingException;
-use Sprout\Exceptions\TenantMissingException;
-use Sprout\Overrides\Auth\SproutAuthCacheTokenRepository;
-use Sprout\Sprout;
-use Sprout\Support\SettingsRepository;
-use Sprout\Tests\Unit\UnitTestCase;
+use Sprout\Core\Contracts\Tenancy;
+use Sprout\Core\Contracts\Tenant;
+use Sprout\Core\Contracts\TenantHasResources;
+use Sprout\Core\Exceptions\TenancyMissingException;
+use Sprout\Core\Exceptions\TenantMissingException;
+use Sprout\Core\Overrides\Auth\SproutAuthCacheTokenRepository;
+use Sprout\Core\Sprout;
+use Sprout\Core\Support\SettingsRepository;
+use Sprout\Core\Tests\Unit\UnitTestCase;
 
 class SproutAuthCacheTokenRepositoryTest extends UnitTestCase
 {
@@ -32,8 +32,8 @@ class SproutAuthCacheTokenRepositoryTest extends UnitTestCase
             $sprout->setCurrentTenancy($tenancy);
 
             /**
-             * @var \Sprout\Contracts\Tenancy&\Mockery\MockInterface $tenancy
-             * @var \Sprout\Contracts\Tenancy&\Mockery\MockInterface $tenant
+             * @var \Sprout\Core\Contracts\Tenancy&\Mockery\MockInterface $tenancy
+             * @var \Sprout\Core\Contracts\Tenancy&\Mockery\MockInterface $tenant
              */
 
             $tenancy->shouldReceive('check')->andReturn(true)->times($callCount);

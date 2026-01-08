@@ -1,18 +1,18 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Http;
+namespace Sprout\Core\Http;
 
 use Closure;
 use Illuminate\Routing\Router;
 use Illuminate\Routing\RouteRegistrar;
 use Illuminate\Support\Facades\Route;
-use Sprout\Contracts\IdentityResolverUsesParameters;
-use Sprout\Exceptions\CompatibilityException;
-use Sprout\Http\Middleware\SproutOptionalTenantContextMiddleware;
-use Sprout\Http\Middleware\SproutTenantContextMiddleware;
-use Sprout\Managers\IdentityResolverManager;
-use Sprout\Managers\TenancyManager;
+use Sprout\Core\Contracts\IdentityResolverUsesParameters;
+use Sprout\Core\Exceptions\CompatibilityException;
+use Sprout\Core\Http\Middleware\SproutOptionalTenantContextMiddleware;
+use Sprout\Core\Http\Middleware\SproutTenantContextMiddleware;
+use Sprout\Core\Managers\IdentityResolverManager;
+use Sprout\Core\Managers\TenancyManager;
 
 final class RouteCreator
 {

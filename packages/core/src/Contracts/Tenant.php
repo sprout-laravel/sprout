@@ -1,6 +1,6 @@
 <?php
 
-namespace Sprout\Contracts;
+namespace Sprout\Core\Contracts;
 
 /**
  * Tenant Contract
@@ -26,7 +26,7 @@ interface Tenant
      *
      * Retrieve the storage name for the tenant identifier, whether that's an
      * attribute, column name, array key or something else.
-     * Used primarily by {@see \Sprout\Contracts\TenantProvider}.
+     * Used primarily by {@see \Sprout\Core\Contracts\TenantProvider}.
      *
      * @return string
      */
@@ -46,7 +46,7 @@ interface Tenant
      *
      * Retrieve the storage name for the tenant key, whether that's an
      * attribute, column name, array key or something else.
-     * Used primarily by {@see \Sprout\Contracts\TenantProvider}.
+     * Used primarily by {@see \Sprout\Core\Contracts\TenantProvider}.
      *
      * @return string
      */

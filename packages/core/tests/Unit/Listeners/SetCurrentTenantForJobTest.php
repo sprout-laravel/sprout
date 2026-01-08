@@ -1,16 +1,16 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Tests\Unit\Listeners;
+namespace Sprout\Core\Tests\Unit\Listeners;
 
 use Illuminate\Queue\Events\JobProcessing;
 use Illuminate\Support\Facades\Context;
 use Mockery;
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\Listeners\SetCurrentTenantForJob;
-use Sprout\Tests\Unit\UnitTestCase;
+use Sprout\Core\Listeners\SetCurrentTenantForJob;
+use Sprout\Core\Tests\Unit\UnitTestCase;
 use Workbench\App\Models\TenantModel;
-use function Sprout\sprout;
+use function Sprout\Core\sprout;
 
 class SetCurrentTenantForJobTest extends UnitTestCase
 {

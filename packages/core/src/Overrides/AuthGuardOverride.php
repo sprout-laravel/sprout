@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Overrides;
+namespace Sprout\Core\Overrides;
 
 use Illuminate\Auth\AuthManager;
-use Sprout\Contracts\Tenancy;
-use Sprout\Contracts\Tenant;
+use Sprout\Core\Contracts\Tenancy;
+use Sprout\Core\Contracts\Tenant;
 
 /**
  * Auth Guard Override
@@ -29,8 +29,8 @@ final class AuthGuardOverride extends BaseOverride
      * override.
      * It is called when a new tenant is marked as the current tenant.
      *
-     * @param \Sprout\Contracts\Tenancy<*> $tenancy
-     * @param \Sprout\Contracts\Tenant $tenant
+     * @param \Sprout\Core\Contracts\Tenancy<*> $tenancy
+     * @param \Sprout\Core\Contracts\Tenant     $tenant
      *
      * @return void
      */
@@ -50,8 +50,8 @@ final class AuthGuardOverride extends BaseOverride
      * It will be called before {@see self::setup()}, but only if the previous
      * tenant was not null.
      *
-     * @param \Sprout\Contracts\Tenancy<*> $tenancy
-     * @param \Sprout\Contracts\Tenant $tenant
+     * @param \Sprout\Core\Contracts\Tenancy<*> $tenancy
+     * @param \Sprout\Core\Contracts\Tenant     $tenant
      *
      * @return void
      */

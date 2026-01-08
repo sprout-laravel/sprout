@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Database\Eloquent;
+namespace Sprout\Core\Database\Eloquent;
 
 use Illuminate\Database\Eloquent\Model;
-use Sprout\Contracts\Tenant as TenantContract;
-use Sprout\Database\Eloquent\Concerns\IsTenant;
+use Sprout\Core\Contracts\Tenant as TenantContract;
+use Sprout\Core\Database\Eloquent\Concerns\IsTenant;
 
 /**
  * Abstract Tenant Class

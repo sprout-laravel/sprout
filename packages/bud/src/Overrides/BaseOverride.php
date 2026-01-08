@@ -6,11 +6,11 @@ namespace Sprout\Bud\Overrides;
 use Closure;
 use Illuminate\Contracts\Foundation\Application;
 use Sprout\Bud\Bud;
-use Sprout\Contracts\BootableServiceOverride;
-use Sprout\Contracts\Tenancy;
-use Sprout\Contracts\Tenant;
-use Sprout\Overrides\BaseOverride as SproutBaseOverride;
-use Sprout\Sprout;
+use Sprout\Core\Contracts\BootableServiceOverride;
+use Sprout\Core\Contracts\Tenancy;
+use Sprout\Core\Contracts\Tenant;
+use Sprout\Core\Overrides\BaseOverride as SproutBaseOverride;
+use Sprout\Core\Sprout;
 
 /**
  * @template OverrideService of object
@@ -48,7 +48,7 @@ abstract class BaseOverride extends SproutBaseOverride implements BootableServic
      * override that take place during the booting of the framework.
      *
      * @param \Illuminate\Contracts\Foundation\Application $app
-     * @param \Sprout\Sprout                               $sprout
+     * @param \Sprout\Core\Sprout                          $sprout
      *
      * @return void
      *
@@ -79,8 +79,8 @@ abstract class BaseOverride extends SproutBaseOverride implements BootableServic
      * Add a driver to the service.
      *
      * @param object                  $service
-     * @param \Sprout\Bud\Bud         $bud
-     * @param \Sprout\Sprout          $sprout
+     * @param \Sprout\Bud\Bud    $bud
+     * @param \Sprout\Core\Sprout     $sprout
      * @param \Closure                $tracker
      *
      * @phpstan-param OverrideService $service
@@ -100,12 +100,12 @@ abstract class BaseOverride extends SproutBaseOverride implements BootableServic
      * It will be called before {@see self::setup()}, but only if the previous
      * tenant was not null.
      *
-     * @template TenantClass of \Sprout\Contracts\Tenant
+     * @template TenantClass of \Sprout\Core\Contracts\Tenant
      *
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Contracts\Tenant               $tenant
+     * @param \Sprout\Core\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Sprout\Core\Contracts\Tenant               $tenant
      *
-     * @phpstan-param TenantClass                    $tenant
+     * @phpstan-param TenantClass                         $tenant
      *
      * @return void
      *

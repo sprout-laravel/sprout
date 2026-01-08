@@ -37,13 +37,13 @@ final readonly class TenantConfig implements ContextualAttribute
     /**
      * Resolve the config store using this attribute
      *
-     * @param \Sprout\Bud\Attributes\TenantConfig       $attribute
+     * @param \Sprout\Bud\Attributes\TenantConfig  $attribute
      * @param \Illuminate\Contracts\Container\Container $container
      *
      * @return array<string, mixed>|null
      *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
-     * @throws \Sprout\Exceptions\MisconfigurationException
+     * @throws \Sprout\Core\Exceptions\MisconfigurationException
      */
     public function resolve(self $attribute, Container $container): ?array
     {

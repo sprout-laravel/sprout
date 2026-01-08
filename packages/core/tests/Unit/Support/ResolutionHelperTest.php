@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Tests\Unit\Support;
+namespace Sprout\Core\Tests\Unit\Support;
 
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -10,17 +10,17 @@ use Illuminate\Routing\Route;
 use Mockery;
 use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\Exceptions\MisconfigurationException;
-use Sprout\Exceptions\NoTenantFoundException;
-use Sprout\Sprout;
-use Sprout\Support\ResolutionHelper;
-use Sprout\Support\ResolutionHook;
-use Sprout\Support\SettingsRepository;
-use Sprout\Tests\Unit\UnitTestCase;
+use Sprout\Core\Exceptions\MisconfigurationException;
+use Sprout\Core\Exceptions\NoTenantFoundException;
+use Sprout\Core\Sprout;
+use Sprout\Core\Support\ResolutionHelper;
+use Sprout\Core\Support\ResolutionHook;
+use Sprout\Core\Support\SettingsRepository;
+use Sprout\Core\Tests\Unit\UnitTestCase;
 use Workbench\App\Models\TenantModel;
-use function Sprout\resolver;
-use function Sprout\sprout;
-use function Sprout\tenancy;
+use function Sprout\Core\resolver;
+use function Sprout\Core\sprout;
+use function Sprout\Core\tenancy;
 
 class ResolutionHelperTest extends UnitTestCase
 {
@@ -84,12 +84,12 @@ class ResolutionHelperTest extends UnitTestCase
     #[Test]
     public function returnsFalseIfThereIsAlreadyATenant(): void
     {
-        /** @var \Sprout\Contracts\Tenancy<TenantModel> $tenancy */
+        /** @var \Sprout\Core\Contracts\Tenancy<TenantModel> $tenancy */
         $tenancy = tenancy();
 
         $tenancy->setTenant(TenantModel::factory()->createOne());
 
-        /** @var \Sprout\Contracts\IdentityResolver $resolver */
+        /** @var \Sprout\Core\Contracts\IdentityResolver $resolver */
         $resolver = resolver('path');
 
         /** @var \Illuminate\Http\Request $fakeRequest */
@@ -103,10 +103,10 @@ class ResolutionHelperTest extends UnitTestCase
     #[Test]
     public function returnsFalseIfTheResolverCannotResolve(): void
     {
-        /** @var \Sprout\Contracts\Tenancy<TenantModel> $tenancy */
+        /** @var \Sprout\Core\Contracts\Tenancy<TenantModel> $tenancy */
         $tenancy = tenancy();
 
-        /** @var \Sprout\Contracts\IdentityResolver $resolver */
+        /** @var \Sprout\Core\Contracts\IdentityResolver $resolver */
         $resolver = resolver('path');
 
         $tenancy->setTenant(TenantModel::factory()->createOne())
@@ -126,10 +126,10 @@ class ResolutionHelperTest extends UnitTestCase
     {
         $tenant = TenantModel::factory()->createOne();
 
-        /** @var \Sprout\Contracts\Tenancy<TenantModel> $tenancy */
+        /** @var \Sprout\Core\Contracts\Tenancy<TenantModel> $tenancy */
         $tenancy = tenancy();
 
-        /** @var \Sprout\Contracts\IdentityResolver&\Sprout\Contracts\IdentityResolverUsesParameters $resolver */
+        /** @var \Sprout\Core\Contracts\IdentityResolver&\Sprout\Core\Contracts\IdentityResolverUsesParameters $resolver */
         $resolver = resolver('path');
 
         /** @var \Illuminate\Routing\Route $fakeRoute */
@@ -175,10 +175,10 @@ class ResolutionHelperTest extends UnitTestCase
     #[Test]
     public function throwsAnExceptionWhenUnableToIdentifyATenantFromTheRoute(): void
     {
-        /** @var \Sprout\Contracts\Tenancy<TenantModel> $tenancy */
+        /** @var \Sprout\Core\Contracts\Tenancy<TenantModel> $tenancy */
         $tenancy = tenancy();
 
-        /** @var \Sprout\Contracts\IdentityResolver&\Sprout\Contracts\IdentityResolverUsesParameters $resolver */
+        /** @var \Sprout\Core\Contracts\IdentityResolver&\Sprout\Core\Contracts\IdentityResolverUsesParameters $resolver */
         $resolver = resolver('path');
 
         /** @var \Illuminate\Routing\Route $fakeRoute */
@@ -216,10 +216,10 @@ class ResolutionHelperTest extends UnitTestCase
     #[Test]
     public function returnsFalseWhenUnableToIdentifyATenantFromTheRouteAndToldNotToThrow(): void
     {
-        /** @var \Sprout\Contracts\Tenancy<TenantModel> $tenancy */
+        /** @var \Sprout\Core\Contracts\Tenancy<TenantModel> $tenancy */
         $tenancy = tenancy();
 
-        /** @var \Sprout\Contracts\IdentityResolver&\Sprout\Contracts\IdentityResolverUsesParameters $resolver */
+        /** @var \Sprout\Core\Contracts\IdentityResolver&\Sprout\Core\Contracts\IdentityResolverUsesParameters $resolver */
         $resolver = resolver('path');
 
         /** @var \Illuminate\Routing\Route $fakeRoute */
@@ -263,10 +263,10 @@ class ResolutionHelperTest extends UnitTestCase
     {
         $tenant = TenantModel::factory()->createOne();
 
-        /** @var \Sprout\Contracts\Tenancy<TenantModel> $tenancy */
+        /** @var \Sprout\Core\Contracts\Tenancy<TenantModel> $tenancy */
         $tenancy = tenancy();
 
-        /** @var \Sprout\Contracts\IdentityResolver&\Sprout\Contracts\IdentityResolverUsesParameters $resolver */
+        /** @var \Sprout\Core\Contracts\IdentityResolver&\Sprout\Core\Contracts\IdentityResolverUsesParameters $resolver */
         $resolver = resolver('path');
 
         /** @var \Illuminate\Http\Request $fakeRequest */
@@ -300,10 +300,10 @@ class ResolutionHelperTest extends UnitTestCase
     #[Test]
     public function throwsAnExceptionWhenUnableToIdentifyATenantFromTheRequest(): void
     {
-        /** @var \Sprout\Contracts\Tenancy<TenantModel> $tenancy */
+        /** @var \Sprout\Core\Contracts\Tenancy<TenantModel> $tenancy */
         $tenancy = tenancy();
 
-        /** @var \Sprout\Contracts\IdentityResolver&\Sprout\Contracts\IdentityResolverUsesParameters $resolver */
+        /** @var \Sprout\Core\Contracts\IdentityResolver&\Sprout\Core\Contracts\IdentityResolverUsesParameters $resolver */
         $resolver = resolver('path');
 
         /** @var \Illuminate\Http\Request $fakeRequest */
@@ -329,10 +329,10 @@ class ResolutionHelperTest extends UnitTestCase
     #[Test]
     public function returnsFalseWhenUnableToIdentifyATenantFromTheRequestAndToldNotToThrow(): void
     {
-        /** @var \Sprout\Contracts\Tenancy<TenantModel> $tenancy */
+        /** @var \Sprout\Core\Contracts\Tenancy<TenantModel> $tenancy */
         $tenancy = tenancy();
 
-        /** @var \Sprout\Contracts\IdentityResolver&\Sprout\Contracts\IdentityResolverUsesParameters $resolver */
+        /** @var \Sprout\Core\Contracts\IdentityResolver&\Sprout\Core\Contracts\IdentityResolverUsesParameters $resolver */
         $resolver = resolver('path');
 
         /** @var \Illuminate\Http\Request $fakeRequest */

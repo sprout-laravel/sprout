@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Events;
+namespace Sprout\Core\Events;
 
 /**
  * Service Override Registered Event
@@ -9,9 +9,9 @@ namespace Sprout\Events;
  * This event is dispatched when a service override is registered with
  * Sprout.
  *
- * @template OverrideClass of \Sprout\Contracts\ServiceOverride
+ * @template OverrideClass of \Sprout\Core\Contracts\ServiceOverride
  *
- * @extends \Sprout\Events\ServiceOverrideEvent<OverrideClass>
+ * @extends \Sprout\Core\Events\ServiceOverrideEvent<OverrideClass>
  *
  * @package Overrides
  *

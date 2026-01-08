@@ -1,20 +1,15 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Tests\Unit\Attributes;
+namespace Sprout\Core\Tests\Unit\Attributes;
 
-use Illuminate\Config\Repository;
-use Orchestra\Testbench\Attributes\DefineEnvironment;
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\Attributes\CurrentTenant;
-use Sprout\Attributes\Override;
-use Sprout\Contracts\ServiceOverride;
-use Sprout\Managers\ServiceOverrideManager;
-use Sprout\Support\GenericTenant;
-use Sprout\Tests\Unit\UnitTestCase;
-use Workbench\App\Models\TenantModel;
-use function Sprout\sprout;
-use function Sprout\tenancy;
+use Sprout\Core\Attributes\Override;
+use Sprout\Core\Contracts\ServiceOverride;
+use Sprout\Core\Managers\ServiceOverrideManager;
+use Sprout\Core\Tests\Unit\UnitTestCase;
+use function Sprout\Core\sprout;
+use function Sprout\Core\tenancy;
 
 class OverrideTest extends UnitTestCase
 {

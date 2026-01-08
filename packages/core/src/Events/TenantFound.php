@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Events;
+namespace Sprout\Core\Events;
 
 use Illuminate\Foundation\Events\Dispatchable;
-use Sprout\Contracts\Tenancy;
-use Sprout\Contracts\Tenant;
+use Sprout\Core\Contracts\Tenancy;
+use Sprout\Core\Contracts\Tenant;
 
 /**
  * Tenant Found Event
@@ -15,8 +15,8 @@ use Sprout\Contracts\Tenant;
  * It is an abstract base class that exists so that developers can listen to
  * all events where tenants are found, regardless of the method used.
  *
- * @see \Sprout\Events\TenantIdentified
- * @see \Sprout\Events\TenantLoaded
+ * @see            \Sprout\Core\Events\TenantIdentified
+ * @see            \Sprout\Core\Events\TenantLoaded
  *
  * @template TenantClass of Tenant
  *
@@ -35,16 +35,16 @@ abstract readonly class TenantFound
     /**
      * The tenancy whose tenant was found
      *
-     * @var \Sprout\Contracts\Tenancy
+     * @var \Sprout\Core\Contracts\Tenancy
      *
-     * @phpstan-var \Sprout\Contracts\Tenancy<TenantClass>
+     * @phpstan-var \Sprout\Core\Contracts\Tenancy<TenantClass>
      */
     public Tenancy $tenancy;
 
     /**
      * The tenant that was found
      *
-     * @var \Sprout\Contracts\Tenant
+     * @var \Sprout\Core\Contracts\Tenant
      *
      * @phpstan-var TenantClass
      */
@@ -53,11 +53,11 @@ abstract readonly class TenantFound
     /**
      * Create a new instance
      *
-     * @param \Sprout\Contracts\Tenant                       $tenant
-     * @param \Sprout\Contracts\Tenancy                      $tenancy
+     * @param \Sprout\Core\Contracts\Tenant                       $tenant
+     * @param \Sprout\Core\Contracts\Tenancy                      $tenancy
      *
-     * @phpstan-param TenantClass                            $tenant
-     * @phpstan-param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
+     * @phpstan-param TenantClass                                 $tenant
+     * @phpstan-param \Sprout\Core\Contracts\Tenancy<TenantClass> $tenancy
      */
     public function __construct(
         Tenant  $tenant,

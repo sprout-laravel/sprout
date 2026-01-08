@@ -21,14 +21,14 @@ use Sprout\Bud\Overrides\Auth\BudAuthManager;
 use Sprout\Bud\Overrides\AuthManagerOverride;
 use Sprout\Bud\Overrides\AuthProviderOverride;
 use Sprout\Bud\Tests\Unit\UnitTestCase;
-use Sprout\Contracts\BootableServiceOverride;
-use Sprout\Contracts\Tenancy;
-use Sprout\Contracts\Tenant;
-use Sprout\Contracts\TenantHasResources;
-use Sprout\Overrides\StackedOverride;
-use Sprout\Sprout;
-use Sprout\Support\SettingsRepository;
-use function Sprout\sprout;
+use Sprout\Core\Contracts\BootableServiceOverride;
+use Sprout\Core\Contracts\Tenancy;
+use Sprout\Core\Contracts\Tenant;
+use Sprout\Core\Contracts\TenantHasResources;
+use Sprout\Core\Overrides\StackedOverride;
+use Sprout\Core\Sprout;
+use Sprout\Core\Support\SettingsRepository;
+use function Sprout\Core\sprout;
 
 class AuthOverrideTest extends UnitTestCase
 {

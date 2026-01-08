@@ -1,24 +1,20 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Http\Resolvers;
+namespace Sprout\Core\Http\Resolvers;
 
-use Closure;
 use Illuminate\Contracts\Encryption\Encrypter;
 use Illuminate\Cookie\CookieJar;
 use Illuminate\Cookie\CookieValuePrefix;
 use Illuminate\Http\Request;
-use Illuminate\Routing\Router;
-use Illuminate\Routing\RouteRegistrar;
 use Illuminate\Support\Facades\Cookie;
-use Sprout\Contracts\Tenancy;
-use Sprout\Contracts\Tenant;
-use Sprout\Exceptions\CompatibilityException;
-use Sprout\Http\Middleware\SproutTenantContextMiddleware;
-use Sprout\Support\BaseIdentityResolver;
-use Sprout\Support\PlaceholderHelper;
-use Sprout\Support\ResolutionHook;
-use Sprout\TenancyOptions;
+use Sprout\Core\Contracts\Tenancy;
+use Sprout\Core\Contracts\Tenant;
+use Sprout\Core\Exceptions\CompatibilityException;
+use Sprout\Core\Support\BaseIdentityResolver;
+use Sprout\Core\Support\PlaceholderHelper;
+use Sprout\Core\Support\ResolutionHook;
+use Sprout\Core\TenancyOptions;
 
 /**
  * Cookie Identity Resolver
@@ -47,10 +43,10 @@ final class CookieIdentityResolver extends BaseIdentityResolver
     /**
      * Create a new instance
      *
-     * @param string                                $name
-     * @param string|null                           $cookie
-     * @param array<string, mixed>                  $options
-     * @param array<\Sprout\Support\ResolutionHook> $hooks
+     * @param string                                     $name
+     * @param string|null                                $cookie
+     * @param array<string, mixed>                       $options
+     * @param array<\Sprout\Core\Support\ResolutionHook> $hooks
      */
     public function __construct(string $name, ?string $cookie = null, array $options = [], array $hooks = [])
     {
@@ -91,7 +87,7 @@ final class CookieIdentityResolver extends BaseIdentityResolver
      * You can use an uppercase character for the first character, <code>{Tenancy}</code>
      * and <code>{Resolver}</code>, and it'll be run through {@see \ucfirst()}.
      *
-     * @param \Sprout\Contracts\Tenancy<*> $tenancy
+     * @param \Sprout\Core\Contracts\Tenancy<*> $tenancy
      *
      * @return string
      */
@@ -111,14 +107,14 @@ final class CookieIdentityResolver extends BaseIdentityResolver
      *
      * Locates a tenant identifier within the provided request and returns it.
      *
-     * @template TenantClass of \Sprout\Contracts\Tenant
+     * @template TenantClass of \Sprout\Core\Contracts\Tenant
      *
-     * @param \Illuminate\Http\Request               $request
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Illuminate\Http\Request                    $request
+     * @param \Sprout\Core\Contracts\Tenancy<TenantClass> $tenancy
      *
      * @return string|null
      *
-     * @throws \Sprout\Exceptions\CompatibilityException
+     * @throws \Sprout\Core\Exceptions\CompatibilityException
      */
     public function resolveFromRequest(Request $request, Tenancy $tenancy): ?string
     {
@@ -150,12 +146,12 @@ final class CookieIdentityResolver extends BaseIdentityResolver
      * This method is also called if there is no current tenant, as there may
      * be actions needed.
      *
-     * @template TenantClass of \Sprout\Contracts\Tenant
+     * @template TenantClass of \Sprout\Core\Contracts\Tenant
      *
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Contracts\Tenant|null          $tenant
+     * @param \Sprout\Core\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Sprout\Core\Contracts\Tenant|null          $tenant
      *
-     * @phpstan-param Tenant|null                    $tenant
+     * @phpstan-param Tenant|null                         $tenant
      *
      * @return void
      *

@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Tests\Unit\Overrides;
+namespace Sprout\Core\Tests\Unit\Overrides;
 
 use Closure;
 use Illuminate\Config\Repository;
@@ -11,17 +11,17 @@ use Mockery;
 use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\Contracts\BootableServiceOverride;
-use Sprout\Contracts\Tenancy;
-use Sprout\Contracts\Tenant;
-use Sprout\Contracts\TenantHasResources;
-use Sprout\Overrides\FilesystemManagerOverride;
-use Sprout\Overrides\FilesystemOverride;
-use Sprout\Overrides\StackedOverride;
-use Sprout\Sprout;
-use Sprout\Support\SettingsRepository;
-use Sprout\Tests\Unit\UnitTestCase;
-use function Sprout\sprout;
+use Sprout\Core\Contracts\BootableServiceOverride;
+use Sprout\Core\Contracts\Tenancy;
+use Sprout\Core\Contracts\Tenant;
+use Sprout\Core\Contracts\TenantHasResources;
+use Sprout\Core\Overrides\FilesystemManagerOverride;
+use Sprout\Core\Overrides\FilesystemOverride;
+use Sprout\Core\Overrides\StackedOverride;
+use Sprout\Core\Sprout;
+use Sprout\Core\Support\SettingsRepository;
+use Sprout\Core\Tests\Unit\UnitTestCase;
+use function Sprout\Core\sprout;
 
 class FilesystemOverrideTest extends UnitTestCase
 {

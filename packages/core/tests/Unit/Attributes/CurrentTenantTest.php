@@ -1,17 +1,17 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Tests\Unit\Attributes;
+namespace Sprout\Core\Tests\Unit\Attributes;
 
 use Illuminate\Config\Repository;
 use Orchestra\Testbench\Attributes\DefineEnvironment;
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\Attributes\CurrentTenant;
-use Sprout\Support\GenericTenant;
-use Sprout\Tests\Unit\UnitTestCase;
+use Sprout\Core\Attributes\CurrentTenant;
+use Sprout\Core\Support\GenericTenant;
+use Sprout\Core\Tests\Unit\UnitTestCase;
 use Workbench\App\Models\TenantModel;
-use function Sprout\sprout;
-use function Sprout\tenancy;
+use function Sprout\Core\sprout;
+use function Sprout\Core\tenancy;
 
 class CurrentTenantTest extends UnitTestCase
 {
@@ -39,7 +39,7 @@ class CurrentTenantTest extends UnitTestCase
     #[Test]
     public function resolvesCurrentTenant(): void
     {
-        /** @var \Sprout\Contracts\Tenancy $tenancy */
+        /** @var \Sprout\Core\Contracts\Tenancy $tenancy */
         $tenancy = tenancy('tenants');
 
         sprout()->setCurrentTenancy($tenancy);
@@ -61,7 +61,7 @@ class CurrentTenantTest extends UnitTestCase
     #[Test, DefineEnvironment('setupSecondTenancy')]
     public function resolvesCurrentTenantForSpecificTenancy(): void
     {
-        /** @var \Sprout\Contracts\Tenancy $tenancy */
+        /** @var \Sprout\Core\Contracts\Tenancy $tenancy */
         $tenancy = tenancy('backup');
 
         sprout()->setCurrentTenancy($tenancy);

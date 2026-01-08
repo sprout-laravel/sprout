@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Support;
+namespace Sprout\Core\Support;
 
 use Closure;
 use Illuminate\Contracts\Config\Repository;
 use Illuminate\Contracts\Foundation\Application;
-use Sprout\Exceptions\MisconfigurationException;
-use Sprout\Sprout;
+use Sprout\Core\Exceptions\MisconfigurationException;
+use Sprout\Core\Sprout;
 
 /**
  * Base Factory
@@ -27,7 +27,7 @@ abstract class BaseFactory
      *
      * @var array<string, \Closure>
      *
-     * @phpstan-var array<class-string<\Sprout\Support\BaseFactory<FactoryClass>>, array<string, \Closure(Application, array<string, mixed>, string): FactoryClass>>
+     * @phpstan-var array<class-string<\Sprout\Core\Support\BaseFactory<FactoryClass>>, array<string, \Closure(Application, array<string, mixed>, string): FactoryClass>>
      */
     protected static array $customCreators = [];
 
@@ -113,7 +113,7 @@ abstract class BaseFactory
      *
      * @return string
      *
-     * @throws \Sprout\Exceptions\MisconfigurationException
+     * @throws \Sprout\Core\Exceptions\MisconfigurationException
      */
     public function getDefaultName(): string
     {
@@ -152,7 +152,7 @@ abstract class BaseFactory
      *
      * @phpstan-return FactoryClass
      *
-     * @throws \Sprout\Exceptions\MisconfigurationException
+     * @throws \Sprout\Core\Exceptions\MisconfigurationException
      */
     protected function callCustomCreator(string $name, array $config): object
     {
@@ -179,7 +179,7 @@ abstract class BaseFactory
      *
      * @phpstan-return FactoryClass
      *
-     * @throws \Sprout\Exceptions\MisconfigurationException
+     * @throws \Sprout\Core\Exceptions\MisconfigurationException
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
      */
     protected function resolve(string $name): object
@@ -229,7 +229,7 @@ abstract class BaseFactory
      *
      * @phpstan-return FactoryClass
      *
-     * @throws \Sprout\Exceptions\MisconfigurationException
+     * @throws \Sprout\Core\Exceptions\MisconfigurationException
      */
     public function get(?string $name = null): object
     {

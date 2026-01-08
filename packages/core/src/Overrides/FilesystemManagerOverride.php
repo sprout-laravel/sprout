@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Overrides;
+namespace Sprout\Core\Overrides;
 
 use Illuminate\Contracts\Foundation\Application;
-use Sprout\Contracts\BootableServiceOverride;
-use Sprout\Overrides\Filesystem\SproutFilesystemManager;
-use Sprout\Sprout;
+use Sprout\Core\Contracts\BootableServiceOverride;
+use Sprout\Core\Overrides\Filesystem\SproutFilesystemManager;
+use Sprout\Core\Sprout;
 
 final class FilesystemManagerOverride extends BaseOverride implements BootableServiceOverride
 {
@@ -17,7 +17,7 @@ final class FilesystemManagerOverride extends BaseOverride implements BootableSe
      * override that take place during the booting of the framework.
      *
      * @param \Illuminate\Contracts\Foundation\Application $app
-     * @param \Sprout\Sprout                               $sprout
+     * @param \Sprout\Core\Sprout                          $sprout
      *
      * @return void
      *

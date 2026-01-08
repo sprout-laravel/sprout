@@ -5,17 +5,13 @@ namespace Sprout\Bud\Tests\Unit\Overrides\Auth;
 
 use Illuminate\Auth\AuthManager;
 use Illuminate\Auth\EloquentUserProvider;
-use Illuminate\Broadcasting\Broadcasters\NullBroadcaster;
-use Illuminate\Broadcasting\BroadcastManager;
 use Illuminate\Config\Repository;
 use Illuminate\Contracts\Auth\UserProvider;
-use Illuminate\Contracts\Broadcasting\Broadcaster;
 use Illuminate\Foundation\Application;
 use InvalidArgumentException;
 use Mockery;
 use PHPUnit\Framework\Attributes\Test;
 use Sprout\Bud\Overrides\Auth\BudAuthManager;
-use Sprout\Bud\Overrides\Broadcast\BudBroadcastManager;
 use Sprout\Bud\Tests\Unit\UnitTestCase;
 
 class BudAuthManagerTest extends UnitTestCase

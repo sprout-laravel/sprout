@@ -19,7 +19,7 @@ use Sprout\Bud\Managers\ConfigStoreManager;
 use Sprout\Bud\Stores\DatabaseConfigStore;
 use Sprout\Bud\Stores\FilesystemConfigStore;
 use Sprout\Bud\Tests\Unit\UnitTestCase;
-use Sprout\Exceptions\MisconfigurationException;
+use Sprout\Core\Exceptions\MisconfigurationException;
 
 class ConfigStoreManagerTest extends UnitTestCase
 {

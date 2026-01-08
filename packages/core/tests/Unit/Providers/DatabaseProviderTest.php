@@ -1,20 +1,20 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Tests\Unit\Providers;
+namespace Sprout\Core\Tests\Unit\Providers;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Orchestra\Testbench\Attributes\DefineEnvironment;
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\Exceptions\MisconfigurationException;
-use Sprout\Providers\DatabaseTenantProvider;
-use Sprout\Support\GenericTenant;
-use Sprout\Tests\Unit\UnitTestCase;
+use Sprout\Core\Exceptions\MisconfigurationException;
+use Sprout\Core\Providers\DatabaseTenantProvider;
+use Sprout\Core\Support\GenericTenant;
+use Sprout\Core\Tests\Unit\UnitTestCase;
 use Workbench\App\CustomTenantEntity;
-use function Sprout\provider;
-use function Sprout\sprout;
+use function Sprout\Core\provider;
+use function Sprout\Core\sprout;
 
 class DatabaseProviderTest extends UnitTestCase
 {

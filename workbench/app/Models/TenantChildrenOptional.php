@@ -6,8 +6,8 @@ namespace Workbench\App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Sprout\Database\Eloquent\Concerns\BelongsToManyTenants;
-use Sprout\Database\Eloquent\Contracts\OptionalTenant;
+use Sprout\Core\Database\Eloquent\Concerns\BelongsToManyTenants;
+use Sprout\Core\Database\Eloquent\Contracts\OptionalTenant;
 use Workbench\Database\Factories\TenantChildrenOptionalFactory;
 
 class TenantChildrenOptional extends Model implements OptionalTenant

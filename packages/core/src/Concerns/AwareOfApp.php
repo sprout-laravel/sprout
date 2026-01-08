@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Concerns;
+namespace Sprout\Core\Concerns;
 
 use Illuminate\Contracts\Foundation\Application;
 

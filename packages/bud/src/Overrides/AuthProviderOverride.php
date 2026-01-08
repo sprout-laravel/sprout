@@ -10,9 +10,9 @@ use RuntimeException;
 use Sprout\Bud\Bud;
 use Sprout\Bud\Overrides\Auth\BudAuthManager;
 use Sprout\Bud\Overrides\Auth\BudAuthProviderCreator;
-use Sprout\Contracts\Tenancy;
-use Sprout\Contracts\Tenant;
-use Sprout\Sprout;
+use Sprout\Core\Contracts\Tenancy;
+use Sprout\Core\Contracts\Tenant;
+use Sprout\Core\Sprout;
 
 /**
  * @extends \Sprout\Bud\Overrides\BaseOverride<\Illuminate\Auth\AuthManager>
@@ -33,8 +33,8 @@ final class AuthProviderOverride extends BaseOverride
      * Add a driver to the service.
      *
      * @param object                               $service
-     * @param \Sprout\Bud\Bud                      $bud
-     * @param \Sprout\Sprout                       $sprout
+     * @param \Sprout\Bud\Bud                 $bud
+     * @param \Sprout\Core\Sprout                  $sprout
      * @param \Closure                             $tracker
      *
      * @phpstan-param \Illuminate\Auth\AuthManager $service
@@ -73,12 +73,12 @@ final class AuthProviderOverride extends BaseOverride
      * It will be called before {@see self::setup()}, but only if the previous
      * tenant was not null.
      *
-     * @template TenantClass of \Sprout\Contracts\Tenant
+     * @template TenantClass of \Sprout\Core\Contracts\Tenant
      *
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Contracts\Tenant               $tenant
+     * @param \Sprout\Core\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Sprout\Core\Contracts\Tenant               $tenant
      *
-     * @phpstan-param TenantClass                    $tenant
+     * @phpstan-param TenantClass                         $tenant
      *
      * @return void
      *

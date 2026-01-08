@@ -1,24 +1,24 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Database\Eloquent\Concerns;
+namespace Sprout\Core\Database\Eloquent\Concerns;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
-use Sprout\Contracts\TenantHasResources;
+use Sprout\Core\Contracts\TenantHasResources;
 
 /**
  * Has Tenant Resources
  *
  * This trait provides helper methods alongside default implementations and
- * functionality to support a {@see \Sprout\Contracts\Tenant} model that also
- * implements the {@see \Sprout\Contracts\TenantHasResources} interface.
+ * functionality to support a {@see \Sprout\Core\Contracts\Tenant} model that also
+ * implements the {@see \Sprout\Core\Contracts\TenantHasResources} interface.
  *
- * @phpstan-require-implements \Sprout\Contracts\Tenant
- * @phpstan-require-implements \Sprout\Contracts\TenantHasResources
+ * @phpstan-require-implements \Sprout\Core\Contracts\Tenant
+ * @phpstan-require-implements \Sprout\Core\Contracts\TenantHasResources
  * @phpstan-require-extends \Illuminate\Database\Eloquent\Model
  *
- * @package Database\Eloquent
+ * @package        Database\Eloquent
  *
  * @phpstan-ignore trait.unused
  */

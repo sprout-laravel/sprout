@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Attributes;
+namespace Sprout\Core\Attributes;
 
 use Attribute;
 

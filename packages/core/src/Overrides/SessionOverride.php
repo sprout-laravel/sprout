@@ -1,18 +1,18 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Overrides;
+namespace Sprout\Core\Overrides;
 
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Session\SessionManager;
 use Illuminate\Support\Arr;
-use Sprout\Contracts\BootableServiceOverride;
-use Sprout\Contracts\Tenancy;
-use Sprout\Contracts\Tenant;
-use Sprout\Overrides\Session\SproutDatabaseSessionHandlerCreator;
-use Sprout\Overrides\Session\SproutFileSessionHandlerCreator;
-use Sprout\Sprout;
-use Sprout\Support\Settings;
+use Sprout\Core\Contracts\BootableServiceOverride;
+use Sprout\Core\Contracts\Tenancy;
+use Sprout\Core\Contracts\Tenant;
+use Sprout\Core\Overrides\Session\SproutDatabaseSessionHandlerCreator;
+use Sprout\Core\Overrides\Session\SproutFileSessionHandlerCreator;
+use Sprout\Core\Sprout;
+use Sprout\Core\Support\Settings;
 
 /**
  * Session Override
@@ -31,7 +31,7 @@ final class SessionOverride extends BaseOverride implements BootableServiceOverr
      * override that take place during the booting of the framework.
      *
      * @param \Illuminate\Contracts\Foundation\Application $app
-     * @param \Sprout\Sprout                               $sprout
+     * @param \Sprout\Core\Sprout                          $sprout
      *
      * @return void
      */
@@ -74,12 +74,12 @@ final class SessionOverride extends BaseOverride implements BootableServiceOverr
      * override.
      * It is called when a new tenant is marked as the current tenant.
      *
-     * @template TenantClass of \Sprout\Contracts\Tenant
+     * @template TenantClass of \Sprout\Core\Contracts\Tenant
      *
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Contracts\Tenant               $tenant
+     * @param \Sprout\Core\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Sprout\Core\Contracts\Tenant               $tenant
      *
-     * @phpstan-param TenantClass                    $tenant
+     * @phpstan-param TenantClass                         $tenant
      *
      * @return void
      */
@@ -130,12 +130,12 @@ final class SessionOverride extends BaseOverride implements BootableServiceOverr
      * It will be called before {@see self::setup()}, but only if the previous
      * tenant was not null.
      *
-     * @template TenantClass of \Sprout\Contracts\Tenant
+     * @template TenantClass of \Sprout\Core\Contracts\Tenant
      *
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Contracts\Tenant               $tenant
+     * @param \Sprout\Core\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Sprout\Core\Contracts\Tenant               $tenant
      *
-     * @phpstan-param TenantClass                    $tenant
+     * @phpstan-param TenantClass                         $tenant
      *
      * @return void
      */
@@ -167,8 +167,8 @@ final class SessionOverride extends BaseOverride implements BootableServiceOverr
     }
 
     /**
-     * @param \Sprout\Contracts\Tenancy<*> $tenancy
-     * @param \Sprout\Contracts\Tenant $tenant
+     * @param \Sprout\Core\Contracts\Tenancy<*> $tenancy
+     * @param \Sprout\Core\Contracts\Tenant     $tenant
      *
      * @return string
      */

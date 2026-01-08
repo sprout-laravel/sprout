@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Tests\Unit;
+namespace Sprout\Core\Tests\Unit;
 
 use Illuminate\Events\Dispatcher;
 use Illuminate\Foundation\PackageManifest;
@@ -11,19 +11,19 @@ use Illuminate\Support\ServiceProvider;
 use Mockery;
 use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\Contracts\Tenancy;
-use Sprout\Contracts\Tenant;
-use Sprout\Contracts\TenantAware;
-use Sprout\Events\CurrentTenantChanged;
-use Sprout\Http\Middleware\SproutTenantContextMiddleware;
-use Sprout\Listeners\IdentifyTenantOnRouting;
-use Sprout\Managers\IdentityResolverManager;
-use Sprout\Managers\ServiceOverrideManager;
-use Sprout\Managers\TenancyManager;
-use Sprout\Managers\TenantProviderManager;
-use Sprout\Sprout;
-use Sprout\SproutServiceProvider;
-use function Sprout\sprout;
+use Sprout\Core\Contracts\Tenancy;
+use Sprout\Core\Contracts\Tenant;
+use Sprout\Core\Contracts\TenantAware;
+use Sprout\Core\Events\CurrentTenantChanged;
+use Sprout\Core\Http\Middleware\SproutTenantContextMiddleware;
+use Sprout\Core\Listeners\IdentifyTenantOnRouting;
+use Sprout\Core\Managers\IdentityResolverManager;
+use Sprout\Core\Managers\ServiceOverrideManager;
+use Sprout\Core\Managers\TenancyManager;
+use Sprout\Core\Managers\TenantProviderManager;
+use Sprout\Core\Sprout;
+use Sprout\Core\SproutServiceProvider;
+use function Sprout\Core\sprout;
 
 class SproutServiceProviderTest extends UnitTestCase
 {

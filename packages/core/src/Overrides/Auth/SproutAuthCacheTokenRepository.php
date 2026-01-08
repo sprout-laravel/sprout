@@ -1,21 +1,21 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Overrides\Auth;
+namespace Sprout\Core\Overrides\Auth;
 
 use Illuminate\Auth\Passwords\CacheTokenRepository;
 use Illuminate\Cache\Repository;
 use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
 use Illuminate\Contracts\Hashing\Hasher as HasherContract;
-use Sprout\Contracts\TenantHasResources;
-use Sprout\Exceptions\TenancyMissingException;
-use Sprout\Exceptions\TenantMissingException;
-use Sprout\Sprout;
+use Sprout\Core\Contracts\TenantHasResources;
+use Sprout\Core\Exceptions\TenancyMissingException;
+use Sprout\Core\Exceptions\TenantMissingException;
+use Sprout\Core\Sprout;
 
 class SproutAuthCacheTokenRepository extends CacheTokenRepository
 {
     /**
-     * @var \Sprout\Sprout
+     * @var \Sprout\Core\Sprout
      */
     private Sprout $sprout;
 
@@ -51,8 +51,8 @@ class SproutAuthCacheTokenRepository extends CacheTokenRepository
     /**
      * @return string
      *
-     * @throws \Sprout\Exceptions\TenancyMissingException
-     * @throws \Sprout\Exceptions\TenantMissingException
+     * @throws \Sprout\Core\Exceptions\TenancyMissingException
+     * @throws \Sprout\Core\Exceptions\TenantMissingException
      */
     public function getPrefix(): string
     {
@@ -72,8 +72,8 @@ class SproutAuthCacheTokenRepository extends CacheTokenRepository
     /**
      * @return string
      *
-     * @throws \Sprout\Exceptions\TenancyMissingException
-     * @throws \Sprout\Exceptions\TenantMissingException
+     * @throws \Sprout\Core\Exceptions\TenancyMissingException
+     * @throws \Sprout\Core\Exceptions\TenantMissingException
      */
     protected function getTenantedPrefix(): string
     {
@@ -91,7 +91,7 @@ class SproutAuthCacheTokenRepository extends CacheTokenRepository
             throw TenantMissingException::make($tenancy->getName());
         }
 
-        /** @var \Sprout\Contracts\Tenant $tenant */
+        /** @var \Sprout\Core\Contracts\Tenant $tenant */
         $tenant = $tenancy->tenant();
 
         return $tenancy->getName() . '.' . ($tenant instanceof TenantHasResources ? $tenant->getTenantResourceKey() : $tenant->getTenantKey());
@@ -104,8 +104,8 @@ class SproutAuthCacheTokenRepository extends CacheTokenRepository
      *
      * @return string
      *
-     * @throws \Sprout\Exceptions\TenancyMissingException
-     * @throws \Sprout\Exceptions\TenantMissingException
+     * @throws \Sprout\Core\Exceptions\TenancyMissingException
+     * @throws \Sprout\Core\Exceptions\TenantMissingException
      */
     public function cacheKey(CanResetPasswordContract $user): string
     {

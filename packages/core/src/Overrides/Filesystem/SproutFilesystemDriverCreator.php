@@ -1,18 +1,18 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Overrides\Filesystem;
+namespace Sprout\Core\Overrides\Filesystem;
 
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Filesystem\FilesystemManager;
-use Sprout\Contracts\Tenancy;
-use Sprout\Contracts\TenantHasResources;
-use Sprout\Exceptions\MisconfigurationException;
-use Sprout\Exceptions\TenancyMissingException;
-use Sprout\Exceptions\TenantMissingException;
-use Sprout\Sprout;
-use Sprout\Support\PlaceholderHelper;
+use Sprout\Core\Contracts\Tenancy;
+use Sprout\Core\Contracts\TenantHasResources;
+use Sprout\Core\Exceptions\MisconfigurationException;
+use Sprout\Core\Exceptions\TenancyMissingException;
+use Sprout\Core\Exceptions\TenantMissingException;
+use Sprout\Core\Sprout;
+use Sprout\Core\Support\PlaceholderHelper;
 
 /**
  * Sprout Filesystem Driver Creator
@@ -40,7 +40,7 @@ final readonly class SproutFilesystemDriverCreator
     private array $config;
 
     /**
-     * @var \Sprout\Sprout
+     * @var \Sprout\Core\Sprout
      */
     private Sprout $sprout;
 
@@ -50,7 +50,7 @@ final readonly class SproutFilesystemDriverCreator
      * @param \Illuminate\Contracts\Foundation\Application $app
      * @param \Illuminate\Filesystem\FilesystemManager     $manager
      * @param array<string, mixed>                         $config
-     * @param \Sprout\Sprout                               $sprout
+     * @param \Sprout\Core\Sprout                          $sprout
      */
     public function __construct(Application $app, FilesystemManager $manager, array $config, Sprout $sprout)
     {
@@ -65,9 +65,9 @@ final readonly class SproutFilesystemDriverCreator
      *
      * @return \Illuminate\Contracts\Filesystem\Filesystem
      *
-     * @throws \Sprout\Exceptions\MisconfigurationException
-     * @throws \Sprout\Exceptions\TenancyMissingException
-     * @throws \Sprout\Exceptions\TenantMissingException
+     * @throws \Sprout\Core\Exceptions\MisconfigurationException
+     * @throws \Sprout\Core\Exceptions\TenancyMissingException
+     * @throws \Sprout\Core\Exceptions\TenantMissingException
      */
     public function __invoke(): Filesystem
     {
@@ -108,8 +108,8 @@ final readonly class SproutFilesystemDriverCreator
     /**
      * Make the disk config tenant-specific
      *
-     * @param \Sprout\Contracts\Tenancy<*>         $tenancy
-     * @param \Sprout\Contracts\TenantHasResources $tenant
+     * @param \Sprout\Core\Contracts\Tenancy<*>         $tenancy
+     * @param \Sprout\Core\Contracts\TenantHasResources $tenant
      *
      * @return array<string, mixed>
      */
@@ -134,9 +134,9 @@ final readonly class SproutFilesystemDriverCreator
     /**
      * Create a storage prefix using the current tenant
      *
-     * @param \Sprout\Contracts\Tenancy<*>         $tenancy
-     * @param \Sprout\Contracts\TenantHasResources $tenant
-     * @param string                               $pathPrefix
+     * @param \Sprout\Core\Contracts\Tenancy<*>         $tenancy
+     * @param \Sprout\Core\Contracts\TenantHasResources $tenant
+     * @param string                                    $pathPrefix
      *
      * @return string
      */

@@ -6,7 +6,7 @@ namespace Sprout\Bud\Overrides\Mailer;
 use Illuminate\Mail\MailManager;
 use Sprout\Bud\Bud;
 use Sprout\Bud\Overrides\BaseCreator;
-use Sprout\Sprout;
+use Sprout\Core\Sprout;
 use Symfony\Component\Mailer\Transport\TransportInterface;
 
 /**
@@ -32,8 +32,8 @@ final class BudMailerTransportCreator extends BaseCreator
 
     /**
      * @param \Illuminate\Mail\MailManager                      $manager
-     * @param \Sprout\Bud\Bud                                   $bud
-     * @param \Sprout\Sprout                                    $sprout
+     * @param \Sprout\Bud\Bud                              $bud
+     * @param \Sprout\Core\Sprout                               $sprout
      * @param string                                            $name
      * @param array<string, mixed>&array{budStore?:string|null} $config
      */
@@ -55,9 +55,9 @@ final class BudMailerTransportCreator extends BaseCreator
     /**
      * @return \Symfony\Component\Mailer\Transport\TransportInterface
      *
-     * @throws \Sprout\Exceptions\MisconfigurationException
-     * @throws \Sprout\Exceptions\TenancyMissingException
-     * @throws \Sprout\Exceptions\TenantMissingException
+     * @throws \Sprout\Core\Exceptions\MisconfigurationException
+     * @throws \Sprout\Core\Exceptions\TenancyMissingException
+     * @throws \Sprout\Core\Exceptions\TenantMissingException
      */
     public function __invoke(): TransportInterface
     {

@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Tests\Unit\Overrides\Session;
+namespace Sprout\Core\Tests\Unit\Overrides\Session;
 
 use Illuminate\Config\Repository;
 use Illuminate\Database\Connection;
@@ -10,13 +10,13 @@ use Illuminate\Foundation\Application;
 use Mockery;
 use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\Contracts\Tenancy;
-use Sprout\Contracts\Tenant;
-use Sprout\Overrides\Session\SproutDatabaseSessionHandler;
-use Sprout\Overrides\Session\SproutDatabaseSessionHandlerCreator;
-use Sprout\Sprout;
-use Sprout\Support\SettingsRepository;
-use Sprout\Tests\Unit\UnitTestCase;
+use Sprout\Core\Contracts\Tenancy;
+use Sprout\Core\Contracts\Tenant;
+use Sprout\Core\Overrides\Session\SproutDatabaseSessionHandler;
+use Sprout\Core\Overrides\Session\SproutDatabaseSessionHandlerCreator;
+use Sprout\Core\Sprout;
+use Sprout\Core\Support\SettingsRepository;
+use Sprout\Core\Tests\Unit\UnitTestCase;
 
 class SproutDatabaseSessionHandlerCreatorTest extends UnitTestCase
 {

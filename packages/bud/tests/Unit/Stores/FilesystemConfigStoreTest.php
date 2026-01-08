@@ -12,10 +12,10 @@ use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\Test;
 use Sprout\Bud\Stores\FilesystemConfigStore;
 use Sprout\Bud\Tests\Unit\UnitTestCase;
-use Sprout\Contracts\Tenancy;
-use Sprout\Contracts\Tenant;
-use Sprout\Contracts\TenantHasResources;
-use Sprout\Exceptions\MisconfigurationException;
+use Sprout\Core\Contracts\Tenancy;
+use Sprout\Core\Contracts\Tenant;
+use Sprout\Core\Contracts\TenantHasResources;
+use Sprout\Core\Exceptions\MisconfigurationException;
 
 class FilesystemConfigStoreTest extends UnitTestCase
 {

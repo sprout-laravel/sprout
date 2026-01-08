@@ -2,8 +2,8 @@
 
 namespace Sprout\Bud\Contracts;
 
-use Sprout\Contracts\Tenancy;
-use Sprout\Contracts\Tenant;
+use Sprout\Core\Contracts\Tenancy;
+use Sprout\Core\Contracts\Tenant;
 
 interface ConfigStore
 {
@@ -17,15 +17,15 @@ interface ConfigStore
     /**
      * Get a config value from the store
      *
-     * @template TenantClass of \Sprout\Contracts\Tenant
+     * @template TenantClass of \Sprout\Core\Contracts\Tenant
      *
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Contracts\Tenant               $tenant
-     * @param string                                 $service
-     * @param string                                 $name
-     * @param array<string, mixed>|null              $default
+     * @param \Sprout\Core\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Sprout\Core\Contracts\Tenant               $tenant
+     * @param string                                      $service
+     * @param string                                      $name
+     * @param array<string, mixed>|null                   $default
      *
-     * @phpstan-param TenantClass                    $tenant
+     * @phpstan-param TenantClass                         $tenant
      *
      * @return array<string, mixed>|null
      */
@@ -40,14 +40,14 @@ interface ConfigStore
     /**
      * Check if the config store has a value
      *
-     * @template TenantClass of \Sprout\Contracts\Tenant
+     * @template TenantClass of \Sprout\Core\Contracts\Tenant
      *
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Contracts\Tenant               $tenant
-     * @param string                                 $service
-     * @param string                                 $name
+     * @param \Sprout\Core\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Sprout\Core\Contracts\Tenant               $tenant
+     * @param string                                      $service
+     * @param string                                      $name
      *
-     * @phpstan-param TenantClass                    $tenant
+     * @phpstan-param TenantClass                         $tenant
      *
      * @return bool
      */
@@ -65,15 +65,15 @@ interface ConfigStore
      * store for the given tenant, either by adding the entry if there wasn't
      * one, or overwriting one if it already existed.
      *
-     * @template TenantClass of \Sprout\Contracts\Tenant
+     * @template TenantClass of \Sprout\Core\Contracts\Tenant
      *
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Contracts\Tenant               $tenant
-     * @param string                                 $service
-     * @param string                                 $name
-     * @param array<string, mixed>                   $config
+     * @param \Sprout\Core\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Sprout\Core\Contracts\Tenant               $tenant
+     * @param string                                      $service
+     * @param string                                      $name
+     * @param array<string, mixed>                        $config
      *
-     * @phpstan-param TenantClass                    $tenant
+     * @phpstan-param TenantClass                         $tenant
      *
      * @return bool
      */
@@ -92,15 +92,15 @@ interface ConfigStore
      * given tenant if one doesn't already exist. If an entry already exists,
      * this method will return false.
      *
-     * @template TenantClass of \Sprout\Contracts\Tenant
+     * @template TenantClass of \Sprout\Core\Contracts\Tenant
      *
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Contracts\Tenant               $tenant
-     * @param string                                 $service
-     * @param string                                 $name
-     * @param array<string, mixed>                   $config
+     * @param \Sprout\Core\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Sprout\Core\Contracts\Tenant               $tenant
+     * @param string                                      $service
+     * @param string                                      $name
+     * @param array<string, mixed>                        $config
      *
-     * @phpstan-param TenantClass                    $tenant
+     * @phpstan-param TenantClass                         $tenant
      *
      * @return bool
      */

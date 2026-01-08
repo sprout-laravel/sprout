@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Attributes;
+namespace Sprout\Core\Attributes;
 
 use Attribute;
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Container\ContextualAttribute;
-use Sprout\Contracts\TenantProvider;
-use Sprout\Managers\TenantProviderManager;
+use Sprout\Core\Contracts\TenantProvider;
+use Sprout\Core\Managers\TenantProviderManager;
 
 /**
  * Provider Attribute
@@ -40,13 +40,13 @@ final readonly class Provider implements ContextualAttribute
     /**
      * Resolve the tenancy using this attribute
      *
-     * @param \Sprout\Attributes\Provider     $attribute
-     * @param \Illuminate\Container\Container $container
+     * @param \Sprout\Core\Attributes\Provider $attribute
+     * @param \Illuminate\Container\Container  $container
      *
-     * @return \Sprout\Contracts\TenantProvider<*>
+     * @return \Sprout\Core\Contracts\TenantProvider<*>
      *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
-     * @throws \Sprout\Exceptions\MisconfigurationException
+     * @throws \Sprout\Core\Exceptions\MisconfigurationException
      */
     public function resolve(self $attribute, Container $container): TenantProvider
     {

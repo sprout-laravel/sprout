@@ -1,14 +1,14 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Overrides\Session;
+namespace Sprout\Core\Overrides\Session;
 
 use Illuminate\Session\FileSessionHandler;
 use Illuminate\Support\Carbon;
-use Sprout\Concerns\AwareOfTenant;
-use Sprout\Contracts\Tenant;
-use Sprout\Contracts\TenantAware;
-use Sprout\Contracts\TenantHasResources;
+use Sprout\Core\Concerns\AwareOfTenant;
+use Sprout\Core\Contracts\Tenant;
+use Sprout\Core\Contracts\TenantAware;
+use Sprout\Core\Contracts\TenantHasResources;
 use Symfony\Component\Finder\Finder;
 
 /**
@@ -27,7 +27,7 @@ final class SproutFileSessionHandler extends FileSessionHandler implements Tenan
             return $this->path;
         }
 
-        /** @var \Sprout\Contracts\Tenant&\Sprout\Contracts\TenantHasResources $tenant */
+        /** @var \Sprout\Core\Contracts\Tenant&\Sprout\Core\Contracts\TenantHasResources $tenant */
         $tenant = $this->getTenant();
 
         return rtrim($this->path, DIRECTORY_SEPARATOR)
@@ -57,8 +57,8 @@ final class SproutFileSessionHandler extends FileSessionHandler implements Tenan
      *
      * @return bool
      *
-     * @throws \Sprout\Exceptions\TenancyMissingException
-     * @throws \Sprout\Exceptions\TenantMissingException
+     * @throws \Sprout\Core\Exceptions\TenancyMissingException
+     * @throws \Sprout\Core\Exceptions\TenantMissingException
      */
     public function write($sessionId, $data): bool
     {

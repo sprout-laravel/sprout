@@ -1,6 +1,6 @@
 <?php
 
-namespace Sprout\Contracts;
+namespace Sprout\Core\Contracts;
 
 /**
  *
@@ -17,7 +17,7 @@ interface TenantAware
     /**
      * Get the tenant if there is one
      *
-     * @return \Sprout\Contracts\Tenant|null
+     * @return \Sprout\Core\Contracts\Tenant|null
      */
     public function getTenant(): ?Tenant;
 
@@ -31,7 +31,7 @@ interface TenantAware
     /**
      * Set the tenant
      *
-     * @param \Sprout\Contracts\Tenant|null $tenant
+     * @param \Sprout\Core\Contracts\Tenant|null $tenant
      *
      * @return static
      */
@@ -40,7 +40,7 @@ interface TenantAware
     /**
      * Get the tenancy if there is one
      *
-     * @return \Sprout\Contracts\Tenancy<*>|null
+     * @return \Sprout\Core\Contracts\Tenancy<*>|null
      */
     public function getTenancy(): ?Tenancy;
 
@@ -54,8 +54,8 @@ interface TenantAware
     /**
      * Set the tenancy
      *
-     * @template TenantClass of \Sprout\Contracts\Tenant
-     * @param \Sprout\Contracts\Tenancy<TenantClass>|null $tenancy
+     * @template TenantClass of \Sprout\Core\Contracts\Tenant
+     * @param \Sprout\Core\Contracts\Tenancy<TenantClass>|null $tenancy
      *
      * @return static
      */

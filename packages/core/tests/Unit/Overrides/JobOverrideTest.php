@@ -1,18 +1,18 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Tests\Unit\Overrides;
+namespace Sprout\Core\Tests\Unit\Overrides;
 
 use Illuminate\Config\Repository;
 use Illuminate\Queue\Events\JobProcessing;
 use Illuminate\Support\Facades\Event;
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\Contracts\BootableServiceOverride;
-use Sprout\Listeners\SetCurrentTenantForJob;
-use Sprout\Overrides\JobOverride;
-use Sprout\Overrides\SessionOverride;
-use Sprout\Tests\Unit\UnitTestCase;
-use function Sprout\sprout;
+use Sprout\Core\Contracts\BootableServiceOverride;
+use Sprout\Core\Listeners\SetCurrentTenantForJob;
+use Sprout\Core\Overrides\JobOverride;
+use Sprout\Core\Overrides\SessionOverride;
+use Sprout\Core\Tests\Unit\UnitTestCase;
+use function Sprout\Core\sprout;
 
 class JobOverrideTest extends UnitTestCase
 {

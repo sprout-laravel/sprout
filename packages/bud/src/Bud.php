@@ -6,10 +6,10 @@ namespace Sprout\Bud;
 use Illuminate\Contracts\Foundation\Application;
 use Sprout\Bud\Contracts\ConfigStore;
 use Sprout\Bud\Managers\ConfigStoreManager;
-use Sprout\Concerns\AwareOfTenant;
-use Sprout\Contracts\TenantAware;
-use Sprout\Exceptions\TenancyMissingException;
-use Sprout\Exceptions\TenantMissingException;
+use Sprout\Core\Concerns\AwareOfTenant;
+use Sprout\Core\Contracts\TenantAware;
+use Sprout\Core\Exceptions\TenancyMissingException;
+use Sprout\Core\Exceptions\TenantMissingException;
 
 final class Bud implements TenantAware
 {
@@ -52,7 +52,7 @@ final class Bud implements TenantAware
      *
      * @return \Sprout\Bud\Contracts\ConfigStore
      *
-     * @throws \Sprout\Exceptions\MisconfigurationException
+     * @throws \Sprout\Core\Exceptions\MisconfigurationException
      */
     public function store(?string $name = null): ConfigStore
     {
@@ -69,9 +69,9 @@ final class Bud implements TenantAware
      *
      * @return array<string, mixed>|null
      *
-     * @throws \Sprout\Exceptions\MisconfigurationException
-     * @throws \Sprout\Exceptions\TenancyMissingException
-     * @throws \Sprout\Exceptions\TenantMissingException
+     * @throws \Sprout\Core\Exceptions\MisconfigurationException
+     * @throws \Sprout\Core\Exceptions\TenancyMissingException
+     * @throws \Sprout\Core\Exceptions\TenantMissingException
      */
     public function config(string $service, string $name, ?array $default = null, ?string $store = null): ?array
     {
@@ -79,14 +79,14 @@ final class Bud implements TenantAware
             throw TenancyMissingException::make();
         }
 
-        /** @var \Sprout\Contracts\Tenancy<\Sprout\Contracts\Tenant> $tenancy */
+        /** @var \Sprout\Core\Contracts\Tenancy<\Sprout\Core\Contracts\Tenant> $tenancy */
         $tenancy = $this->getTenancy();
 
         if (! $this->hasTenant()) {
             throw TenantMissingException::make($tenancy->getName());
         }
 
-        /** @var \Sprout\Contracts\Tenant $tenant */
+        /** @var \Sprout\Core\Contracts\Tenant $tenant */
         $tenant = $this->getTenant();
 
         return $this->store($store)

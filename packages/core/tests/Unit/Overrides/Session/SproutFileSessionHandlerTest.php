@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Tests\Unit\Overrides\Session;
+namespace Sprout\Core\Tests\Unit\Overrides\Session;
 
 use Carbon\Carbon;
 use Illuminate\Config\Repository;
@@ -9,10 +9,10 @@ use Illuminate\Filesystem\Filesystem;
 use Mockery;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\Contracts\Tenancy;
-use Sprout\Contracts\Tenant;
-use Sprout\Overrides\Session\SproutFileSessionHandler;
-use Sprout\Tests\Unit\UnitTestCase;
+use Sprout\Core\Contracts\Tenancy;
+use Sprout\Core\Contracts\Tenant;
+use Sprout\Core\Overrides\Session\SproutFileSessionHandler;
+use Sprout\Core\Tests\Unit\UnitTestCase;
 
 class SproutFileSessionHandlerTest extends UnitTestCase
 {

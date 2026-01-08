@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Tests\Unit;
+namespace Sprout\Core\Tests\Unit;
 
 use Illuminate\Config\Repository;
 use Illuminate\Foundation\Application;
@@ -9,13 +9,13 @@ use Illuminate\Support\Facades\Event;
 use Mockery;
 use Orchestra\Testbench\Attributes\DefineEnvironment;
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\Contracts\Tenancy;
-use Sprout\Sprout;
-use Sprout\Support\ResolutionHook;
-use Sprout\Support\Settings;
-use Sprout\Support\SettingsRepository;
+use Sprout\Core\Contracts\Tenancy;
+use Sprout\Core\Sprout;
+use Sprout\Core\Support\ResolutionHook;
+use Sprout\Core\Support\Settings;
+use Sprout\Core\Support\SettingsRepository;
 use Workbench\App\Models\TenantModel;
-use function Sprout\sprout;
+use function Sprout\Core\sprout;
 
 class SproutTest extends UnitTestCase
 {

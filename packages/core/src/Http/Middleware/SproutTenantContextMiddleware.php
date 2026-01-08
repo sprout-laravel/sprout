@@ -1,14 +1,14 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Http\Middleware;
+namespace Sprout\Core\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Sprout\Exceptions\NoTenantFoundException;
-use Sprout\Sprout;
-use Sprout\Support\ResolutionHelper;
-use Sprout\Support\ResolutionHook;
+use Sprout\Core\Exceptions\NoTenantFoundException;
+use Sprout\Core\Sprout;
+use Sprout\Core\Support\ResolutionHelper;
+use Sprout\Core\Support\ResolutionHook;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -28,14 +28,14 @@ final class SproutTenantContextMiddleware
     public const ALIAS = 'sprout.tenanted';
 
     /**
-     * @var \Sprout\Sprout
+     * @var \Sprout\Core\Sprout
      */
     private Sprout $sprout;
 
     /**
      * Create a new instance of the middleware
      *
-     * @param \Sprout\Sprout $sprout
+     * @param \Sprout\Core\Sprout $sprout
      */
     public function __construct(Sprout $sprout)
     {
@@ -51,9 +51,9 @@ final class SproutTenantContextMiddleware
      *
      * @return \Symfony\Component\HttpFoundation\Response
      *
-     * @throws \Sprout\Exceptions\NoTenantFoundException
+     * @throws \Sprout\Core\Exceptions\NoTenantFoundException
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
-     * @throws \Sprout\Exceptions\MisconfigurationException
+     * @throws \Sprout\Core\Exceptions\MisconfigurationException
      */
     public function handle(Request $request, Closure $next, string ...$options): Response
     {

@@ -1,22 +1,22 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Facades;
+namespace Sprout\Core\Facades;
 
 use Illuminate\Support\Facades\Facade;
-use Sprout\Contracts\Tenancy;
-use Sprout\Contracts\Tenant;
-use Sprout\Managers\IdentityResolverManager;
-use Sprout\Managers\ServiceOverrideManager;
-use Sprout\Managers\TenancyManager;
-use Sprout\Managers\TenantProviderManager;
-use Sprout\Support\ResolutionHook;
-use Sprout\Support\SettingsRepository;
+use Sprout\Core\Contracts\Tenancy;
+use Sprout\Core\Contracts\Tenant;
+use Sprout\Core\Managers\IdentityResolverManager;
+use Sprout\Core\Managers\ServiceOverrideManager;
+use Sprout\Core\Managers\TenancyManager;
+use Sprout\Core\Managers\TenantProviderManager;
+use Sprout\Core\Support\ResolutionHook;
+use Sprout\Core\Support\SettingsRepository;
 
 /**
  * Sprout Facade
  *
- * This is the facade for the {@see \Sprout\Sprout} class.
+ * This is the facade for the {@see \Sprout\Core\Sprout} class.
  *
  * @method static mixed config(string $key, mixed $default = null)
  * @method static array<Tenancy> getAllCurrentTenancies()
@@ -24,14 +24,14 @@ use Sprout\Support\SettingsRepository;
  * @method static Tenancy|null getCurrentTenancy()
  * @method static bool hasCurrentTenancy()
  * @method static bool isCurrentHook(ResolutionHook|null $hook)
- * @method static \Sprout\Sprout markAsInContext()
- * @method static \Sprout\Sprout markAsOutsideContext()
+ * @method static \Sprout\Core\Sprout markAsInContext()
+ * @method static \Sprout\Core\Sprout markAsOutsideContext()
  * @method static ServiceOverrideManager overrides()
  * @method static TenantProviderManager providers()
- * @method static \Sprout\Sprout resetTenancies()
+ * @method static \Sprout\Core\Sprout resetTenancies()
  * @method static IdentityResolverManager resolvers()
  * @method static string route(string $name, Tenant $tenant, string|null $resolver = null, string|null $tenancy = null, array<mixed> $parameters = [], bool $absolute = true)
- * @method static \Sprout\Sprout setCurrentHook(ResolutionHook|null $hook)
+ * @method static \Sprout\Core\Sprout setCurrentHook(ResolutionHook|null $hook)
  * @method static void setCurrentTenancy(Tenancy $tenancy)
  * @method static mixed setting(string $key, mixed $default = null)
  * @method static SettingsRepository settings()
@@ -45,6 +45,6 @@ final class Sprout extends Facade
 {
     protected static function getFacadeAccessor(): string
     {
-        return \Sprout\Sprout::class;
+        return \Sprout\Core\Sprout::class;
     }
 }

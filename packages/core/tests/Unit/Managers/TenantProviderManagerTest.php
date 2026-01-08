@@ -1,19 +1,19 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Tests\Unit\Managers;
+namespace Sprout\Core\Tests\Unit\Managers;
 
 use Orchestra\Testbench\Attributes\DefineEnvironment;
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\Exceptions\MisconfigurationException;
-use Sprout\Managers\TenantProviderManager;
-use Sprout\Providers\DatabaseTenantProvider;
-use Sprout\Providers\EloquentTenantProvider;
-use Sprout\Tests\Unit\UnitTestCase;
+use Sprout\Core\Exceptions\MisconfigurationException;
+use Sprout\Core\Managers\TenantProviderManager;
+use Sprout\Core\Providers\DatabaseTenantProvider;
+use Sprout\Core\Providers\EloquentTenantProvider;
+use Sprout\Core\Tests\Unit\UnitTestCase;
 use stdClass;
 use Workbench\App\Models\NoResourcesTenantModel;
 use Workbench\App\Models\TenantModel;
-use function Sprout\sprout;
+use function Sprout\Core\sprout;
 
 class TenantProviderManagerTest extends UnitTestCase
 {

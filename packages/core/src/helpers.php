@@ -2,16 +2,16 @@
 
 namespace Sprout;
 
-use Sprout\Contracts\IdentityResolver;
-use Sprout\Contracts\ServiceOverride;
-use Sprout\Contracts\Tenancy;
-use Sprout\Contracts\TenantProvider;
-use Sprout\Support\SettingsRepository;
+use Sprout\Core\Contracts\IdentityResolver;
+use Sprout\Core\Contracts\ServiceOverride;
+use Sprout\Core\Contracts\Tenancy;
+use Sprout\Core\Contracts\TenantProvider;
+use Sprout\Core\Support\SettingsRepository;
 
 /**
  * Get the core Sprout class
  *
- * @return \Sprout\Sprout
+ * @return \Sprout\Core\Sprout
  *
  * @codeCoverageIgnore
  */
@@ -23,7 +23,7 @@ function sprout(): Sprout
 /**
  * Get the Sprout settings repository
  *
- * @return \Sprout\Support\SettingsRepository
+ * @return \Sprout\Core\Support\SettingsRepository
  *
  * @codeCoverageIgnore
  */
@@ -37,9 +37,9 @@ function settings(): SettingsRepository
  *
  * @param string|null $name
  *
- * @return \Sprout\Contracts\IdentityResolver
+ * @return \Sprout\Core\Contracts\IdentityResolver
  *
- * @throws \Sprout\Exceptions\MisconfigurationException
+ * @throws \Sprout\Core\Exceptions\MisconfigurationException
  *
  * @codeCoverageIgnore
  */
@@ -53,9 +53,9 @@ function resolver(?string $name = null): IdentityResolver
  *
  * @param string|null $name
  *
- * @return \Sprout\Contracts\Tenancy<*>
+ * @return \Sprout\Core\Contracts\Tenancy<*>
  *
- * @throws \Sprout\Exceptions\MisconfigurationException
+ * @throws \Sprout\Core\Exceptions\MisconfigurationException
  *
  * @codeCoverageIgnore
  */
@@ -69,9 +69,9 @@ function tenancy(?string $name = null): Tenancy
  *
  * @param string|null $name
  *
- * @return \Sprout\Contracts\TenantProvider<*>
+ * @return \Sprout\Core\Contracts\TenantProvider<*>
  *
- * @throws \Sprout\Exceptions\MisconfigurationException
+ * @throws \Sprout\Core\Exceptions\MisconfigurationException
  *
  * @codeCoverageIgnore
  */
@@ -85,7 +85,7 @@ function provider(?string $name = null): TenantProvider
  *
  * @param string $service
  *
- * @return \Sprout\Contracts\ServiceOverride|null
+ * @return \Sprout\Core\Contracts\ServiceOverride|null
  *
  * @codeCoverageIgnore
  */

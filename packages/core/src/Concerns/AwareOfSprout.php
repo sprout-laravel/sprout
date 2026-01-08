@@ -1,14 +1,14 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Concerns;
+namespace Sprout\Core\Concerns;
 
-use Sprout\Sprout;
+use Sprout\Core\Sprout;
 
 trait AwareOfSprout
 {
     /**
-     * @var \Sprout\Sprout
+     * @var \Sprout\Core\Sprout
      */
     private Sprout $sprout;
 

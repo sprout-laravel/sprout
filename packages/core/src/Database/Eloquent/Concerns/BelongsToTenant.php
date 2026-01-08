@@ -1,19 +1,19 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Database\Eloquent\Concerns;
+namespace Sprout\Core\Database\Eloquent\Concerns;
 
-use Sprout\Database\Eloquent\Observers\BelongsToTenantObserver;
-use Sprout\Database\Eloquent\Scopes\BelongsToTenantScope;
+use Sprout\Core\Database\Eloquent\Observers\BelongsToTenantObserver;
+use Sprout\Core\Database\Eloquent\Scopes\BelongsToTenantScope;
 
 /**
  * Belongs to many Tenants
  *
  * This trait provides the basic supporting functionality required to automate
- * the relation between an Eloquent model and a {@see \Sprout\Contracts\Tenant},
+ * the relation between an Eloquent model and a {@see \Sprout\Core\Contracts\Tenant},
  * using a belongs to relationship.
  *
- * @package Database\Eloquent
+ * @package        Database\Eloquent
  *
  * @phpstan-ignore trait.unused
  */

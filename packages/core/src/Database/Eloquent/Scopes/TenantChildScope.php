@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Database\Eloquent\Scopes;
+namespace Sprout\Core\Database\Eloquent\Scopes;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Scope;
@@ -12,8 +12,8 @@ use Illuminate\Database\Eloquent\Scope;
  * A base scope utilised to provide a withoutTenants extension method to the
  * Eloquent query builder.
  *
- * @see     \Sprout\Database\Eloquent\Scopes\BelongsToManyTenantsScope
- * @see     \Sprout\Database\Eloquent\Scopes\BelongsToTenantScope
+ * @see     \Sprout\Core\Database\Eloquent\Scopes\BelongsToManyTenantsScope
+ * @see     \Sprout\Core\Database\Eloquent\Scopes\BelongsToTenantScope
  *
  * @package Database\Eloquent
  */

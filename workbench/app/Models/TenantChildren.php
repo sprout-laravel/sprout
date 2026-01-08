@@ -6,7 +6,7 @@ namespace Workbench\App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Sprout\Database\Eloquent\Concerns\BelongsToManyTenants;
+use Sprout\Core\Database\Eloquent\Concerns\BelongsToManyTenants;
 use Workbench\Database\Factories\TenantChildrenFactory;
 
 class TenantChildren extends Model

@@ -10,7 +10,7 @@ use LogicException;
 use Sprout\Bud\Bud;
 use Sprout\Bud\Overrides\Broadcast\BudBroadcastConnectionCreator;
 use Sprout\Bud\Overrides\Broadcast\BudBroadcastManager;
-use Sprout\Sprout;
+use Sprout\Core\Sprout;
 
 /**
  * Broadcast Connection Override
@@ -36,8 +36,8 @@ final class BroadcastConnectionOverride extends BaseOverride
      * Add a driver to the service.
      *
      * @param object                                            $service
-     * @param \Sprout\Bud\Bud                                   $bud
-     * @param \Sprout\Sprout                                    $sprout
+     * @param \Sprout\Bud\Bud                              $bud
+     * @param \Sprout\Core\Sprout                               $sprout
      * @param \Closure                                          $tracker
      *
      * @phpstan-param \Illuminate\Broadcasting\BroadcastManager $service

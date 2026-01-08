@@ -1,26 +1,26 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout;
+namespace Sprout\Core;
 
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Routing\Router;
 use Illuminate\Support\ServiceProvider;
-use Sprout\Contracts\Tenancy;
-use Sprout\Contracts\Tenant;
-use Sprout\Contracts\TenantAware;
-use Sprout\Events\CurrentTenantChanged;
-use Sprout\Http\Middleware\SproutOptionalTenantContextMiddleware;
-use Sprout\Http\Middleware\SproutTenantContextMiddleware;
-use Sprout\Http\RouterMethods;
-use Sprout\Listeners\IdentifyTenantOnRouting;
-use Sprout\Managers\IdentityResolverManager;
-use Sprout\Managers\ServiceOverrideManager;
-use Sprout\Managers\TenancyManager;
-use Sprout\Managers\TenantProviderManager;
-use Sprout\Support\ResolutionHook;
-use Sprout\Support\SettingsRepository;
+use Sprout\Core\Contracts\Tenancy;
+use Sprout\Core\Contracts\Tenant;
+use Sprout\Core\Contracts\TenantAware;
+use Sprout\Core\Events\CurrentTenantChanged;
+use Sprout\Core\Http\Middleware\SproutOptionalTenantContextMiddleware;
+use Sprout\Core\Http\Middleware\SproutTenantContextMiddleware;
+use Sprout\Core\Http\RouterMethods;
+use Sprout\Core\Listeners\IdentifyTenantOnRouting;
+use Sprout\Core\Managers\IdentityResolverManager;
+use Sprout\Core\Managers\ServiceOverrideManager;
+use Sprout\Core\Managers\TenancyManager;
+use Sprout\Core\Managers\TenantProviderManager;
+use Sprout\Core\Support\ResolutionHook;
+use Sprout\Core\Support\SettingsRepository;
 
 /**
  * Sprout Service Provider

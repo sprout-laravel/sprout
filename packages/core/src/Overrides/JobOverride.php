@@ -1,14 +1,14 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Overrides;
+namespace Sprout\Core\Overrides;
 
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Queue\Events\JobProcessing;
-use Sprout\Contracts\BootableServiceOverride;
-use Sprout\Listeners\SetCurrentTenantForJob;
-use Sprout\Sprout;
+use Sprout\Core\Contracts\BootableServiceOverride;
+use Sprout\Core\Listeners\SetCurrentTenantForJob;
+use Sprout\Core\Sprout;
 
 /**
  * Job Override
@@ -27,7 +27,7 @@ final class JobOverride extends BaseOverride implements BootableServiceOverride
      * override that take place during the booting of the framework.
      *
      * @param \Illuminate\Contracts\Foundation\Application $app
-     * @param \Sprout\Sprout                               $sprout
+     * @param \Sprout\Core\Sprout                          $sprout
      *
      * @return void
      */

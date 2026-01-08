@@ -1,16 +1,16 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Events;
+namespace Sprout\Core\Events;
 
 /**
  * Service Override Booted Event
  *
  * This event is dispatched after a service override has been booted.
  *
- * @template OverrideClass of \Sprout\Contracts\ServiceOverride
+ * @template OverrideClass of \Sprout\Core\Contracts\ServiceOverride
  *
- * @extends \Sprout\Events\ServiceOverrideEvent<OverrideClass>
+ * @extends \Sprout\Core\Events\ServiceOverrideEvent<OverrideClass>
  *
  * @package Overrides
  *

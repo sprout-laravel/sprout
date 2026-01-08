@@ -15,7 +15,7 @@
   "license"          : "MIT",
   "autoload"         : {
     "psr-4": {
-      "Sprout\\": "src/"
+      "Sprout\\Core\\": "src/"
     },
     "files": [
       "src/helpers.php"
@@ -23,7 +23,7 @@
   },
   "autoload-dev"     : {
     "psr-4": {
-      "Sprout\\Tests\\"                 : "tests",
+      "Sprout\\Core\\Tests\\"           : "tests",
       "Workbench\\App\\"                : "workbench/app/",
       "Workbench\\Database\\Factories\\": "workbench/database/factories/",
       "Workbench\\Database\\Seeders\\"  : "workbench/database/seeders/"
@@ -61,20 +61,17 @@
     ]
   },
   "extra"            : {
-    "laravel"     : {
+    "laravel": {
       "providers": [
-        "Sprout\\SproutServiceProvider"
+        "Sprout\\Core\\SproutServiceProvider"
       ],
       "facades"  : [
-        "Sprout\\Facades\\Overrides",
-        "Sprout\\Facades\\Providers",
-        "Sprout\\Facades\\Resolvers",
-        "Sprout\\Facades\\Sprout",
-        "Sprout\\Facades\\Tenancies"
+        "Sprout\\Core\\Facades\\Overrides",
+        "Sprout\\Core\\Facades\\Providers",
+        "Sprout\\Core\\Facades\\Resolvers",
+        "Sprout\\Core\\Facades\\Sprout",
+        "Sprout\\Core\\Facades\\Tenancies"
       ]
-    },
-    "branch-alias": {
-      "dev-main": "1.x-dev"
     }
   },
   "config"           : {

@@ -1,13 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Overrides\Auth;
+namespace Sprout\Core\Overrides\Auth;
 
 use Illuminate\Auth\Passwords\PasswordBrokerManager;
 use Illuminate\Auth\Passwords\TokenRepositoryInterface;
 use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Support\Str;
-use Sprout\Sprout;
+use Sprout\Core\Sprout;
 
 /**
  * Sprout Auth Password Broker Manager
@@ -23,7 +22,7 @@ use Sprout\Sprout;
 class SproutAuthPasswordBrokerManager extends PasswordBrokerManager
 {
     /**
-     * @var \Sprout\Sprout
+     * @var \Sprout\Core\Sprout
      */
     private Sprout $sprout;
 

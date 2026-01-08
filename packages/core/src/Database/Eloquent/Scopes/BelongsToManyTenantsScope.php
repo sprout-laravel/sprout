@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Database\Eloquent\Scopes;
+namespace Sprout\Core\Database\Eloquent\Scopes;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Sprout\Contracts\Tenancy;
-use Sprout\Exceptions\TenantMissingException;
-use function Sprout\sprout;
+use Sprout\Core\Contracts\Tenancy;
+use Sprout\Core\Exceptions\TenantMissingException;
+use function Sprout\Core\sprout;
 
 /**
  * Belongs to many Tenants Scope
@@ -18,7 +18,7 @@ use function Sprout\sprout;
  * It automatically adds the necessary clauses to queries to help avoid data
  * leaking between tenants in a "Shared Database, Shared Schema" setup.
  *
- * @see     \Sprout\Database\Eloquent\Concerns\BelongsToManyTenants
+ * @see     \Sprout\Core\Database\Eloquent\Concerns\BelongsToManyTenants
  *
  * @package Database\Eloquent
  */
@@ -29,15 +29,15 @@ final class BelongsToManyTenantsScope extends TenantChildScope
      *
      * @template ModelClass of \Illuminate\Database\Eloquent\Model
      *
-     * @param \Illuminate\Database\Eloquent\Builder<ModelClass>                                      $builder
-     * @param \Illuminate\Database\Eloquent\Model&\Sprout\Database\Eloquent\Concerns\BelongsToTenant $model
+     * @param \Illuminate\Database\Eloquent\Builder<ModelClass>                                           $builder
+     * @param \Illuminate\Database\Eloquent\Model&\Sprout\Core\Database\Eloquent\Concerns\BelongsToTenant $model
      *
-     * @phpstan-param ModelClass                                                                     $model
+     * @phpstan-param ModelClass                                                                          $model
      *
      * @return void
      *
-     * @throws \Sprout\Exceptions\TenantMissingException
-     * @throws \Sprout\Exceptions\TenantRelationException
+     * @throws \Sprout\Core\Exceptions\TenantMissingException
+     * @throws \Sprout\Core\Exceptions\TenantRelationException
      */
     public function apply(Builder $builder, Model $model): void
     {
@@ -54,13 +54,13 @@ final class BelongsToManyTenantsScope extends TenantChildScope
          * This has to be here because it errors if it's in the method docblock,
          * though I've no idea why.
          *
-         * @var ModelClass&\Sprout\Database\Eloquent\Concerns\BelongsToTenant $model
+         * @var ModelClass&\Sprout\Core\Database\Eloquent\Concerns\BelongsToTenant $model
          */
         if ($model::shouldIgnoreTenantRestrictions() || ! sprout()->withinContext()) {
             return;
         }
 
-        /** @var \Sprout\Contracts\Tenancy<*> $tenancy */
+        /** @var \Sprout\Core\Contracts\Tenancy<*> $tenancy */
         $tenancy = $model->getTenancy();
 
         // If there's no current tenant
@@ -98,14 +98,14 @@ final class BelongsToManyTenantsScope extends TenantChildScope
      *
      * @template ModelClass of \Illuminate\Database\Eloquent\Model
      *
-     * @param \Illuminate\Database\Eloquent\Builder<ModelClass>                                      $builder
-     * @param \Illuminate\Database\Eloquent\Model&\Sprout\Database\Eloquent\Concerns\BelongsToTenant $model
-     * @param \Sprout\Contracts\Tenancy<*>                                                           $tenancy
+     * @param \Illuminate\Database\Eloquent\Builder<ModelClass>                                           $builder
+     * @param \Illuminate\Database\Eloquent\Model&\Sprout\Core\Database\Eloquent\Concerns\BelongsToTenant $model
+     * @param \Sprout\Core\Contracts\Tenancy<*>                                                           $tenancy
      *
-     * @phpstan-param ModelClass                                                                     $model
+     * @phpstan-param ModelClass                                                                          $model
      *
      * @return void
-     * @throws \Sprout\Exceptions\TenantRelationException
+     * @throws \Sprout\Core\Exceptions\TenantRelationException
      */
     protected function applyTenantClause(Builder $builder, Model $model, Tenancy $tenancy): void
     {
@@ -113,7 +113,7 @@ final class BelongsToManyTenantsScope extends TenantChildScope
          * This has to be here because it errors if it's in the method docblock,
          * though I've no idea why.
          *
-         * @var ModelClass&\Sprout\Database\Eloquent\Concerns\BelongsToTenant $model
+         * @var ModelClass&\Sprout\Core\Database\Eloquent\Concerns\BelongsToTenant $model
          */
 
         /** @var string $relationName */

@@ -1,15 +1,15 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Support;
+namespace Sprout\Core\Support;
 
-use Sprout\Contracts\Tenant;
+use Sprout\Core\Contracts\Tenant;
 
 /**
  * Generic Tenant
  *
- * This is a default implementation of the {@see \Sprout\Contracts\Tenant}
- * interface for the use with {@see \Sprout\Providers\DatabaseTenantProvider}
+ * This is a default implementation of the {@see \Sprout\Core\Contracts\Tenant}
+ * interface for the use with {@see \Sprout\Core\Providers\DatabaseTenantProvider}
  * as the tenant entity.
  *
  * @pacakge Core
@@ -55,7 +55,7 @@ class GenericTenant implements Tenant
      *
      * Retrieve the storage name for the tenant identifier, whether that's an
      * attribute, column name, array key or something else.
-     * Used primarily by {@see \Sprout\Contracts\TenantProvider}.
+     * Used primarily by {@see \Sprout\Core\Contracts\TenantProvider}.
      *
      * @return string
      */
@@ -82,7 +82,7 @@ class GenericTenant implements Tenant
      *
      * Retrieve the storage name for the tenant key, whether that's an
      * attribute, column name, array key or something else.
-     * Used primarily by {@see \Sprout\Contracts\TenantProvider}.
+     * Used primarily by {@see \Sprout\Core\Contracts\TenantProvider}.
      *
      * @return string
      */

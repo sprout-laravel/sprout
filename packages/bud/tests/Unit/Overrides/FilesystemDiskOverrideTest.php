@@ -19,16 +19,16 @@ use Sprout\Bud\Exceptions\CyclicOverrideException;
 use Sprout\Bud\Managers\ConfigStoreManager;
 use Sprout\Bud\Overrides\FilesystemDiskOverride;
 use Sprout\Bud\Tests\Unit\UnitTestCase;
-use Sprout\Contracts\BootableServiceOverride;
-use Sprout\Contracts\Tenancy;
-use Sprout\Contracts\Tenant;
-use Sprout\Contracts\TenantHasResources;
-use Sprout\Overrides\Filesystem\SproutFilesystemManager;
-use Sprout\Overrides\FilesystemManagerOverride;
-use Sprout\Overrides\StackedOverride;
-use Sprout\Sprout;
-use Sprout\Support\SettingsRepository;
-use function Sprout\sprout;
+use Sprout\Core\Contracts\BootableServiceOverride;
+use Sprout\Core\Contracts\Tenancy;
+use Sprout\Core\Contracts\Tenant;
+use Sprout\Core\Contracts\TenantHasResources;
+use Sprout\Core\Overrides\Filesystem\SproutFilesystemManager;
+use Sprout\Core\Overrides\FilesystemManagerOverride;
+use Sprout\Core\Overrides\StackedOverride;
+use Sprout\Core\Sprout;
+use Sprout\Core\Support\SettingsRepository;
+use function Sprout\Core\sprout;
 
 class FilesystemDiskOverrideTest extends UnitTestCase
 {
@@ -218,7 +218,7 @@ class FilesystemDiskOverrideTest extends UnitTestCase
 
         $override->boot($app, $sprout);
 
-        /** @var \Sprout\Overrides\Filesystem\SproutFilesystemManager $manager */
+        /** @var \Sprout\Core\Overrides\Filesystem\SproutFilesystemManager $manager */
         $manager = $app->make('filesystem');
 
         $this->expectException(RuntimeException::class);
@@ -277,7 +277,7 @@ class FilesystemDiskOverrideTest extends UnitTestCase
 
         $override->boot($app, $sprout);
 
-        /** @var \Sprout\Overrides\Filesystem\SproutFilesystemManager $manager */
+        /** @var \Sprout\Core\Overrides\Filesystem\SproutFilesystemManager $manager */
         $manager = $app->make('filesystem');
 
         $this->expectException(CyclicOverrideException::class);
@@ -339,7 +339,7 @@ class FilesystemDiskOverrideTest extends UnitTestCase
 
         $override->boot($app, $sprout);
 
-        /** @var \Sprout\Overrides\Filesystem\SproutFilesystemManager $filesystem */
+        /** @var \Sprout\Core\Overrides\Filesystem\SproutFilesystemManager $filesystem */
         $filesystem = $app->make('filesystem');
 
         $filesystem->disk('bud-disk');

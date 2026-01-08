@@ -1,17 +1,17 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Facades;
+namespace Sprout\Core\Facades;
 
 use Closure;
 use Illuminate\Support\Facades\Facade;
-use Sprout\Contracts\Tenancy;
-use Sprout\Managers\TenancyManager;
+use Sprout\Core\Contracts\Tenancy;
+use Sprout\Core\Managers\TenancyManager;
 
 /**
  * Tenancies Facade
  *
- * This is the facade for the {@see \Sprout\Managers\TenancyManager} class.
+ * This is the facade for the {@see \Sprout\Core\Managers\TenancyManager} class.
  *
  * @method static TenancyManager flushResolved()
  * @method static Tenancy get(string|null $name = null)

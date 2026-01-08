@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Tests\Unit\Overrides\Filesystem;
+namespace Sprout\Core\Tests\Unit\Overrides\Filesystem;
 
 use Illuminate\Config\Repository;
 use Illuminate\Contracts\Filesystem\Filesystem;
@@ -11,8 +11,8 @@ use Illuminate\Foundation\Application;
 use InvalidArgumentException;
 use Mockery;
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\Overrides\Filesystem\SproutFilesystemManager;
-use Sprout\Tests\Unit\UnitTestCase;
+use Sprout\Core\Overrides\Filesystem\SproutFilesystemManager;
+use Sprout\Core\Tests\Unit\UnitTestCase;
 
 class SproutFilesystemManagerTest extends UnitTestCase
 {

@@ -8,11 +8,11 @@ use Illuminate\Encryption\Encrypter;
 use Illuminate\Support\Str;
 use Sprout\Bud\Stores\DatabaseConfigStore;
 use Sprout\Bud\Stores\FilesystemConfigStore;
-use Sprout\Exceptions\MisconfigurationException;
-use Sprout\Support\BaseFactory;
+use Sprout\Core\Exceptions\MisconfigurationException;
+use Sprout\Core\Support\BaseFactory;
 
 /**
- * @extends \Sprout\Support\BaseFactory<\Sprout\Bud\Contracts\ConfigStore>
+ * @extends \Sprout\Core\Support\BaseFactory<\Sprout\Bud\Contracts\ConfigStore>
  */
 class ConfigStoreManager extends BaseFactory
 {
@@ -92,7 +92,7 @@ class ConfigStoreManager extends BaseFactory
      * @return \Sprout\Bud\Stores\FilesystemConfigStore
      *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
-     * @throws \Sprout\Exceptions\MisconfigurationException
+     * @throws \Sprout\Core\Exceptions\MisconfigurationException
      */
     protected function createFilesystemConfig(array $config, string $name): FilesystemConfigStore
     {
@@ -129,7 +129,7 @@ class ConfigStoreManager extends BaseFactory
      * @return \Sprout\Bud\Stores\DatabaseConfigStore
      *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
-     * @throws \Sprout\Exceptions\MisconfigurationException
+     * @throws \Sprout\Core\Exceptions\MisconfigurationException
      */
     protected function createDatabaseConfig(array $config, string $name): DatabaseConfigStore
     {

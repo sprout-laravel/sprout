@@ -12,13 +12,13 @@ use Sprout\Bud\Contracts\ConfigStore;
 use Sprout\Bud\Managers\ConfigStoreManager;
 use Sprout\Bud\Overrides\Mailer\BudMailerTransportCreator;
 use Sprout\Bud\Tests\Unit\UnitTestCase;
-use Sprout\Contracts\Tenancy;
-use Sprout\Contracts\Tenant;
-use Sprout\Contracts\TenantHasResources;
-use Sprout\Exceptions\TenancyMissingException;
-use Sprout\Exceptions\TenantMissingException;
-use Sprout\Sprout;
-use Sprout\Support\SettingsRepository;
+use Sprout\Core\Contracts\Tenancy;
+use Sprout\Core\Contracts\Tenant;
+use Sprout\Core\Contracts\TenantHasResources;
+use Sprout\Core\Exceptions\TenancyMissingException;
+use Sprout\Core\Exceptions\TenantMissingException;
+use Sprout\Core\Sprout;
+use Sprout\Core\Support\SettingsRepository;
 use Symfony\Component\Mailer\Transport\TransportInterface;
 
 class BudMailerCreatorTest extends UnitTestCase

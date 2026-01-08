@@ -15,18 +15,15 @@ use Sprout\Bud\Bud;
 use Sprout\Bud\Contracts\ConfigStore;
 use Sprout\Bud\Exceptions\CyclicOverrideException;
 use Sprout\Bud\Managers\ConfigStoreManager;
-use Sprout\Bud\Overrides\FilesystemDiskOverride;
 use Sprout\Bud\Overrides\MailerOverride;
 use Sprout\Bud\Tests\Unit\UnitTestCase;
-use Sprout\Contracts\BootableServiceOverride;
-use Sprout\Contracts\Tenancy;
-use Sprout\Contracts\Tenant;
-use Sprout\Contracts\TenantHasResources;
-use Sprout\Overrides\FilesystemManagerOverride;
-use Sprout\Overrides\StackedOverride;
-use Sprout\Sprout;
-use Sprout\Support\SettingsRepository;
-use function Sprout\sprout;
+use Sprout\Core\Contracts\BootableServiceOverride;
+use Sprout\Core\Contracts\Tenancy;
+use Sprout\Core\Contracts\Tenant;
+use Sprout\Core\Contracts\TenantHasResources;
+use Sprout\Core\Sprout;
+use Sprout\Core\Support\SettingsRepository;
+use function Sprout\Core\sprout;
 
 class MailerOverrideTest extends UnitTestCase
 {

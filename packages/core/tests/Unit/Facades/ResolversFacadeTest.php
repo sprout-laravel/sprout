@@ -1,18 +1,17 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Tests\Unit\Facades;
+namespace Sprout\Core\Tests\Unit\Facades;
 
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\Facades\Resolvers;
-use Sprout\Facades\Sprout;
-use Sprout\Tests\Unit\UnitTestCase;
+use Sprout\Core\Facades\Resolvers;
+use Sprout\Core\Tests\Unit\UnitTestCase;
 
 class ResolversFacadeTest extends UnitTestCase
 {
     #[Test]
     public function usesCorrectInstance(): void
     {
-        $this->assertEquals(\Sprout\sprout()->resolvers(), Resolvers::getFacadeRoot());
+        $this->assertEquals(\Sprout\Core\sprout()->resolvers(), Resolvers::getFacadeRoot());
     }
 }

@@ -1,26 +1,26 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Concerns;
+namespace Sprout\Core\Concerns;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
 use Illuminate\Routing\RouteRegistrar;
 use Illuminate\Support\Facades\URL;
-use Sprout\Contracts\Tenancy;
-use Sprout\Contracts\Tenant;
-use Sprout\Support\PlaceholderHelper;
+use Sprout\Core\Contracts\Tenancy;
+use Sprout\Core\Contracts\Tenant;
+use Sprout\Core\Support\PlaceholderHelper;
 
 /**
  * Find Identity in Route Parameter
  *
  * This trait provides both helper methods and default implementations for
- * methods required by the {@see \Sprout\Contracts\IdentityResolverUsesParameters}
+ * methods required by the {@see \Sprout\Core\Contracts\IdentityResolverUsesParameters}
  * interface.
  *
  * @package Resolvers
  *
- * @phpstan-require-implements \Sprout\Contracts\IdentityResolverUsesParameters
+ * @phpstan-require-implements \Sprout\Core\Contracts\IdentityResolverUsesParameters
  */
 trait FindsIdentityInRouteParameter
 {
@@ -89,9 +89,9 @@ trait FindsIdentityInRouteParameter
      * replacing occurrences of <code>{tenancy}</code> with the name of the
      * tenancy, and <code>{resolver}</code> with the name of the resolver.
      *
-     * @template TenantClass of \Sprout\Contracts\Tenant
+     * @template TenantClass of \Sprout\Core\Contracts\Tenant
      *
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Sprout\Core\Contracts\Tenancy<TenantClass> $tenancy
      *
      * @return string
      */
@@ -113,7 +113,7 @@ trait FindsIdentityInRouteParameter
      * {@see self::getRouteParameterName()}, but wrapped with curly braces for
      * use in route definitions.
      *
-     * @param \Sprout\Contracts\Tenancy<\Sprout\Contracts\Tenant> $tenancy
+     * @param \Sprout\Core\Contracts\Tenancy<\Sprout\Core\Contracts\Tenant> $tenancy
      *
      * @return string
      */
@@ -161,9 +161,9 @@ trait FindsIdentityInRouteParameter
      * This method returns an array mapping the route parameter name to its
      * pattern, for use in route definitions.
      *
-     * @template TenantClass of \Sprout\Contracts\Tenant
+     * @template TenantClass of \Sprout\Core\Contracts\Tenant
      *
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Sprout\Core\Contracts\Tenancy<TenantClass> $tenancy
      *
      * @return array<string, string>
      */
@@ -185,10 +185,10 @@ trait FindsIdentityInRouteParameter
      * {@see self::getParameterPatternMapping()} to a supplied route registrar,
      * for a supplied tenancy.
      *
-     * @template TenantClass of \Sprout\Contracts\Tenant
+     * @template TenantClass of \Sprout\Core\Contracts\Tenant
      *
-     * @param \Illuminate\Routing\RouteRegistrar     $registrar
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Illuminate\Routing\RouteRegistrar          $registrar
+     * @param \Sprout\Core\Contracts\Tenancy<TenantClass> $tenancy
      *
      * @return \Illuminate\Routing\RouteRegistrar
      */
@@ -206,11 +206,11 @@ trait FindsIdentityInRouteParameter
      *
      * Locates a tenant identifier within the provided route and returns it.
      *
-     * @template TenantClass of \Sprout\Contracts\Tenant
+     * @template TenantClass of \Sprout\Core\Contracts\Tenant
      *
-     * @param \Illuminate\Routing\Route              $route
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Illuminate\Http\Request               $request
+     * @param \Illuminate\Routing\Route                   $route
+     * @param \Sprout\Core\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Illuminate\Http\Request                    $request
      *
      * @return string|null
      */
@@ -241,12 +241,12 @@ trait FindsIdentityInRouteParameter
      * This method is also called if there is no current tenant, as there may
      * be actions needed.
      *
-     * @template TenantClass of \Sprout\Contracts\Tenant
+     * @template TenantClass of \Sprout\Core\Contracts\Tenant
      *
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Contracts\Tenant|null          $tenant
+     * @param \Sprout\Core\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Sprout\Core\Contracts\Tenant|null          $tenant
      *
-     * @phpstan-param Tenant|null                    $tenant
+     * @phpstan-param Tenant|null                         $tenant
      *
      * @return void
      */
@@ -271,15 +271,15 @@ trait FindsIdentityInRouteParameter
      * This method is only really useful for identity resolvers that use route
      * parameters, but it's here for backwards compatibility.
      *
-     * @template TenantClass of \Sprout\Contracts\Tenant
+     * @template TenantClass of \Sprout\Core\Contracts\Tenant
      *
-     * @param string                                 $name
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Contracts\Tenant               $tenant
-     * @param array<string, mixed>                   $parameters
-     * @param bool                                   $absolute
+     * @param string                                      $name
+     * @param \Sprout\Core\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Sprout\Core\Contracts\Tenant               $tenant
+     * @param array<string, mixed>                        $parameters
+     * @param bool                                        $absolute
      *
-     * @phpstan-param TenantClass                    $tenant
+     * @phpstan-param TenantClass                         $tenant
      *
      * @return string
      */

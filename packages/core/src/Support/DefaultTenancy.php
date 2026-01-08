@@ -2,44 +2,44 @@
 /** @noinspection PhpUnnecessaryStaticReferenceInspection */
 declare(strict_types=1);
 
-namespace Sprout\Support;
+namespace Sprout\Core\Support;
 
-use Sprout\Contracts\IdentityResolver;
-use Sprout\Contracts\Tenancy;
-use Sprout\Contracts\Tenant;
-use Sprout\Contracts\TenantProvider;
-use Sprout\Events\CurrentTenantChanged;
-use Sprout\Events\TenantIdentified;
-use Sprout\Events\TenantLoaded;
+use Sprout\Core\Contracts\IdentityResolver;
+use Sprout\Core\Contracts\Tenancy;
+use Sprout\Core\Contracts\Tenant;
+use Sprout\Core\Contracts\TenantProvider;
+use Sprout\Core\Events\CurrentTenantChanged;
+use Sprout\Core\Events\TenantIdentified;
+use Sprout\Core\Events\TenantLoaded;
 
 /**
  * Default Tenancy
  *
- * This is a default implementation of the {@see \Sprout\Contracts\Tenancy}
+ * This is a default implementation of the {@see \Sprout\Core\Contracts\Tenancy}
  * interface.
  *
  * @package Core
  *
- * @template TenantClass of \Sprout\Contracts\Tenant
+ * @template TenantClass of \Sprout\Core\Contracts\Tenant
  *
- * @implements \Sprout\Contracts\Tenancy<TenantClass>
+ * @implements \Sprout\Core\Contracts\Tenancy<TenantClass>
  */
 final class DefaultTenancy implements Tenancy
 {
     private string $name;
 
     /**
-     * @var \Sprout\Contracts\TenantProvider<TenantClass>
+     * @var \Sprout\Core\Contracts\TenantProvider<TenantClass>
      */
     private TenantProvider $provider;
 
     /**
-     * @var \Sprout\Contracts\IdentityResolver|null
+     * @var \Sprout\Core\Contracts\IdentityResolver|null
      */
     private ?IdentityResolver $resolver = null;
 
     /**
-     * @var \Sprout\Contracts\Tenant|null
+     * @var \Sprout\Core\Contracts\Tenant|null
      *
      * @phpstan-var TenantClass|null
      */
@@ -56,7 +56,7 @@ final class DefaultTenancy implements Tenancy
     private array $optionConfig = [];
 
     /**
-     * @var \Sprout\Support\ResolutionHook|null
+     * @var \Sprout\Core\Support\ResolutionHook|null
      */
     private ?ResolutionHook $hook = null;
 
@@ -64,7 +64,7 @@ final class DefaultTenancy implements Tenancy
      * Create a new instance
      *
      * @param string                                                           $name
-     * @param \Sprout\Contracts\TenantProvider<TenantClass>                    $provider
+     * @param \Sprout\Core\Contracts\TenantProvider<TenantClass>               $provider
      * @param array<array-key, string|array<string, array<array-key, scalar>>> $options
      */
     public function __construct(string $name, TenantProvider $provider, array $options)
@@ -120,7 +120,7 @@ final class DefaultTenancy implements Tenancy
      * Implementations may attempt to load a tenant if one isn't present, though
      * this is not required.
      *
-     * @return \Sprout\Contracts\Tenant|null
+     * @return \Sprout\Core\Contracts\Tenant|null
      *
      * @phpstan-return TenantClass|null
      */
@@ -136,7 +136,7 @@ final class DefaultTenancy implements Tenancy
      *
      * @return int|string|null
      *
-     * @see \Sprout\Contracts\Tenant::getTenantKey()
+     * @see \Sprout\Core\Contracts\Tenant::getTenantKey()
      */
     public function key(): int|string|null
     {
@@ -150,7 +150,7 @@ final class DefaultTenancy implements Tenancy
      *
      * @return string|null
      *
-     * @see \Sprout\Contracts\Tenant::getTenantIdentifier()
+     * @see \Sprout\Core\Contracts\Tenant::getTenantIdentifier()
      */
     public function identifier(): ?string
     {
@@ -216,7 +216,7 @@ final class DefaultTenancy implements Tenancy
      *
      * Get the tenant provider used by this tenancy.
      *
-     * @return \Sprout\Contracts\TenantProvider<TenantClass>
+     * @return \Sprout\Core\Contracts\TenantProvider<TenantClass>
      */
     public function provider(): TenantProvider
     {
@@ -226,7 +226,7 @@ final class DefaultTenancy implements Tenancy
     /**
      * Set the identity resolved used
      *
-     * @param \Sprout\Contracts\IdentityResolver $resolver
+     * @param \Sprout\Core\Contracts\IdentityResolver $resolver
      *
      * @return static
      */
@@ -240,7 +240,7 @@ final class DefaultTenancy implements Tenancy
     /**
      * Get the used identity resolver
      *
-     * @return \Sprout\Contracts\IdentityResolver|null
+     * @return \Sprout\Core\Contracts\IdentityResolver|null
      */
     public function resolver(): ?IdentityResolver
     {
@@ -260,9 +260,9 @@ final class DefaultTenancy implements Tenancy
     /**
      * Set the current tenant
      *
-     * @param \Sprout\Contracts\Tenant|null $tenant
+     * @param \Sprout\Core\Contracts\Tenant|null $tenant
      *
-     * @phpstan-param TenantClass|null      $tenant
+     * @phpstan-param TenantClass|null           $tenant
      *
      * @return static
      */
@@ -370,7 +370,7 @@ final class DefaultTenancy implements Tenancy
     /**
      * Set the hook where the tenant was resolved
      *
-     * @param \Sprout\Support\ResolutionHook $hook
+     * @param \Sprout\Core\Support\ResolutionHook $hook
      *
      * @return $this
      */
@@ -384,7 +384,7 @@ final class DefaultTenancy implements Tenancy
     /**
      * Get the hook where the tenant was resolved
      *
-     * @return \Sprout\Support\ResolutionHook|null
+     * @return \Sprout\Core\Support\ResolutionHook|null
      */
     public function hook(): ?ResolutionHook
     {

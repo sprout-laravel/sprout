@@ -1,15 +1,15 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Listeners;
+namespace Sprout\Core\Listeners;
 
-use Sprout\Events\CurrentTenantChanged;
-use Sprout\Managers\ServiceOverrideManager;
+use Sprout\Core\Events\CurrentTenantChanged;
+use Sprout\Core\Managers\ServiceOverrideManager;
 
 /**
  * Clean-up Service Overrides
  *
- * This class is an event listener for {@see \Sprout\Events\CurrentTenantChanged}
+ * This class is an event listener for {@see \Sprout\Core\Events\CurrentTenantChanged}
  * that cleans up any existing service overrides when the tenancy changes.
  *
  * @package Overrides
@@ -17,14 +17,14 @@ use Sprout\Managers\ServiceOverrideManager;
 final class CleanupServiceOverrides
 {
     /**
-     * @var \Sprout\Managers\ServiceOverrideManager
+     * @var \Sprout\Core\Managers\ServiceOverrideManager
      */
     private ServiceOverrideManager $overrides;
 
     /**
      * Create a new instance
      *
-     * @param \Sprout\Managers\ServiceOverrideManager $overrides
+     * @param \Sprout\Core\Managers\ServiceOverrideManager $overrides
      */
     public function __construct(ServiceOverrideManager $overrides)
     {
@@ -34,13 +34,13 @@ final class CleanupServiceOverrides
     /**
      * Handle event
      *
-     * @template TenantClass of \Sprout\Contracts\Tenant
+     * @template TenantClass of \Sprout\Core\Contracts\Tenant
      *
-     * @param \Sprout\Events\CurrentTenantChanged<TenantClass> $event
+     * @param \Sprout\Core\Events\CurrentTenantChanged<TenantClass> $event
      *
      * @return void
      *
-     * @throws \Sprout\Exceptions\ServiceOverrideException
+     * @throws \Sprout\Core\Exceptions\ServiceOverrideException
      */
     public function handle(CurrentTenantChanged $event): void
     {

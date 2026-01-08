@@ -5,10 +5,10 @@ namespace Workbench\App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Sprout\Contracts\Tenant;
-use Sprout\Contracts\TenantHasResources;
-use Sprout\Database\Eloquent\Concerns\HasTenantResources;
-use Sprout\Database\Eloquent\Concerns\IsTenant;
+use Sprout\Core\Contracts\Tenant;
+use Sprout\Core\Contracts\TenantHasResources;
+use Sprout\Core\Database\Eloquent\Concerns\HasTenantResources;
+use Sprout\Core\Database\Eloquent\Concerns\IsTenant;
 use Workbench\Database\Factories\TenantModelFactory;
 
 class TenantModel extends Model implements Tenant, TenantHasResources

@@ -1,18 +1,18 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Facades;
+namespace Sprout\Core\Facades;
 
 use Illuminate\Support\Facades\Facade;
-use Sprout\Contracts\ServiceOverride;
-use Sprout\Contracts\Tenancy;
-use Sprout\Contracts\Tenant;
-use Sprout\Managers\ServiceOverrideManager;
+use Sprout\Core\Contracts\ServiceOverride;
+use Sprout\Core\Contracts\Tenancy;
+use Sprout\Core\Contracts\Tenant;
+use Sprout\Core\Managers\ServiceOverrideManager;
 
 /**
  * Service Override Facade
  *
- * This is the facade for the {@see \Sprout\Managers\ServiceOverrideManager} class.
+ * This is the facade for the {@see \Sprout\Core\Managers\ServiceOverrideManager} class.
  *
  * @method static void bootOverrides()
  * @method static void cleanupOverrides(Tenancy $tenancy, Tenant $tenant)

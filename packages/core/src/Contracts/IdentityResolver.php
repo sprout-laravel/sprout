@@ -1,12 +1,10 @@
 <?php
 
-namespace Sprout\Contracts;
+namespace Sprout\Core\Contracts;
 
-use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Routing\Router;
 use Illuminate\Routing\RouteRegistrar;
-use Sprout\Support\ResolutionHook;
+use Sprout\Core\Support\ResolutionHook;
 
 /**
  * Identity Resolver Contract
@@ -31,10 +29,10 @@ interface IdentityResolver
      *
      * Locates a tenant identifier within the provided request and returns it.
      *
-     * @template TenantClass of \Sprout\Contracts\Tenant
+     * @template TenantClass of \Sprout\Core\Contracts\Tenant
      *
-     * @param \Illuminate\Http\Request               $request
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Illuminate\Http\Request                    $request
+     * @param \Sprout\Core\Contracts\Tenancy<TenantClass> $tenancy
      *
      * @return string|null
      */
@@ -46,8 +44,8 @@ interface IdentityResolver
      * Configures a provided route to work with itself, adding parameters,
      * middleware, and anything else required, besides the default middleware.
      *
-     * @param \Illuminate\Routing\RouteRegistrar                  $route
-     * @param \Sprout\Contracts\Tenancy<\Sprout\Contracts\Tenant> $tenancy
+     * @param \Illuminate\Routing\RouteRegistrar                            $route
+     * @param \Sprout\Core\Contracts\Tenancy<\Sprout\Core\Contracts\Tenant> $tenancy
      *
      * @return void
      */
@@ -61,12 +59,12 @@ interface IdentityResolver
      * This method is also called if there is no current tenant, as there may
      * be actions needed.
      *
-     * @template TenantClass of \Sprout\Contracts\Tenant
+     * @template TenantClass of \Sprout\Core\Contracts\Tenant
      *
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Contracts\Tenant|null          $tenant
+     * @param \Sprout\Core\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Sprout\Core\Contracts\Tenant|null          $tenant
      *
-     * @phpstan-param TenantClass|null               $tenant
+     * @phpstan-param TenantClass|null                    $tenant
      *
      * @return void
      */
@@ -78,11 +76,11 @@ interface IdentityResolver
      * This method allows a resolver to prevent resolution with the request in
      * its current state, whether that means it's too early, or too late.
      *
-     * @template TenantClass of \Sprout\Contracts\Tenant
+     * @template TenantClass of \Sprout\Core\Contracts\Tenant
      *
-     * @param \Illuminate\Http\Request               $request
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Support\ResolutionHook         $hook
+     * @param \Illuminate\Http\Request                    $request
+     * @param \Sprout\Core\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Sprout\Core\Support\ResolutionHook         $hook
      *
      * @return bool
      */
@@ -99,15 +97,15 @@ interface IdentityResolver
      * This method is only really useful for identity resolvers that use route
      * parameters, but, it's here for backwards compatibility.
      *
-     * @template TenantClass of \Sprout\Contracts\Tenant
+     * @template TenantClass of \Sprout\Core\Contracts\Tenant
      *
-     * @param string                                 $name
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Contracts\Tenant               $tenant
-     * @param array<string, mixed>                   $parameters
-     * @param bool                                   $absolute
+     * @param string                                      $name
+     * @param \Sprout\Core\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Sprout\Core\Contracts\Tenant               $tenant
+     * @param array<string, mixed>                        $parameters
+     * @param bool                                        $absolute
      *
-     * @phpstan-param TenantClass                    $tenant
+     * @phpstan-param TenantClass                         $tenant
      *
      * @return string
      */

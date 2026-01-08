@@ -1,30 +1,30 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Database\Eloquent\Concerns;
+namespace Sprout\Core\Database\Eloquent\Concerns;
 
 use Illuminate\Database\Eloquent\Relations\Relation;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
-use Sprout\Attributes\TenantRelation;
-use Sprout\Contracts\Tenancy;
-use Sprout\Database\Eloquent\Contracts\OptionalTenant;
-use Sprout\Exceptions\TenantRelationException;
-use Sprout\Managers\TenancyManager;
+use Sprout\Core\Attributes\TenantRelation;
+use Sprout\Core\Contracts\Tenancy;
+use Sprout\Core\Database\Eloquent\Contracts\OptionalTenant;
+use Sprout\Core\Exceptions\TenantRelationException;
+use Sprout\Core\Managers\TenancyManager;
 
 /**
  * Is Tenant Child
  *
  * This trait provides helper methods and functionality that supports the
  * automatic handling of Eloquent models that are direct descendants of
- * {@see \Sprout\Contracts\Tenant} models.
+ * {@see \Sprout\Core\Contracts\Tenant} models.
  *
  * @phpstan-require-extends \Illuminate\Database\Eloquent\Model
  *
  * @mixin \Illuminate\Database\Eloquent\Model
  *
- * @package Database\Eloquent
+ * @package        Database\Eloquent
  *
  * @phpstan-ignore trait.unused
  */
@@ -101,7 +101,7 @@ trait IsTenantChild
      *
      * @return bool
      *
-     * @see \Sprout\Database\Eloquent\Contracts\OptionalTenant
+     * @see \Sprout\Core\Database\Eloquent\Contracts\OptionalTenant
      */
     public static function isTenantOptional(): bool
     {
@@ -113,9 +113,9 @@ trait IsTenantChild
      *
      * @return string
      *
-     * @throws \Sprout\Exceptions\TenantRelationException
+     * @throws \Sprout\Core\Exceptions\TenantRelationException
      *
-     * @see \Sprout\Attributes\TenantRelation
+     * @see \Sprout\Core\Attributes\TenantRelation
      */
     private function findTenantRelationName(): string
     {
@@ -145,7 +145,7 @@ trait IsTenantChild
      *
      * @return string|null
      *
-     * @throws \Sprout\Exceptions\TenantRelationException
+     * @throws \Sprout\Core\Exceptions\TenantRelationException
      */
     public function getTenantRelationName(): ?string
     {
@@ -169,11 +169,11 @@ trait IsTenantChild
     /**
      * Get the tenancy this model relates to a tenant of
      *
-     * @return \Sprout\Contracts\Tenancy
+     * @return \Sprout\Core\Contracts\Tenancy
      */
     public function getTenancy(): Tenancy
     {
-        /** @var \Sprout\Managers\TenancyManager $tenancyManager */
+        /** @var \Sprout\Core\Managers\TenancyManager $tenancyManager */
         $tenancyManager = app(TenancyManager::class);
 
         return $tenancyManager->get($this->getTenancyName());

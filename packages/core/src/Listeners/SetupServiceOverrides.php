@@ -1,15 +1,15 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Listeners;
+namespace Sprout\Core\Listeners;
 
-use Sprout\Events\CurrentTenantChanged;
-use Sprout\Managers\ServiceOverrideManager;
+use Sprout\Core\Events\CurrentTenantChanged;
+use Sprout\Core\Managers\ServiceOverrideManager;
 
 /**
  * Setup Service Overrides
  *
- * This class is an event listener for {@see \Sprout\Events\CurrentTenantChanged}
+ * This class is an event listener for {@see \Sprout\Core\Events\CurrentTenantChanged}
  * that sets up any service overrides using their setup action hook.
  *
  * @package Override
@@ -17,14 +17,14 @@ use Sprout\Managers\ServiceOverrideManager;
 final class SetupServiceOverrides
 {
     /**
-     * @var \Sprout\Managers\ServiceOverrideManager
+     * @var \Sprout\Core\Managers\ServiceOverrideManager
      */
     private ServiceOverrideManager $overrides;
 
     /**
      * Create a new instance
      *
-     * @param \Sprout\Managers\ServiceOverrideManager $overrides
+     * @param \Sprout\Core\Managers\ServiceOverrideManager $overrides
      */
     public function __construct(ServiceOverrideManager $overrides)
     {
@@ -34,9 +34,9 @@ final class SetupServiceOverrides
     /**
      * Handle the event
      *
-     * @template TenantClass of \Sprout\Contracts\Tenant
+     * @template TenantClass of \Sprout\Core\Contracts\Tenant
      *
-     * @param \Sprout\Events\CurrentTenantChanged<TenantClass> $event
+     * @param \Sprout\Core\Events\CurrentTenantChanged<TenantClass> $event
      *
      * @return void
      */

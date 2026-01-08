@@ -1,22 +1,22 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Tests\Unit\Support;
+namespace Sprout\Core\Tests\Unit\Support;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Mockery;
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\Contracts\TenantProvider;
-use Sprout\Events\TenantIdentified;
-use Sprout\Events\TenantLoaded;
-use Sprout\Providers\EloquentTenantProvider;
-use Sprout\Support\DefaultTenancy;
-use Sprout\Support\ResolutionHook;
-use Sprout\TenancyOptions;
-use Sprout\Tests\Unit\UnitTestCase;
+use Sprout\Core\Contracts\TenantProvider;
+use Sprout\Core\Events\TenantIdentified;
+use Sprout\Core\Events\TenantLoaded;
+use Sprout\Core\Providers\EloquentTenantProvider;
+use Sprout\Core\Support\DefaultTenancy;
+use Sprout\Core\Support\ResolutionHook;
+use Sprout\Core\TenancyOptions;
+use Sprout\Core\Tests\Unit\UnitTestCase;
 use Workbench\App\Models\TenantModel;
-use function Sprout\sprout;
+use function Sprout\Core\sprout;
 
 class DefaultTenancyTest extends UnitTestCase
 {
@@ -33,7 +33,7 @@ class DefaultTenancyTest extends UnitTestCase
     #[Test]
     public function hasName(): void
     {
-        /** @var \Sprout\Contracts\Tenancy $tenancy */
+        /** @var \Sprout\Core\Contracts\Tenancy $tenancy */
         $tenancy = sprout()->tenancies()->get();
 
         $this->assertInstanceOf(DefaultTenancy::class, $tenancy);
@@ -43,7 +43,7 @@ class DefaultTenancyTest extends UnitTestCase
     #[Test]
     public function hasNoCurrentTenantByDefault(): void
     {
-        /** @var \Sprout\Contracts\Tenancy $tenancy */
+        /** @var \Sprout\Core\Contracts\Tenancy $tenancy */
         $tenancy = sprout()->tenancies()->get();
 
         $this->assertFalse($tenancy->check());
@@ -52,7 +52,7 @@ class DefaultTenancyTest extends UnitTestCase
     #[Test]
     public function storesCurrentTenantForAccess(): void
     {
-        /** @var \Sprout\Contracts\Tenancy $tenancy */
+        /** @var \Sprout\Core\Contracts\Tenancy $tenancy */
         $tenancy = sprout()->tenancies()->get();
 
         $this->assertFalse($tenancy->check());
@@ -70,7 +70,7 @@ class DefaultTenancyTest extends UnitTestCase
     #[Test]
     public function identifiesTenant(): void
     {
-        /** @var \Sprout\Contracts\Tenancy $tenancy */
+        /** @var \Sprout\Core\Contracts\Tenancy $tenancy */
         $tenancy = sprout()->tenancies()->get();
 
         $this->assertFalse($tenancy->check());
@@ -89,7 +89,7 @@ class DefaultTenancyTest extends UnitTestCase
     #[Test]
     public function loadsTenant(): void
     {
-        /** @var \Sprout\Contracts\Tenancy $tenancy */
+        /** @var \Sprout\Core\Contracts\Tenancy $tenancy */
         $tenancy = sprout()->tenancies()->get();
 
         $this->assertFalse($tenancy->check());
@@ -108,7 +108,7 @@ class DefaultTenancyTest extends UnitTestCase
     #[Test]
     public function hasATenantProvider(): void
     {
-        /** @var \Sprout\Contracts\Tenancy $tenancy */
+        /** @var \Sprout\Core\Contracts\Tenancy $tenancy */
         $tenancy = sprout()->tenancies()->get();
 
         $provider = $tenancy->provider();
@@ -120,7 +120,7 @@ class DefaultTenancyTest extends UnitTestCase
     #[Test]
     public function storesHowAndWhenTheTenantWasResolved(): void
     {
-        /** @var \Sprout\Contracts\Tenancy $tenancy */
+        /** @var \Sprout\Core\Contracts\Tenancy $tenancy */
         $tenancy = sprout()->tenancies()->get();
 
         $this->assertFalse($tenancy->wasResolved());

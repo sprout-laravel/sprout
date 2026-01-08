@@ -8,7 +8,7 @@ use Illuminate\Filesystem\FilesystemManager;
 use InvalidArgumentException;
 use Sprout\Bud\Bud;
 use Sprout\Bud\Overrides\BaseCreator;
-use Sprout\Sprout;
+use Sprout\Core\Sprout;
 
 /**
  * Bud Filesystem Disk Creator
@@ -31,8 +31,8 @@ final class BudFilesystemDiskCreator extends BaseCreator
 
     /**
      * @param \Illuminate\Filesystem\FilesystemManager                      $manager
-     * @param \Sprout\Bud\Bud                                               $bud
-     * @param \Sprout\Sprout                                                $sprout
+     * @param \Sprout\Bud\Bud                                          $bud
+     * @param \Sprout\Core\Sprout                                           $sprout
      * @param array<string, mixed>&array{budStore?:string|null,name?:mixed} $config
      */
     public function __construct(
@@ -53,9 +53,9 @@ final class BudFilesystemDiskCreator extends BaseCreator
      *
      * @return \Illuminate\Contracts\Filesystem\Filesystem
      *
-     * @throws \Sprout\Exceptions\MisconfigurationException
-     * @throws \Sprout\Exceptions\TenancyMissingException
-     * @throws \Sprout\Exceptions\TenantMissingException
+     * @throws \Sprout\Core\Exceptions\MisconfigurationException
+     * @throws \Sprout\Core\Exceptions\TenancyMissingException
+     * @throws \Sprout\Core\Exceptions\TenantMissingException
      */
     public function __invoke(): Filesystem
     {

@@ -1,16 +1,16 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Tests\Feature;
+namespace Sprout\Core\Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Exceptions;
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\Contracts\Tenant;
-use Sprout\Exceptions\NoTenantFoundException;
-use Sprout\Http\Middleware\AddTenantHeaderToResponse;
-use Sprout\Support\ResolutionHook;
-use Sprout\TenancyOptions;
+use Sprout\Core\Contracts\Tenant;
+use Sprout\Core\Exceptions\NoTenantFoundException;
+use Sprout\Core\Http\Middleware\AddTenantHeaderToResponse;
+use Sprout\Core\Support\ResolutionHook;
+use Sprout\Core\TenancyOptions;
 use Workbench\App\Models\TenantModel;
 
 class TenantIdentificationTest extends FeatureTestCase

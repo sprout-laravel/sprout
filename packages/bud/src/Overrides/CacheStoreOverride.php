@@ -5,10 +5,9 @@ namespace Sprout\Bud\Overrides;
 
 use Closure;
 use Illuminate\Foundation\Application;
-use RuntimeException;
 use Sprout\Bud\Bud;
 use Sprout\Bud\Overrides\Cache\BudCacheStoreCreator;
-use Sprout\Sprout;
+use Sprout\Core\Sprout;
 
 /**
  * @extends \Sprout\Bud\Overrides\BaseOverride<\Illuminate\Cache\CacheManager>
@@ -29,8 +28,8 @@ final class CacheStoreOverride extends BaseOverride
      * Add a driver to the service.
      *
      * @param object                                 $service
-     * @param \Sprout\Bud\Bud                        $bud
-     * @param \Sprout\Sprout                         $sprout
+     * @param \Sprout\Bud\Bud                   $bud
+     * @param \Sprout\Core\Sprout                    $sprout
      * @param \Closure                               $tracker
      *
      * @phpstan-param \Illuminate\Cache\CacheManager $service

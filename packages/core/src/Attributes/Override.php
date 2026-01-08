@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Attributes;
+namespace Sprout\Core\Attributes;
 
 use Attribute;
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Container\ContextualAttribute;
-use Sprout\Contracts\ServiceOverride;
-use Sprout\Managers\ServiceOverrideManager;
+use Sprout\Core\Contracts\ServiceOverride;
+use Sprout\Core\Managers\ServiceOverrideManager;
 
 /**
  * Override Attribute
@@ -42,10 +42,10 @@ final readonly class Override implements ContextualAttribute
     /**
      * Resolve the tenancy using this attribute
      *
-     * @param \Sprout\Attributes\Override     $attribute
-     * @param \Illuminate\Container\Container $container
+     * @param \Sprout\Core\Attributes\Override $attribute
+     * @param \Illuminate\Container\Container  $container
      *
-     * @return \Sprout\Contracts\ServiceOverride|null
+     * @return \Sprout\Core\Contracts\ServiceOverride|null
      *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
      */

@@ -7,7 +7,7 @@ use Illuminate\Contracts\Broadcasting\Broadcaster;
 use InvalidArgumentException;
 use Sprout\Bud\Bud;
 use Sprout\Bud\Overrides\BaseCreator;
-use Sprout\Sprout;
+use Sprout\Core\Sprout;
 
 /**
  * Bud Broadcast Connection Creator
@@ -29,9 +29,9 @@ final class BudBroadcastConnectionCreator extends BaseCreator
     private array $config;
 
     /**
-     * @param \Sprout\Bud\Overrides\Broadcast\BudBroadcastManager           $manager
-     * @param \Sprout\Bud\Bud                                               $bud
-     * @param \Sprout\Sprout                                                $sprout
+     * @param \Sprout\Bud\Overrides\Broadcast\BudBroadcastManager      $manager
+     * @param \Sprout\Bud\Bud                                          $bud
+     * @param \Sprout\Core\Sprout                                           $sprout
      * @param array<string, mixed>&array{budStore?:string|null,name?:mixed} $config
      */
     public function __construct(
@@ -52,9 +52,9 @@ final class BudBroadcastConnectionCreator extends BaseCreator
      *
      * @return \Illuminate\Contracts\Broadcasting\Broadcaster
      *
-     * @throws \Sprout\Exceptions\MisconfigurationException
-     * @throws \Sprout\Exceptions\TenancyMissingException
-     * @throws \Sprout\Exceptions\TenantMissingException
+     * @throws \Sprout\Core\Exceptions\MisconfigurationException
+     * @throws \Sprout\Core\Exceptions\TenancyMissingException
+     * @throws \Sprout\Core\Exceptions\TenantMissingException
      */
     public function __invoke(): Broadcaster
     {

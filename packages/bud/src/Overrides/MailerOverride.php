@@ -7,7 +7,7 @@ use Closure;
 use RuntimeException;
 use Sprout\Bud\Bud;
 use Sprout\Bud\Overrides\Mailer\BudMailerTransportCreator;
-use Sprout\Sprout;
+use Sprout\Core\Sprout;
 
 /**
  * Mailer Override
@@ -33,8 +33,8 @@ final class MailerOverride extends BaseOverride
      * Add a driver to the service.
      *
      * @param object                               $service
-     * @param \Sprout\Bud\Bud                      $bud
-     * @param \Sprout\Sprout                       $sprout
+     * @param \Sprout\Bud\Bud                 $bud
+     * @param \Sprout\Core\Sprout                  $sprout
      * @param \Closure                             $tracker
      *
      * @phpstan-param \Illuminate\Mail\MailManager $service

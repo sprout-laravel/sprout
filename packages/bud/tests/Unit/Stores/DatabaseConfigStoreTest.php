@@ -13,8 +13,8 @@ use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\Test;
 use Sprout\Bud\Stores\DatabaseConfigStore;
 use Sprout\Bud\Tests\Unit\UnitTestCase;
-use Sprout\Contracts\Tenancy;
-use Sprout\Contracts\Tenant;
+use Sprout\Core\Contracts\Tenancy;
+use Sprout\Core\Contracts\Tenant;
 
 class DatabaseConfigStoreTest extends UnitTestCase
 {

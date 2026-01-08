@@ -6,9 +6,8 @@ namespace Workbench\App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Sprout\Attributes\TenantRelation;
-use Sprout\Database\Eloquent\Concerns\BelongsToTenant;
-use Sprout\Database\Eloquent\Concerns\IsTenantChild;
+use Sprout\Core\Attributes\TenantRelation;
+use Sprout\Core\Database\Eloquent\Concerns\BelongsToTenant;
 use Workbench\Database\Factories\TenantChildFactory;
 
 class TenantChild extends Model

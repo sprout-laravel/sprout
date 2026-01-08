@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Attributes;
+namespace Sprout\Core\Attributes;
 
 use Attribute;
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Container\ContextualAttribute;
-use Sprout\Contracts\Tenant;
-use Sprout\Managers\TenancyManager;
+use Sprout\Core\Contracts\Tenant;
+use Sprout\Core\Managers\TenancyManager;
 
 /**
  * Current Tenant Attribute
@@ -42,10 +42,10 @@ final readonly class CurrentTenant implements ContextualAttribute
     /**
      * Resolve the tenant using this attribute
      *
-     * @param \Sprout\Attributes\CurrentTenant $tenant
-     * @param \Illuminate\Container\Container  $container
+     * @param \Sprout\Core\Attributes\CurrentTenant $tenant
+     * @param \Illuminate\Container\Container       $container
      *
-     * @return \Sprout\Contracts\Tenant|null
+     * @return \Sprout\Core\Contracts\Tenant|null
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
      */
     public function resolve(self $tenant, Container $container): ?Tenant

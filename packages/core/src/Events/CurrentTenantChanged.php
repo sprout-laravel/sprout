@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Events;
+namespace Sprout\Core\Events;
 
 use Illuminate\Foundation\Bus\Dispatchable;
-use Sprout\Contracts\Tenancy;
-use Sprout\Contracts\Tenant;
+use Sprout\Core\Contracts\Tenancy;
+use Sprout\Core\Contracts\Tenant;
 
 /**
  * Current Tenant Changed Event
@@ -24,7 +24,7 @@ use Sprout\Contracts\Tenant;
  * @method static void dispatchIf(bool $condition, Tenancy $tenancy, Tenant|null $previous, Tenant|null $current)
  * @method static void dispatchUnless(bool $condition, Tenancy $tenancy, Tenant|null $previous, Tenant|null $current)
  *
- * @package Core
+ * @package        Core
  *
  * @codeCoverageIgnore
  *
@@ -37,14 +37,14 @@ final readonly class CurrentTenantChanged
     /**
      * The tenancy whose current tenant changed
      *
-     * @var \Sprout\Contracts\Tenancy<TenantClass>
+     * @var \Sprout\Core\Contracts\Tenancy<TenantClass>
      */
     public Tenancy $tenancy;
 
     /**
      * The current tenant
      *
-     * @var \Sprout\Contracts\Tenant|null
+     * @var \Sprout\Core\Contracts\Tenant|null
      *
      * @phpstan-var TenantClass|null
      */
@@ -53,7 +53,7 @@ final readonly class CurrentTenantChanged
     /**
      * The previous tenant
      *
-     * @var \Sprout\Contracts\Tenant|null
+     * @var \Sprout\Core\Contracts\Tenant|null
      *
      * @phpstan-var TenantClass|null
      */
@@ -62,12 +62,12 @@ final readonly class CurrentTenantChanged
     /**
      * Create a new instance
      *
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Contracts\Tenant|null          $previous
-     * @param \Sprout\Contracts\Tenant|null          $current
+     * @param \Sprout\Core\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Sprout\Core\Contracts\Tenant|null          $previous
+     * @param \Sprout\Core\Contracts\Tenant|null          $current
      *
-     * @phpstan-param TenantClass|null               $previous
-     * @phpstan-param TenantClass|null               $current
+     * @phpstan-param TenantClass|null                    $previous
+     * @phpstan-param TenantClass|null                    $current
      */
     public function __construct(
         Tenancy $tenancy,

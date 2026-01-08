@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace Workbench\App;
 
-use Sprout\Contracts\Tenant;
-use Sprout\Contracts\TenantHasResources;
+use Sprout\Core\Contracts\Tenant;
+use Sprout\Core\Contracts\TenantHasResources;
 
 class CustomTenantEntity implements Tenant, TenantHasResources
 {
@@ -45,7 +45,7 @@ class CustomTenantEntity implements Tenant, TenantHasResources
      *
      * Retrieve the storage name for the tenant identifier, whether that's an
      * attribute, column name, array key or something else.
-     * Used primarily by {@see \Sprout\Contracts\TenantProvider}.
+     * Used primarily by {@see \Sprout\Core\Contracts\TenantProvider}.
      *
      * @return string
      */
@@ -72,7 +72,7 @@ class CustomTenantEntity implements Tenant, TenantHasResources
      *
      * Retrieve the storage name for the tenant key, whether that's an
      * attribute, column name, array key or something else.
-     * Used primarily by {@see \Sprout\Contracts\TenantProvider}.
+     * Used primarily by {@see \Sprout\Core\Contracts\TenantProvider}.
      *
      * @return string
      */

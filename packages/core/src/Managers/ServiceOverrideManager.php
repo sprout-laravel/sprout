@@ -1,22 +1,22 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Managers;
+namespace Sprout\Core\Managers;
 
 use Illuminate\Contracts\Foundation\Application;
-use Sprout\Concerns\AwareOfApp;
-use Sprout\Concerns\AwareOfSprout;
-use Sprout\Contracts\BootableServiceOverride;
-use Sprout\Contracts\ServiceOverride;
-use Sprout\Contracts\Tenancy;
-use Sprout\Contracts\Tenant;
-use Sprout\Events\ServiceOverrideBooted;
-use Sprout\Events\ServiceOverrideRegistered;
-use Sprout\Exceptions\MisconfigurationException;
-use Sprout\Exceptions\ServiceOverrideException;
-use Sprout\Exceptions\TenancyMissingException;
-use Sprout\Sprout;
-use Sprout\TenancyOptions;
+use Sprout\Core\Concerns\AwareOfApp;
+use Sprout\Core\Concerns\AwareOfSprout;
+use Sprout\Core\Contracts\BootableServiceOverride;
+use Sprout\Core\Contracts\ServiceOverride;
+use Sprout\Core\Contracts\Tenancy;
+use Sprout\Core\Contracts\Tenant;
+use Sprout\Core\Events\ServiceOverrideBooted;
+use Sprout\Core\Events\ServiceOverrideRegistered;
+use Sprout\Core\Exceptions\MisconfigurationException;
+use Sprout\Core\Exceptions\ServiceOverrideException;
+use Sprout\Core\Exceptions\TenancyMissingException;
+use Sprout\Core\Sprout;
+use Sprout\Core\TenancyOptions;
 
 /**
  * Service Override Manager
@@ -32,12 +32,12 @@ final class ServiceOverrideManager
     use AwareOfApp, AwareOfSprout;
 
     /**
-     * @var array<string, \Sprout\Contracts\ServiceOverride>
+     * @var array<string, \Sprout\Core\Contracts\ServiceOverride>
      */
     protected array $overrides = [];
 
     /**
-     * @var array<string, class-string<\Sprout\Contracts\ServiceOverride>>
+     * @var array<string, class-string<\Sprout\Core\Contracts\ServiceOverride>>
      */
     protected array $overrideClasses = [];
 
@@ -52,7 +52,7 @@ final class ServiceOverrideManager
     protected bool $overridesBooted = false;
 
     /**
-     * @var array<string, array<class-string<\Sprout\Contracts\ServiceOverride>, string>>
+     * @var array<string, array<class-string<\Sprout\Core\Contracts\ServiceOverride>, string>>
      */
     protected array $setupOverrides = [];
 
@@ -110,13 +110,13 @@ final class ServiceOverrideManager
     /**
      * Check if a service override has been set up for a tenancy
      *
-     * @param string $service
-     * @param \Sprout\Contracts\Tenancy<*>|null $tenancy
+     * @param string                                 $service
+     * @param \Sprout\Core\Contracts\Tenancy<*>|null $tenancy
      *
      * @return bool
      *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
-     * @throws \Sprout\Exceptions\TenancyMissingException
+     * @throws \Sprout\Core\Exceptions\TenancyMissingException
      */
     public function hasOverrideBeenSetUp(string $service, ?Tenancy $tenancy = null): bool
     {
@@ -132,12 +132,12 @@ final class ServiceOverrideManager
     /**
      * Check if a tenancy has been set up
      *
-     * @param \Sprout\Contracts\Tenancy<*>|null $tenancy
+     * @param \Sprout\Core\Contracts\Tenancy<*>|null $tenancy
      *
      * @return bool
      *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
-     * @throws \Sprout\Exceptions\TenancyMissingException
+     * @throws \Sprout\Core\Exceptions\TenancyMissingException
      *
      * @codeCoverageIgnore
      */
@@ -179,7 +179,7 @@ final class ServiceOverrideManager
      *
      * @param string $service
      *
-     * @return class-string<\Sprout\Contracts\ServiceOverride>|null
+     * @return class-string<\Sprout\Core\Contracts\ServiceOverride>|null
      */
     public function getOverrideClass(string $service): ?string
     {
@@ -189,9 +189,9 @@ final class ServiceOverrideManager
     /**
      * Get all services whose overrides have been set up for a tenancy
      *
-     * @param \Sprout\Contracts\Tenancy<*> $tenancy
+     * @param \Sprout\Core\Contracts\Tenancy<*> $tenancy
      *
-     * @return array<class-string<\Sprout\Contracts\ServiceOverride>, string>
+     * @return array<class-string<\Sprout\Core\Contracts\ServiceOverride>, string>
      */
     public function getSetupOverrides(Tenancy $tenancy): array
     {
@@ -203,7 +203,7 @@ final class ServiceOverrideManager
      *
      * @param string $service
      *
-     * @return \Sprout\Contracts\ServiceOverride|null
+     * @return \Sprout\Core\Contracts\ServiceOverride|null
      */
     public function get(string $service): ?ServiceOverride
     {
@@ -220,8 +220,8 @@ final class ServiceOverrideManager
      * @return void
      *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
-     * @throws \Sprout\Exceptions\MisconfigurationException
-     * @throws \Sprout\Exceptions\ServiceOverrideException
+     * @throws \Sprout\Core\Exceptions\MisconfigurationException
+     * @throws \Sprout\Core\Exceptions\ServiceOverrideException
      */
     public function registerOverrides(): void
     {
@@ -238,8 +238,8 @@ final class ServiceOverrideManager
      *
      * @return void
      *
-     * @throws \Sprout\Exceptions\MisconfigurationException
-     * @throws \Sprout\Exceptions\ServiceOverrideException
+     * @throws \Sprout\Core\Exceptions\MisconfigurationException
+     * @throws \Sprout\Core\Exceptions\ServiceOverrideException
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
      */
     public function bootOverrides(): void
@@ -256,10 +256,10 @@ final class ServiceOverrideManager
      *
      * @template TenantClass of Tenant
      *
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Contracts\Tenant               $tenant
+     * @param \Sprout\Core\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Sprout\Core\Contracts\Tenant               $tenant
      *
-     * @phpstan-param TenantClass                    $tenant
+     * @phpstan-param TenantClass                         $tenant
      *
      * @return void
      */
@@ -288,14 +288,14 @@ final class ServiceOverrideManager
      *
      * @template TenantClass of Tenant
      *
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Contracts\Tenant               $tenant
+     * @param \Sprout\Core\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Sprout\Core\Contracts\Tenant               $tenant
      *
-     * @phpstan-param TenantClass                    $tenant
+     * @phpstan-param TenantClass                         $tenant
      *
      * @return void
      *
-     * @throws \Sprout\Exceptions\ServiceOverrideException
+     * @throws \Sprout\Core\Exceptions\ServiceOverrideException
      */
     public function cleanupOverrides(Tenancy $tenancy, Tenant $tenant): void
     {
@@ -328,8 +328,8 @@ final class ServiceOverrideManager
      * @return static
      *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
-     * @throws \Sprout\Exceptions\MisconfigurationException
-     * @throws \Sprout\Exceptions\ServiceOverrideException
+     * @throws \Sprout\Core\Exceptions\MisconfigurationException
+     * @throws \Sprout\Core\Exceptions\ServiceOverrideException
      */
     protected function register(string $service): self
     {
@@ -360,14 +360,14 @@ final class ServiceOverrideManager
             throw MisconfigurationException::invalidConfig('driver', 'service override', $service, $config['driver']);
         }
 
-        /** @var class-string<\Sprout\Contracts\ServiceOverride> $driver */
+        /** @var class-string<\Sprout\Core\Contracts\ServiceOverride> $driver */
         $driver = $config['driver'];
 
         // Create a new instance of the service override with the service name
         // and config, as we know the constructor signature
         $override = $this->app->make($driver, compact('service', 'config'));
 
-        /** @var \Sprout\Contracts\ServiceOverride $override */
+        /** @var \Sprout\Core\Contracts\ServiceOverride $override */
 
         if (method_exists($override, 'setApp')) {
             $override->setApp($this->app);
@@ -406,8 +406,8 @@ final class ServiceOverrideManager
      * @return static
      *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
-     * @throws \Sprout\Exceptions\MisconfigurationException
-     * @throws \Sprout\Exceptions\ServiceOverrideException
+     * @throws \Sprout\Core\Exceptions\MisconfigurationException
+     * @throws \Sprout\Core\Exceptions\ServiceOverrideException
      */
     protected function boot(string $service): self
     {

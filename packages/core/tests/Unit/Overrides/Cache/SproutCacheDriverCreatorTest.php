@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Tests\Unit\Overrides\Cache;
+namespace Sprout\Core\Tests\Unit\Overrides\Cache;
 
 use Illuminate\Cache\CacheManager;
 use Illuminate\Cache\Repository as CacheRepository;
@@ -10,15 +10,15 @@ use Illuminate\Foundation\Application;
 use InvalidArgumentException;
 use Mockery;
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\Contracts\Tenancy;
-use Sprout\Contracts\Tenant;
-use Sprout\Exceptions\MisconfigurationException;
-use Sprout\Exceptions\TenancyMissingException;
-use Sprout\Exceptions\TenantMissingException;
-use Sprout\Overrides\Cache\SproutCacheDriverCreator;
-use Sprout\Sprout;
-use Sprout\Support\SettingsRepository;
-use Sprout\Tests\Unit\UnitTestCase;
+use Sprout\Core\Contracts\Tenancy;
+use Sprout\Core\Contracts\Tenant;
+use Sprout\Core\Exceptions\MisconfigurationException;
+use Sprout\Core\Exceptions\TenancyMissingException;
+use Sprout\Core\Exceptions\TenantMissingException;
+use Sprout\Core\Overrides\Cache\SproutCacheDriverCreator;
+use Sprout\Core\Sprout;
+use Sprout\Core\Support\SettingsRepository;
+use Sprout\Core\Tests\Unit\UnitTestCase;
 
 class SproutCacheDriverCreatorTest extends UnitTestCase
 {

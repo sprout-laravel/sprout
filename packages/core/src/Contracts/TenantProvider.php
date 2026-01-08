@@ -1,15 +1,15 @@
 <?php
 
-namespace Sprout\Contracts;
+namespace Sprout\Core\Contracts;
 
 /**
  * Tenant Provider Contract
  *
  * This contract marks a class as being a tenant provider, responsible for
- * retrieving instances of {@see \Sprout\Contracts\Tenant} for given
+ * retrieving instances of {@see \Sprout\Core\Contracts\Tenant} for given
  * identifiers or keys.
  *
- * @template TenantClass of \Sprout\Contracts\Tenant
+ * @template TenantClass of \Sprout\Core\Contracts\Tenant
  *
  * @package Core
  */
@@ -30,10 +30,10 @@ interface TenantProvider
      *
      * @param string $identifier
      *
-     * @return \Sprout\Contracts\Tenant|null
+     * @return \Sprout\Core\Contracts\Tenant|null
      *
-     * @see \Sprout\Contracts\Tenant::getTenantIdentifier()
-     * @see \Sprout\Contracts\Tenant::getTenantIdentifierName()
+     * @see \Sprout\Core\Contracts\Tenant::getTenantIdentifier()
+     * @see \Sprout\Core\Contracts\Tenant::getTenantIdentifierName()
      *
      * @phpstan-return TenantClass|null
      */
@@ -47,10 +47,10 @@ interface TenantProvider
      *
      * @param int|string $key
      *
-     * @return \Sprout\Contracts\Tenant|null
+     * @return \Sprout\Core\Contracts\Tenant|null
      *
-     * @see \Sprout\Contracts\Tenant::getTenantKey()
-     * @see \Sprout\Contracts\Tenant::getTenantKeyName()
+     * @see \Sprout\Core\Contracts\Tenant::getTenantKey()
+     * @see \Sprout\Core\Contracts\Tenant::getTenantKeyName()
      *
      * @phpstan-return TenantClass|null
      */
@@ -61,19 +61,19 @@ interface TenantProvider
      *
      * Gets an instance of the tenant implementation the provider represents,
      * using a resource key.
-     * The tenant class must implement the {@see \Sprout\Contracts\TenantHasResources}
+     * The tenant class must implement the {@see \Sprout\Core\Contracts\TenantHasResources}
      * interface for this method to work.
      *
      * @param string $resourceKey
      *
-     * @return (\Sprout\Contracts\Tenant&\Sprout\Contracts\TenantHasResources)|null
+     * @return (\Sprout\Core\Contracts\Tenant&\Sprout\Core\Contracts\TenantHasResources)|null
      *
-     * @throws \Sprout\Exceptions\MisconfigurationException
+     * @throws \Sprout\Core\Exceptions\MisconfigurationException
      *
-     * @phpstan-return (TenantClass&\Sprout\Contracts\TenantHasResources)|null
+     * @phpstan-return (TenantClass&\Sprout\Core\Contracts\TenantHasResources)|null
      *
-     * @see \Sprout\Contracts\Tenant::getTenantKeyName()
-     * @see \Sprout\Contracts\Tenant::getTenantKey()
+     * @see \Sprout\Core\Contracts\Tenant::getTenantKeyName()
+     * @see \Sprout\Core\Contracts\Tenant::getTenantKey()
      */
     public function retrieveByResourceKey(string $resourceKey): (Tenant&TenantHasResources)|null;
 }

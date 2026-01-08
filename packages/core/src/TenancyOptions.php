@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout;
+namespace Sprout\Core;
 
-use Sprout\Contracts\Tenancy;
+use Sprout\Core\Contracts\Tenancy;
 
 /**
  * Tenancy Options
@@ -59,7 +59,7 @@ class TenancyOptions
     }
 
     /**
-     * @param \Sprout\Contracts\Tenancy<*> $tenancy
+     * @param \Sprout\Core\Contracts\Tenancy<*> $tenancy
      *
      * @return bool
      */
@@ -69,7 +69,7 @@ class TenancyOptions
     }
 
     /**
-     * @param \Sprout\Contracts\Tenancy<*> $tenancy
+     * @param \Sprout\Core\Contracts\Tenancy<*> $tenancy
      *
      * @return bool
      */
@@ -79,7 +79,7 @@ class TenancyOptions
     }
 
     /**
-     * @param \Sprout\Contracts\Tenancy<*> $tenancy
+     * @param \Sprout\Core\Contracts\Tenancy<*> $tenancy
      *
      * @return list<string>|null
      */
@@ -89,7 +89,7 @@ class TenancyOptions
     }
 
     /**
-     * @param \Sprout\Contracts\Tenancy<*> $tenancy
+     * @param \Sprout\Core\Contracts\Tenancy<*> $tenancy
      *
      * @return bool
      */
@@ -99,8 +99,8 @@ class TenancyOptions
     }
 
     /**
-     * @param \Sprout\Contracts\Tenancy<*> $tenancy
-     * @param string $service
+     * @param \Sprout\Core\Contracts\Tenancy<*> $tenancy
+     * @param string                            $service
      *
      * @return bool
      */

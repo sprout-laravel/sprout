@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Exceptions;
+namespace Sprout\Core\Exceptions;
 
-use Sprout\Support\ResolutionHook;
+use Sprout\Core\Support\ResolutionHook;
 
 /**
  * Misconfiguration Exception
@@ -90,7 +90,7 @@ final class MisconfigurationException extends SproutException
     /**
      * Create a new exception for when a resolution hook is not supported
      *
-     * @param \Sprout\Support\ResolutionHook $hook
+     * @param \Sprout\Core\Support\ResolutionHook $hook
      *
      * @return self
      */

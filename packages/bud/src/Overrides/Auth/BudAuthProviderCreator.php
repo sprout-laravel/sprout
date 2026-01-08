@@ -6,7 +6,7 @@ namespace Sprout\Bud\Overrides\Auth;
 use Illuminate\Contracts\Auth\UserProvider;
 use Sprout\Bud\Bud;
 use Sprout\Bud\Overrides\BaseCreator;
-use Sprout\Sprout;
+use Sprout\Core\Sprout;
 
 final class BudAuthProviderCreator extends BaseCreator
 {
@@ -24,9 +24,9 @@ final class BudAuthProviderCreator extends BaseCreator
     private array $config;
 
     /**
-     * @param \Sprout\Bud\Overrides\Auth\BudAuthManager         $manager
-     * @param \Sprout\Bud\Bud                                   $bud
-     * @param \Sprout\Sprout                                    $sprout
+     * @param \Sprout\Bud\Overrides\Auth\BudAuthManager    $manager
+     * @param \Sprout\Bud\Bud                              $bud
+     * @param \Sprout\Core\Sprout                               $sprout
      * @param string                                            $name
      * @param array<string, mixed>&array{budStore?:string|null} $config
      */

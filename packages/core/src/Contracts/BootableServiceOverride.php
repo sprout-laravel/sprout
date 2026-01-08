@@ -1,14 +1,14 @@
 <?php
 
-namespace Sprout\Contracts;
+namespace Sprout\Core\Contracts;
 
 use Illuminate\Contracts\Foundation\Application;
-use Sprout\Sprout;
+use Sprout\Core\Sprout;
 
 /**
  * Bootable Service Override
  *
- * This contract marks a {@see \Sprout\Contracts\ServiceOverride} as being
+ * This contract marks a {@see \Sprout\Core\Contracts\ServiceOverride} as being
  * bootable, meaning that it can perform actions during the boot stage of the
  * framework.
  */
@@ -21,7 +21,7 @@ interface BootableServiceOverride extends ServiceOverride
      * override that take place during the booting of the framework.
      *
      * @param \Illuminate\Contracts\Foundation\Application $app
-     * @param \Sprout\Sprout                               $sprout
+     * @param \Sprout\Core\Sprout                          $sprout
      *
      * @return void
      */

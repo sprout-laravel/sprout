@@ -1,18 +1,18 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Tests\Unit\Overrides\Session;
+namespace Sprout\Core\Tests\Unit\Overrides\Session;
 
 use Illuminate\Config\Repository;
 use Mockery;
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\Contracts\Tenancy;
-use Sprout\Contracts\Tenant;
-use Sprout\Overrides\Session\SproutFileSessionHandler;
-use Sprout\Overrides\Session\SproutFileSessionHandlerCreator;
-use Sprout\Sprout;
-use Sprout\Tests\Unit\UnitTestCase;
-use function Sprout\sprout;
+use Sprout\Core\Contracts\Tenancy;
+use Sprout\Core\Contracts\Tenant;
+use Sprout\Core\Overrides\Session\SproutFileSessionHandler;
+use Sprout\Core\Overrides\Session\SproutFileSessionHandlerCreator;
+use Sprout\Core\Sprout;
+use Sprout\Core\Tests\Unit\UnitTestCase;
+use function Sprout\Core\sprout;
 
 class SproutFileSessionHandlerCreatorTest extends UnitTestCase
 {

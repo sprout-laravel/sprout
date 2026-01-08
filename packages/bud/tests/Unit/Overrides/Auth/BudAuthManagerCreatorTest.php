@@ -4,9 +4,7 @@ declare(strict_types=1);
 namespace Sprout\Bud\Tests\Unit\Overrides\Auth;
 
 use Illuminate\Contracts\Auth\UserProvider;
-use Illuminate\Contracts\Broadcasting\Broadcaster;
 use Illuminate\Foundation\Application;
-use InvalidArgumentException;
 use Mockery;
 use PHPUnit\Framework\Attributes\Test;
 use Sprout\Bud\Bud;
@@ -15,13 +13,13 @@ use Sprout\Bud\Managers\ConfigStoreManager;
 use Sprout\Bud\Overrides\Auth\BudAuthManager;
 use Sprout\Bud\Overrides\Auth\BudAuthProviderCreator;
 use Sprout\Bud\Tests\Unit\UnitTestCase;
-use Sprout\Contracts\Tenancy;
-use Sprout\Contracts\Tenant;
-use Sprout\Contracts\TenantHasResources;
-use Sprout\Exceptions\TenancyMissingException;
-use Sprout\Exceptions\TenantMissingException;
-use Sprout\Sprout;
-use Sprout\Support\SettingsRepository;
+use Sprout\Core\Contracts\Tenancy;
+use Sprout\Core\Contracts\Tenant;
+use Sprout\Core\Contracts\TenantHasResources;
+use Sprout\Core\Exceptions\TenancyMissingException;
+use Sprout\Core\Exceptions\TenantMissingException;
+use Sprout\Core\Sprout;
+use Sprout\Core\Support\SettingsRepository;
 
 class BudAuthManagerCreatorTest extends UnitTestCase
 {

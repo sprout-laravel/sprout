@@ -1,20 +1,20 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Tests\Unit\Managers;
+namespace Sprout\Core\Tests\Unit\Managers;
 
 use Orchestra\Testbench\Attributes\DefineEnvironment;
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\Exceptions\MisconfigurationException;
-use Sprout\Http\Resolvers\CookieIdentityResolver;
-use Sprout\Http\Resolvers\HeaderIdentityResolver;
-use Sprout\Http\Resolvers\PathIdentityResolver;
-use Sprout\Http\Resolvers\SessionIdentityResolver;
-use Sprout\Http\Resolvers\SubdomainIdentityResolver;
-use Sprout\Managers\IdentityResolverManager;
-use Sprout\Tests\Unit\UnitTestCase;
-use function Sprout\resolver;
-use function Sprout\sprout;
+use Sprout\Core\Exceptions\MisconfigurationException;
+use Sprout\Core\Http\Resolvers\CookieIdentityResolver;
+use Sprout\Core\Http\Resolvers\HeaderIdentityResolver;
+use Sprout\Core\Http\Resolvers\PathIdentityResolver;
+use Sprout\Core\Http\Resolvers\SessionIdentityResolver;
+use Sprout\Core\Http\Resolvers\SubdomainIdentityResolver;
+use Sprout\Core\Managers\IdentityResolverManager;
+use Sprout\Core\Tests\Unit\UnitTestCase;
+use function Sprout\Core\resolver;
+use function Sprout\Core\sprout;
 
 class IdentityResolverManagerTest extends UnitTestCase
 {

@@ -1,15 +1,15 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Tests\Unit\Managers;
+namespace Sprout\Core\Tests\Unit\Managers;
 
 use Orchestra\Testbench\Attributes\DefineEnvironment;
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\Exceptions\MisconfigurationException;
-use Sprout\Managers\TenancyManager;
-use Sprout\Support\DefaultTenancy;
-use Sprout\Tests\Unit\UnitTestCase;
-use function Sprout\sprout;
+use Sprout\Core\Exceptions\MisconfigurationException;
+use Sprout\Core\Managers\TenancyManager;
+use Sprout\Core\Support\DefaultTenancy;
+use Sprout\Core\Tests\Unit\UnitTestCase;
+use function Sprout\Core\sprout;
 
 class TenancyManagerTest extends UnitTestCase
 {

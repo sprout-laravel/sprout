@@ -1,17 +1,17 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Tests\Unit\Facades;
+namespace Sprout\Core\Tests\Unit\Facades;
 
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\Facades\Sprout;
-use Sprout\Tests\Unit\UnitTestCase;
+use Sprout\Core\Facades\Sprout;
+use Sprout\Core\Tests\Unit\UnitTestCase;
 
 class SproutFacadeTest extends UnitTestCase
 {
     #[Test]
     public function usesCorrectInstance(): void
     {
-        $this->assertEquals(\Sprout\sprout(), Sprout::getFacadeRoot());
+        $this->assertEquals(\Sprout\Core\sprout(), Sprout::getFacadeRoot());
     }
 }

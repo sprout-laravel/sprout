@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Tests\Unit\Overrides\Auth;
+namespace Sprout\Core\Tests\Unit\Overrides\Auth;
 
 use Illuminate\Cache\Repository as CacheRepository;
 use Illuminate\Config\Repository;
@@ -12,12 +12,12 @@ use Illuminate\Foundation\Application;
 use Mockery;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\Overrides\Auth\SproutAuthCacheTokenRepository;
-use Sprout\Overrides\Auth\SproutAuthDatabaseTokenRepository;
-use Sprout\Overrides\Auth\SproutAuthPasswordBrokerManager;
-use Sprout\Sprout;
-use Sprout\Support\SettingsRepository;
-use Sprout\Tests\Unit\UnitTestCase;
+use Sprout\Core\Overrides\Auth\SproutAuthCacheTokenRepository;
+use Sprout\Core\Overrides\Auth\SproutAuthDatabaseTokenRepository;
+use Sprout\Core\Overrides\Auth\SproutAuthPasswordBrokerManager;
+use Sprout\Core\Sprout;
+use Sprout\Core\Support\SettingsRepository;
+use Sprout\Core\Tests\Unit\UnitTestCase;
 
 class SproutAuthPasswordBrokerManagerTest extends UnitTestCase
 {
