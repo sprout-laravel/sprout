@@ -3,14 +3,14 @@ declare(strict_types=1);
 
 namespace Sprout\Core;
 
-use Core\Contracts\Tenancy;
-use Core\Contracts\Tenant;
-use Core\Managers\IdentityResolverManager;
-use Core\Managers\ServiceOverrideManager;
-use Core\Managers\TenancyManager;
-use Core\Managers\TenantProviderManager;
-use Core\Support\ResolutionHook;
-use Core\Support\SettingsRepository;
+use Sprout\Core\Contracts\Tenancy;
+use Sprout\Core\Contracts\Tenant;
+use Sprout\Core\Managers\IdentityResolverManager;
+use Sprout\Core\Managers\ServiceOverrideManager;
+use Sprout\Core\Managers\TenancyManager;
+use Sprout\Core\Managers\TenantProviderManager;
+use Sprout\Core\Support\ResolutionHook;
+use Sprout\Core\Support\SettingsRepository;
 use Illuminate\Contracts\Foundation\Application;
 
 /**
@@ -28,27 +28,27 @@ final class Sprout
     private Application $app;
 
     /**
-     * @var array<int, \Core\Contracts\Tenancy<\Core\Contracts\Tenant>>
+     * @var array<int, \Sprout\Core\Contracts\Tenancy<\Sprout\Core\Contracts\Tenant>>
      */
     private array $currentTenancies = [];
 
     /**
-     * @var \Core\Managers\ServiceOverrideManager
+     * @var \Sprout\Core\Managers\ServiceOverrideManager
      */
     private ServiceOverrideManager $overrides;
 
     /**
-     * @var \Core\Managers\TenantProviderManager
+     * @var \Sprout\Core\Managers\TenantProviderManager
      */
     private TenantProviderManager $providers;
 
     /**
-     * @var \Core\Managers\IdentityResolverManager
+     * @var \Sprout\Core\Managers\IdentityResolverManager
      */
     private IdentityResolverManager $resolvers;
 
     /**
-     * @var \Core\Managers\TenancyManager
+     * @var \Sprout\Core\Managers\TenancyManager
      */
     private TenancyManager $tenancies;
 
@@ -58,20 +58,24 @@ final class Sprout
     private bool $withinContext = false;
 
     /**
-     * @var \Core\Support\SettingsRepository
+     * @var \Sprout\Core\Support\SettingsRepository
      */
     private SettingsRepository $settings;
 
     /**
-     * @var \Core\Support\ResolutionHook|null
+     * @var \Sprout\Core\Support\ResolutionHook|null
      */
     private ?ResolutionHook $currentHook = null;
 
     /**
      * Create a new instance
      *
-     * @param \Illuminate\Contracts\Foundation\Application $app
-     * @param \Core\Support\SettingsRepository             $settings
+     * @param \Illuminate\Contracts\Foundation\Application       $app
+     * @param \Sprout\Core\Support\SettingsRepository            $settings
+     * @param \Sprout\Core\Managers\TenantProviderManager|null   $providers
+     * @param \Sprout\Core\Managers\IdentityResolverManager|null $resolvers
+     * @param \Sprout\Core\Managers\TenancyManager|null          $tenancies
+     * @param \Sprout\Core\Managers\ServiceOverrideManager|null  $overrides
      */
     public function __construct(
         Application              $app,
@@ -121,7 +125,7 @@ final class Sprout
     /**
      * Get the Sprout settings repository
      *
-     * @return \Core\Support\SettingsRepository
+     * @return \Sprout\Core\Support\SettingsRepository
      */
     public function settings(): SettingsRepository
     {
@@ -131,9 +135,9 @@ final class Sprout
     /**
      * Set the current tenancy
      *
-     * @template TenantClass of \Core\Contracts\Tenant
+     * @template TenantClass of \Sprout\Core\Contracts\Tenant
      *
-     * @param \Core\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Sprout\Core\Contracts\Tenancy<TenantClass> $tenancy
      *
      * @return void
      */
@@ -163,7 +167,7 @@ final class Sprout
     /**
      * Get the current tenancy
      *
-     * @return \Core\Contracts\Tenancy<\Core\Contracts\Tenant>|null
+     * @return \Sprout\Core\Contracts\Tenancy<\Sprout\Core\Contracts\Tenant>|null
      */
     public function getCurrentTenancy(): ?Tenancy
     {
@@ -177,7 +181,7 @@ final class Sprout
     /**
      * Get all the current tenancies
      *
-     * @return \Core\Contracts\Tenancy<\Core\Contracts\Tenant>[]
+     * @return \Sprout\Core\Contracts\Tenancy<\Sprout\Core\Contracts\Tenant>[]
      */
     public function getAllCurrentTenancies(): array
     {
@@ -205,7 +209,7 @@ final class Sprout
     /**
      * Get the identity resolver manager
      *
-     * @return \Core\Managers\IdentityResolverManager
+     * @return \Sprout\Core\Managers\IdentityResolverManager
      */
     public function resolvers(): IdentityResolverManager
     {
@@ -215,7 +219,7 @@ final class Sprout
     /**
      * Get the tenant providers manager
      *
-     * @return \Core\Managers\TenantProviderManager
+     * @return \Sprout\Core\Managers\TenantProviderManager
      */
     public function providers(): TenantProviderManager
     {
@@ -225,7 +229,7 @@ final class Sprout
     /**
      * Get the tenancy manager
      *
-     * @return \Core\Managers\TenancyManager
+     * @return \Sprout\Core\Managers\TenancyManager
      */
     public function tenancies(): TenancyManager
     {
@@ -235,7 +239,7 @@ final class Sprout
     /**
      * Get the service override manager
      *
-     * @return \Core\Managers\ServiceOverrideManager
+     * @return \Sprout\Core\Managers\ServiceOverrideManager
      */
     public function overrides(): ServiceOverrideManager
     {
@@ -245,7 +249,7 @@ final class Sprout
     /**
      * Check if a resolution hook is enabled
      *
-     * @param \Core\Support\ResolutionHook $hook
+     * @param \Sprout\Core\Support\ResolutionHook $hook
      *
      * @return bool
      *
@@ -296,7 +300,7 @@ final class Sprout
     /**
      * Generate a route for a tenant
      *
-     * This method will proxy a call to {@see \Core\Contracts\IdentityResolver::route()}
+     * This method will proxy a call to {@see \Sprout\Core\Contracts\IdentityResolver::route()}
      * to generate a URL for a tenanted route.
      *
      * If no tenancy name is provided, this method will use the current tenancy
@@ -305,10 +309,10 @@ final class Sprout
      * If no resolver name is provided, this method will use the resolver
      * currently linked with the tenancy, or the default one.
      *
-     * @template TenantClass of \Core\Contracts\Tenant
+     * @template TenantClass of \Sprout\Core\Contracts\Tenant
      *
      * @param string                 $name
-     * @param \Core\Contracts\Tenant $tenant
+     * @param \Sprout\Core\Contracts\Tenant $tenant
      * @param string|null            $resolver
      * @param string|null            $tenancy
      * @param array<string, mixed>   $parameters
@@ -318,7 +322,7 @@ final class Sprout
      *
      * @return string
      *
-     * @throws \Core\Exceptions\MisconfigurationException
+     * @throws \Sprout\Core\Exceptions\MisconfigurationException
      */
     public function route(string $name, Tenant $tenant, ?string $resolver = null, ?string $tenancy = null, array $parameters = [], bool $absolute = true): string
     {
@@ -328,7 +332,7 @@ final class Sprout
             $tenancyInstance = $this->tenancies()->get($tenancy);
         }
 
-        /** @var \Core\Contracts\Tenancy<TenantClass> $tenancyInstance */
+        /** @var \Sprout\Core\Contracts\Tenancy<TenantClass> $tenancyInstance */
 
         if ($resolver === null) {
             $resolverInstance = $tenancyInstance->resolver() ?? $this->resolvers()->get();
@@ -336,7 +340,7 @@ final class Sprout
             $resolverInstance = $this->resolvers()->get($resolver);
         }
 
-        /** @var \Core\Contracts\IdentityResolver $resolverInstance */
+        /** @var \Sprout\Core\Contracts\IdentityResolver $resolverInstance */
 
         return $resolverInstance->route($name, $tenancyInstance, $tenant, $parameters, $absolute);
     }
@@ -344,7 +348,7 @@ final class Sprout
     /**
      * Set the current resolution hook
      *
-     * @param \Core\Support\ResolutionHook|null $hook
+     * @param \Sprout\Core\Support\ResolutionHook|null $hook
      *
      * @return static
      */
@@ -358,7 +362,7 @@ final class Sprout
     /**
      * Get the current resolution hook
      *
-     * @return \Core\Support\ResolutionHook|null
+     * @return \Sprout\Core\Support\ResolutionHook|null
      */
     public function getCurrentHook(): ?ResolutionHook
     {
@@ -368,7 +372,7 @@ final class Sprout
     /**
      * Check if the current resolution hook is the provided
      *
-     * @param \Core\Support\ResolutionHook|null $hook
+     * @param \Sprout\Core\Support\ResolutionHook|null $hook
      *
      * @return bool
      */

@@ -1,6 +1,6 @@
 <?php
 
-namespace Sprout;
+namespace Sprout\Core;
 
 use Sprout\Core\Contracts\IdentityResolver;
 use Sprout\Core\Contracts\ServiceOverride;
