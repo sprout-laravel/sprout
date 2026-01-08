@@ -4,7 +4,7 @@
   "type"             : "library",
   "require"          : {
     "php"              : "^8.3",
-    "laravel/framework": "^12.45.2",
+    "laravel/framework": "^12.46",
     "sprout/sprout"    : "^2.0-dev"
   },
   "require-dev"      : {
