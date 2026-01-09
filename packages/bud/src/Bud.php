@@ -56,6 +56,17 @@ final class Bud implements TenantAware
      */
     public function store(?string $name = null): ConfigStore
     {
+        if ($this->hasTenancy()) {
+            /** @var \Sprout\Core\Contracts\Tenancy<*> $tenancy */
+            $tenancy = $this->getTenancy();
+            
+            // If there's a tenancy, we will use their locked store, the store
+            // that was provided, or the default store.
+            $name = BudOptions::getLockedStore($tenancy)
+                    ?? $name
+                       ?? BudOptions::getDefaultStore($tenancy);
+        }
+
         return $this->stores->get($name);
     }
 
