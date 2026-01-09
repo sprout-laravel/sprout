@@ -209,7 +209,7 @@ interface Tenancy
      *
      * @param string $option
      *
-     * @return array<array-key, mixed>|null
+     * @return scalar|array<array-key, mixed>|null
      */
-    public function optionConfig(string $option): ?array;
+    public function optionConfig(string $option): array|float|bool|int|string|null;
 }

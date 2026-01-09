@@ -51,7 +51,7 @@ final class DefaultTenancy implements Tenancy
     private array $options = [];
 
     /**
-     * @var array<string, array<array-key, scalar>>
+     * @var array<string, scalar|array<array-key, scalar>>
      */
     private array $optionConfig = [];
 
@@ -65,7 +65,7 @@ final class DefaultTenancy implements Tenancy
      *
      * @param string                                                           $name
      * @param \Sprout\Core\Contracts\TenantProvider<TenantClass>               $provider
-     * @param array<array-key, string|array<string, array<array-key, scalar>>> $options
+     * @param array<array-key, scalar|array<string, array<array-key, scalar>>> $options
      */
     public function __construct(string $name, TenantProvider $provider, array $options)
     {
@@ -74,14 +74,13 @@ final class DefaultTenancy implements Tenancy
 
         $options = array_values($options);
 
-        /** @var string|array<string, array<array-key, scalar>> $value */
+        /** @var scalar|array<string, scalar|array<array-key, scalar>> $value */
         foreach ($options as $value) {
             if (is_array($value)) {
                 /** @var string $option */
                 $option                      = array_keys($value)[0];
                 $this->options[]             = $option;
                 $this->optionConfig[$option] = $value[$option];
-                /** @phpstan-ignore function.alreadyNarrowedType */
             } else if (is_string($value)) {
                 $this->options[] = $value;
             }
@@ -356,9 +355,9 @@ final class DefaultTenancy implements Tenancy
      *
      * @param string $option
      *
-     * @return array<array-key, mixed>|null
+     * @return scalar|array<array-key, mixed>|null
      */
-    public function optionConfig(string $option): ?array
+    public function optionConfig(string $option): array|float|bool|int|string|null
     {
         if (! $this->hasOptionConfig($option)) {
             return null;
