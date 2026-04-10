@@ -17,7 +17,7 @@ use Sprout\Core\Sprout;
  * This override specifically allows for the creation of filesystem disks
  * using the Bud config store.
  *
- * @extends \Sprout\Bud\Overrides\BaseOverride<\Illuminate\Filesystem\FilesystemManager>
+ * @extends \Sprout\Overrides\BudBaseOverride<\Illuminate\Filesystem\FilesystemManager>
  */
 final class BudFilesystemDiskOverride extends BaseOverride
 {

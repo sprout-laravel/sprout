@@ -13,7 +13,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use Sprout\Core\Contracts\BootableServiceOverride;
 use Sprout\Core\Contracts\TenantAware;
-use Sprout\Core\Overrides\SessionOverride;
+use Sprout\Overrides\Session\SessionOverride;
 use Sprout\Core\Sprout;
 use Sprout\Core\Support\Settings;
 use Sprout\Core\Support\SettingsRepository;

@@ -10,7 +10,7 @@ use Sprout\Bud\Overrides\Cache\BudCacheStoreCreator;
 use Sprout\Core\Sprout;
 
 /**
- * @extends \Sprout\Bud\Overrides\BaseOverride<\Illuminate\Cache\CacheManager>
+ * @extends \Sprout\Overrides\BudBaseOverride<\Illuminate\Cache\CacheManager>
  */
 final class BudCacheStoreOverride extends BaseOverride
 {

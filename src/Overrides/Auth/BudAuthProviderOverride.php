@@ -15,7 +15,7 @@ use Sprout\Core\Contracts\Tenant;
 use Sprout\Core\Sprout;
 
 /**
- * @extends \Sprout\Bud\Overrides\BaseOverride<\Illuminate\Auth\AuthManager>
+ * @extends \Sprout\Overrides\BudBaseOverride<\Illuminate\Auth\AuthManager>
  */
 final class BudAuthProviderOverride extends BaseOverride
 {

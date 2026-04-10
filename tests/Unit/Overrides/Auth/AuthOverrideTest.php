@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Core\Tests\Unit\Overrides;
+namespace Sprout\\Tests\\Unit\\Overrides\\Auth;
 
 use Closure;
 use Illuminate\Auth\AuthManager;
@@ -16,8 +16,8 @@ use Sprout\Core\Contracts\BootableServiceOverride;
 use Sprout\Core\Contracts\Tenancy;
 use Sprout\Core\Contracts\Tenant;
 use Sprout\Core\Overrides\Auth\SproutAuthPasswordBrokerManager;
-use Sprout\Core\Overrides\AuthGuardOverride;
-use Sprout\Core\Overrides\AuthPasswordOverride;
+use Sprout\Overrides\Auth\AuthGuardOverride;
+use Sprout\Overrides\Auth\AuthPasswordOverride;
 use Sprout\Core\Overrides\StackedOverride;
 use Sprout\Core\Sprout;
 use Sprout\Core\Support\SettingsRepository;

@@ -22,33 +22,33 @@ return [
     'filesystem' => [
         'driver'    => \Sprout\Core\Overrides\StackedOverride::class,
         'overrides' => [
-            \Sprout\Core\Overrides\FilesystemManagerOverride::class,
-            \Sprout\Core\Overrides\FilesystemOverride::class,
+            \Sprout\Overrides\Filesystem\FilesystemManagerOverride::class,
+            \Sprout\Overrides\Filesystem\FilesystemOverride::class,
         ],
     ],
 
     'job' => [
-        'driver' => \Sprout\Core\Overrides\JobOverride::class,
+        'driver' => \Sprout\Overrides\Job\JobOverride::class,
     ],
 
     'cache' => [
-        'driver' => \Sprout\Core\Overrides\CacheOverride::class,
+        'driver' => \Sprout\Overrides\Cache\CacheOverride::class,
     ],
 
     'auth' => [
         'driver'    => \Sprout\Core\Overrides\StackedOverride::class,
         'overrides' => [
-            \Sprout\Core\Overrides\AuthGuardOverride::class,
-            \Sprout\Core\Overrides\AuthPasswordOverride::class,
+            \Sprout\Overrides\Auth\AuthGuardOverride::class,
+            \Sprout\Overrides\Auth\AuthPasswordOverride::class,
         ],
     ],
 
     'cookie' => [
-        'driver' => \Sprout\Core\Overrides\CookieOverride::class,
+        'driver' => \Sprout\Overrides\Cookie\CookieOverride::class,
     ],
 
     'session' => [
-        'driver'   => \Sprout\Core\Overrides\SessionOverride::class,
+        'driver'   => \Sprout\Overrides\Session\SessionOverride::class,
         'database' => false,
     ],
 ];

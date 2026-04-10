@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Core\Overrides;
+namespace Sprout\\Overrides\\Cache;
 
 use Closure;
 use Illuminate\Cache\CacheManager;

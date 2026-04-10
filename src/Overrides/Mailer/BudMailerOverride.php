@@ -15,7 +15,7 @@ use Sprout\Core\Sprout;
  * This override specifically allows for the creation of mailers
  * using Bud config stores.
  *
- * @extends \Sprout\Bud\Overrides\BaseOverride<\Illuminate\Mail\MailManager>
+ * @extends \Sprout\Overrides\BudBaseOverride<\Illuminate\Mail\MailManager>
  */
 final class BudMailerOverride extends BaseOverride
 {

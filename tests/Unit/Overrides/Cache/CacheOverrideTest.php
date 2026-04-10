@@ -14,7 +14,7 @@ use PHPUnit\Framework\Attributes\Test;
 use Sprout\Core\Contracts\BootableServiceOverride;
 use Sprout\Core\Contracts\Tenancy;
 use Sprout\Core\Contracts\Tenant;
-use Sprout\Core\Overrides\CacheOverride;
+use Sprout\Overrides\Cache\CacheOverride;
 use Sprout\Core\Sprout;
 use Sprout\Core\Support\SettingsRepository;
 use Sprout\Core\Tests\Unit\UnitTestCase;

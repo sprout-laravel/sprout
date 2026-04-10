@@ -14,7 +14,7 @@ use Sprout\Core\Sprout;
  * This override specifically allows for the creation of database connections
  * using Bud config store.
  *
- * @extends \Sprout\Bud\Overrides\BaseOverride<\Illuminate\Database\DatabaseManager>
+ * @extends \Sprout\Overrides\BudBaseOverride<\Illuminate\Database\DatabaseManager>
  */
 final class BudDatabaseConnectionOverride extends BaseOverride
 {

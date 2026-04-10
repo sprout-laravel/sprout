@@ -9,8 +9,8 @@ use Illuminate\Support\Facades\Event;
 use PHPUnit\Framework\Attributes\Test;
 use Sprout\Core\Contracts\BootableServiceOverride;
 use Sprout\Core\Listeners\SetCurrentTenantForJob;
-use Sprout\Core\Overrides\JobOverride;
-use Sprout\Core\Overrides\SessionOverride;
+use Sprout\Overrides\Job\JobOverride;
+use Sprout\Overrides\Session\SessionOverride;
 use Sprout\Core\Tests\Unit\UnitTestCase;
 use function Sprout\Core\sprout;
 

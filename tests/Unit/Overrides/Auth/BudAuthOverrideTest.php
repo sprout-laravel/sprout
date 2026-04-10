@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Bud\Tests\Unit\Overrides;
+namespace Sprout\\Tests\\Unit\\Overrides\\Auth;
 
 use Closure;
 use Illuminate\Auth\AuthManager;
@@ -18,8 +18,8 @@ use Sprout\Bud\Contracts\ConfigStore;
 use Sprout\Bud\Exceptions\CyclicOverrideException;
 use Sprout\Bud\Managers\ConfigStoreManager;
 use Sprout\Bud\Overrides\Auth\BudAuthManager;
-use Sprout\Bud\Overrides\AuthManagerOverride;
-use Sprout\Bud\Overrides\AuthProviderOverride;
+use Sprout\Overrides\Auth\BudAuthManagerOverride;
+use Sprout\Overrides\Auth\BudAuthProviderOverride;
 use Sprout\Bud\Tests\Unit\UnitTestCase;
 use Sprout\Core\Contracts\BootableServiceOverride;
 use Sprout\Core\Contracts\Tenancy;
