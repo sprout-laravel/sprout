@@ -96,7 +96,7 @@ abstract class BaseCreator
      */
     protected function checkForCyclicDrivers(?string $driver, string $term, string $name): void
     {
-        if ($driver === 'bud') {
+        if ($driver === 'sprout:bud') {
             throw CyclicOverrideException::make($term, $name);
         }
     }

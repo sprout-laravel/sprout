@@ -43,7 +43,7 @@ final class BudDatabaseConnectionOverride extends BaseOverride
     protected function addDriver(object $service, Bud $bud, Sprout $sprout, Closure $tracker): void
     {
         // Add a bud driver.
-        $service->extend('bud', function ($config, $name) use ($service, $bud, $sprout, $tracker) {
+        $service->extend('sprout:bud', function ($config, $name) use ($service, $bud, $sprout, $tracker) {
             // Track the connection name.
             $tracker($name);
 

@@ -44,7 +44,7 @@ final class BudMailerOverride extends BaseOverride
     protected function addDriver(object $service, Bud $bud, Sprout $sprout, Closure $tracker): void
     {
         // Add a bud driver.
-        $service->extend('bud', function ($config) use ($service, $bud, $sprout, $tracker) {
+        $service->extend('sprout:bud', function ($config) use ($service, $bud, $sprout, $tracker) {
             /**
              * @var array<string, mixed>&array{budStore?:string|null,name?:mixed} $config
              */

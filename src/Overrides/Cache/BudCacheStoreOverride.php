@@ -38,7 +38,7 @@ final class BudCacheStoreOverride extends BaseOverride
      */
     protected function addDriver(object $service, Bud $bud, Sprout $sprout, Closure $tracker): void
     {
-        $service->extend('bud', function (Application $app, array $config) use ($service, $bud, $sprout, $tracker) {
+        $service->extend('sprout:bud', function (Application $app, array $config) use ($service, $bud, $sprout, $tracker) {
             /**
              * @var array<string, mixed>&array{budStore?:string|null,store:string} $config
              */

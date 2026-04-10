@@ -50,7 +50,7 @@ final class BudFilesystemDiskOverride extends BaseOverride
         }
 
         // Add a bud driver.
-        $service->extend('bud', function (Application $app, array $config) use ($service, $bud, $sprout, $tracker) {
+        $service->extend('sprout:bud', function (Application $app, array $config) use ($service, $bud, $sprout, $tracker) {
             // Track the connection name.
             /** @var array<string, mixed>&array{budStore?:string|null,name?:string|null} $config */
             // If the config contains the disk name

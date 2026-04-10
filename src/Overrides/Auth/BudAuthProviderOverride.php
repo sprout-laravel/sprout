@@ -47,7 +47,7 @@ final class BudAuthProviderOverride extends BaseOverride
             throw new LogicException('Cannot override auth providers without the Bud auth manager override');
         }
 
-        $service->provider('bud', function (Application $app, array $config) use ($service, $bud, $sprout, $tracker) {
+        $service->provider('sprout:bud', function (Application $app, array $config) use ($service, $bud, $sprout, $tracker) {
             /**
              * @var array<string, mixed>&array{budStore?:string|null,driver:string,provider?:mixed} $config
              */
