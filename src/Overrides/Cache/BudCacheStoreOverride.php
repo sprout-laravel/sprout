@@ -1,18 +1,19 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Overrides;
+namespace Sprout\Overrides\Cache;
 
 use Closure;
 use Illuminate\Foundation\Application;
-use Sprout;
+use Sprout\Bud;
+use Sprout\Overrides\BudBaseOverride;
 use Sprout\Overrides\Cache\BudCacheStoreCreator;
 use Sprout\Sprout;
 
 /**
  * @extends \Sprout\Overrides\BudBaseOverride<\Illuminate\Cache\CacheManager>
  */
-final class BudCacheStoreOverride extends BaseOverride
+final class BudCacheStoreOverride extends BudBaseOverride
 {
     /**
      * Get the name of the service being overridden.

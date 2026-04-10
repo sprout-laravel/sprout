@@ -1,12 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Overrides;
+namespace Sprout\Overrides\Filesystem;
 
 use Illuminate\Contracts\Foundation\Application;
 use Sprout\Contracts\BootableServiceOverride;
 use Sprout\Overrides\Filesystem\SproutFilesystemManager;
 use Sprout\Sprout;
+use Sprout\Overrides\BaseOverride;
 
 final class FilesystemManagerOverride extends BaseOverride implements BootableServiceOverride
 {

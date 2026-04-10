@@ -6,7 +6,7 @@ namespace Sprout\Attributes;
 use Attribute;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Contracts\Container\ContextualAttribute;
-use Sprout;
+use Sprout\Bud;
 
 /**
  * Config Store Attribute

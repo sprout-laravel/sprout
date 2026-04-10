@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Tests\Unit\Overrides;
+namespace Sprout\Tests\Unit\Overrides\Filesystem;
 
 use Closure;
 use Illuminate\Config\Repository;
@@ -13,11 +13,12 @@ use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use RuntimeException;
-use Sprout;
+use Sprout\Bud;
 use Sprout\Contracts\ConfigStore;
 use Sprout\Exceptions\CyclicOverrideException;
 use Sprout\Managers\ConfigStoreManager;
 use Sprout\Overrides\Filesystem\BudFilesystemDiskOverride;
+use Sprout\Overrides\Filesystem\BudFilesystemDiskCreator;
 use Sprout\Tests\Unit\UnitTestCase;
 use Sprout\Contracts\BootableServiceOverride;
 use Sprout\Contracts\Tenancy;
@@ -43,7 +44,7 @@ class BudFilesystemDiskOverrideTest extends UnitTestCase
     {
         return Mockery::mock(SproutFilesystemManager::class, static function (MockInterface $mock) {
             $mock->shouldReceive('extend')
-                 ->with('bud', Mockery::on(static function ($arg) {
+                 ->with('sprout:bud', Mockery::on(static function ($arg) {
                      return is_callable($arg) && $arg instanceof Closure;
                  }))
                  ->once();
@@ -53,7 +54,7 @@ class BudFilesystemDiskOverrideTest extends UnitTestCase
     #[Test]
     public function isBuiltCorrectly(): void
     {
-        $this->assertTrue(is_subclass_of(FilesystemDiskOverride::class, BootableServiceOverride::class));
+        $this->assertTrue(is_subclass_of(BudFilesystemDiskOverride::class, BootableServiceOverride::class));
     }
 
     #[Test]
@@ -66,7 +67,7 @@ class BudFilesystemDiskOverrideTest extends UnitTestCase
                 'driver'    => StackedOverride::class,
                 'overrides' => [
                     FilesystemManagerOverride::class,
-                    FilesystemDiskOverride::class,
+                    BudFilesystemDiskOverride::class,
                 ],
             ],
         ]);
@@ -86,7 +87,7 @@ class BudFilesystemDiskOverrideTest extends UnitTestCase
     {
         $overrides = [
             FilesystemManagerOverride::class,
-            FilesystemDiskOverride::class,
+            BudFilesystemDiskOverride::class,
         ];
 
         $override = new StackedOverride('filesystem', compact('overrides'));
@@ -141,7 +142,7 @@ class BudFilesystemDiskOverrideTest extends UnitTestCase
     {
         $override = new StackedOverride('filesystem', [
             'overrides' => [
-                FilesystemDiskOverride::class,
+                BudFilesystemDiskOverride::class,
             ],
         ]);
 
@@ -173,7 +174,7 @@ class BudFilesystemDiskOverrideTest extends UnitTestCase
         $override = new StackedOverride('filesystem', [
             'overrides' => [
                 FilesystemManagerOverride::class,
-                FilesystemDiskOverride::class,
+                BudFilesystemDiskOverride::class,
             ],
         ]);
 
@@ -194,7 +195,7 @@ class BudFilesystemDiskOverrideTest extends UnitTestCase
 
         $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
         $app->make('config')->set('filesystems.disks.bud-disk', [
-            'driver' => 'bud',
+            'driver' => 'sprout:bud',
         ]);
 
         $app->singleton(Bud::class, fn () => new Bud($app, Mockery::mock(ConfigStoreManager::class, function (MockInterface $mock) use ($tenancy, $tenant) {
@@ -233,7 +234,7 @@ class BudFilesystemDiskOverrideTest extends UnitTestCase
         $override = new StackedOverride('filesystem', [
             'overrides' => [
                 FilesystemManagerOverride::class,
-                FilesystemDiskOverride::class,
+                BudFilesystemDiskOverride::class,
             ],
         ]);
 
@@ -251,7 +252,7 @@ class BudFilesystemDiskOverrideTest extends UnitTestCase
 
         $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
         $app->make('config')->set('filesystems.disks.bud-disk', [
-            'driver' => 'bud',
+            'driver' => 'sprout:bud',
         ]);
 
         $app->singleton(Bud::class, fn () => new Bud($app, Mockery::mock(ConfigStoreManager::class, function (MockInterface $mock) use ($tenancy, $tenant) {
@@ -264,7 +265,7 @@ class BudFilesystemDiskOverrideTest extends UnitTestCase
                               'filesystem',
                               'bud-disk',
                           )->andReturn([
-                             'driver' => 'bud',
+                             'driver' => 'sprout:bud',
                          ]);
                  }));
         })));
@@ -292,7 +293,7 @@ class BudFilesystemDiskOverrideTest extends UnitTestCase
         $override = new StackedOverride('filesystem', [
             'overrides' => [
                 FilesystemManagerOverride::class,
-                FilesystemDiskOverride::class,
+                BudFilesystemDiskOverride::class,
             ],
         ]);
 
@@ -303,7 +304,7 @@ class BudFilesystemDiskOverrideTest extends UnitTestCase
 
         $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
         $app->make('config')->set('filesystems.disks.bud-disk', [
-            'driver' => 'bud',
+            'driver' => 'sprout:bud',
         ]);
 
         $tenant = Mockery::mock(Tenant::class, TenantHasResources::class, static function (MockInterface $mock) {
@@ -344,8 +345,8 @@ class BudFilesystemDiskOverrideTest extends UnitTestCase
 
         $filesystem->disk('bud-disk');
 
-        $this->assertNotEmpty($override->getOverrides()[FilesystemDiskOverride::class]->getOverrides());
-        $this->assertContains('bud-disk', $override->getOverrides()[FilesystemDiskOverride::class]->getOverrides());
+        $this->assertNotEmpty($override->getOverrides()[BudFilesystemDiskOverride::class]->getOverrides());
+        $this->assertContains('bud-disk', $override->getOverrides()[BudFilesystemDiskOverride::class]->getOverrides());
     }
 
     #[Test]
@@ -354,7 +355,7 @@ class BudFilesystemDiskOverrideTest extends UnitTestCase
         $override = new StackedOverride('filesystem', [
             'overrides' => [
                 FilesystemManagerOverride::class,
-                FilesystemDiskOverride::class,
+                BudFilesystemDiskOverride::class,
             ],
         ]);
 
@@ -367,7 +368,7 @@ class BudFilesystemDiskOverrideTest extends UnitTestCase
 
         $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
         $app->make('config')->set('filesystems.disks.bud-disk', [
-            'driver' => 'bud',
+            'driver' => 'sprout:bud',
         ]);
 
         $tenant = Mockery::mock(Tenant::class, TenantHasResources::class, static function (MockInterface $mock) {
@@ -403,7 +404,7 @@ class BudFilesystemDiskOverrideTest extends UnitTestCase
 
         $override->boot($app, $sprout);
 
-        $filesystemOverride = $override->getOverride(FilesystemDiskOverride::class);
+        $filesystemOverride = $override->getOverride(BudFilesystemDiskOverride::class);
 
         $this->assertEmpty($filesystemOverride->getOverrides());
 
@@ -425,7 +426,7 @@ class BudFilesystemDiskOverrideTest extends UnitTestCase
         $override = new StackedOverride('filesystem', [
             'overrides' => [
                 FilesystemManagerOverride::class,
-                FilesystemDiskOverride::class,
+                BudFilesystemDiskOverride::class,
             ],
         ]);
 
@@ -446,7 +447,7 @@ class BudFilesystemDiskOverrideTest extends UnitTestCase
 
         $override->boot($app, $sprout);
 
-        $filesystemOverride = $override->getOverride(FilesystemDiskOverride::class);
+        $filesystemOverride = $override->getOverride(BudFilesystemDiskOverride::class);
 
         $this->assertEmpty($filesystemOverride->getOverrides());
 

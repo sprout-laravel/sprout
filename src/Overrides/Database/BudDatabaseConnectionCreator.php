@@ -5,7 +5,7 @@ namespace Sprout\Overrides\Database;
 
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\DatabaseManager;
-use Sprout;
+use Sprout\Bud;
 use Sprout\Overrides\BaseCreator;
 use Sprout\Sprout;
 

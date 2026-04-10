@@ -28,10 +28,12 @@ trait BelongsToManyTenants
      */
     public static function bootBelongsToManyTenants(): void
     {
-        // Automatically scope queries
-        static::addGlobalScope(new BelongsToManyTenantsScope());
+        static::whenBooted(static function () {
+            // Automatically scope queries
+            static::addGlobalScope(new BelongsToManyTenantsScope());
 
-        // Add the observer
-        static::observe(new BelongsToManyTenantsObserver());
+            // Add the observer
+            static::observe(new BelongsToManyTenantsObserver());
+        });
     }
 }

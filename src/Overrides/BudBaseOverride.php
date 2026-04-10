@@ -5,7 +5,7 @@ namespace Sprout\Overrides;
 
 use Closure;
 use Illuminate\Contracts\Foundation\Application;
-use Sprout;
+use Sprout\Bud;
 use Sprout\Contracts\BootableServiceOverride;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;

@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\\Overrides\\Cache;
+namespace Sprout\Overrides\Cache;
 
 use Closure;
 use Illuminate\Cache\CacheManager;
@@ -12,6 +12,7 @@ use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 use Sprout\Overrides\Cache\SproutCacheDriverCreator;
 use Sprout\Sprout;
+use Sprout\Overrides\BaseOverride;
 
 final class CacheOverride extends BaseOverride implements BootableServiceOverride
 {

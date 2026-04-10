@@ -5,7 +5,7 @@ namespace Sprout\Overrides\Broadcast;
 
 use Illuminate\Contracts\Broadcasting\Broadcaster;
 use InvalidArgumentException;
-use Sprout;
+use Sprout\Bud;
 use Sprout\Overrides\BaseCreator;
 use Sprout\Sprout;
 

@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Sprout\Overrides;
 
 use RuntimeException;
-use Sprout;
+use Sprout\Bud;
 use Sprout\Exceptions\CyclicOverrideException;
 use Sprout\Exceptions\TenancyMissingException;
 use Sprout\Exceptions\TenantMissingException;

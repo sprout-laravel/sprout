@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Tests\Unit\Overrides;
+namespace Sprout\Tests\Unit\Overrides\Broadcast;
 
 use Closure;
 use Illuminate\Broadcasting\BroadcastManager;
@@ -13,13 +13,13 @@ use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use RuntimeException;
-use Sprout;
+use Sprout\Bud;
 use Sprout\Contracts\ConfigStore;
 use Sprout\Exceptions\CyclicOverrideException;
 use Sprout\Managers\ConfigStoreManager;
 use Sprout\Overrides\Broadcast\BudBroadcastManager;
-use Sprout\Overrides\Broadcast\BudBroadcastConnectionOverride;
 use Sprout\Overrides\Broadcast\BudBroadcastManagerOverride;
+use Sprout\Overrides\Broadcast\BudBroadcastConnectionOverride;
 use Sprout\Tests\Unit\UnitTestCase;
 use Sprout\Contracts\BootableServiceOverride;
 use Sprout\Contracts\Tenancy;
@@ -44,7 +44,7 @@ class BudBroadcastOverrideTest extends UnitTestCase
         return Mockery::mock(BudBroadcastManager::class, static function (MockInterface $mock) use ($extends, $callback) {
             if ($extends) {
                 $mock->shouldReceive('extend')
-                     ->with('bud', Mockery::on(static function ($arg) {
+                     ->with('sprout:bud', Mockery::on(static function ($arg) {
                          return is_callable($arg) && $arg instanceof Closure;
                      }))
                      ->once();
@@ -59,8 +59,8 @@ class BudBroadcastOverrideTest extends UnitTestCase
     #[Test]
     public function isBuiltCorrectly(): void
     {
-        $this->assertTrue(is_subclass_of(BroadcastManagerOverride::class, BootableServiceOverride::class));
-        $this->assertTrue(is_subclass_of(BroadcastConnectionOverride::class, BootableServiceOverride::class));
+        $this->assertTrue(is_subclass_of(BudBroadcastManagerOverride::class, BootableServiceOverride::class));
+        $this->assertTrue(is_subclass_of(BudBroadcastConnectionOverride::class, BootableServiceOverride::class));
     }
 
     #[Test]
@@ -72,8 +72,8 @@ class BudBroadcastOverrideTest extends UnitTestCase
             'broadcast' => [
                 'driver'    => StackedOverride::class,
                 'overrides' => [
-                    BroadcastManagerOverride::class,
-                    BroadcastConnectionOverride::class,
+                    BudBroadcastManagerOverride::class,
+                    BudBroadcastConnectionOverride::class,
                 ],
             ],
         ]);
@@ -93,8 +93,8 @@ class BudBroadcastOverrideTest extends UnitTestCase
     {
         $override = new StackedOverride('broadcast', [
             'overrides' => [
-                BroadcastManagerOverride::class,
-                BroadcastConnectionOverride::class,
+                BudBroadcastManagerOverride::class,
+                BudBroadcastConnectionOverride::class,
             ],
         ]);
 
@@ -151,7 +151,7 @@ class BudBroadcastOverrideTest extends UnitTestCase
     {
         $override = new StackedOverride('broadcast', [
             'overrides' => [
-                BroadcastConnectionOverride::class,
+                BudBroadcastConnectionOverride::class,
             ],
         ]);
 
@@ -182,8 +182,8 @@ class BudBroadcastOverrideTest extends UnitTestCase
     {
         $override = new StackedOverride('broadcast', [
             'overrides' => [
-                BroadcastManagerOverride::class,
-                BroadcastConnectionOverride::class,
+                BudBroadcastManagerOverride::class,
+                BudBroadcastConnectionOverride::class,
             ],
         ]);
 
@@ -232,7 +232,7 @@ class BudBroadcastOverrideTest extends UnitTestCase
         $this->expectExceptionMessage('Unable to find configuration for [broadcast.bud-connection] for tenant [my-tenant] on tenancy [my-tenancy]');
 
         $manager->connectUsing('bud-connection', [
-            'driver' => 'bud',
+            'driver' => 'sprout:bud',
         ]);
     }
 
@@ -241,8 +241,8 @@ class BudBroadcastOverrideTest extends UnitTestCase
     {
         $override = new StackedOverride('broadcast', [
             'overrides' => [
-                BroadcastManagerOverride::class,
-                BroadcastConnectionOverride::class,
+                BudBroadcastManagerOverride::class,
+                BudBroadcastConnectionOverride::class,
             ],
         ]);
 
@@ -270,7 +270,7 @@ class BudBroadcastOverrideTest extends UnitTestCase
                               'broadcast',
                               'bud-connection',
                           )->andReturn([
-                             'driver' => 'bud',
+                             'driver' => 'sprout:bud',
                          ]);
                  }));
         })));
@@ -290,7 +290,7 @@ class BudBroadcastOverrideTest extends UnitTestCase
         $this->expectExceptionMessage('Attempt to create cyclic bud broadcast connection [bud-connection] detected');
 
         $manager->connectUsing('bud-connection', [
-            'driver' => 'bud',
+            'driver' => 'sprout:bud',
         ]);
     }
 
@@ -299,8 +299,8 @@ class BudBroadcastOverrideTest extends UnitTestCase
     {
         $override = new StackedOverride('broadcast', [
             'overrides' => [
-                BroadcastManagerOverride::class,
-                BroadcastConnectionOverride::class,
+                BudBroadcastManagerOverride::class,
+                BudBroadcastConnectionOverride::class,
             ],
         ]);
 
@@ -345,11 +345,11 @@ class BudBroadcastOverrideTest extends UnitTestCase
         $manager = $app->make(BroadcastManager::class);
 
         $manager->connectUsing('bud-connection', [
-            'driver' => 'bud',
+            'driver' => 'sprout:bud',
         ]);
 
-        $this->assertNotEmpty($override->getOverrides()[BroadcastConnectionOverride::class]->getOverrides());
-        $this->assertContains('bud-connection', $override->getOverrides()[BroadcastConnectionOverride::class]->getOverrides());
+        $this->assertNotEmpty($override->getOverrides()[BudBroadcastConnectionOverride::class]->getOverrides());
+        $this->assertContains('bud-connection', $override->getOverrides()[BudBroadcastConnectionOverride::class]->getOverrides());
     }
 
     #[Test]
@@ -357,8 +357,8 @@ class BudBroadcastOverrideTest extends UnitTestCase
     {
         $override = new StackedOverride('broadcast', [
             'overrides' => [
-                BroadcastManagerOverride::class,
-                BroadcastConnectionOverride::class,
+                BudBroadcastManagerOverride::class,
+                BudBroadcastConnectionOverride::class,
             ],
         ]);
 
@@ -402,14 +402,14 @@ class BudBroadcastOverrideTest extends UnitTestCase
 
         $override->boot($app, $sprout);
 
-        $broadcastOverride = $override->getOverride(BroadcastConnectionOverride::class);
+        $broadcastOverride = $override->getOverride(BudBroadcastConnectionOverride::class);
 
         $this->assertEmpty($broadcastOverride->getOverrides());
 
         $manager = $app->make(BroadcastManager::class);
 
         $manager->connectUsing('bud-connection', [
-            'driver' => 'bud',
+            'driver' => 'sprout:bud',
         ]);
 
         $this->assertNotEmpty($broadcastOverride->getOverrides());
@@ -425,8 +425,8 @@ class BudBroadcastOverrideTest extends UnitTestCase
     {
         $override = new StackedOverride('broadcast', [
             'overrides' => [
-                BroadcastManagerOverride::class,
-                BroadcastConnectionOverride::class,
+                BudBroadcastManagerOverride::class,
+                BudBroadcastConnectionOverride::class,
             ],
         ]);
 
@@ -440,7 +440,7 @@ class BudBroadcastOverrideTest extends UnitTestCase
         $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
 
         $app->make('config')->set('broadcasting.connections.bud-connection', [
-            'driver' => 'bud',
+            'driver' => 'sprout:bud',
         ]);
 
         $sprout = new Sprout($app, new SettingsRepository());
@@ -474,7 +474,7 @@ class BudBroadcastOverrideTest extends UnitTestCase
 
         $override->boot($app, $sprout);
 
-        $broadcastOverride = $override->getOverride(BroadcastConnectionOverride::class);
+        $broadcastOverride = $override->getOverride(BudBroadcastConnectionOverride::class);
 
         $this->assertEmpty($broadcastOverride->getOverrides());
 
@@ -495,8 +495,8 @@ class BudBroadcastOverrideTest extends UnitTestCase
     {
         $override = new StackedOverride('broadcast', [
             'overrides' => [
-                BroadcastManagerOverride::class,
-                BroadcastConnectionOverride::class,
+                BudBroadcastManagerOverride::class,
+                BudBroadcastConnectionOverride::class,
             ],
         ]);
 
@@ -510,7 +510,7 @@ class BudBroadcastOverrideTest extends UnitTestCase
         $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
 
         $app->make('config')->set('broadcasting.connections.bud-connection', [
-            'driver' => 'bud',
+            'driver' => 'sprout:bud',
         ]);
 
         $sprout = new Sprout($app, new SettingsRepository());
@@ -527,7 +527,7 @@ class BudBroadcastOverrideTest extends UnitTestCase
 
         $override->boot($app, $sprout);
 
-        $broadcastOverride = $override->getOverride(BroadcastConnectionOverride::class);
+        $broadcastOverride = $override->getOverride(BudBroadcastConnectionOverride::class);
 
         $this->assertEmpty($broadcastOverride->getOverrides());
 

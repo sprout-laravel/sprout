@@ -1,11 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Overrides;
+namespace Sprout\Overrides\Auth;
 
 use Illuminate\Auth\AuthManager;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
+use Sprout\Overrides\BaseOverride;
 
 /**
  * Auth Guard Override

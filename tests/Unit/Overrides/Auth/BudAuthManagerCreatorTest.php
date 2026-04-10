@@ -7,19 +7,19 @@ use Illuminate\Contracts\Auth\UserProvider;
 use Illuminate\Foundation\Application;
 use Mockery;
 use PHPUnit\Framework\Attributes\Test;
-use Sprout;
+use Sprout\Bud;
 use Sprout\Contracts\ConfigStore;
-use Sprout\Managers\ConfigStoreManager;
-use Sprout\Overrides\Auth\BudAuthManager;
-use Sprout\Overrides\Auth\BudAuthProviderCreator;
-use Sprout\Tests\Unit\UnitTestCase;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 use Sprout\Contracts\TenantHasResources;
 use Sprout\Exceptions\TenancyMissingException;
 use Sprout\Exceptions\TenantMissingException;
+use Sprout\Managers\ConfigStoreManager;
+use Sprout\Overrides\Auth\BudAuthManager;
+use Sprout\Overrides\Auth\BudAuthProviderCreator;
 use Sprout\Sprout;
 use Sprout\Support\SettingsRepository;
+use Sprout\Tests\Unit\UnitTestCase;
 
 class BudAuthManagerCreatorTest extends UnitTestCase
 {

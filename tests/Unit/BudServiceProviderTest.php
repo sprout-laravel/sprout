@@ -6,7 +6,7 @@ namespace Sprout\Tests\Unit;
 use Illuminate\Foundation\PackageManifest;
 use Illuminate\Support\ServiceProvider;
 use PHPUnit\Framework\Attributes\Test;
-use Sprout;
+use Sprout\Bud;
 use Sprout\BudServiceProvider;
 use Sprout\Contracts\ConfigStore;
 use Sprout\Managers\ConfigStoreManager;

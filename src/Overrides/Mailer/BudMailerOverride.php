@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Overrides;
+namespace Sprout\Overrides\Mailer;
 
 use Closure;
 use RuntimeException;
-use Sprout;
-use Sprout\Overrides\Mailer\BudMailerTransportCreator;
+use Sprout\Bud;
+use Sprout\Overrides\BudBaseOverride;
 use Sprout\Sprout;
 
 /**
@@ -17,7 +17,7 @@ use Sprout\Sprout;
  *
  * @extends \Sprout\Overrides\BudBaseOverride<\Illuminate\Mail\MailManager>
  */
-final class BudMailerOverride extends BaseOverride
+final class BudMailerOverride extends BudBaseOverride
 {
     /**
      * Get the name of the service being overridden.

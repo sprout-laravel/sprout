@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Overrides;
+namespace Sprout\Overrides\Job;
 
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Contracts\Foundation\Application;
@@ -9,6 +9,7 @@ use Illuminate\Queue\Events\JobProcessing;
 use Sprout\Contracts\BootableServiceOverride;
 use Sprout\Listeners\SetCurrentTenantForJob;
 use Sprout\Sprout;
+use Sprout\Overrides\BaseOverride;
 
 /**
  * Job Override

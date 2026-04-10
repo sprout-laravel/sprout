@@ -1,23 +1,24 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Overrides;
+namespace Sprout\Overrides\Auth;
 
 use Closure;
 use Illuminate\Foundation\Application;
 use LogicException;
 use RuntimeException;
-use Sprout;
+use Sprout\Bud;
 use Sprout\Overrides\Auth\BudAuthManager;
 use Sprout\Overrides\Auth\BudAuthProviderCreator;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
+use Sprout\Overrides\BudBaseOverride;
 use Sprout\Sprout;
 
 /**
  * @extends \Sprout\Overrides\BudBaseOverride<\Illuminate\Auth\AuthManager>
  */
-final class BudAuthProviderOverride extends BaseOverride
+final class BudAuthProviderOverride extends BudBaseOverride
 {
     /**
      * Get the name of the service being overridden.

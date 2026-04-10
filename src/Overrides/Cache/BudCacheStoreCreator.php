@@ -6,7 +6,7 @@ namespace Sprout\Overrides\Cache;
 use Illuminate\Cache\CacheManager;
 use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Support\Arr;
-use Sprout;
+use Sprout\Bud;
 use Sprout\Overrides\BaseCreator;
 use Sprout\Sprout;
 

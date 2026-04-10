@@ -1,15 +1,16 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Overrides;
+namespace Sprout\Overrides\Broadcast;
 
 use Closure;
 use Illuminate\Broadcasting\BroadcastManager;
 use Illuminate\Contracts\Foundation\Application;
 use LogicException;
-use Sprout;
+use Sprout\Bud;
 use Sprout\Overrides\Broadcast\BudBroadcastConnectionCreator;
 use Sprout\Overrides\Broadcast\BudBroadcastManager;
+use Sprout\Overrides\BudBaseOverride;
 use Sprout\Sprout;
 
 /**
@@ -20,7 +21,7 @@ use Sprout\Sprout;
  *
  * @extends \Sprout\Overrides\BudBaseOverride<\Illuminate\Broadcasting\BroadcastManager>
  */
-final class BudBroadcastConnectionOverride extends BaseOverride
+final class BudBroadcastConnectionOverride extends BudBaseOverride
 {
     /**
      * Get the name of the service being overridden.

@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Tests\Unit\Overrides;
+namespace Sprout\Tests\Unit\Overrides\Database;
 
 use Closure;
 use Illuminate\Config\Repository;
@@ -11,18 +11,18 @@ use Mockery;
 use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
-use Sprout;
-use Sprout\Contracts\ConfigStore;
-use Sprout\Exceptions\CyclicOverrideException;
-use Sprout\Managers\ConfigStoreManager;
-use Sprout\Overrides\Database\BudDatabaseConnectionOverride;
-use Sprout\Tests\Unit\UnitTestCase;
+use Sprout\Bud;
 use Sprout\Contracts\BootableServiceOverride;
+use Sprout\Contracts\ConfigStore;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 use Sprout\Contracts\TenantHasResources;
+use Sprout\Exceptions\CyclicOverrideException;
+use Sprout\Managers\ConfigStoreManager;
+use Sprout\Overrides\Database\BudDatabaseConnectionOverride;
 use Sprout\Sprout;
 use Sprout\Support\SettingsRepository;
+use Sprout\Tests\Unit\UnitTestCase;
 use function Sprout\sprout;
 
 class BudDatabaseConnectionOverrideTest extends UnitTestCase
@@ -39,7 +39,7 @@ class BudDatabaseConnectionOverrideTest extends UnitTestCase
         return Mockery::mock(DatabaseManager::class, static function (MockInterface $mock) use ($extends, $callback) {
             if ($extends) {
                 $mock->shouldReceive('extend')
-                     ->with('bud', Mockery::on(static function ($arg) {
+                     ->with('sprout:bud', Mockery::on(static function ($arg) {
                          return is_callable($arg) && $arg instanceof Closure;
                      }))
                      ->once();
@@ -54,7 +54,7 @@ class BudDatabaseConnectionOverrideTest extends UnitTestCase
     #[Test]
     public function isBuiltCorrectly(): void
     {
-        $this->assertTrue(is_subclass_of(DatabaseConnectionOverride::class, BootableServiceOverride::class));
+        $this->assertTrue(is_subclass_of(BudDatabaseConnectionOverride::class, BootableServiceOverride::class));
     }
 
     #[Test]
@@ -64,7 +64,7 @@ class BudDatabaseConnectionOverrideTest extends UnitTestCase
 
         config()->set('sprout.overrides', [
             'database' => [
-                'driver' => DatabaseConnectionOverride::class,
+                'driver' => BudDatabaseConnectionOverride::class,
             ],
         ]);
 
@@ -73,7 +73,7 @@ class BudDatabaseConnectionOverrideTest extends UnitTestCase
         $sprout->overrides()->registerOverrides();
 
         $this->assertTrue($sprout->overrides()->hasOverride('database'));
-        $this->assertSame(DatabaseConnectionOverride::class, $sprout->overrides()->getOverrideClass('database'));
+        $this->assertSame(BudDatabaseConnectionOverride::class, $sprout->overrides()->getOverrideClass('database'));
         $this->assertTrue($sprout->overrides()->isOverrideBootable('database'));
         $this->assertTrue($sprout->overrides()->hasOverrideBooted('database'));
     }
@@ -81,7 +81,7 @@ class BudDatabaseConnectionOverrideTest extends UnitTestCase
     #[Test, DataProvider('managerResolvedDataProvider')]
     public function bootsCorrectly(bool $return): void
     {
-        $override = new DatabaseConnectionOverride('database', []);
+        $override = new BudDatabaseConnectionOverride('database', []);
 
         /** @var \Illuminate\Foundation\Application&MockInterface $app */
         $app = Mockery::mock($this->app, function (MockInterface $mock) use ($return) {
@@ -124,7 +124,7 @@ class BudDatabaseConnectionOverrideTest extends UnitTestCase
     #[Test]
     public function errorsIfOverriddenConnectionAlsoUsesBud(): void
     {
-        $override = new DatabaseConnectionOverride('database', []);
+        $override = new BudDatabaseConnectionOverride('database', []);
 
         $tenant  = Mockery::mock(Tenant::class, TenantHasResources::class, static function (MockInterface $mock) {
         });
@@ -140,7 +140,7 @@ class BudDatabaseConnectionOverrideTest extends UnitTestCase
 
         $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
         $app->make('config')->set('database.connections.bud-connection', [
-            'driver'   => 'bud',
+            'driver' => 'sprout:bud',
             'database' => 'bud-database',
         ]);
 
@@ -154,7 +154,7 @@ class BudDatabaseConnectionOverrideTest extends UnitTestCase
                               'database',
                               'bud-connection',
                           )->andReturn([
-                             'driver'   => 'bud',
+                             'driver' => 'sprout:bud',
                              'database' => 'bud-database',
                          ]);
                  }));
@@ -180,7 +180,7 @@ class BudDatabaseConnectionOverrideTest extends UnitTestCase
     #[Test]
     public function keepsTrackOfResolvedBudDrivers(): void
     {
-        $override = new DatabaseConnectionOverride('database', []);
+        $override = new BudDatabaseConnectionOverride('database', []);
 
         $tenant  = Mockery::mock(Tenant::class, TenantHasResources::class, static function (MockInterface $mock) {
         });
@@ -196,7 +196,7 @@ class BudDatabaseConnectionOverrideTest extends UnitTestCase
 
         $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
         $app->make('config')->set('database.connections.bud-connection', [
-            'driver'   => 'bud',
+            'driver' => 'sprout:bud',
             'database' => 'bud-database',
         ]);
 
@@ -235,7 +235,7 @@ class BudDatabaseConnectionOverrideTest extends UnitTestCase
     #[Test]
     public function cleansUpResolvedDrivers(): void
     {
-        $override = new DatabaseConnectionOverride('database', []);
+        $override = new BudDatabaseConnectionOverride('database', []);
 
         $this->app->forgetInstance('db');
 
@@ -246,7 +246,7 @@ class BudDatabaseConnectionOverrideTest extends UnitTestCase
 
         $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
         $app->make('config')->set('database.connections.bud-connection', [
-            'driver'   => 'bud',
+            'driver' => 'sprout:bud',
             'database' => 'bud-database',
         ]);
 
@@ -298,7 +298,7 @@ class BudDatabaseConnectionOverrideTest extends UnitTestCase
     #[Test]
     public function cleansUpNothingWithoutResolvedDrivers(): void
     {
-        $override = new DatabaseConnectionOverride('database', []);
+        $override = new BudDatabaseConnectionOverride('database', []);
 
         $this->app->forgetInstance('db');
 
@@ -309,7 +309,7 @@ class BudDatabaseConnectionOverrideTest extends UnitTestCase
 
         $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
         $app->make('config')->set('database.connections.bud-connection', [
-            'driver'   => 'bud',
+            'driver' => 'sprout:bud',
             'database' => 'bud-database',
         ]);
 

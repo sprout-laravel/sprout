@@ -1,11 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Overrides;
+namespace Sprout\Overrides\Cookie;
 
 use Illuminate\Cookie\CookieJar;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
+use Sprout\Overrides\BaseOverride;
 
 /**
  * Cookie Override

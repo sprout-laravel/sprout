@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Sprout\Overrides\Auth;
 
 use Illuminate\Contracts\Auth\UserProvider;
-use Sprout;
+use Sprout\Bud;
 use Sprout\Overrides\BaseCreator;
 use Sprout\Sprout;
 

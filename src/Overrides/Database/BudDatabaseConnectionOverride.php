@@ -1,10 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Overrides;
+namespace Sprout\Overrides\Database;
 
 use Closure;
-use Sprout;
+use Sprout\Bud;
+use Sprout\Overrides\BaseOverride;
+use Sprout\Overrides\BudBaseOverride;
 use Sprout\Overrides\Database\BudDatabaseConnectionCreator;
 use Sprout\Sprout;
 
@@ -16,7 +18,7 @@ use Sprout\Sprout;
  *
  * @extends \Sprout\Overrides\BudBaseOverride<\Illuminate\Database\DatabaseManager>
  */
-final class BudDatabaseConnectionOverride extends BaseOverride
+final class BudDatabaseConnectionOverride extends BudBaseOverride
 {
     /**
      * Get the name of the service being overridden.

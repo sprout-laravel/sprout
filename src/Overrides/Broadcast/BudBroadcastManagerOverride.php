@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Overrides;
+namespace Sprout\Overrides\Broadcast;
 
 use Illuminate\Broadcasting\BroadcastManager;
 use Illuminate\Contracts\Container\Container;

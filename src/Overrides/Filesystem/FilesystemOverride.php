@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Overrides;
+namespace Sprout\Overrides\Filesystem;
 
 use Closure;
 use Illuminate\Contracts\Filesystem\Filesystem;
@@ -12,6 +12,7 @@ use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 use Sprout\Overrides\Filesystem\SproutFilesystemDriverCreator;
 use Sprout\Sprout;
+use Sprout\Overrides\BaseOverride;
 
 final class FilesystemOverride extends BaseOverride implements BootableServiceOverride
 {

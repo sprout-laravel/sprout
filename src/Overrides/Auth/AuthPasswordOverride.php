@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Overrides;
+namespace Sprout\Overrides\Auth;
 
 use Illuminate\Contracts\Foundation\Application;
 use Sprout\Contracts\BootableServiceOverride;
@@ -9,6 +9,7 @@ use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 use Sprout\Overrides\Auth\SproutAuthPasswordBrokerManager;
 use Sprout\Sprout;
+use Sprout\Overrides\BaseOverride;
 
 /**
  * Auth Password Override

@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Sprout\Overrides\Mailer;
 
 use Illuminate\Mail\MailManager;
-use Sprout;
+use Sprout\Bud;
 use Sprout\Overrides\BaseCreator;
 use Sprout\Sprout;
 use Symfony\Component\Mailer\Transport\TransportInterface;

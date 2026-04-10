@@ -1,12 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Overrides;
+namespace Sprout\Overrides\Filesystem;
 
 use Closure;
 use Illuminate\Contracts\Foundation\Application;
 use LogicException;
-use Sprout;
+use Sprout\Bud;
+use Sprout\Overrides\BudBaseOverride;
 use Sprout\Overrides\Filesystem\BudFilesystemDiskCreator;
 use Sprout\Overrides\Filesystem\SproutFilesystemManager;
 use Sprout\Sprout;
@@ -19,7 +20,7 @@ use Sprout\Sprout;
  *
  * @extends \Sprout\Overrides\BudBaseOverride<\Illuminate\Filesystem\FilesystemManager>
  */
-final class BudFilesystemDiskOverride extends BaseOverride
+final class BudFilesystemDiskOverride extends BudBaseOverride
 {
     /**
      * Get the name of the service being overridden.

@@ -1,5 +1,5 @@
 providers:
-  - Sprout\\SproutServiceProvider
+  - Sprout\SproutServiceProvider
 
 migrations:
   - workbench/database/migrations
