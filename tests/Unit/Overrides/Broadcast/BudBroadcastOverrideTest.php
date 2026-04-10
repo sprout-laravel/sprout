@@ -4,9 +4,9 @@ declare(strict_types=1);
 namespace Sprout\Bud\Tests\Unit\Overrides;
 
 use Closure;
+use Illuminate\Broadcasting\BroadcastManager;
 use Illuminate\Config\Repository;
 use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Filesystem\FilesystemManager;
 use LogicException;
 use Mockery;
 use Mockery\MockInterface;
@@ -17,20 +17,20 @@ use Sprout\Bud\Bud;
 use Sprout\Bud\Contracts\ConfigStore;
 use Sprout\Bud\Exceptions\CyclicOverrideException;
 use Sprout\Bud\Managers\ConfigStoreManager;
-use Sprout\Bud\Overrides\FilesystemDiskOverride;
+use Sprout\Bud\Overrides\Broadcast\BudBroadcastManager;
+use Sprout\Bud\Overrides\BroadcastConnectionOverride;
+use Sprout\Bud\Overrides\BroadcastManagerOverride;
 use Sprout\Bud\Tests\Unit\UnitTestCase;
 use Sprout\Core\Contracts\BootableServiceOverride;
 use Sprout\Core\Contracts\Tenancy;
 use Sprout\Core\Contracts\Tenant;
 use Sprout\Core\Contracts\TenantHasResources;
-use Sprout\Core\Overrides\Filesystem\SproutFilesystemManager;
-use Sprout\Core\Overrides\FilesystemManagerOverride;
 use Sprout\Core\Overrides\StackedOverride;
 use Sprout\Core\Sprout;
 use Sprout\Core\Support\SettingsRepository;
 use function Sprout\Core\sprout;
 
-class FilesystemDiskOverrideTest extends UnitTestCase
+class BudBroadcastOverrideTest extends UnitTestCase
 {
     protected function defineEnvironment($app): void
     {
@@ -39,21 +39,28 @@ class FilesystemDiskOverrideTest extends UnitTestCase
         });
     }
 
-    private function mockFilesystemManager(): FilesystemManager&MockInterface
+    private function mockBudBroadcastManager(bool $extends = true, ?Closure $callback = null): BudBroadcastManager&MockInterface
     {
-        return Mockery::mock(SproutFilesystemManager::class, static function (MockInterface $mock) {
-            $mock->shouldReceive('extend')
-                 ->with('bud', Mockery::on(static function ($arg) {
-                     return is_callable($arg) && $arg instanceof Closure;
-                 }))
-                 ->once();
+        return Mockery::mock(BudBroadcastManager::class, static function (MockInterface $mock) use ($extends, $callback) {
+            if ($extends) {
+                $mock->shouldReceive('extend')
+                     ->with('bud', Mockery::on(static function ($arg) {
+                         return is_callable($arg) && $arg instanceof Closure;
+                     }))
+                     ->once();
+            }
+
+            if ($callback) {
+                $callback($mock);
+            }
         });
     }
 
     #[Test]
     public function isBuiltCorrectly(): void
     {
-        $this->assertTrue(is_subclass_of(FilesystemDiskOverride::class, BootableServiceOverride::class));
+        $this->assertTrue(is_subclass_of(BroadcastManagerOverride::class, BootableServiceOverride::class));
+        $this->assertTrue(is_subclass_of(BroadcastConnectionOverride::class, BootableServiceOverride::class));
     }
 
     #[Test]
@@ -62,60 +69,63 @@ class FilesystemDiskOverrideTest extends UnitTestCase
         $sprout = sprout();
 
         config()->set('sprout.overrides', [
-            'filesystem' => [
+            'broadcast' => [
                 'driver'    => StackedOverride::class,
                 'overrides' => [
-                    FilesystemManagerOverride::class,
-                    FilesystemDiskOverride::class,
+                    BroadcastManagerOverride::class,
+                    BroadcastConnectionOverride::class,
                 ],
             ],
         ]);
 
-        $this->assertFalse($sprout->overrides()->hasOverride('filesystem'));
+        $this->assertFalse($sprout->overrides()->hasOverride('broadcast'));
 
         $sprout->overrides()->registerOverrides();
 
-        $this->assertTrue($sprout->overrides()->hasOverride('filesystem'));
-        $this->assertSame(StackedOverride::class, $sprout->overrides()->getOverrideClass('filesystem'));
-        $this->assertTrue($sprout->overrides()->isOverrideBootable('filesystem'));
-        $this->assertTrue($sprout->overrides()->hasOverrideBooted('filesystem'));
+        $this->assertTrue($sprout->overrides()->hasOverride('broadcast'));
+        $this->assertSame(StackedOverride::class, $sprout->overrides()->getOverrideClass('broadcast'));
+        $this->assertTrue($sprout->overrides()->isOverrideBootable('broadcast'));
+        $this->assertTrue($sprout->overrides()->hasOverrideBooted('broadcast'));
     }
 
-    #[Test, DataProvider('filesystemResolvedDataProvider')]
+    #[Test, DataProvider('broadcastResolvedDataProvider')]
     public function bootsCorrectly(bool $return): void
     {
-        $overrides = [
-            FilesystemManagerOverride::class,
-            FilesystemDiskOverride::class,
-        ];
-
-        $override = new StackedOverride('filesystem', compact('overrides'));
+        $override = new StackedOverride('broadcast', [
+            'overrides' => [
+                BroadcastManagerOverride::class,
+                BroadcastConnectionOverride::class,
+            ],
+        ]);
 
         /** @var \Illuminate\Foundation\Application&MockInterface $app */
         $app = Mockery::mock($this->app, function (MockInterface $mock) use ($return) {
             $mock->makePartial();
 
             if ($return) {
-                $mock->shouldReceive('forgetInstance')->with('filesystem')->once();
+                $mock->shouldReceive('forgetInstance')->with(BroadcastManager::class)->once();
             }
 
             $mock->shouldReceive('singleton')
-                 ->with('filesystem', Mockery::on(static function ($arg) {
+                 ->with(BroadcastManager::class, Mockery::on(static function ($arg) {
                      return is_callable($arg) && $arg instanceof Closure;
                  }))
                  ->once();
 
-            $mock->shouldReceive('resolved')->withArgs(['filesystem'])->andReturn($return)->times(2);
+            $mock->shouldReceive('resolved')
+                 ->withArgs([BroadcastManager::class])
+                 ->andReturn($return)
+                 ->times(2);
 
             if ($return) {
                 $mock->shouldReceive('make')
-                     ->with('filesystem')
-                     ->andReturn($this->mockFilesystemManager())
+                     ->with(BroadcastManager::class)
+                     ->andReturn($this->mockBudBroadcastManager())
                      ->times(2);
             } else {
                 $mock->shouldReceive('afterResolving')
                      ->withArgs([
-                         'filesystem',
+                         BroadcastManager::class,
                          Mockery::on(static function ($arg) {
                              return is_callable($arg) && $arg instanceof Closure;
                          }),
@@ -139,9 +149,9 @@ class FilesystemDiskOverrideTest extends UnitTestCase
     #[Test]
     public function errorsWithoutManager(): void
     {
-        $override = new StackedOverride('filesystem', [
+        $override = new StackedOverride('broadcast', [
             'overrides' => [
-                FilesystemDiskOverride::class,
+                BroadcastConnectionOverride::class,
             ],
         ]);
 
@@ -151,18 +161,18 @@ class FilesystemDiskOverrideTest extends UnitTestCase
         });
 
         // We have to bind the mock so that the extension can be registered.
-        $app->singleton('filesystem', fn () => Mockery::mock(FilesystemManager::class));
+        $app->singleton(BroadcastManager::class, fn () => Mockery::mock(BroadcastManager::class));
 
         $sprout = new Sprout($app, new SettingsRepository());
 
         $override->setApp($app)->setSprout($sprout);
 
         $this->expectException(LogicException::class);
-        $this->expectExceptionMessage('Cannot override filesystem disks without the Sprout filesystem manager override');
+        $this->expectExceptionMessage('Cannot override broadcast connections without the Bud broadcast manager override');
 
         // This is important, otherwise it doesn't behave nicely with the
         // afterResolving method.
-        $app->make('filesystem');
+        $app->make(BroadcastManager::class);
 
         $override->boot($app, $sprout);
     }
@@ -170,10 +180,10 @@ class FilesystemDiskOverrideTest extends UnitTestCase
     #[Test]
     public function errorsWithNoTenantSpecificConfig(): void
     {
-        $override = new StackedOverride('filesystem', [
+        $override = new StackedOverride('broadcast', [
             'overrides' => [
-                FilesystemManagerOverride::class,
-                FilesystemDiskOverride::class,
+                BroadcastManagerOverride::class,
+                BroadcastConnectionOverride::class,
             ],
         ]);
 
@@ -193,9 +203,6 @@ class FilesystemDiskOverrideTest extends UnitTestCase
         });
 
         $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
-        $app->make('config')->set('filesystems.disks.bud-disk', [
-            'driver' => 'bud',
-        ]);
 
         $app->singleton(Bud::class, fn () => new Bud($app, Mockery::mock(ConfigStoreManager::class, function (MockInterface $mock) use ($tenancy, $tenant) {
             $mock->shouldReceive('get')
@@ -204,8 +211,8 @@ class FilesystemDiskOverrideTest extends UnitTestCase
                           ->with(
                               $tenancy,
                               $tenant,
-                              'filesystem',
-                              'bud-disk',
+                              'broadcast',
+                              'bud-connection',
                           )->andReturn(null);
                  }));
         })));
@@ -218,22 +225,24 @@ class FilesystemDiskOverrideTest extends UnitTestCase
 
         $override->boot($app, $sprout);
 
-        /** @var \Sprout\Core\Overrides\Filesystem\SproutFilesystemManager $manager */
-        $manager = $app->make('filesystem');
+        /** @var \Sprout\Bud\Overrides\Broadcast\BudBroadcastManager $manager */
+        $manager = $app->make(BroadcastManager::class);
 
         $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('Unable to find configuration for [filesystem.bud-disk] for tenant [my-tenant] on tenancy [my-tenancy]');
+        $this->expectExceptionMessage('Unable to find configuration for [broadcast.bud-connection] for tenant [my-tenant] on tenancy [my-tenancy]');
 
-        $manager->disk('bud-disk');
+        $manager->connectUsing('bud-connection', [
+            'driver' => 'bud',
+        ]);
     }
 
     #[Test]
     public function errorsIfOverriddenConnectionAlsoUsesBud(): void
     {
-        $override = new StackedOverride('filesystem', [
+        $override = new StackedOverride('broadcast', [
             'overrides' => [
-                FilesystemManagerOverride::class,
-                FilesystemDiskOverride::class,
+                BroadcastManagerOverride::class,
+                BroadcastConnectionOverride::class,
             ],
         ]);
 
@@ -250,9 +259,6 @@ class FilesystemDiskOverrideTest extends UnitTestCase
         });
 
         $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
-        $app->make('config')->set('filesystems.disks.bud-disk', [
-            'driver' => 'bud',
-        ]);
 
         $app->singleton(Bud::class, fn () => new Bud($app, Mockery::mock(ConfigStoreManager::class, function (MockInterface $mock) use ($tenancy, $tenant) {
             $mock->shouldReceive('get')
@@ -261,8 +267,8 @@ class FilesystemDiskOverrideTest extends UnitTestCase
                           ->with(
                               $tenancy,
                               $tenant,
-                              'filesystem',
-                              'bud-disk',
+                              'broadcast',
+                              'bud-connection',
                           )->andReturn([
                              'driver' => 'bud',
                          ]);
@@ -277,42 +283,40 @@ class FilesystemDiskOverrideTest extends UnitTestCase
 
         $override->boot($app, $sprout);
 
-        /** @var \Sprout\Core\Overrides\Filesystem\SproutFilesystemManager $manager */
-        $manager = $app->make('filesystem');
+        /** @var \Sprout\Bud\Overrides\Broadcast\BudBroadcastManager $manager */
+        $manager = $app->make(BroadcastManager::class);
 
         $this->expectException(CyclicOverrideException::class);
-        $this->expectExceptionMessage('Attempt to create cyclic bud filesystem disk [bud-disk] detected');
+        $this->expectExceptionMessage('Attempt to create cyclic bud broadcast connection [bud-connection] detected');
 
-        $manager->disk('bud-disk');
+        $manager->connectUsing('bud-connection', [
+            'driver' => 'bud',
+        ]);
     }
 
     #[Test]
     public function keepsTrackOfResolvedBudDrivers(): void
     {
-        $override = new StackedOverride('filesystem', [
+        $override = new StackedOverride('broadcast', [
             'overrides' => [
-                FilesystemManagerOverride::class,
-                FilesystemDiskOverride::class,
+                BroadcastManagerOverride::class,
+                BroadcastConnectionOverride::class,
             ],
         ]);
 
-        /** @var \Illuminate\Foundation\Application&MockInterface $app */
-        $app = Mockery::mock($this->app, static function (MockInterface $mock) {
-            $mock->makePartial();
+        $tenant  = Mockery::mock(Tenant::class, TenantHasResources::class, static function (MockInterface $mock) {
         });
-
-        $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
-        $app->make('config')->set('filesystems.disks.bud-disk', [
-            'driver' => 'bud',
-        ]);
-
-        $tenant = Mockery::mock(Tenant::class, TenantHasResources::class, static function (MockInterface $mock) {
-        });
-
         $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) use ($tenant) {
             $mock->shouldReceive('check')->andReturnTrue()->once();
             $mock->shouldReceive('tenant')->andReturn($tenant)->once();
         });
+
+        /** @var \Illuminate\Foundation\Application&MockInterface $app */
+        $app = Mockery::mock($this->app, static function (MockInterface $mock) use ($tenancy, $tenant) {
+            $mock->makePartial();
+        });
+
+        $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
 
         $app->singleton(Bud::class, fn () => new Bud($app, Mockery::mock(ConfigStoreManager::class, function (MockInterface $mock) use ($tenancy, $tenant) {
             $mock->shouldReceive('get')
@@ -321,12 +325,10 @@ class FilesystemDiskOverrideTest extends UnitTestCase
                           ->with(
                               $tenancy,
                               $tenant,
-                              'filesystem',
-                              'bud-disk',
+                              'broadcast',
+                              'bud-connection',
                           )->andReturn([
-                             'driver' => 'local',
-                             'root'   => storage_path('app'),
-                             'throw'  => false,
+                             'driver' => 'null',
                          ]);
                  }));
         })));
@@ -339,26 +341,28 @@ class FilesystemDiskOverrideTest extends UnitTestCase
 
         $override->boot($app, $sprout);
 
-        /** @var \Sprout\Core\Overrides\Filesystem\SproutFilesystemManager $filesystem */
-        $filesystem = $app->make('filesystem');
+        /** @var \Sprout\Bud\Overrides\Broadcast\BudBroadcastManager $manager */
+        $manager = $app->make(BroadcastManager::class);
 
-        $filesystem->disk('bud-disk');
+        $manager->connectUsing('bud-connection', [
+            'driver' => 'bud',
+        ]);
 
-        $this->assertNotEmpty($override->getOverrides()[FilesystemDiskOverride::class]->getOverrides());
-        $this->assertContains('bud-disk', $override->getOverrides()[FilesystemDiskOverride::class]->getOverrides());
+        $this->assertNotEmpty($override->getOverrides()[BroadcastConnectionOverride::class]->getOverrides());
+        $this->assertContains('bud-connection', $override->getOverrides()[BroadcastConnectionOverride::class]->getOverrides());
     }
 
     #[Test]
     public function cleansUpResolvedDrivers(): void
     {
-        $override = new StackedOverride('filesystem', [
+        $override = new StackedOverride('broadcast', [
             'overrides' => [
-                FilesystemManagerOverride::class,
-                FilesystemDiskOverride::class,
+                BroadcastManagerOverride::class,
+                BroadcastConnectionOverride::class,
             ],
         ]);
 
-        $this->app->forgetInstance('filesystem');
+        $this->app->forgetInstance(BroadcastManager::class);
 
         /** @var \Illuminate\Foundation\Application&MockInterface $app */
         $app = Mockery::mock($this->app, static function (MockInterface $mock) {
@@ -366,9 +370,8 @@ class FilesystemDiskOverrideTest extends UnitTestCase
         });
 
         $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
-        $app->make('config')->set('filesystems.disks.bud-disk', [
-            'driver' => 'bud',
-        ]);
+
+        $sprout = new Sprout($app, new SettingsRepository());
 
         $tenant = Mockery::mock(Tenant::class, TenantHasResources::class, static function (MockInterface $mock) {
         });
@@ -385,17 +388,13 @@ class FilesystemDiskOverrideTest extends UnitTestCase
                           ->with(
                               $tenancy,
                               $tenant,
-                              'filesystem',
-                              'bud-disk',
+                              'broadcast',
+                              'bud-connection',
                           )->andReturn([
-                             'driver' => 'local',
-                             'root'   => storage_path('app'),
-                             'throw'  => false,
+                             'driver' => 'null',
                          ]);
                  }));
         })));
-
-        $sprout  = new Sprout($app, new SettingsRepository());
 
         $sprout->setCurrentTenancy($tenancy);
 
@@ -403,42 +402,71 @@ class FilesystemDiskOverrideTest extends UnitTestCase
 
         $override->boot($app, $sprout);
 
-        $filesystemOverride = $override->getOverride(FilesystemDiskOverride::class);
+        $broadcastOverride = $override->getOverride(BroadcastConnectionOverride::class);
 
-        $this->assertEmpty($filesystemOverride->getOverrides());
+        $this->assertEmpty($broadcastOverride->getOverrides());
 
-        $filesystem = $app->make('filesystem');
+        $manager = $app->make(BroadcastManager::class);
 
-        $filesystem->disk('bud-disk');
+        $manager->connectUsing('bud-connection', [
+            'driver' => 'bud',
+        ]);
 
-        $this->assertNotEmpty($filesystemOverride->getOverrides());
-        $this->assertContains('bud-disk', $filesystemOverride->getOverrides());
+        $this->assertNotEmpty($broadcastOverride->getOverrides());
+        $this->assertContains('bud-connection', $broadcastOverride->getOverrides());
 
         $override->cleanup($tenancy, $tenant);
 
-        $this->assertEmpty($filesystemOverride->getOverrides());
+        $this->assertEmpty($broadcastOverride->getOverrides());
     }
 
     #[Test]
-    public function cleansUpNothingWithoutResolvedDrivers(): void
+    public function cleansUpResolvedDriversFromPreconfiguredConnections(): void
     {
-        $override = new StackedOverride('filesystem', [
+        $override = new StackedOverride('broadcast', [
             'overrides' => [
-                FilesystemManagerOverride::class,
-                FilesystemDiskOverride::class,
+                BroadcastManagerOverride::class,
+                BroadcastConnectionOverride::class,
             ],
         ]);
 
-        $this->app->forgetInstance('filesystem');
+        $this->app->forgetInstance(BroadcastManager::class);
 
         /** @var \Illuminate\Foundation\Application&MockInterface $app */
         $app = Mockery::mock($this->app, static function (MockInterface $mock) {
             $mock->makePartial();
         });
 
-        $sprout  = new Sprout($app, new SettingsRepository());
-        $tenant  = Mockery::mock(Tenant::class, TenantHasResources::class);
-        $tenancy = Mockery::mock(Tenancy::class);
+        $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
+
+        $app->make('config')->set('broadcasting.connections.bud-connection', [
+            'driver' => 'bud',
+        ]);
+
+        $sprout = new Sprout($app, new SettingsRepository());
+
+        $tenant = Mockery::mock(Tenant::class, TenantHasResources::class, static function (MockInterface $mock) {
+        });
+
+        $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) use ($tenant) {
+            $mock->shouldReceive('check')->andReturnTrue()->once();
+            $mock->shouldReceive('tenant')->andReturn($tenant)->once();
+        });
+
+        $app->singleton(Bud::class, fn () => new Bud($app, Mockery::mock(ConfigStoreManager::class, function (MockInterface $mock) use ($tenancy, $tenant) {
+            $mock->shouldReceive('get')
+                 ->andReturn(Mockery::mock(ConfigStore::class, function (MockInterface $mock) use ($tenancy, $tenant) {
+                     $mock->shouldReceive('get')
+                          ->with(
+                              $tenancy,
+                              $tenant,
+                              'broadcast',
+                              'bud-connection',
+                          )->andReturn([
+                             'driver' => 'null',
+                         ]);
+                 }));
+        })));
 
         $sprout->setCurrentTenancy($tenancy);
 
@@ -446,24 +474,73 @@ class FilesystemDiskOverrideTest extends UnitTestCase
 
         $override->boot($app, $sprout);
 
-        $filesystemOverride = $override->getOverride(FilesystemDiskOverride::class);
+        $broadcastOverride = $override->getOverride(BroadcastConnectionOverride::class);
 
-        $this->assertEmpty($filesystemOverride->getOverrides());
+        $this->assertEmpty($broadcastOverride->getOverrides());
 
-        $app->make('filesystem');
+        $manager = $app->make(BroadcastManager::class);
 
-        $this->assertEmpty($filesystemOverride->getOverrides());
+        $manager->connection('bud-connection');
+
+        $this->assertNotEmpty($broadcastOverride->getOverrides());
+        $this->assertContains('bud-connection', $broadcastOverride->getOverrides());
 
         $override->cleanup($tenancy, $tenant);
 
-        $this->assertEmpty($filesystemOverride->getOverrides());
+        $this->assertEmpty($broadcastOverride->getOverrides());
     }
 
-    public static function filesystemResolvedDataProvider(): array
+    #[Test]
+    public function cleansUpNothingWithoutResolvedDrivers(): void
+    {
+        $override = new StackedOverride('broadcast', [
+            'overrides' => [
+                BroadcastManagerOverride::class,
+                BroadcastConnectionOverride::class,
+            ],
+        ]);
+
+        $this->app->forgetInstance(BroadcastManager::class);
+
+        /** @var \Illuminate\Foundation\Application&MockInterface $app */
+        $app = Mockery::mock($this->app, static function (MockInterface $mock) {
+            $mock->makePartial();
+        });
+
+        $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
+
+        $app->make('config')->set('broadcasting.connections.bud-connection', [
+            'driver' => 'bud',
+        ]);
+
+        $sprout = new Sprout($app, new SettingsRepository());
+
+        $tenant = Mockery::mock(Tenant::class, TenantHasResources::class, static function (MockInterface $mock) {
+        });
+
+        $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) use ($tenant) {
+        });
+
+        $sprout->setCurrentTenancy($tenancy);
+
+        $override->setApp($app)->setSprout($sprout);
+
+        $override->boot($app, $sprout);
+
+        $broadcastOverride = $override->getOverride(BroadcastConnectionOverride::class);
+
+        $this->assertEmpty($broadcastOverride->getOverrides());
+
+        $override->cleanup($tenancy, $tenant);
+
+        $this->assertEmpty($broadcastOverride->getOverrides());
+    }
+
+    public static function broadcastResolvedDataProvider(): array
     {
         return [
-            'filesystem resolved'     => [true],
-            'filesystem not resolved' => [false],
+            'broadcast resolved'     => [true],
+            'broadcast not resolved' => [false],
         ];
     }
 }

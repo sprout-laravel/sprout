@@ -25,7 +25,7 @@ use Sprout\Core\Sprout;
 use Sprout\Core\Support\SettingsRepository;
 use function Sprout\Core\sprout;
 
-class DatabaseConnectionOverrideTest extends UnitTestCase
+class BudDatabaseConnectionOverrideTest extends UnitTestCase
 {
     protected function defineEnvironment($app): void
     {

@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Sprout\Bud\Tests\Unit\Overrides;
 
 use Closure;
-use Illuminate\Broadcasting\BroadcastManager;
+use Illuminate\Auth\AuthManager;
 use Illuminate\Config\Repository;
 use Illuminate\Contracts\Foundation\Application;
 use LogicException;
@@ -17,9 +17,9 @@ use Sprout\Bud\Bud;
 use Sprout\Bud\Contracts\ConfigStore;
 use Sprout\Bud\Exceptions\CyclicOverrideException;
 use Sprout\Bud\Managers\ConfigStoreManager;
-use Sprout\Bud\Overrides\Broadcast\BudBroadcastManager;
-use Sprout\Bud\Overrides\BroadcastConnectionOverride;
-use Sprout\Bud\Overrides\BroadcastManagerOverride;
+use Sprout\Bud\Overrides\Auth\BudAuthManager;
+use Sprout\Bud\Overrides\AuthManagerOverride;
+use Sprout\Bud\Overrides\AuthProviderOverride;
 use Sprout\Bud\Tests\Unit\UnitTestCase;
 use Sprout\Core\Contracts\BootableServiceOverride;
 use Sprout\Core\Contracts\Tenancy;
@@ -30,7 +30,7 @@ use Sprout\Core\Sprout;
 use Sprout\Core\Support\SettingsRepository;
 use function Sprout\Core\sprout;
 
-class BroadcastOverrideTest extends UnitTestCase
+class BudAuthOverrideTest extends UnitTestCase
 {
     protected function defineEnvironment($app): void
     {
@@ -39,11 +39,11 @@ class BroadcastOverrideTest extends UnitTestCase
         });
     }
 
-    private function mockBudBroadcastManager(bool $extends = true, ?Closure $callback = null): BudBroadcastManager&MockInterface
+    private function mockBudAuthManager(bool $extends = true, ?Closure $callback = null): BudAuthManager&MockInterface
     {
-        return Mockery::mock(BudBroadcastManager::class, static function (MockInterface $mock) use ($extends, $callback) {
+        return Mockery::mock(BudAuthManager::class, static function (MockInterface $mock) use ($extends, $callback) {
             if ($extends) {
-                $mock->shouldReceive('extend')
+                $mock->shouldReceive('provider')
                      ->with('bud', Mockery::on(static function ($arg) {
                          return is_callable($arg) && $arg instanceof Closure;
                      }))
@@ -59,8 +59,8 @@ class BroadcastOverrideTest extends UnitTestCase
     #[Test]
     public function isBuiltCorrectly(): void
     {
-        $this->assertTrue(is_subclass_of(BroadcastManagerOverride::class, BootableServiceOverride::class));
-        $this->assertTrue(is_subclass_of(BroadcastConnectionOverride::class, BootableServiceOverride::class));
+        $this->assertTrue(is_subclass_of(AuthManagerOverride::class, BootableServiceOverride::class));
+        $this->assertTrue(is_subclass_of(AuthProviderOverride::class, BootableServiceOverride::class));
     }
 
     #[Test]
@@ -69,32 +69,32 @@ class BroadcastOverrideTest extends UnitTestCase
         $sprout = sprout();
 
         config()->set('sprout.overrides', [
-            'broadcast' => [
+            'auth' => [
                 'driver'    => StackedOverride::class,
                 'overrides' => [
-                    BroadcastManagerOverride::class,
-                    BroadcastConnectionOverride::class,
+                    AuthManagerOverride::class,
+                    AuthProviderOverride::class,
                 ],
             ],
         ]);
 
-        $this->assertFalse($sprout->overrides()->hasOverride('broadcast'));
+        $this->assertFalse($sprout->overrides()->hasOverride('auth'));
 
         $sprout->overrides()->registerOverrides();
 
-        $this->assertTrue($sprout->overrides()->hasOverride('broadcast'));
-        $this->assertSame(StackedOverride::class, $sprout->overrides()->getOverrideClass('broadcast'));
-        $this->assertTrue($sprout->overrides()->isOverrideBootable('broadcast'));
-        $this->assertTrue($sprout->overrides()->hasOverrideBooted('broadcast'));
+        $this->assertTrue($sprout->overrides()->hasOverride('auth'));
+        $this->assertSame(StackedOverride::class, $sprout->overrides()->getOverrideClass('auth'));
+        $this->assertTrue($sprout->overrides()->isOverrideBootable('auth'));
+        $this->assertTrue($sprout->overrides()->hasOverrideBooted('auth'));
     }
 
-    #[Test, DataProvider('broadcastResolvedDataProvider')]
+    #[Test, DataProvider('authResolvedDataProvider')]
     public function bootsCorrectly(bool $return): void
     {
-        $override = new StackedOverride('broadcast', [
+        $override = new StackedOverride('auth', [
             'overrides' => [
-                BroadcastManagerOverride::class,
-                BroadcastConnectionOverride::class,
+                AuthManagerOverride::class,
+                AuthProviderOverride::class,
             ],
         ]);
 
@@ -103,29 +103,29 @@ class BroadcastOverrideTest extends UnitTestCase
             $mock->makePartial();
 
             if ($return) {
-                $mock->shouldReceive('forgetInstance')->with(BroadcastManager::class)->once();
+                $mock->shouldReceive('forgetInstance')->with('auth')->once();
             }
 
             $mock->shouldReceive('singleton')
-                 ->with(BroadcastManager::class, Mockery::on(static function ($arg) {
+                 ->with('auth', Mockery::on(static function ($arg) {
                      return is_callable($arg) && $arg instanceof Closure;
                  }))
                  ->once();
 
             $mock->shouldReceive('resolved')
-                 ->withArgs([BroadcastManager::class])
+                 ->withArgs(['auth'])
                  ->andReturn($return)
                  ->times(2);
 
             if ($return) {
                 $mock->shouldReceive('make')
-                     ->with(BroadcastManager::class)
-                     ->andReturn($this->mockBudBroadcastManager())
+                     ->with('auth')
+                     ->andReturn($this->mockBudAuthManager())
                      ->times(2);
             } else {
                 $mock->shouldReceive('afterResolving')
                      ->withArgs([
-                         BroadcastManager::class,
+                         'auth',
                          Mockery::on(static function ($arg) {
                              return is_callable($arg) && $arg instanceof Closure;
                          }),
@@ -149,9 +149,9 @@ class BroadcastOverrideTest extends UnitTestCase
     #[Test]
     public function errorsWithoutManager(): void
     {
-        $override = new StackedOverride('broadcast', [
+        $override = new StackedOverride('auth', [
             'overrides' => [
-                BroadcastConnectionOverride::class,
+                AuthProviderOverride::class,
             ],
         ]);
 
@@ -161,18 +161,18 @@ class BroadcastOverrideTest extends UnitTestCase
         });
 
         // We have to bind the mock so that the extension can be registered.
-        $app->singleton(BroadcastManager::class, fn () => Mockery::mock(BroadcastManager::class));
+        $app->singleton(AuthManager::class, fn () => Mockery::mock(AuthManager::class));
 
         $sprout = new Sprout($app, new SettingsRepository());
 
         $override->setApp($app)->setSprout($sprout);
 
         $this->expectException(LogicException::class);
-        $this->expectExceptionMessage('Cannot override broadcast connections without the Bud broadcast manager override');
+        $this->expectExceptionMessage('Cannot override auth providers without the Bud auth manager override');
 
         // This is important, otherwise it doesn't behave nicely with the
         // afterResolving method.
-        $app->make(BroadcastManager::class);
+        $app->make('auth');
 
         $override->boot($app, $sprout);
     }
@@ -180,10 +180,10 @@ class BroadcastOverrideTest extends UnitTestCase
     #[Test]
     public function errorsWithNoTenantSpecificConfig(): void
     {
-        $override = new StackedOverride('broadcast', [
+        $override = new StackedOverride('auth', [
             'overrides' => [
-                BroadcastManagerOverride::class,
-                BroadcastConnectionOverride::class,
+                AuthManagerOverride::class,
+                AuthProviderOverride::class,
             ],
         ]);
 
@@ -211,8 +211,8 @@ class BroadcastOverrideTest extends UnitTestCase
                           ->with(
                               $tenancy,
                               $tenant,
-                              'broadcast',
-                              'bud-connection',
+                              'auth',
+                              'bud-provider',
                           )->andReturn(null);
                  }));
         })));
@@ -225,24 +225,22 @@ class BroadcastOverrideTest extends UnitTestCase
 
         $override->boot($app, $sprout);
 
-        /** @var \Sprout\Bud\Overrides\Broadcast\BudBroadcastManager $manager */
-        $manager = $app->make(BroadcastManager::class);
+        /** @var \Sprout\Bud\Overrides\Auth\BudAuthManager $manager */
+        $manager = $app->make('auth');
 
         $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('Unable to find configuration for [broadcast.bud-connection] for tenant [my-tenant] on tenancy [my-tenancy]');
+        $this->expectExceptionMessage('Unable to find configuration for [auth.bud-provider] for tenant [my-tenant] on tenancy [my-tenancy]');
 
-        $manager->connectUsing('bud-connection', [
-            'driver' => 'bud',
-        ]);
+        $manager->createUserProviderFromConfig(['driver' => 'bud', 'provider' => 'bud-provider']);
     }
 
     #[Test]
     public function errorsIfOverriddenConnectionAlsoUsesBud(): void
     {
-        $override = new StackedOverride('broadcast', [
+        $override = new StackedOverride('auth', [
             'overrides' => [
-                BroadcastManagerOverride::class,
-                BroadcastConnectionOverride::class,
+                AuthManagerOverride::class,
+                AuthProviderOverride::class,
             ],
         ]);
 
@@ -267,8 +265,8 @@ class BroadcastOverrideTest extends UnitTestCase
                           ->with(
                               $tenancy,
                               $tenant,
-                              'broadcast',
-                              'bud-connection',
+                              'auth',
+                              'bud-provider',
                           )->andReturn([
                              'driver' => 'bud',
                          ]);
@@ -283,24 +281,25 @@ class BroadcastOverrideTest extends UnitTestCase
 
         $override->boot($app, $sprout);
 
-        /** @var \Sprout\Bud\Overrides\Broadcast\BudBroadcastManager $manager */
-        $manager = $app->make(BroadcastManager::class);
+        /** @var \Sprout\Bud\Overrides\Auth\BudAuthManager $manager */
+        $manager = $app->make('auth');
 
         $this->expectException(CyclicOverrideException::class);
-        $this->expectExceptionMessage('Attempt to create cyclic bud broadcast connection [bud-connection] detected');
+        $this->expectExceptionMessage('Attempt to create cyclic bud auth provider [bud-provider] detected');
 
-        $manager->connectUsing('bud-connection', [
-            'driver' => 'bud',
+        $manager->createUserProviderFromConfig([
+            'driver'   => 'bud',
+            'provider' => 'bud-provider',
         ]);
     }
 
     #[Test]
-    public function keepsTrackOfResolvedBudDrivers(): void
+    public function keepsTrackOfResolvedBudProviders(): void
     {
-        $override = new StackedOverride('broadcast', [
+        $override = new StackedOverride('auth', [
             'overrides' => [
-                BroadcastManagerOverride::class,
-                BroadcastConnectionOverride::class,
+                AuthManagerOverride::class,
+                AuthProviderOverride::class,
             ],
         ]);
 
@@ -325,10 +324,11 @@ class BroadcastOverrideTest extends UnitTestCase
                           ->with(
                               $tenancy,
                               $tenant,
-                              'broadcast',
-                              'bud-connection',
+                              'auth',
+                              'bud-provider',
                           )->andReturn([
-                             'driver' => 'null',
+                             'driver' => 'database',
+                             'table'  => 'fake-table',
                          ]);
                  }));
         })));
@@ -341,28 +341,26 @@ class BroadcastOverrideTest extends UnitTestCase
 
         $override->boot($app, $sprout);
 
-        /** @var \Sprout\Bud\Overrides\Broadcast\BudBroadcastManager $manager */
-        $manager = $app->make(BroadcastManager::class);
+        /** @var \Sprout\Bud\Overrides\Auth\BudAuthManager $manager */
+        $manager = $app->make('auth');
 
-        $manager->connectUsing('bud-connection', [
-            'driver' => 'bud',
-        ]);
+        $manager->createUserProviderFromConfig(['provider' => 'bud-provider', 'driver' => 'bud']);
 
-        $this->assertNotEmpty($override->getOverrides()[BroadcastConnectionOverride::class]->getOverrides());
-        $this->assertContains('bud-connection', $override->getOverrides()[BroadcastConnectionOverride::class]->getOverrides());
+        $this->assertNotEmpty($override->getOverrides()[AuthProviderOverride::class]->getOverrides());
+        $this->assertContains('bud-provider', $override->getOverrides()[AuthProviderOverride::class]->getOverrides());
     }
 
     #[Test]
     public function cleansUpResolvedDrivers(): void
     {
-        $override = new StackedOverride('broadcast', [
+        $override = new StackedOverride('auth', [
             'overrides' => [
-                BroadcastManagerOverride::class,
-                BroadcastConnectionOverride::class,
+                AuthManagerOverride::class,
+                AuthProviderOverride::class,
             ],
         ]);
 
-        $this->app->forgetInstance(BroadcastManager::class);
+        $this->app->forgetInstance('auth');
 
         /** @var \Illuminate\Foundation\Application&MockInterface $app */
         $app = Mockery::mock($this->app, static function (MockInterface $mock) {
@@ -388,10 +386,11 @@ class BroadcastOverrideTest extends UnitTestCase
                           ->with(
                               $tenancy,
                               $tenant,
-                              'broadcast',
-                              'bud-connection',
+                              'auth',
+                              'bud-provider',
                           )->andReturn([
-                             'driver' => 'null',
+                             'driver' => 'database',
+                             'table'  => 'fake-table',
                          ]);
                  }));
         })));
@@ -402,35 +401,34 @@ class BroadcastOverrideTest extends UnitTestCase
 
         $override->boot($app, $sprout);
 
-        $broadcastOverride = $override->getOverride(BroadcastConnectionOverride::class);
+        $authOverride = $override->getOverride(AuthProviderOverride::class);
 
-        $this->assertEmpty($broadcastOverride->getOverrides());
+        $this->assertEmpty($authOverride->getOverrides());
 
-        $manager = $app->make(BroadcastManager::class);
+        /** @var \Sprout\Bud\Overrides\Auth\BudAuthManager $manager */
+        $manager = $app->make('auth');
 
-        $manager->connectUsing('bud-connection', [
-            'driver' => 'bud',
-        ]);
+        $manager->createUserProviderFromConfig(['provider' => 'bud-provider', 'driver' => 'bud']);
 
-        $this->assertNotEmpty($broadcastOverride->getOverrides());
-        $this->assertContains('bud-connection', $broadcastOverride->getOverrides());
+        $this->assertNotEmpty($authOverride->getOverrides());
+        $this->assertContains('bud-provider', $authOverride->getOverrides());
 
         $override->cleanup($tenancy, $tenant);
 
-        $this->assertEmpty($broadcastOverride->getOverrides());
+        $this->assertEmpty($authOverride->getOverrides());
     }
 
     #[Test]
     public function cleansUpResolvedDriversFromPreconfiguredConnections(): void
     {
-        $override = new StackedOverride('broadcast', [
+        $override = new StackedOverride('auth', [
             'overrides' => [
-                BroadcastManagerOverride::class,
-                BroadcastConnectionOverride::class,
+                AuthManagerOverride::class,
+                AuthProviderOverride::class,
             ],
         ]);
 
-        $this->app->forgetInstance(BroadcastManager::class);
+        $this->app->forgetInstance('auth');
 
         /** @var \Illuminate\Foundation\Application&MockInterface $app */
         $app = Mockery::mock($this->app, static function (MockInterface $mock) {
@@ -439,7 +437,7 @@ class BroadcastOverrideTest extends UnitTestCase
 
         $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
 
-        $app->make('config')->set('broadcasting.connections.bud-connection', [
+        $app->make('config')->set('auth.providers.bud-provider', [
             'driver' => 'bud',
         ]);
 
@@ -460,10 +458,11 @@ class BroadcastOverrideTest extends UnitTestCase
                           ->with(
                               $tenancy,
                               $tenant,
-                              'broadcast',
-                              'bud-connection',
+                              'auth',
+                              'bud-provider',
                           )->andReturn([
-                             'driver' => 'null',
+                             'driver' => 'database',
+                             'table'  => 'fake-table',
                          ]);
                  }));
         })));
@@ -474,33 +473,34 @@ class BroadcastOverrideTest extends UnitTestCase
 
         $override->boot($app, $sprout);
 
-        $broadcastOverride = $override->getOverride(BroadcastConnectionOverride::class);
+        $authOverride = $override->getOverride(AuthProviderOverride::class);
 
-        $this->assertEmpty($broadcastOverride->getOverrides());
+        $this->assertEmpty($authOverride->getOverrides());
 
-        $manager = $app->make(BroadcastManager::class);
+        /** @var \Sprout\Bud\Overrides\Auth\BudAuthManager $manager */
+        $manager = $app->make('auth');
 
-        $manager->connection('bud-connection');
+        $manager->createUserProvider('bud-provider');
 
-        $this->assertNotEmpty($broadcastOverride->getOverrides());
-        $this->assertContains('bud-connection', $broadcastOverride->getOverrides());
+        $this->assertNotEmpty($authOverride->getOverrides());
+        $this->assertContains('bud-provider', $authOverride->getOverrides());
 
         $override->cleanup($tenancy, $tenant);
 
-        $this->assertEmpty($broadcastOverride->getOverrides());
+        $this->assertEmpty($authOverride->getOverrides());
     }
 
     #[Test]
     public function cleansUpNothingWithoutResolvedDrivers(): void
     {
-        $override = new StackedOverride('broadcast', [
+        $override = new StackedOverride('auth', [
             'overrides' => [
-                BroadcastManagerOverride::class,
-                BroadcastConnectionOverride::class,
+                AuthManagerOverride::class,
+                AuthProviderOverride::class,
             ],
         ]);
 
-        $this->app->forgetInstance(BroadcastManager::class);
+        $this->app->forgetInstance('auth');
 
         /** @var \Illuminate\Foundation\Application&MockInterface $app */
         $app = Mockery::mock($this->app, static function (MockInterface $mock) {
@@ -509,7 +509,7 @@ class BroadcastOverrideTest extends UnitTestCase
 
         $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
 
-        $app->make('config')->set('broadcasting.connections.bud-connection', [
+        $app->make('config')->set('auth.providers.bud-provider', [
             'driver' => 'bud',
         ]);
 
@@ -527,20 +527,20 @@ class BroadcastOverrideTest extends UnitTestCase
 
         $override->boot($app, $sprout);
 
-        $broadcastOverride = $override->getOverride(BroadcastConnectionOverride::class);
+        $authOverride = $override->getOverride(AuthProviderOverride::class);
 
-        $this->assertEmpty($broadcastOverride->getOverrides());
+        $this->assertEmpty($authOverride->getOverrides());
 
         $override->cleanup($tenancy, $tenant);
 
-        $this->assertEmpty($broadcastOverride->getOverrides());
+        $this->assertEmpty($authOverride->getOverrides());
     }
 
-    public static function broadcastResolvedDataProvider(): array
+    public static function authResolvedDataProvider(): array
     {
         return [
-            'broadcast resolved'     => [true],
-            'broadcast not resolved' => [false],
+            'auth resolved'     => [true],
+            'auth not resolved' => [false],
         ];
     }
 }

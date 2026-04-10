@@ -4,9 +4,9 @@ declare(strict_types=1);
 namespace Sprout\Bud\Tests\Unit\Overrides;
 
 use Closure;
-use Illuminate\Auth\AuthManager;
 use Illuminate\Config\Repository;
 use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Filesystem\FilesystemManager;
 use LogicException;
 use Mockery;
 use Mockery\MockInterface;
@@ -17,20 +17,20 @@ use Sprout\Bud\Bud;
 use Sprout\Bud\Contracts\ConfigStore;
 use Sprout\Bud\Exceptions\CyclicOverrideException;
 use Sprout\Bud\Managers\ConfigStoreManager;
-use Sprout\Bud\Overrides\Auth\BudAuthManager;
-use Sprout\Bud\Overrides\AuthManagerOverride;
-use Sprout\Bud\Overrides\AuthProviderOverride;
+use Sprout\Bud\Overrides\FilesystemDiskOverride;
 use Sprout\Bud\Tests\Unit\UnitTestCase;
 use Sprout\Core\Contracts\BootableServiceOverride;
 use Sprout\Core\Contracts\Tenancy;
 use Sprout\Core\Contracts\Tenant;
 use Sprout\Core\Contracts\TenantHasResources;
+use Sprout\Core\Overrides\Filesystem\SproutFilesystemManager;
+use Sprout\Core\Overrides\FilesystemManagerOverride;
 use Sprout\Core\Overrides\StackedOverride;
 use Sprout\Core\Sprout;
 use Sprout\Core\Support\SettingsRepository;
 use function Sprout\Core\sprout;
 
-class AuthOverrideTest extends UnitTestCase
+class BudFilesystemDiskOverrideTest extends UnitTestCase
 {
     protected function defineEnvironment($app): void
     {
@@ -39,28 +39,21 @@ class AuthOverrideTest extends UnitTestCase
         });
     }
 
-    private function mockBudAuthManager(bool $extends = true, ?Closure $callback = null): BudAuthManager&MockInterface
+    private function mockFilesystemManager(): FilesystemManager&MockInterface
     {
-        return Mockery::mock(BudAuthManager::class, static function (MockInterface $mock) use ($extends, $callback) {
-            if ($extends) {
-                $mock->shouldReceive('provider')
-                     ->with('bud', Mockery::on(static function ($arg) {
-                         return is_callable($arg) && $arg instanceof Closure;
-                     }))
-                     ->once();
-            }
-
-            if ($callback) {
-                $callback($mock);
-            }
+        return Mockery::mock(SproutFilesystemManager::class, static function (MockInterface $mock) {
+            $mock->shouldReceive('extend')
+                 ->with('bud', Mockery::on(static function ($arg) {
+                     return is_callable($arg) && $arg instanceof Closure;
+                 }))
+                 ->once();
         });
     }
 
     #[Test]
     public function isBuiltCorrectly(): void
     {
-        $this->assertTrue(is_subclass_of(AuthManagerOverride::class, BootableServiceOverride::class));
-        $this->assertTrue(is_subclass_of(AuthProviderOverride::class, BootableServiceOverride::class));
+        $this->assertTrue(is_subclass_of(FilesystemDiskOverride::class, BootableServiceOverride::class));
     }
 
     #[Test]
@@ -69,63 +62,60 @@ class AuthOverrideTest extends UnitTestCase
         $sprout = sprout();
 
         config()->set('sprout.overrides', [
-            'auth' => [
+            'filesystem' => [
                 'driver'    => StackedOverride::class,
                 'overrides' => [
-                    AuthManagerOverride::class,
-                    AuthProviderOverride::class,
+                    FilesystemManagerOverride::class,
+                    FilesystemDiskOverride::class,
                 ],
             ],
         ]);
 
-        $this->assertFalse($sprout->overrides()->hasOverride('auth'));
+        $this->assertFalse($sprout->overrides()->hasOverride('filesystem'));
 
         $sprout->overrides()->registerOverrides();
 
-        $this->assertTrue($sprout->overrides()->hasOverride('auth'));
-        $this->assertSame(StackedOverride::class, $sprout->overrides()->getOverrideClass('auth'));
-        $this->assertTrue($sprout->overrides()->isOverrideBootable('auth'));
-        $this->assertTrue($sprout->overrides()->hasOverrideBooted('auth'));
+        $this->assertTrue($sprout->overrides()->hasOverride('filesystem'));
+        $this->assertSame(StackedOverride::class, $sprout->overrides()->getOverrideClass('filesystem'));
+        $this->assertTrue($sprout->overrides()->isOverrideBootable('filesystem'));
+        $this->assertTrue($sprout->overrides()->hasOverrideBooted('filesystem'));
     }
 
-    #[Test, DataProvider('authResolvedDataProvider')]
+    #[Test, DataProvider('filesystemResolvedDataProvider')]
     public function bootsCorrectly(bool $return): void
     {
-        $override = new StackedOverride('auth', [
-            'overrides' => [
-                AuthManagerOverride::class,
-                AuthProviderOverride::class,
-            ],
-        ]);
+        $overrides = [
+            FilesystemManagerOverride::class,
+            FilesystemDiskOverride::class,
+        ];
+
+        $override = new StackedOverride('filesystem', compact('overrides'));
 
         /** @var \Illuminate\Foundation\Application&MockInterface $app */
         $app = Mockery::mock($this->app, function (MockInterface $mock) use ($return) {
             $mock->makePartial();
 
             if ($return) {
-                $mock->shouldReceive('forgetInstance')->with('auth')->once();
+                $mock->shouldReceive('forgetInstance')->with('filesystem')->once();
             }
 
             $mock->shouldReceive('singleton')
-                 ->with('auth', Mockery::on(static function ($arg) {
+                 ->with('filesystem', Mockery::on(static function ($arg) {
                      return is_callable($arg) && $arg instanceof Closure;
                  }))
                  ->once();
 
-            $mock->shouldReceive('resolved')
-                 ->withArgs(['auth'])
-                 ->andReturn($return)
-                 ->times(2);
+            $mock->shouldReceive('resolved')->withArgs(['filesystem'])->andReturn($return)->times(2);
 
             if ($return) {
                 $mock->shouldReceive('make')
-                     ->with('auth')
-                     ->andReturn($this->mockBudAuthManager())
+                     ->with('filesystem')
+                     ->andReturn($this->mockFilesystemManager())
                      ->times(2);
             } else {
                 $mock->shouldReceive('afterResolving')
                      ->withArgs([
-                         'auth',
+                         'filesystem',
                          Mockery::on(static function ($arg) {
                              return is_callable($arg) && $arg instanceof Closure;
                          }),
@@ -149,9 +139,9 @@ class AuthOverrideTest extends UnitTestCase
     #[Test]
     public function errorsWithoutManager(): void
     {
-        $override = new StackedOverride('auth', [
+        $override = new StackedOverride('filesystem', [
             'overrides' => [
-                AuthProviderOverride::class,
+                FilesystemDiskOverride::class,
             ],
         ]);
 
@@ -161,18 +151,18 @@ class AuthOverrideTest extends UnitTestCase
         });
 
         // We have to bind the mock so that the extension can be registered.
-        $app->singleton(AuthManager::class, fn () => Mockery::mock(AuthManager::class));
+        $app->singleton('filesystem', fn () => Mockery::mock(FilesystemManager::class));
 
         $sprout = new Sprout($app, new SettingsRepository());
 
         $override->setApp($app)->setSprout($sprout);
 
         $this->expectException(LogicException::class);
-        $this->expectExceptionMessage('Cannot override auth providers without the Bud auth manager override');
+        $this->expectExceptionMessage('Cannot override filesystem disks without the Sprout filesystem manager override');
 
         // This is important, otherwise it doesn't behave nicely with the
         // afterResolving method.
-        $app->make('auth');
+        $app->make('filesystem');
 
         $override->boot($app, $sprout);
     }
@@ -180,10 +170,10 @@ class AuthOverrideTest extends UnitTestCase
     #[Test]
     public function errorsWithNoTenantSpecificConfig(): void
     {
-        $override = new StackedOverride('auth', [
+        $override = new StackedOverride('filesystem', [
             'overrides' => [
-                AuthManagerOverride::class,
-                AuthProviderOverride::class,
+                FilesystemManagerOverride::class,
+                FilesystemDiskOverride::class,
             ],
         ]);
 
@@ -203,6 +193,9 @@ class AuthOverrideTest extends UnitTestCase
         });
 
         $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
+        $app->make('config')->set('filesystems.disks.bud-disk', [
+            'driver' => 'bud',
+        ]);
 
         $app->singleton(Bud::class, fn () => new Bud($app, Mockery::mock(ConfigStoreManager::class, function (MockInterface $mock) use ($tenancy, $tenant) {
             $mock->shouldReceive('get')
@@ -211,8 +204,8 @@ class AuthOverrideTest extends UnitTestCase
                           ->with(
                               $tenancy,
                               $tenant,
-                              'auth',
-                              'bud-provider',
+                              'filesystem',
+                              'bud-disk',
                           )->andReturn(null);
                  }));
         })));
@@ -225,22 +218,22 @@ class AuthOverrideTest extends UnitTestCase
 
         $override->boot($app, $sprout);
 
-        /** @var \Sprout\Bud\Overrides\Auth\BudAuthManager $manager */
-        $manager = $app->make('auth');
+        /** @var \Sprout\Core\Overrides\Filesystem\SproutFilesystemManager $manager */
+        $manager = $app->make('filesystem');
 
         $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('Unable to find configuration for [auth.bud-provider] for tenant [my-tenant] on tenancy [my-tenancy]');
+        $this->expectExceptionMessage('Unable to find configuration for [filesystem.bud-disk] for tenant [my-tenant] on tenancy [my-tenancy]');
 
-        $manager->createUserProviderFromConfig(['driver' => 'bud', 'provider' => 'bud-provider']);
+        $manager->disk('bud-disk');
     }
 
     #[Test]
     public function errorsIfOverriddenConnectionAlsoUsesBud(): void
     {
-        $override = new StackedOverride('auth', [
+        $override = new StackedOverride('filesystem', [
             'overrides' => [
-                AuthManagerOverride::class,
-                AuthProviderOverride::class,
+                FilesystemManagerOverride::class,
+                FilesystemDiskOverride::class,
             ],
         ]);
 
@@ -257,6 +250,9 @@ class AuthOverrideTest extends UnitTestCase
         });
 
         $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
+        $app->make('config')->set('filesystems.disks.bud-disk', [
+            'driver' => 'bud',
+        ]);
 
         $app->singleton(Bud::class, fn () => new Bud($app, Mockery::mock(ConfigStoreManager::class, function (MockInterface $mock) use ($tenancy, $tenant) {
             $mock->shouldReceive('get')
@@ -265,8 +261,8 @@ class AuthOverrideTest extends UnitTestCase
                           ->with(
                               $tenancy,
                               $tenant,
-                              'auth',
-                              'bud-provider',
+                              'filesystem',
+                              'bud-disk',
                           )->andReturn([
                              'driver' => 'bud',
                          ]);
@@ -281,41 +277,42 @@ class AuthOverrideTest extends UnitTestCase
 
         $override->boot($app, $sprout);
 
-        /** @var \Sprout\Bud\Overrides\Auth\BudAuthManager $manager */
-        $manager = $app->make('auth');
+        /** @var \Sprout\Core\Overrides\Filesystem\SproutFilesystemManager $manager */
+        $manager = $app->make('filesystem');
 
         $this->expectException(CyclicOverrideException::class);
-        $this->expectExceptionMessage('Attempt to create cyclic bud auth provider [bud-provider] detected');
+        $this->expectExceptionMessage('Attempt to create cyclic bud filesystem disk [bud-disk] detected');
 
-        $manager->createUserProviderFromConfig([
-            'driver'   => 'bud',
-            'provider' => 'bud-provider',
-        ]);
+        $manager->disk('bud-disk');
     }
 
     #[Test]
-    public function keepsTrackOfResolvedBudProviders(): void
+    public function keepsTrackOfResolvedBudDrivers(): void
     {
-        $override = new StackedOverride('auth', [
+        $override = new StackedOverride('filesystem', [
             'overrides' => [
-                AuthManagerOverride::class,
-                AuthProviderOverride::class,
+                FilesystemManagerOverride::class,
+                FilesystemDiskOverride::class,
             ],
         ]);
 
-        $tenant  = Mockery::mock(Tenant::class, TenantHasResources::class, static function (MockInterface $mock) {
-        });
-        $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) use ($tenant) {
-            $mock->shouldReceive('check')->andReturnTrue()->once();
-            $mock->shouldReceive('tenant')->andReturn($tenant)->once();
-        });
-
         /** @var \Illuminate\Foundation\Application&MockInterface $app */
-        $app = Mockery::mock($this->app, static function (MockInterface $mock) use ($tenancy, $tenant) {
+        $app = Mockery::mock($this->app, static function (MockInterface $mock) {
             $mock->makePartial();
         });
 
         $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
+        $app->make('config')->set('filesystems.disks.bud-disk', [
+            'driver' => 'bud',
+        ]);
+
+        $tenant = Mockery::mock(Tenant::class, TenantHasResources::class, static function (MockInterface $mock) {
+        });
+
+        $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) use ($tenant) {
+            $mock->shouldReceive('check')->andReturnTrue()->once();
+            $mock->shouldReceive('tenant')->andReturn($tenant)->once();
+        });
 
         $app->singleton(Bud::class, fn () => new Bud($app, Mockery::mock(ConfigStoreManager::class, function (MockInterface $mock) use ($tenancy, $tenant) {
             $mock->shouldReceive('get')
@@ -324,11 +321,12 @@ class AuthOverrideTest extends UnitTestCase
                           ->with(
                               $tenancy,
                               $tenant,
-                              'auth',
-                              'bud-provider',
+                              'filesystem',
+                              'bud-disk',
                           )->andReturn([
-                             'driver' => 'database',
-                             'table'  => 'fake-table',
+                             'driver' => 'local',
+                             'root'   => storage_path('app'),
+                             'throw'  => false,
                          ]);
                  }));
         })));
@@ -341,26 +339,26 @@ class AuthOverrideTest extends UnitTestCase
 
         $override->boot($app, $sprout);
 
-        /** @var \Sprout\Bud\Overrides\Auth\BudAuthManager $manager */
-        $manager = $app->make('auth');
+        /** @var \Sprout\Core\Overrides\Filesystem\SproutFilesystemManager $filesystem */
+        $filesystem = $app->make('filesystem');
 
-        $manager->createUserProviderFromConfig(['provider' => 'bud-provider', 'driver' => 'bud']);
+        $filesystem->disk('bud-disk');
 
-        $this->assertNotEmpty($override->getOverrides()[AuthProviderOverride::class]->getOverrides());
-        $this->assertContains('bud-provider', $override->getOverrides()[AuthProviderOverride::class]->getOverrides());
+        $this->assertNotEmpty($override->getOverrides()[FilesystemDiskOverride::class]->getOverrides());
+        $this->assertContains('bud-disk', $override->getOverrides()[FilesystemDiskOverride::class]->getOverrides());
     }
 
     #[Test]
     public function cleansUpResolvedDrivers(): void
     {
-        $override = new StackedOverride('auth', [
+        $override = new StackedOverride('filesystem', [
             'overrides' => [
-                AuthManagerOverride::class,
-                AuthProviderOverride::class,
+                FilesystemManagerOverride::class,
+                FilesystemDiskOverride::class,
             ],
         ]);
 
-        $this->app->forgetInstance('auth');
+        $this->app->forgetInstance('filesystem');
 
         /** @var \Illuminate\Foundation\Application&MockInterface $app */
         $app = Mockery::mock($this->app, static function (MockInterface $mock) {
@@ -368,81 +366,10 @@ class AuthOverrideTest extends UnitTestCase
         });
 
         $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
-
-        $sprout = new Sprout($app, new SettingsRepository());
-
-        $tenant = Mockery::mock(Tenant::class, TenantHasResources::class, static function (MockInterface $mock) {
-        });
-
-        $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) use ($tenant) {
-            $mock->shouldReceive('check')->andReturnTrue()->once();
-            $mock->shouldReceive('tenant')->andReturn($tenant)->once();
-        });
-
-        $app->singleton(Bud::class, fn () => new Bud($app, Mockery::mock(ConfigStoreManager::class, function (MockInterface $mock) use ($tenancy, $tenant) {
-            $mock->shouldReceive('get')
-                 ->andReturn(Mockery::mock(ConfigStore::class, function (MockInterface $mock) use ($tenancy, $tenant) {
-                     $mock->shouldReceive('get')
-                          ->with(
-                              $tenancy,
-                              $tenant,
-                              'auth',
-                              'bud-provider',
-                          )->andReturn([
-                             'driver' => 'database',
-                             'table'  => 'fake-table',
-                         ]);
-                 }));
-        })));
-
-        $sprout->setCurrentTenancy($tenancy);
-
-        $override->setApp($app)->setSprout($sprout);
-
-        $override->boot($app, $sprout);
-
-        $authOverride = $override->getOverride(AuthProviderOverride::class);
-
-        $this->assertEmpty($authOverride->getOverrides());
-
-        /** @var \Sprout\Bud\Overrides\Auth\BudAuthManager $manager */
-        $manager = $app->make('auth');
-
-        $manager->createUserProviderFromConfig(['provider' => 'bud-provider', 'driver' => 'bud']);
-
-        $this->assertNotEmpty($authOverride->getOverrides());
-        $this->assertContains('bud-provider', $authOverride->getOverrides());
-
-        $override->cleanup($tenancy, $tenant);
-
-        $this->assertEmpty($authOverride->getOverrides());
-    }
-
-    #[Test]
-    public function cleansUpResolvedDriversFromPreconfiguredConnections(): void
-    {
-        $override = new StackedOverride('auth', [
-            'overrides' => [
-                AuthManagerOverride::class,
-                AuthProviderOverride::class,
-            ],
-        ]);
-
-        $this->app->forgetInstance('auth');
-
-        /** @var \Illuminate\Foundation\Application&MockInterface $app */
-        $app = Mockery::mock($this->app, static function (MockInterface $mock) {
-            $mock->makePartial();
-        });
-
-        $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
-
-        $app->make('config')->set('auth.providers.bud-provider', [
+        $app->make('config')->set('filesystems.disks.bud-disk', [
             'driver' => 'bud',
         ]);
 
-        $sprout = new Sprout($app, new SettingsRepository());
-
         $tenant = Mockery::mock(Tenant::class, TenantHasResources::class, static function (MockInterface $mock) {
         });
 
@@ -458,14 +385,17 @@ class AuthOverrideTest extends UnitTestCase
                           ->with(
                               $tenancy,
                               $tenant,
-                              'auth',
-                              'bud-provider',
+                              'filesystem',
+                              'bud-disk',
                           )->andReturn([
-                             'driver' => 'database',
-                             'table'  => 'fake-table',
+                             'driver' => 'local',
+                             'root'   => storage_path('app'),
+                             'throw'  => false,
                          ]);
                  }));
         })));
+
+        $sprout  = new Sprout($app, new SettingsRepository());
 
         $sprout->setCurrentTenancy($tenancy);
 
@@ -473,53 +403,42 @@ class AuthOverrideTest extends UnitTestCase
 
         $override->boot($app, $sprout);
 
-        $authOverride = $override->getOverride(AuthProviderOverride::class);
+        $filesystemOverride = $override->getOverride(FilesystemDiskOverride::class);
 
-        $this->assertEmpty($authOverride->getOverrides());
+        $this->assertEmpty($filesystemOverride->getOverrides());
 
-        /** @var \Sprout\Bud\Overrides\Auth\BudAuthManager $manager */
-        $manager = $app->make('auth');
+        $filesystem = $app->make('filesystem');
 
-        $manager->createUserProvider('bud-provider');
+        $filesystem->disk('bud-disk');
 
-        $this->assertNotEmpty($authOverride->getOverrides());
-        $this->assertContains('bud-provider', $authOverride->getOverrides());
+        $this->assertNotEmpty($filesystemOverride->getOverrides());
+        $this->assertContains('bud-disk', $filesystemOverride->getOverrides());
 
         $override->cleanup($tenancy, $tenant);
 
-        $this->assertEmpty($authOverride->getOverrides());
+        $this->assertEmpty($filesystemOverride->getOverrides());
     }
 
     #[Test]
     public function cleansUpNothingWithoutResolvedDrivers(): void
     {
-        $override = new StackedOverride('auth', [
+        $override = new StackedOverride('filesystem', [
             'overrides' => [
-                AuthManagerOverride::class,
-                AuthProviderOverride::class,
+                FilesystemManagerOverride::class,
+                FilesystemDiskOverride::class,
             ],
         ]);
 
-        $this->app->forgetInstance('auth');
+        $this->app->forgetInstance('filesystem');
 
         /** @var \Illuminate\Foundation\Application&MockInterface $app */
         $app = Mockery::mock($this->app, static function (MockInterface $mock) {
             $mock->makePartial();
         });
 
-        $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
-
-        $app->make('config')->set('auth.providers.bud-provider', [
-            'driver' => 'bud',
-        ]);
-
-        $sprout = new Sprout($app, new SettingsRepository());
-
-        $tenant = Mockery::mock(Tenant::class, TenantHasResources::class, static function (MockInterface $mock) {
-        });
-
-        $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) use ($tenant) {
-        });
+        $sprout  = new Sprout($app, new SettingsRepository());
+        $tenant  = Mockery::mock(Tenant::class, TenantHasResources::class);
+        $tenancy = Mockery::mock(Tenancy::class);
 
         $sprout->setCurrentTenancy($tenancy);
 
@@ -527,20 +446,24 @@ class AuthOverrideTest extends UnitTestCase
 
         $override->boot($app, $sprout);
 
-        $authOverride = $override->getOverride(AuthProviderOverride::class);
+        $filesystemOverride = $override->getOverride(FilesystemDiskOverride::class);
 
-        $this->assertEmpty($authOverride->getOverrides());
+        $this->assertEmpty($filesystemOverride->getOverrides());
+
+        $app->make('filesystem');
+
+        $this->assertEmpty($filesystemOverride->getOverrides());
 
         $override->cleanup($tenancy, $tenant);
 
-        $this->assertEmpty($authOverride->getOverrides());
+        $this->assertEmpty($filesystemOverride->getOverrides());
     }
 
-    public static function authResolvedDataProvider(): array
+    public static function filesystemResolvedDataProvider(): array
     {
         return [
-            'auth resolved'     => [true],
-            'auth not resolved' => [false],
+            'filesystem resolved'     => [true],
+            'filesystem not resolved' => [false],
         ];
     }
 }

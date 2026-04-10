@@ -4,9 +4,9 @@ declare(strict_types=1);
 namespace Sprout\Bud\Tests\Unit\Overrides;
 
 use Closure;
-use Illuminate\Cache\CacheManager;
 use Illuminate\Config\Repository;
 use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Mail\MailManager;
 use Mockery;
 use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -15,7 +15,7 @@ use Sprout\Bud\Bud;
 use Sprout\Bud\Contracts\ConfigStore;
 use Sprout\Bud\Exceptions\CyclicOverrideException;
 use Sprout\Bud\Managers\ConfigStoreManager;
-use Sprout\Bud\Overrides\CacheStoreOverride;
+use Sprout\Bud\Overrides\MailerOverride;
 use Sprout\Bud\Tests\Unit\UnitTestCase;
 use Sprout\Core\Contracts\BootableServiceOverride;
 use Sprout\Core\Contracts\Tenancy;
@@ -25,7 +25,7 @@ use Sprout\Core\Sprout;
 use Sprout\Core\Support\SettingsRepository;
 use function Sprout\Core\sprout;
 
-class CacheStoreOverrideTest extends UnitTestCase
+class BudMailerOverrideTest extends UnitTestCase
 {
     protected function defineEnvironment($app): void
     {
@@ -34,9 +34,9 @@ class CacheStoreOverrideTest extends UnitTestCase
         });
     }
 
-    private function mockCacheManager(): CacheManager&MockInterface
+    private function mockMailManager(): MailManager&MockInterface
     {
-        return Mockery::mock(CacheManager::class, static function (MockInterface $mock) {
+        return Mockery::mock(MailManager::class, static function (MockInterface $mock) {
             $mock->shouldReceive('extend')
                  ->with('bud', Mockery::on(static function ($arg) {
                      return is_callable($arg) && $arg instanceof Closure;
@@ -48,7 +48,7 @@ class CacheStoreOverrideTest extends UnitTestCase
     #[Test]
     public function isBuiltCorrectly(): void
     {
-        $this->assertTrue(is_subclass_of(CacheStoreOverride::class, BootableServiceOverride::class));
+        $this->assertTrue(is_subclass_of(MailerOverride::class, BootableServiceOverride::class));
     }
 
     #[Test]
@@ -57,40 +57,40 @@ class CacheStoreOverrideTest extends UnitTestCase
         $sprout = sprout();
 
         config()->set('sprout.overrides', [
-            'cache' => [
-                'driver' => CacheStoreOverride::class,
+            'mailer' => [
+                'driver' => MailerOverride::class,
             ],
         ]);
 
-        $this->assertFalse($sprout->overrides()->hasOverride('cache'));
+        $this->assertFalse($sprout->overrides()->hasOverride('mailer'));
 
         $sprout->overrides()->registerOverrides();
 
-        $this->assertTrue($sprout->overrides()->hasOverride('cache'));
-        $this->assertSame(CacheStoreOverride::class, $sprout->overrides()->getOverrideClass('cache'));
-        $this->assertTrue($sprout->overrides()->isOverrideBootable('cache'));
-        $this->assertTrue($sprout->overrides()->hasOverrideBooted('cache'));
+        $this->assertTrue($sprout->overrides()->hasOverride('mailer'));
+        $this->assertSame(MailerOverride::class, $sprout->overrides()->getOverrideClass('mailer'));
+        $this->assertTrue($sprout->overrides()->isOverrideBootable('mailer'));
+        $this->assertTrue($sprout->overrides()->hasOverrideBooted('mailer'));
     }
 
-    #[Test, DataProvider('cacheResolvedDataProvider')]
+    #[Test, DataProvider('mailerResolvedDataProvider')]
     public function bootsCorrectly(bool $return): void
     {
-        $override = new CacheStoreOverride('cache', []);
+        $override = new MailerOverride('mailer', []);
 
         /** @var \Illuminate\Foundation\Application&MockInterface $app */
         $app = Mockery::mock($this->app, function (MockInterface $mock) use ($return) {
             $mock->makePartial();
-            $mock->shouldReceive('resolved')->withArgs(['cache'])->andReturn($return)->once();
+            $mock->shouldReceive('resolved')->withArgs(['mail.manager'])->andReturn($return)->once();
 
             if ($return) {
                 $mock->shouldReceive('make')
-                     ->with('cache')
-                     ->andReturn($this->mockCacheManager())
+                     ->with('mail.manager')
+                     ->andReturn($this->mockMailManager())
                      ->once();
             } else {
                 $mock->shouldReceive('afterResolving')
                      ->withArgs([
-                         'cache',
+                         'mail.manager',
                          Mockery::on(static function ($arg) {
                              return is_callable($arg) && $arg instanceof Closure;
                          }),
@@ -112,9 +112,9 @@ class CacheStoreOverrideTest extends UnitTestCase
     }
 
     #[Test]
-    public function errorsIfOverriddenCacheStoreAlsoUsesBud(): void
+    public function errorsIfOverriddenMailerAlsoUsesBud(): void
     {
-        $override = new CacheStoreOverride('cache', []);
+        $override = new MailerOverride('mailer', []);
 
         $tenant  = Mockery::mock(Tenant::class, TenantHasResources::class, static function (MockInterface $mock) {
         });
@@ -129,21 +129,21 @@ class CacheStoreOverrideTest extends UnitTestCase
         });
 
         $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
-        $app->make('config')->set('cache.stores.bud-cache', [
-            'driver' => 'bud',
+        $app->make('config')->set('mail.mailers.bud-mailer', [
+            'transport' => 'bud',
         ]);
 
         $app->singleton(Bud::class, fn () => new Bud($app, Mockery::mock(ConfigStoreManager::class, function (MockInterface $mock) use ($tenancy, $tenant) {
             $mock->shouldReceive('get')
-                 ->andReturn(Mockery::mock(ConfigStore::class, static function (MockInterface $mock) use ($tenancy, $tenant) {
+                 ->andReturn(Mockery::mock(ConfigStore::class, function (MockInterface $mock) use ($tenancy, $tenant) {
                      $mock->shouldReceive('get')
                           ->with(
                               $tenancy,
                               $tenant,
-                              'cache',
-                              'bud-cache',
+                              'mailer',
+                              'bud-mailer',
                           )->andReturn([
-                             'driver' => 'bud',
+                             'transport' => 'bud',
                          ]);
                  }));
         })));
@@ -156,19 +156,19 @@ class CacheStoreOverrideTest extends UnitTestCase
 
         $override->boot($app, $sprout);
 
-        /** @var \Illuminate\Cache\CacheManager $manager */
-        $manager = $app->make('cache');
+        /** @var \Illuminate\Mail\MailManager $manager */
+        $manager = $app->make('mail.manager');
 
         $this->expectException(CyclicOverrideException::class);
-        $this->expectExceptionMessage('Attempt to create cyclic bud cache store [bud-cache] detected');
+        $this->expectExceptionMessage('Attempt to create cyclic bud mailer [bud-mailer] detected');
 
-        $manager->store('bud-cache');
+        $manager->mailer('bud-mailer');
     }
 
     #[Test]
     public function keepsTrackOfResolvedBudDrivers(): void
     {
-        $override = new CacheStoreOverride('cache', []);
+        $override = new MailerOverride('mailer', []);
 
         /** @var \Illuminate\Foundation\Application&MockInterface $app */
         $app = Mockery::mock($this->app, static function (MockInterface $mock) {
@@ -176,8 +176,8 @@ class CacheStoreOverrideTest extends UnitTestCase
         });
 
         $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
-        $app->make('config')->set('cache.stores.bud-cache', [
-            'driver' => 'bud',
+        $app->make('config')->set('mail.mailers.bud-mailer', [
+            'transport' => 'bud',
         ]);
 
         $tenant = Mockery::mock(Tenant::class, TenantHasResources::class, static function (MockInterface $mock) {
@@ -195,11 +195,12 @@ class CacheStoreOverrideTest extends UnitTestCase
                           ->with(
                               $tenancy,
                               $tenant,
-                              'cache',
-                              'bud-cache',
+                              'mailer',
+                              'bud-mailer',
                           )->andReturn([
-                             'driver'    => 'array',
-                             'serialize' => false,
+                             'transport' => 'smtp',
+                             'port' => 25,
+                             'host' => 'localhost'
                          ]);
                  }));
         })));
@@ -212,20 +213,20 @@ class CacheStoreOverrideTest extends UnitTestCase
 
         $override->boot($app, $sprout);
 
-        /** @var \Illuminate\Cache\CacheManager $manager */
-        $manager = $app->make('cache');
+        /** @var \Illuminate\Mail\MailManager $manager */
+        $manager = $app->make('mail.manager');
 
-        $manager->store('bud-cache');
+        $manager->mailer('bud-mailer');
 
-        $this->assertContains('bud-cache', $override->getOverrides());
+        $this->assertContains('bud-mailer', $override->getOverrides());
     }
 
     #[Test]
     public function cleansUpResolvedDrivers(): void
     {
-        $override = new CacheStoreOverride('cache', []);
+        $override = new MailerOverride('mailer', []);
 
-        $this->app->forgetInstance('cache');
+        $this->app->forgetInstance('mail.manager');
 
         /** @var \Illuminate\Foundation\Application&MockInterface $app */
         $app = Mockery::mock($this->app, static function (MockInterface $mock) {
@@ -233,8 +234,8 @@ class CacheStoreOverrideTest extends UnitTestCase
         });
 
         $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
-        $app->make('config')->set('cache.stores.bud-cache', [
-            'driver' => 'bud',
+        $app->make('config')->set('mail.mailers.bud-mailer', [
+            'transport' => 'bud',
         ]);
 
         $tenant = Mockery::mock(Tenant::class, TenantHasResources::class, static function (MockInterface $mock) {
@@ -252,11 +253,12 @@ class CacheStoreOverrideTest extends UnitTestCase
                           ->with(
                               $tenancy,
                               $tenant,
-                              'cache',
-                              'bud-cache',
+                              'mailer',
+                              'bud-mailer',
                           )->andReturn([
-                             'driver'    => 'array',
-                             'serialize' => false,
+                             'transport' => 'smtp',
+                             'port' => 25,
+                             'host' => 'localhost'
                          ]);
                  }));
         })));
@@ -271,13 +273,13 @@ class CacheStoreOverrideTest extends UnitTestCase
 
         $this->assertEmpty($override->getOverrides());
 
-        /** @var \Illuminate\Cache\CacheManager $manager */
-        $manager = $app->make('cache');
+        /** @var \Illuminate\Mail\MailManager $manager */
+        $manager = $app->make('mail.manager');
 
-        $manager->store('bud-cache');
+        $manager->mailer('bud-mailer');
 
         $this->assertNotEmpty($override->getOverrides());
-        $this->assertContains('bud-cache', $override->getOverrides());
+        $this->assertContains('bud-mailer', $override->getOverrides());
 
         $override->cleanup($tenancy, $tenant);
 
@@ -287,9 +289,9 @@ class CacheStoreOverrideTest extends UnitTestCase
     #[Test]
     public function cleansUpNothingWithoutResolvedDrivers(): void
     {
-        $override = new CacheStoreOverride('cache', []);
+        $override = new MailerOverride('mailer', []);
 
-        $this->app->forgetInstance('cache');
+        $this->app->forgetInstance('mail.manager');
 
         /** @var \Illuminate\Foundation\Application&MockInterface $app */
         $app = Mockery::mock($this->app, static function (MockInterface $mock) {
@@ -297,8 +299,8 @@ class CacheStoreOverrideTest extends UnitTestCase
         });
 
         $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
-        $app->make('config')->set('cache.stores.bud-cache', [
-            'driver' => 'bud',
+        $app->make('config')->set('mail.mailers.bud-mailer', [
+            'transport' => 'bud',
         ]);
 
         $sprout  = new Sprout($app, new SettingsRepository());
@@ -313,7 +315,7 @@ class CacheStoreOverrideTest extends UnitTestCase
 
         $this->assertEmpty($override->getOverrides());
 
-        $app->make('cache');
+        $app->make('mail.manager');
 
         $this->assertEmpty($override->getOverrides());
 
@@ -322,11 +324,11 @@ class CacheStoreOverrideTest extends UnitTestCase
         $this->assertEmpty($override->getOverrides());
     }
 
-    public static function cacheResolvedDataProvider(): array
+    public static function mailerResolvedDataProvider(): array
     {
         return [
-            'cache resolved'     => [true],
-            'cache not resolved' => [false],
+            'mailer resolved'     => [true],
+            'mailer not resolved' => [false],
         ];
     }
 }
