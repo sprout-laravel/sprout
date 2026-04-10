@@ -48,10 +48,10 @@ final class DatabaseConfigStore extends BaseConfigStore
      *
      * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
      * @param \Sprout\Contracts\Tenant               $tenant
-     * @param string                                      $service
-     * @param string                                      $name
+     * @param string                                 $service
+     * @param string                                 $name
      *
-     * @phpstan-param TenantClass                         $tenant
+     * @phpstan-param TenantClass                    $tenant
      *
      * @return \Illuminate\Database\Query\Builder
      */
@@ -71,11 +71,11 @@ final class DatabaseConfigStore extends BaseConfigStore
      *
      * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
      * @param \Sprout\Contracts\Tenant               $tenant
-     * @param string                                      $service
-     * @param string                                      $name
-     * @param array<string, mixed>|null                   $default
+     * @param string                                 $service
+     * @param string                                 $name
+     * @param array<string, mixed>|null              $default
      *
-     * @phpstan-param Tenant                              $tenant
+     * @phpstan-param Tenant                         $tenant
      *
      * @return array<string, mixed>|null
      */
@@ -100,10 +100,10 @@ final class DatabaseConfigStore extends BaseConfigStore
      *
      * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
      * @param \Sprout\Contracts\Tenant               $tenant
-     * @param string                                      $service
-     * @param string                                      $name
+     * @param string                                 $service
+     * @param string                                 $name
      *
-     * @phpstan-param Tenant                              $tenant
+     * @phpstan-param Tenant                         $tenant
      *
      * @return bool
      */
@@ -125,11 +125,11 @@ final class DatabaseConfigStore extends BaseConfigStore
      *
      * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
      * @param \Sprout\Contracts\Tenant               $tenant
-     * @param string                                      $service
-     * @param string                                      $name
-     * @param array<string, mixed>                        $config
+     * @param string                                 $service
+     * @param string                                 $name
+     * @param array<string, mixed>                   $config
      *
-     * @phpstan-param Tenant                              $tenant
+     * @phpstan-param Tenant                         $tenant
      *
      * @return bool
      *
@@ -145,10 +145,10 @@ final class DatabaseConfigStore extends BaseConfigStore
                                     'name'      => $name,
                                     'config'    => $this->encryptConfig($config),
                                 ], [
-                                    'tenancy'   => $tenancy->getName(),
-                                    'tenant_id' => $tenant->getTenantKey(),
-                                    'service'   => $service,
-                                    'name'      => $name,
+                                    'tenancy',
+                                    'tenant_id',
+                                    'service',
+                                    'name',
                                 ]) !== 0;
     }
 
@@ -163,11 +163,11 @@ final class DatabaseConfigStore extends BaseConfigStore
      *
      * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
      * @param \Sprout\Contracts\Tenant               $tenant
-     * @param string                                      $service
-     * @param string                                      $name
-     * @param array<string, mixed>                        $config
+     * @param string                                 $service
+     * @param string                                 $name
+     * @param array<string, mixed>                   $config
      *
-     * @phpstan-param Tenant                              $tenant
+     * @phpstan-param Tenant                         $tenant
      *
      * @return bool
      *

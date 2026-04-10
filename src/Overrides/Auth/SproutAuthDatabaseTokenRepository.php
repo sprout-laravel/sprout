@@ -177,6 +177,7 @@ class SproutAuthDatabaseTokenRepository extends DatabaseTokenRepository
         $record = (array)$this->getExistingTenantedRecord($user);
 
         return ! empty($record) &&
+               isset($record['token'], $record['created_at']) &&
                ! $this->tokenExpired($record['created_at']) &&
                $this->hasher->check($token, $record['token']);
     }
@@ -196,6 +197,8 @@ class SproutAuthDatabaseTokenRepository extends DatabaseTokenRepository
         /** @var array{token?: string, created_at?: string} $record */
         $record = (array)$this->getExistingTenantedRecord($user);
 
-        return ! empty($record) && $this->tokenRecentlyCreated($record['created_at']);
+        return ! empty($record) &&
+               isset($record['created_at']) &&
+               $this->tokenRecentlyCreated($record['created_at']);
     }
 }
