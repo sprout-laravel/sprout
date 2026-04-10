@@ -12,7 +12,7 @@ use Sprout\Core\Sprout;
 /**
  * @extends \Sprout\Bud\Overrides\BaseOverride<\Illuminate\Cache\CacheManager>
  */
-final class CacheStoreOverride extends BaseOverride
+final class BudCacheStoreOverride extends BaseOverride
 {
     /**
      * Get the name of the service being overridden.

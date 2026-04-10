@@ -19,7 +19,7 @@ use Sprout\Core\Sprout;
  *
  * @extends \Sprout\Bud\Overrides\BaseOverride<\Illuminate\Filesystem\FilesystemManager>
  */
-final class FilesystemDiskOverride extends BaseOverride
+final class BudFilesystemDiskOverride extends BaseOverride
 {
     /**
      * Get the name of the service being overridden.

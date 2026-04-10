@@ -3,15 +3,13 @@ declare(strict_types=1);
 
 namespace Sprout\Bud\Overrides;
 
-use Illuminate\Broadcasting\BroadcastManager;
-use Illuminate\Contracts\Container\Container;
 use Illuminate\Contracts\Foundation\Application;
-use Sprout\Bud\Overrides\Broadcast\BudBroadcastManager;
+use Sprout\Bud\Overrides\Auth\BudAuthManager;
 use Sprout\Core\Contracts\BootableServiceOverride;
 use Sprout\Core\Overrides\BaseOverride;
 use Sprout\Core\Sprout;
 
-final class BroadcastManagerOverride extends BaseOverride implements BootableServiceOverride
+final class BudAuthManagerOverride extends BaseOverride implements BootableServiceOverride
 {
     /**
      * Boot a service override
@@ -30,15 +28,15 @@ final class BroadcastManagerOverride extends BaseOverride implements BootableSer
     {
         $original = null;
 
-        // If the broadcast manager has already been resolved
-        if ($app->resolved(BroadcastManager::class)) {
+        // If the auth manager has already been resolved
+        if ($app->resolved('auth')) {
             // We'll grab the manager
-            $original = $app->make(BroadcastManager::class);
+            $original = $app->make('auth');
             // and then tell the container to forget it
-            $app->forgetInstance(BroadcastManager::class);
+            $app->forgetInstance('auth');
         }
 
-        // Bind a replacement broadcast manager to enable Bud features
-        $app->singleton(BroadcastManager::class, fn (Container $app) => new BudBroadcastManager($app, $original));
+        // Bind a replacement auth manager to enable Bud features
+        $app->singleton('auth', fn (Application $app) => new BudAuthManager($app, $original));
     }
 }

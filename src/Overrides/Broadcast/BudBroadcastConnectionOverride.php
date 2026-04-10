@@ -20,7 +20,7 @@ use Sprout\Core\Sprout;
  *
  * @extends \Sprout\Bud\Overrides\BaseOverride<\Illuminate\Broadcasting\BroadcastManager>
  */
-final class BroadcastConnectionOverride extends BaseOverride
+final class BudBroadcastConnectionOverride extends BaseOverride
 {
     /**
      * Get the name of the service being overridden.

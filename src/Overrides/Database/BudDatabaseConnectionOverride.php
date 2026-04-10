@@ -16,7 +16,7 @@ use Sprout\Core\Sprout;
  *
  * @extends \Sprout\Bud\Overrides\BaseOverride<\Illuminate\Database\DatabaseManager>
  */
-final class DatabaseConnectionOverride extends BaseOverride
+final class BudDatabaseConnectionOverride extends BaseOverride
 {
     /**
      * Get the name of the service being overridden.

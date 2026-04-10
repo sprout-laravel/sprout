@@ -17,7 +17,7 @@ use Sprout\Core\Sprout;
 /**
  * @extends \Sprout\Bud\Overrides\BaseOverride<\Illuminate\Auth\AuthManager>
  */
-final class AuthProviderOverride extends BaseOverride
+final class BudAuthProviderOverride extends BaseOverride
 {
     /**
      * Get the name of the service being overridden.

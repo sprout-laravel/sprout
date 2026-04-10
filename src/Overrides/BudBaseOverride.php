@@ -15,7 +15,7 @@ use Sprout\Core\Sprout;
 /**
  * @template OverrideService of object
  */
-abstract class BaseOverride extends SproutBaseOverride implements BootableServiceOverride
+abstract class BudBaseOverride extends SproutBaseOverride implements BootableServiceOverride
 {
     /**
      * @var array<string>
