@@ -15,22 +15,18 @@
   "license"          : "MIT",
   "autoload"         : {
     "psr-4": {
-      "Sprout\\Core\\"    : "packages/core/src/",
-      "Sprout\\Bud\\"     : "packages/bud/src/",
-      "Sprout\\Seedling\\": "packages/seedling/src/"
+      "Sprout\\": "src/"
     },
     "files": [
-      "packages/core/src/helpers.php"
+      "src/helpers.php"
     ]
   },
   "autoload-dev"     : {
     "psr-4": {
-      "Sprout\\Core\\Tests\\"           : "packages/core/tests",
-      "Sprout\\Bud\\Tests\\"            : "packages/bud/tests",
-      "Sprout\\Seedling\\Tests\\"       : "packages/seedling/tests",
-      "Workbench\\App\\"                : "workbench/app/",
+      "Sprout\\Tests\\": "tests/",
+      "Workbench\\App\\": "workbench/app/",
       "Workbench\\Database\\Factories\\": "workbench/database/factories/",
-      "Workbench\\Database\\Seeders\\"  : "workbench/database/seeders/"
+      "Workbench\\Database\\Seeders\\": "workbench/database/seeders/"
     }
   },
   "authors"          : [
@@ -67,16 +63,15 @@
   "extra"            : {
     "laravel"     : {
       "providers": [
-        "Sprout\\Core\\SproutServiceProvider",
-        "Sprout\\Bud\\BudServiceProvider",
-        "Sprout\\Seedling\\SeedlingServiceProvider"
+        "Sprout\\SproutServiceProvider",
+        "Sprout\\BudServiceProvider"
       ],
       "facades"  : [
-        "Sprout\\Core\\Facades\\Overrides",
-        "Sprout\\Core\\Facades\\Providers",
-        "Sprout\\Core\\Facades\\Resolvers",
-        "Sprout\\Core\\Facades\\Sprout",
-        "Sprout\\Core\\Facades\\Tenancies"
+        "Sprout\\Facades\\Overrides",
+        "Sprout\\Facades\\Providers",
+        "Sprout\\Facades\\Resolvers",
+        "Sprout\\Facades\\Sprout",
+        "Sprout\\Facades\\Tenancies"
       ]
     },
     "branch-alias": {
