@@ -287,16 +287,7 @@ class DatabaseConfigStoreTest extends UnitTestCase
                                              && $v['name'] === $name
                                              && $encrypter->decryptString($v['config']) === $encrypter->decryptString($encryptedConfig);
                                   }),
-                                  Mockery::on(static function (array $v) use ($service, $name, $key) {
-                                      if (! isset($v['tenancy'], $v['tenant_id'], $v['service'], $v['name'])) {
-                                          return false;
-                                      }
-
-                                      return $v['tenancy'] === 'my-tenants'
-                                             && $v['tenant_id'] === $key
-                                             && $v['service'] === $service
-                                             && $v['name'] === $name;
-                                  })
+                                  ['tenancy', 'tenant_id', 'service', 'name']
                               )
                               ->once()
                               ->andReturn(1);
