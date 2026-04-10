@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Bud\Tests\Unit\Attributes;
+namespace Sprout\Tests\Unit\Attributes;
 
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\Bud\Attributes\ConfigStore;
-use Sprout\Bud\Managers\ConfigStoreManager;
-use Sprout\Bud\Tests\Unit\UnitTestCase;
+use Sprout\Attributes\ConfigStore;
+use Sprout\Managers\ConfigStoreManager;
+use Sprout\Tests\Unit\UnitTestCase;
 
 class ConfigStoreTest extends UnitTestCase
 {
@@ -22,11 +22,11 @@ class ConfigStoreTest extends UnitTestCase
     {
         $manager = $this->app->make(ConfigStoreManager::class);
 
-        $callback1 = static function (#[ConfigStore] \Sprout\Bud\Contracts\ConfigStore $store) {
+        $callback1 = static function (#[ConfigStore] \Sprout\Contracts\ConfigStore $store) {
             return $store;
         };
 
-        $callback2 = static function (#[ConfigStore('filesystem')] \Sprout\Bud\Contracts\ConfigStore $store) {
+        $callback2 = static function (#[ConfigStore('filesystem')] \Sprout\Contracts\ConfigStore $store) {
             return $store;
         };
 

@@ -1,17 +1,17 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Core\Listeners;
+namespace Sprout\Listeners;
 
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Routing\Route;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
-use Sprout\Core\Http\Middleware\SproutOptionalTenantContextMiddleware;
-use Sprout\Core\Http\Middleware\SproutTenantContextMiddleware;
-use Sprout\Core\Sprout;
-use Sprout\Core\Support\ResolutionHelper;
-use Sprout\Core\Support\ResolutionHook;
+use Sprout\Http\Middleware\SproutOptionalTenantContextMiddleware;
+use Sprout\Http\Middleware\SproutTenantContextMiddleware;
+use Sprout\Sprout;
+use Sprout\Support\ResolutionHelper;
+use Sprout\Support\ResolutionHook;
 
 /**
  * Identify Tenant on Routing
@@ -24,7 +24,7 @@ use Sprout\Core\Support\ResolutionHook;
 final class IdentifyTenantOnRouting
 {
     /**
-     * @var \Sprout\Core\Sprout
+     * @var \Sprout\Sprout
      */
     private Sprout $sprout;
 
@@ -41,8 +41,8 @@ final class IdentifyTenantOnRouting
      * @return void
      *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
-     * @throws \Sprout\Core\Exceptions\MisconfigurationException
-     * @throws \Sprout\Core\Exceptions\NoTenantFoundException
+     * @throws \Sprout\Exceptions\MisconfigurationException
+     * @throws \Sprout\Exceptions\NoTenantFoundException
      */
     public function handle(RouteMatched $event): void
     {

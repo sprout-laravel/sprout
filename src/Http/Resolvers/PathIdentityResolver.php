@@ -1,16 +1,16 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Core\Http\Resolvers;
+namespace Sprout\Http\Resolvers;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\RouteRegistrar;
-use Sprout\Core\Concerns\FindsIdentityInRouteParameter;
-use Sprout\Core\Contracts\IdentityResolverUsesParameters;
-use Sprout\Core\Contracts\Tenancy;
-use Sprout\Core\Contracts\Tenant;
-use Sprout\Core\Exceptions\TenantMissingException;
-use Sprout\Core\Support\BaseIdentityResolver;
+use Sprout\Concerns\FindsIdentityInRouteParameter;
+use Sprout\Contracts\IdentityResolverUsesParameters;
+use Sprout\Contracts\Tenancy;
+use Sprout\Contracts\Tenant;
+use Sprout\Exceptions\TenantMissingException;
+use Sprout\Support\BaseIdentityResolver;
 
 /**
  * Path Identity Resolver
@@ -40,7 +40,7 @@ final class PathIdentityResolver extends BaseIdentityResolver implements Identit
      * @param int|null                                   $segment
      * @param string|null                                $pattern
      * @param string|null                                $parameter
-     * @param array<\Sprout\Core\Support\ResolutionHook> $hooks
+     * @param array<\Sprout\Support\ResolutionHook> $hooks
      */
     public function __construct(string $name, ?int $segment = null, ?string $pattern = null, ?string $parameter = null, array $hooks = [])
     {
@@ -58,10 +58,10 @@ final class PathIdentityResolver extends BaseIdentityResolver implements Identit
      *
      * Locates a tenant identifier within the provided request and returns it.
      *
-     * @template TenantClass of \Sprout\Core\Contracts\Tenant
+     * @template TenantClass of \Sprout\Contracts\Tenant
      *
      * @param \Illuminate\Http\Request                    $request
-     * @param \Sprout\Core\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
      *
      * @return string|null
      */
@@ -87,7 +87,7 @@ final class PathIdentityResolver extends BaseIdentityResolver implements Identit
      * middleware, and anything else required, besides the default middleware.
      *
      * @param \Illuminate\Routing\RouteRegistrar                            $route
-     * @param \Sprout\Core\Contracts\Tenancy<\Sprout\Core\Contracts\Tenant> $tenancy
+     * @param \Sprout\Contracts\Tenancy<\Sprout\Contracts\Tenant> $tenancy
      *
      * @return void
      */
@@ -102,9 +102,9 @@ final class PathIdentityResolver extends BaseIdentityResolver implements Identit
     /**
      * Get the route prefix including the tenant parameter
      *
-     * @template TenantClass of \Sprout\Core\Contracts\Tenant
+     * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Sprout\Core\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
      *
      * @return string
      */
@@ -116,13 +116,13 @@ final class PathIdentityResolver extends BaseIdentityResolver implements Identit
     /**
      * Get the route prefix with the parameter replaced with the tenant identifier
      *
-     * @template TenantClass of \Sprout\Core\Contracts\Tenant
+     * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Sprout\Core\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
      *
      * @return string
      *
-     * @throws \Sprout\Core\Exceptions\TenantMissingException
+     * @throws \Sprout\Exceptions\TenantMissingException
      */
     public function getTenantRoutePrefix(Tenancy $tenancy): string
     {
@@ -148,16 +148,16 @@ final class PathIdentityResolver extends BaseIdentityResolver implements Identit
      * This method is also called if there is no current tenant, as there may
      * be actions needed.
      *
-     * @template TenantClass of \Sprout\Core\Contracts\Tenant
+     * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Sprout\Core\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Core\Contracts\Tenant|null          $tenant
+     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Sprout\Contracts\Tenant|null          $tenant
      *
      * @phpstan-param TenantClass|null                    $tenant
      *
      * @return void
      *
-     * @throws \Sprout\Core\Exceptions\TenantMissingException
+     * @throws \Sprout\Exceptions\TenantMissingException
      */
     public function setup(Tenancy $tenancy, ?Tenant $tenant): void
     {

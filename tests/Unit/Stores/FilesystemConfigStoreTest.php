@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Bud\Tests\Unit\Stores;
+namespace Sprout\Tests\Unit\Stores;
 
 use Closure;
 use Illuminate\Contracts\Filesystem\Filesystem;
@@ -10,12 +10,12 @@ use Illuminate\Support\Str;
 use Mockery;
 use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\Bud\Stores\FilesystemConfigStore;
-use Sprout\Bud\Tests\Unit\UnitTestCase;
-use Sprout\Core\Contracts\Tenancy;
-use Sprout\Core\Contracts\Tenant;
-use Sprout\Core\Contracts\TenantHasResources;
-use Sprout\Core\Exceptions\MisconfigurationException;
+use Sprout\Stores\FilesystemConfigStore;
+use Sprout\Tests\Unit\UnitTestCase;
+use Sprout\Contracts\Tenancy;
+use Sprout\Contracts\Tenant;
+use Sprout\Contracts\TenantHasResources;
+use Sprout\Exceptions\MisconfigurationException;
 
 class FilesystemConfigStoreTest extends UnitTestCase
 {

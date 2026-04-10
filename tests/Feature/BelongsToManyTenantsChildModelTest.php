@@ -1,18 +1,18 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Core\Tests\Feature;
+namespace Sprout\Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\Core\Exceptions\TenantMismatchException;
-use Sprout\Core\Exceptions\TenantMissingException;
-use Sprout\Core\Managers\TenancyManager;
-use Sprout\Core\TenancyOptions;
+use Sprout\Exceptions\TenantMismatchException;
+use Sprout\Exceptions\TenantMissingException;
+use Sprout\Managers\TenancyManager;
+use Sprout\TenancyOptions;
 use Workbench\App\Models\TenantChildren;
 use Workbench\App\Models\TenantChildrenOptional;
 use Workbench\App\Models\TenantModel;
-use function Sprout\Core\sprout;
+use function Sprout\sprout;
 
 class BelongsToManyTenantsChildModelTest extends FeatureTestCase
 {
@@ -30,7 +30,7 @@ class BelongsToManyTenantsChildModelTest extends FeatureTestCase
     {
         $tenant = TenantModel::factory()->createOne();
 
-        /** @var \Sprout\Core\Support\DefaultTenancy $tenancy */
+        /** @var \Sprout\Support\DefaultTenancy $tenancy */
         $tenancy = $this->app->make(TenancyManager::class)->get();
 
         sprout()->setCurrentTenancy($tenancy);
@@ -62,7 +62,7 @@ class BelongsToManyTenantsChildModelTest extends FeatureTestCase
             $child->tenants()->attach($tenant3);
         })->create();
 
-        /** @var \Sprout\Core\Support\DefaultTenancy $tenancy */
+        /** @var \Sprout\Support\DefaultTenancy $tenancy */
         $tenancy = $this->app->make(TenancyManager::class)->get();
 
         sprout()->setCurrentTenancy($tenancy);
@@ -99,7 +99,7 @@ class BelongsToManyTenantsChildModelTest extends FeatureTestCase
             $child->tenants()->attach($tenant1);
         })->createOne();
 
-        /** @var \Sprout\Core\Support\DefaultTenancy $tenancy */
+        /** @var \Sprout\Support\DefaultTenancy $tenancy */
         $tenancy = $this->app->make(TenancyManager::class)->get();
 
         sprout()->setCurrentTenancy($tenancy);
@@ -121,7 +121,7 @@ class BelongsToManyTenantsChildModelTest extends FeatureTestCase
             $child->tenants()->attach($tenant1);
         })->createOne();
 
-        /** @var \Sprout\Core\Support\DefaultTenancy $tenancy */
+        /** @var \Sprout\Support\DefaultTenancy $tenancy */
         $tenancy = $this->app->make(TenancyManager::class)->get();
 
         sprout()->setCurrentTenancy($tenancy);
@@ -143,7 +143,7 @@ class BelongsToManyTenantsChildModelTest extends FeatureTestCase
     #[Test]
     public function errorsOutWhenTheresNoTenantButThereIsATenancyWhenQuerying(): void
     {
-        /** @var \Sprout\Core\Support\DefaultTenancy $tenancy */
+        /** @var \Sprout\Support\DefaultTenancy $tenancy */
         $tenancy = $this->app->make(TenancyManager::class)->get();
 
         sprout()->setCurrentTenancy($tenancy);
@@ -157,7 +157,7 @@ class BelongsToManyTenantsChildModelTest extends FeatureTestCase
     #[Test]
     public function doesNotErrorOutWhenTheresNoTenantButThereIsATenancyWhenQueryingIfTenantIsOptional(): void
     {
-        /** @var \Sprout\Core\Support\DefaultTenancy $tenancy */
+        /** @var \Sprout\Support\DefaultTenancy $tenancy */
         $tenancy = $this->app->make(TenancyManager::class)->get();
 
         $tenant = TenantModel::factory()->createOne();
@@ -185,7 +185,7 @@ class BelongsToManyTenantsChildModelTest extends FeatureTestCase
     #[Test]
     public function errorsOutWhenTheresNoTenantButThereIsATenancyWhenCreating(): void
     {
-        /** @var \Sprout\Core\Support\DefaultTenancy $tenancy */
+        /** @var \Sprout\Support\DefaultTenancy $tenancy */
         $tenancy = $this->app->make(TenancyManager::class)->get();
 
         sprout()->setCurrentTenancy($tenancy);
@@ -199,7 +199,7 @@ class BelongsToManyTenantsChildModelTest extends FeatureTestCase
     #[Test]
     public function doesNotErrorOutWhenTheresNoTenantButThereIsATenancyWhenCreatingIfTenantIsOptional(): void
     {
-        /** @var \Sprout\Core\Support\DefaultTenancy $tenancy */
+        /** @var \Sprout\Support\DefaultTenancy $tenancy */
         $tenancy = $this->app->make(TenancyManager::class)->get();
 
         sprout()->setCurrentTenancy($tenancy);
@@ -221,7 +221,7 @@ class BelongsToManyTenantsChildModelTest extends FeatureTestCase
 
         $child2 = TenantChildrenOptional::factory()->createOne();
 
-        /** @var \Sprout\Core\Support\DefaultTenancy $tenancy */
+        /** @var \Sprout\Support\DefaultTenancy $tenancy */
         $tenancy = $this->app->make(TenancyManager::class)->get();
 
         sprout()->setCurrentTenancy($tenancy);
@@ -245,7 +245,7 @@ class BelongsToManyTenantsChildModelTest extends FeatureTestCase
             $child->tenants()->attach($tenant1);
         })->createOne();
 
-        /** @var \Sprout\Core\Support\DefaultTenancy $tenancy */
+        /** @var \Sprout\Support\DefaultTenancy $tenancy */
         $tenancy = $this->app->make(TenancyManager::class)->get();
 
         sprout()->setCurrentTenancy($tenancy);
@@ -268,7 +268,7 @@ class BelongsToManyTenantsChildModelTest extends FeatureTestCase
             $child->tenants()->attach($tenant1);
         })->createOne();
 
-        /** @var \Sprout\Core\Support\DefaultTenancy $tenancy */
+        /** @var \Sprout\Support\DefaultTenancy $tenancy */
         $tenancy = $this->app->make(TenancyManager::class)->get();
 
         $tenancy->removeOption(TenancyOptions::throwIfNotRelated());
@@ -308,7 +308,7 @@ class BelongsToManyTenantsChildModelTest extends FeatureTestCase
             $child->tenants()->attach($tenant);
         })->createOne();
 
-        /** @var \Sprout\Core\Support\DefaultTenancy $tenancy */
+        /** @var \Sprout\Support\DefaultTenancy $tenancy */
         $tenancy = $this->app->make(TenancyManager::class)->get();
 
         sprout()->setCurrentTenancy($tenancy);
@@ -328,7 +328,7 @@ class BelongsToManyTenantsChildModelTest extends FeatureTestCase
     {
         $tenant = TenantModel::factory()->createOne();
 
-        /** @var \Sprout\Core\Support\DefaultTenancy $tenancy */
+        /** @var \Sprout\Support\DefaultTenancy $tenancy */
         $tenancy = $this->app->make(TenancyManager::class)->get();
 
         sprout()->setCurrentTenancy($tenancy);

@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Core\Listeners;
+namespace Sprout\Listeners;
 
 use Illuminate\Queue\Events\JobProcessing;
 use Illuminate\Support\Facades\Context;
-use Sprout\Core\Managers\TenancyManager;
-use Sprout\Core\Sprout;
+use Sprout\Managers\TenancyManager;
+use Sprout\Sprout;
 
 /**
  * Set Current Tenant For Job
@@ -20,12 +20,12 @@ use Sprout\Core\Sprout;
 final class SetCurrentTenantForJob
 {
     /**
-     * @var \Sprout\Core\Sprout
+     * @var \Sprout\Sprout
      */
     private Sprout $sprout;
 
     /**
-     * @var \Sprout\Core\Managers\TenancyManager
+     * @var \Sprout\Managers\TenancyManager
      */
     private TenancyManager $tenancies;
 
@@ -45,7 +45,7 @@ final class SetCurrentTenantForJob
          * @var int|string $key
          */
         foreach ($tenants as $tenancyName => $key) {
-            /** @var \Sprout\Core\Contracts\Tenancy<\Sprout\Core\Contracts\Tenant> $tenancy */
+            /** @var \Sprout\Contracts\Tenancy<\Sprout\Contracts\Tenant> $tenancy */
             $tenancy = $this->tenancies->get($tenancyName);
 
             // It's always the key, so we load instead of identifying

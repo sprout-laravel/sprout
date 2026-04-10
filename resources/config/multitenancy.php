@@ -1,6 +1,6 @@
 <?php
 
-use Sprout\Core\TenancyOptions;
+use Sprout\TenancyOptions;
 
 return [
 
@@ -77,7 +77,7 @@ return [
 
         'tenants' => [
             'driver' => 'eloquent',
-            'model'  => \Sprout\Core\Database\Eloquent\Tenant::class,
+            'model'  => \Sprout\Database\Eloquent\Tenant::class,
         ],
 
         // 'backup' => [

@@ -1,15 +1,15 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Core\Tests\Unit\Attributes;
+namespace Sprout\Tests\Unit\Attributes;
 
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\Core\Attributes\CurrentTenancy;
-use Sprout\Core\Contracts\Tenancy;
-use Sprout\Core\Tests\Unit\UnitTestCase;
+use Sprout\Attributes\CurrentTenancy;
+use Sprout\Contracts\Tenancy;
+use Sprout\Tests\Unit\UnitTestCase;
 use Workbench\App\Models\TenantModel;
-use function Sprout\Core\sprout;
-use function Sprout\Core\tenancy;
+use function Sprout\sprout;
+use function Sprout\tenancy;
 
 class CurrentTenancyTest extends UnitTestCase
 {
@@ -23,7 +23,7 @@ class CurrentTenancyTest extends UnitTestCase
     #[Test]
     public function resolvesCurrentTenant(): void
     {
-        /** @var \Sprout\Core\Contracts\Tenancy $tenancy */
+        /** @var \Sprout\Contracts\Tenancy $tenancy */
         $tenancy = tenancy('tenants');
 
         sprout()->setCurrentTenancy($tenancy);

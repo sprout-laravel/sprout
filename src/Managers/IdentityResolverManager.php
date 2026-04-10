@@ -1,23 +1,23 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Core\Managers;
+namespace Sprout\Managers;
 
-use Sprout\Core\Exceptions\MisconfigurationException;
-use Sprout\Core\Http\Resolvers\CookieIdentityResolver;
-use Sprout\Core\Http\Resolvers\HeaderIdentityResolver;
-use Sprout\Core\Http\Resolvers\PathIdentityResolver;
-use Sprout\Core\Http\Resolvers\SessionIdentityResolver;
-use Sprout\Core\Http\Resolvers\SubdomainIdentityResolver;
-use Sprout\Core\Support\BaseFactory;
+use Sprout\Exceptions\MisconfigurationException;
+use Sprout\Http\Resolvers\CookieIdentityResolver;
+use Sprout\Http\Resolvers\HeaderIdentityResolver;
+use Sprout\Http\Resolvers\PathIdentityResolver;
+use Sprout\Http\Resolvers\SessionIdentityResolver;
+use Sprout\Http\Resolvers\SubdomainIdentityResolver;
+use Sprout\Support\BaseFactory;
 
 /**
  * Identity Resolver Manager
  *
  * This is a manager and factory, responsible for creating and storing
- * implementations of {@see \Sprout\Core\Contracts\IdentityResolver}.
+ * implementations of {@see \Sprout\Contracts\IdentityResolver}.
  *
- * @extends \Sprout\Core\Support\BaseFactory<\Sprout\Core\Contracts\IdentityResolver>
+ * @extends \Sprout\Support\BaseFactory<\Sprout\Contracts\IdentityResolver>
  *
  * @package Core
  */
@@ -51,11 +51,11 @@ final class IdentityResolverManager extends BaseFactory
      * @param array<string, mixed>                                                                                                               $config
      * @param string                                                                                                                             $name
      *
-     * @phpstan-param array{domain?: string, pattern?: string|null, parameter?: string|null, hooks?: array<\Sprout\Core\Support\ResolutionHook>} $config
+     * @phpstan-param array{domain?: string, pattern?: string|null, parameter?: string|null, hooks?: array<\Sprout\Support\ResolutionHook>} $config
      *
-     * @return \Sprout\Core\Http\Resolvers\SubdomainIdentityResolver
+     * @return \Sprout\Http\Resolvers\SubdomainIdentityResolver
      *
-     * @throws \Sprout\Core\Exceptions\MisconfigurationException
+     * @throws \Sprout\Exceptions\MisconfigurationException
      */
     protected function createSubdomainResolver(array $config, string $name): SubdomainIdentityResolver
     {
@@ -78,11 +78,11 @@ final class IdentityResolverManager extends BaseFactory
      * @param array<string, mixed>                                                                                                                  $config
      * @param string                                                                                                                                $name
      *
-     * @phpstan-param array{segment?: int|null, pattern?: string|null, parameter?: string|null, hooks?: array<\Sprout\Core\Support\ResolutionHook>} $config
+     * @phpstan-param array{segment?: int|null, pattern?: string|null, parameter?: string|null, hooks?: array<\Sprout\Support\ResolutionHook>} $config
      *
-     * @return \Sprout\Core\Http\Resolvers\PathIdentityResolver
+     * @return \Sprout\Http\Resolvers\PathIdentityResolver
      *
-     * @throws \Sprout\Core\Exceptions\MisconfigurationException
+     * @throws \Sprout\Exceptions\MisconfigurationException
      */
     protected function createPathResolver(array $config, string $name): PathIdentityResolver
     {
@@ -107,9 +107,9 @@ final class IdentityResolverManager extends BaseFactory
      * @param array<string, mixed>                                                                    $config
      * @param string                                                                                  $name
      *
-     * @phpstan-param array{header?: string|null, hooks?: array<\Sprout\Core\Support\ResolutionHook>} $config
+     * @phpstan-param array{header?: string|null, hooks?: array<\Sprout\Support\ResolutionHook>} $config
      *
-     * @return \Sprout\Core\Http\Resolvers\HeaderIdentityResolver
+     * @return \Sprout\Http\Resolvers\HeaderIdentityResolver
      */
     protected function createHeaderResolver(array $config, string $name): HeaderIdentityResolver
     {
@@ -126,9 +126,9 @@ final class IdentityResolverManager extends BaseFactory
      * @param array<string, mixed>                                                                                                         $config
      * @param string                                                                                                                       $name
      *
-     * @phpstan-param array{cookie?: string|null, options?: array<string, mixed>|null, hooks?: array<\Sprout\Core\Support\ResolutionHook>} $config
+     * @phpstan-param array{cookie?: string|null, options?: array<string, mixed>|null, hooks?: array<\Sprout\Support\ResolutionHook>} $config
      *
-     * @return \Sprout\Core\Http\Resolvers\CookieIdentityResolver
+     * @return \Sprout\Http\Resolvers\CookieIdentityResolver
      */
     protected function createCookieResolver(array $config, string $name): CookieIdentityResolver
     {
@@ -146,9 +146,9 @@ final class IdentityResolverManager extends BaseFactory
      * @param array<string, mixed>                                                                     $config
      * @param string                                                                                   $name
      *
-     * @phpstan-param array{session?: string|null, hooks?: array<\Sprout\Core\Support\ResolutionHook>} $config
+     * @phpstan-param array{session?: string|null, hooks?: array<\Sprout\Support\ResolutionHook>} $config
      *
-     * @return \Sprout\Core\Http\Resolvers\SessionIdentityResolver
+     * @return \Sprout\Http\Resolvers\SessionIdentityResolver
      */
     protected function createSessionResolver(array $config, string $name): SessionIdentityResolver
     {

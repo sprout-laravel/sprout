@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Bud\Exceptions;
+namespace Sprout\Exceptions;
 
 final class CyclicOverrideException extends BudException
 {

@@ -1,14 +1,14 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Bud\Overrides\Cache;
+namespace Sprout\Overrides\Cache;
 
 use Illuminate\Cache\CacheManager;
 use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Support\Arr;
-use Sprout\Bud\Bud;
-use Sprout\Bud\Overrides\BaseCreator;
-use Sprout\Core\Sprout;
+use Sprout;
+use Sprout\Overrides\BaseCreator;
+use Sprout\Sprout;
 
 final class BudCacheStoreCreator extends BaseCreator
 {
@@ -27,8 +27,8 @@ final class BudCacheStoreCreator extends BaseCreator
 
     /**
      * @param \Illuminate\Cache\CacheManager                    $manager
-     * @param \Sprout\Bud\Bud                              $bud
-     * @param \Sprout\Core\Sprout                               $sprout
+     * @param \Sprout\Bud                              $bud
+     * @param \Sprout\Sprout                               $sprout
      * @param string                                            $name
      * @param array<string, mixed>&array{budStore?:string|null} $config
      */
@@ -60,10 +60,10 @@ final class BudCacheStoreCreator extends BaseCreator
     /**
      * @return \Illuminate\Contracts\Cache\Repository
      *
-     * @throws \Sprout\Bud\Exceptions\CyclicOverrideException
-     * @throws \Sprout\Core\Exceptions\MisconfigurationException
-     * @throws \Sprout\Core\Exceptions\TenancyMissingException
-     * @throws \Sprout\Core\Exceptions\TenantMissingException
+     * @throws \Sprout\Exceptions\CyclicOverrideException
+     * @throws \Sprout\Exceptions\MisconfigurationException
+     * @throws \Sprout\Exceptions\TenancyMissingException
+     * @throws \Sprout\Exceptions\TenantMissingException
      */
     public function __invoke(): Repository
     {

@@ -1,24 +1,24 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Core\Managers;
+namespace Sprout\Managers;
 
 use Illuminate\Contracts\Foundation\Application;
-use Sprout\Core\Support\BaseFactory;
-use Sprout\Core\Support\DefaultTenancy;
+use Sprout\Support\BaseFactory;
+use Sprout\Support\DefaultTenancy;
 
 /**
  * Tenancy Manager
  *
  * This is a manager and factory, responsible for creating and storing
- * implementations of {@see \Sprout\Core\Contracts\Tenancy}.
+ * implementations of {@see \Sprout\Contracts\Tenancy}.
  *
- * @extends \Sprout\Core\Support\BaseFactory<\Sprout\Core\Contracts\Tenancy>
+ * @extends \Sprout\Support\BaseFactory<\Sprout\Contracts\Tenancy>
  */
 final class TenancyManager extends BaseFactory
 {
     /**
-     * @var \Sprout\Core\Managers\TenantProviderManager
+     * @var \Sprout\Managers\TenantProviderManager
      */
     private TenantProviderManager $providerManager;
 
@@ -26,7 +26,7 @@ final class TenancyManager extends BaseFactory
      * Create a new instance
      *
      * @param \Illuminate\Contracts\Foundation\Application $app
-     * @param \Sprout\Core\Managers\TenantProviderManager  $providerManager
+     * @param \Sprout\Managers\TenantProviderManager  $providerManager
      */
     public function __construct(Application $app, TenantProviderManager $providerManager)
     {
@@ -65,7 +65,7 @@ final class TenancyManager extends BaseFactory
      *
      * @phpstan-param array{provider?: string|null, options?: list<string>} $config
      *
-     * @return \Sprout\Core\Support\DefaultTenancy<\Sprout\Core\Contracts\Tenant>
+     * @return \Sprout\Support\DefaultTenancy<\Sprout\Contracts\Tenant>
      */
     protected function createDefaultTenancy(array $config, string $name): DefaultTenancy
     {

@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Bud\Overrides;
+namespace Sprout\Overrides;
 
 use Closure;
 use Illuminate\Foundation\Application;
-use Sprout\Bud\Bud;
-use Sprout\Bud\Overrides\Cache\BudCacheStoreCreator;
-use Sprout\Core\Sprout;
+use Sprout;
+use Sprout\Overrides\Cache\BudCacheStoreCreator;
+use Sprout\Sprout;
 
 /**
  * @extends \Sprout\Overrides\BudBaseOverride<\Illuminate\Cache\CacheManager>
@@ -28,8 +28,8 @@ final class BudCacheStoreOverride extends BaseOverride
      * Add a driver to the service.
      *
      * @param object                                 $service
-     * @param \Sprout\Bud\Bud                   $bud
-     * @param \Sprout\Core\Sprout                    $sprout
+     * @param \Sprout\Bud                   $bud
+     * @param \Sprout\Sprout                    $sprout
      * @param \Closure                               $tracker
      *
      * @phpstan-param \Illuminate\Cache\CacheManager $service

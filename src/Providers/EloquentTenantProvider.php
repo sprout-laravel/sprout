@@ -1,28 +1,28 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Core\Providers;
+namespace Sprout\Providers;
 
 use Illuminate\Database\Eloquent\Model;
-use Sprout\Core\Contracts\Tenant;
-use Sprout\Core\Contracts\TenantHasResources;
-use Sprout\Core\Exceptions\MisconfigurationException;
-use Sprout\Core\Support\BaseTenantProvider;
+use Sprout\Contracts\Tenant;
+use Sprout\Contracts\TenantHasResources;
+use Sprout\Exceptions\MisconfigurationException;
+use Sprout\Support\BaseTenantProvider;
 
 /**
  * Eloquent Tenant Provider
  *
- * This class provides an implementation of the {@see \Sprout\Core\Contracts\TenantProvider}
- * contract for situations where the {@see \Sprout\Core\Contracts\Tenant} is an
+ * This class provides an implementation of the {@see \Sprout\Contracts\TenantProvider}
+ * contract for situations where the {@see \Sprout\Contracts\Tenant} is an
  * Eloquent model.
  *
- * @template TenantModel of \Illuminate\Database\Eloquent\Model&\Sprout\Core\Contracts\Tenant
+ * @template TenantModel of \Illuminate\Database\Eloquent\Model&\Sprout\Contracts\Tenant
  *
- * @extends \Sprout\Core\Support\BaseTenantProvider<TenantModel>
+ * @extends \Sprout\Support\BaseTenantProvider<TenantModel>
  *
  * @package  Providers
  *
- * @internal New instances are created with {@see \Sprout\Core\Managers\TenantProviderManager::createEloquentProvider()}, and shouldn't be created manually
+ * @internal New instances are created with {@see \Sprout\Managers\TenantProviderManager::createEloquentProvider()}, and shouldn't be created manually
  */
 final class EloquentTenantProvider extends BaseTenantProvider
 {
@@ -74,7 +74,7 @@ final class EloquentTenantProvider extends BaseTenantProvider
     /**
      * Get an instance of the tenant model
      *
-     * @return \Illuminate\Database\Eloquent\Model&\Sprout\Core\Contracts\Tenant
+     * @return \Illuminate\Database\Eloquent\Model&\Sprout\Contracts\Tenant
      *
      * @phpstan-return TenantModel
      */
@@ -95,10 +95,10 @@ final class EloquentTenantProvider extends BaseTenantProvider
      *
      * @param string $identifier
      *
-     * @return \Sprout\Core\Contracts\Tenant|null
+     * @return \Sprout\Contracts\Tenant|null
      *
-     * @see \Sprout\Core\Contracts\Tenant::getTenantIdentifier()
-     * @see \Sprout\Core\Contracts\Tenant::getTenantIdentifierName()
+     * @see \Sprout\Contracts\Tenant::getTenantIdentifier()
+     * @see \Sprout\Contracts\Tenant::getTenantIdentifierName()
      *
      * @phpstan-return TenantModel|null
      */
@@ -120,10 +120,10 @@ final class EloquentTenantProvider extends BaseTenantProvider
      *
      * @param int|string $key
      *
-     * @return \Sprout\Core\Contracts\Tenant|null
+     * @return \Sprout\Contracts\Tenant|null
      *
-     * @see \Sprout\Core\Contracts\Tenant::getTenantKey()
-     * @see \Sprout\Core\Contracts\Tenant::getTenantKeyName()
+     * @see \Sprout\Contracts\Tenant::getTenantKey()
+     * @see \Sprout\Contracts\Tenant::getTenantKeyName()
      *
      * @phpstan-return TenantModel|null
      */
@@ -142,19 +142,19 @@ final class EloquentTenantProvider extends BaseTenantProvider
      *
      * Gets an instance of the tenant implementation the provider represents,
      * using a resource key.
-     * The tenant class must implement the {@see \Sprout\Core\Contracts\TenantHasResources}
+     * The tenant class must implement the {@see \Sprout\Contracts\TenantHasResources}
      * interface for this method to work.
      *
      * @param string $resourceKey
      *
-     * @return (\Sprout\Core\Contracts\Tenant&\Sprout\Core\Contracts\TenantHasResources)|null
+     * @return (\Sprout\Contracts\Tenant&\Sprout\Contracts\TenantHasResources)|null
      *
-     * @throws \Sprout\Core\Exceptions\MisconfigurationException
+     * @throws \Sprout\Exceptions\MisconfigurationException
      *
-     * @phpstan-return (TenantModel&\Sprout\Core\Contracts\TenantHasResources)|null
+     * @phpstan-return (TenantModel&\Sprout\Contracts\TenantHasResources)|null
      *
-     * @see \Sprout\Core\Contracts\TenantHasResources::getTenantResourceKeyName()
-     * @see \Sprout\Core\Contracts\TenantHasResources::getTenantResourceKey()
+     * @see \Sprout\Contracts\TenantHasResources::getTenantResourceKeyName()
+     * @see \Sprout\Contracts\TenantHasResources::getTenantResourceKey()
      */
     public function retrieveByResourceKey(string $resourceKey): (Tenant&TenantHasResources)|null
     {
@@ -164,7 +164,7 @@ final class EloquentTenantProvider extends BaseTenantProvider
             throw MisconfigurationException::misconfigured('tenant', $model::class, 'resources');
         }
 
-        /** @var (TenantModel&\Sprout\Core\Contracts\TenantHasResources)|null */
+        /** @var (TenantModel&\Sprout\Contracts\TenantHasResources)|null */
         return $model->newModelQuery()
                      ->where($model->getTenantResourceKeyName(), $resourceKey)
                      ->first();

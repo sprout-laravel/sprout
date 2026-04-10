@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Bud\Tests\Unit\Overrides\Auth;
+namespace Sprout\Tests\Unit\Overrides\Auth;
 
 use Illuminate\Auth\AuthManager;
 use Illuminate\Auth\EloquentUserProvider;
@@ -11,8 +11,8 @@ use Illuminate\Foundation\Application;
 use InvalidArgumentException;
 use Mockery;
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\Bud\Overrides\Auth\BudAuthManager;
-use Sprout\Bud\Tests\Unit\UnitTestCase;
+use Sprout\Overrides\Auth\BudAuthManager;
+use Sprout\Tests\Unit\UnitTestCase;
 
 class BudAuthManagerTest extends UnitTestCase
 {

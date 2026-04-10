@@ -1,6 +1,6 @@
 <?php
 
-namespace Sprout\Core\Database\Eloquent\Contracts;
+namespace Sprout\Database\Eloquent\Contracts;
 
 /**
  * Optional Tenant Contract

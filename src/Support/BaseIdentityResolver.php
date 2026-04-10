@@ -1,20 +1,20 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Core\Support;
+namespace Sprout\Support;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\RouteRegistrar;
-use Sprout\Core\Concerns\AwareOfApp;
-use Sprout\Core\Concerns\AwareOfSprout;
-use Sprout\Core\Contracts\IdentityResolver;
-use Sprout\Core\Contracts\Tenancy;
-use Sprout\Core\Contracts\Tenant;
+use Sprout\Concerns\AwareOfApp;
+use Sprout\Concerns\AwareOfSprout;
+use Sprout\Contracts\IdentityResolver;
+use Sprout\Contracts\Tenancy;
+use Sprout\Contracts\Tenant;
 
 /**
  * Base Identity Resolver
  *
- * This is an abstract {@see \Sprout\Core\Contracts\IdentityResolver} to provide
+ * This is an abstract {@see \Sprout\Contracts\IdentityResolver} to provide
  *  a shared implementation of common functionality.
  *
  * @package Core
@@ -29,7 +29,7 @@ abstract class BaseIdentityResolver implements IdentityResolver
     private string $name;
 
     /**
-     * @var array<\Sprout\Core\Support\ResolutionHook>
+     * @var array<\Sprout\Support\ResolutionHook>
      */
     private array $hooks;
 
@@ -37,7 +37,7 @@ abstract class BaseIdentityResolver implements IdentityResolver
      * Create a new instance
      *
      * @param string                                     $name
-     * @param array<\Sprout\Core\Support\ResolutionHook> $hooks
+     * @param array<\Sprout\Support\ResolutionHook> $hooks
      */
     public function __construct(string $name, array $hooks = [])
     {
@@ -58,7 +58,7 @@ abstract class BaseIdentityResolver implements IdentityResolver
     /**
      * Get the hooks this resolver uses
      *
-     * @return array<\Sprout\Core\Support\ResolutionHook>
+     * @return array<\Sprout\Support\ResolutionHook>
      */
     public function getHooks(): array
     {
@@ -73,10 +73,10 @@ abstract class BaseIdentityResolver implements IdentityResolver
      * This method is also called if there is no current tenant, as there may
      * be actions needed.
      *
-     * @template TenantClass of \Sprout\Core\Contracts\Tenant
+     * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Sprout\Core\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Core\Contracts\Tenant|null          $tenant
+     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Sprout\Contracts\Tenant|null          $tenant
      *
      * @phpstan-param Tenant|null                         $tenant
      *
@@ -93,11 +93,11 @@ abstract class BaseIdentityResolver implements IdentityResolver
      * This method allows a resolver to prevent resolution with the request in
      * its current state, whether that means it's too early, or too late.
      *
-     * @template TenantClass of \Sprout\Core\Contracts\Tenant
+     * @template TenantClass of \Sprout\Contracts\Tenant
      *
      * @param \Illuminate\Http\Request                    $request
-     * @param \Sprout\Core\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Core\Support\ResolutionHook         $hook
+     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Sprout\Support\ResolutionHook         $hook
      *
      * @return bool
      */
@@ -117,11 +117,11 @@ abstract class BaseIdentityResolver implements IdentityResolver
      * This method is only really useful for identity resolvers that use route
      * parameters, but, it's here for backwards compatibility.
      *
-     * @template TenantClass of \Sprout\Core\Contracts\Tenant
+     * @template TenantClass of \Sprout\Contracts\Tenant
      *
      * @param string                                      $name
-     * @param \Sprout\Core\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Core\Contracts\Tenant               $tenant
+     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Sprout\Contracts\Tenant               $tenant
      * @param array<string, mixed>                        $parameters
      * @param bool                                        $absolute
      *
@@ -141,7 +141,7 @@ abstract class BaseIdentityResolver implements IdentityResolver
      * middleware, and anything else required, besides the default middleware.
      *
      * @param \Illuminate\Routing\RouteRegistrar                            $route
-     * @param \Sprout\Core\Contracts\Tenancy<\Sprout\Core\Contracts\Tenant> $tenancy
+     * @param \Sprout\Contracts\Tenancy<\Sprout\Contracts\Tenant> $tenancy
      *
      * @return void
      */

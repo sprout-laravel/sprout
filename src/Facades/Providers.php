@@ -1,17 +1,17 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Core\Facades;
+namespace Sprout\Facades;
 
 use Closure;
 use Illuminate\Support\Facades\Facade;
-use Sprout\Core\Contracts\TenantProvider;
-use Sprout\Core\Managers\TenantProviderManager;
+use Sprout\Contracts\TenantProvider;
+use Sprout\Managers\TenantProviderManager;
 
 /**
  * Providers Facade
  *
- * This is the facade for the {@see \Sprout\Core\Managers\TenantProviderManager} class.
+ * This is the facade for the {@see \Sprout\Managers\TenantProviderManager} class.
  *
  * @method static TenantProviderManager flushResolved()
  * @method static TenantProvider get(string|null $name = null)

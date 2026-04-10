@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Bud;
+namespace Sprout;
 
 use Illuminate\Support\ServiceProvider;
-use Sprout\Bud\Contracts\ConfigStore;
-use Sprout\Bud\Managers\ConfigStoreManager;
+use Sprout\Contracts\ConfigStore;
+use Sprout\Managers\ConfigStoreManager;
 
 /**
  * Bud Service Provider

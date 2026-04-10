@@ -1,16 +1,16 @@
 <?php
 
-namespace Sprout\Core\Contracts;
+namespace Sprout\Contracts;
 
-use Sprout\Core\Support\ResolutionHook;
+use Sprout\Support\ResolutionHook;
 
 /**
  * Tenancy Contract
  *
  * This contract represents a tenancy, an object responsible for managing the
- * state of the current tenancy, i.e. the current {@see \Sprout\Core\Contracts\Tenant}.
+ * state of the current tenancy, i.e. the current {@see \Sprout\Contracts\Tenant}.
  *
- * @template TenantClass of \Sprout\Core\Contracts\Tenant
+ * @template TenantClass of \Sprout\Contracts\Tenant
  *
  * @package Core
  */
@@ -33,7 +33,7 @@ interface Tenancy
      *
      * @return bool
      *
-     * @phpstan-assert-if-true \Sprout\Core\Contracts\Tenant $this->tenant()
+     * @phpstan-assert-if-true \Sprout\Contracts\Tenant $this->tenant()
      * @phpstan-assert-if-true string $this->identifier()
      * @phpstan-assert-if-true string|int $this->key()
      * @phpstan-assert-if-false null $this->tenant()
@@ -49,7 +49,7 @@ interface Tenancy
      * Implementations may attempt to load a tenant if one isn't present, though
      * this is not required.
      *
-     * @return \Sprout\Core\Contracts\Tenant|null
+     * @return \Sprout\Contracts\Tenant|null
      *
      * @phpstan-return TenantClass|null
      */
@@ -61,7 +61,7 @@ interface Tenancy
      * Get the tenant key for the current tenant if there is one.
      *
      * @return int|string|null
-     * @see \Sprout\Core\Contracts\Tenant::getTenantKey()
+     * @see \Sprout\Contracts\Tenant::getTenantKey()
      *
      */
     public function key(): int|string|null;
@@ -72,7 +72,7 @@ interface Tenancy
      * Get the tenant identifier for the current tenant if there is one.
      *
      * @return string|null
-     * @see \Sprout\Core\Contracts\Tenant::getTenantIdentifier()
+     * @see \Sprout\Contracts\Tenant::getTenantIdentifier()
      *
      */
     public function identifier(): ?string;
@@ -104,14 +104,14 @@ interface Tenancy
      *
      * Get the tenant provider used by this tenancy.
      *
-     * @return \Sprout\Core\Contracts\TenantProvider<TenantClass>
+     * @return \Sprout\Contracts\TenantProvider<TenantClass>
      */
     public function provider(): TenantProvider;
 
     /**
      * Set the identity resolved used
      *
-     * @param \Sprout\Core\Contracts\IdentityResolver $resolver
+     * @param \Sprout\Contracts\IdentityResolver $resolver
      *
      * @return static
      */
@@ -120,7 +120,7 @@ interface Tenancy
     /**
      * Set the hook where the tenant was resolved
      *
-     * @param \Sprout\Core\Support\ResolutionHook $hook
+     * @param \Sprout\Support\ResolutionHook $hook
      *
      * @return $this
      */
@@ -129,14 +129,14 @@ interface Tenancy
     /**
      * Get the used identity resolver
      *
-     * @return \Sprout\Core\Contracts\IdentityResolver|null
+     * @return \Sprout\Contracts\IdentityResolver|null
      */
     public function resolver(): ?IdentityResolver;
 
     /**
      * Get the hook where the tenant was resolved
      *
-     * @return \Sprout\Core\Support\ResolutionHook|null
+     * @return \Sprout\Support\ResolutionHook|null
      */
     public function hook(): ?ResolutionHook;
 
@@ -145,7 +145,7 @@ interface Tenancy
      *
      * @return bool
      *
-     * @phpstan-assert-if-true \Sprout\Core\Contracts\IdentityResolver $this->resolver()
+     * @phpstan-assert-if-true \Sprout\Contracts\IdentityResolver $this->resolver()
      * @phpstan-assert-if-false null $this->resolver()
      */
     public function wasResolved(): bool;
@@ -153,7 +153,7 @@ interface Tenancy
     /**
      * Set the current tenant
      *
-     * @param \Sprout\Core\Contracts\Tenant|null $tenant
+     * @param \Sprout\Contracts\Tenant|null $tenant
      *
      * @phpstan-param TenantClass|null           $tenant
      *

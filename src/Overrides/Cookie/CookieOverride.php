@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Core\Overrides;
+namespace Sprout\Overrides;
 
 use Illuminate\Cookie\CookieJar;
-use Sprout\Core\Contracts\Tenancy;
-use Sprout\Core\Contracts\Tenant;
+use Sprout\Contracts\Tenancy;
+use Sprout\Contracts\Tenant;
 
 /**
  * Cookie Override
@@ -24,8 +24,8 @@ final class CookieOverride extends BaseOverride
      * override.
      * It is called when a new tenant is marked as the current tenant.
      *
-     * @param \Sprout\Core\Contracts\Tenancy<*> $tenancy
-     * @param \Sprout\Core\Contracts\Tenant     $tenant
+     * @param \Sprout\Contracts\Tenancy<*> $tenancy
+     * @param \Sprout\Contracts\Tenant     $tenant
      *
      * @return void
      */

@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Bud\Overrides\Database;
+namespace Sprout\Overrides\Database;
 
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\DatabaseManager;
-use Sprout\Bud\Bud;
-use Sprout\Bud\Overrides\BaseCreator;
-use Sprout\Core\Sprout;
+use Sprout;
+use Sprout\Overrides\BaseCreator;
+use Sprout\Sprout;
 
 /**
  * Bud Database Connection Creator
@@ -32,8 +32,8 @@ final class BudDatabaseConnectionCreator extends BaseCreator
 
     /**
      * @param \Illuminate\Database\DatabaseManager              $manager
-     * @param \Sprout\Bud\Bud                              $bud
-     * @param \Sprout\Core\Sprout                               $sprout
+     * @param \Sprout\Bud                              $bud
+     * @param \Sprout\Sprout                               $sprout
      * @param string                                            $name
      * @param array<string, mixed>&array{budStore?:string|null} $config
      */
@@ -57,9 +57,9 @@ final class BudDatabaseConnectionCreator extends BaseCreator
      *
      * @return \Illuminate\Database\ConnectionInterface
      *
-     * @throws \Sprout\Core\Exceptions\MisconfigurationException
-     * @throws \Sprout\Core\Exceptions\TenancyMissingException
-     * @throws \Sprout\Core\Exceptions\TenantMissingException
+     * @throws \Sprout\Exceptions\MisconfigurationException
+     * @throws \Sprout\Exceptions\TenancyMissingException
+     * @throws \Sprout\Exceptions\TenantMissingException
      */
     public function __invoke(): ConnectionInterface
     {

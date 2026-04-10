@@ -1,17 +1,17 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Core\Events;
+namespace Sprout\Events;
 
 use Illuminate\Foundation\Events\Dispatchable;
-use Sprout\Core\Contracts\ServiceOverride;
+use Sprout\Contracts\ServiceOverride;
 
 /**
  * Service Override Event
  *
  * This is a base event class for the service override events.
  *
- * @template OverrideClass of \Sprout\Core\Contracts\ServiceOverride
+ * @template OverrideClass of \Sprout\Contracts\ServiceOverride
  *
  * @method static self dispatch(string $service, ServiceOverride $override)
  * @method static self dispatchIf(bool $boolean, string $service, ServiceOverride $override)
@@ -33,7 +33,7 @@ abstract class ServiceOverrideEvent
     public readonly string $service;
 
     /**
-     * @var \Sprout\Core\Contracts\ServiceOverride
+     * @var \Sprout\Contracts\ServiceOverride
      *
      * @phpstam-var OverrideClass
      */
@@ -41,7 +41,7 @@ abstract class ServiceOverrideEvent
 
     /**
      * @param string                                 $service
-     * @param \Sprout\Core\Contracts\ServiceOverride $override
+     * @param \Sprout\Contracts\ServiceOverride $override
      *
      * @phpstan-param OverrideClass                  $override
      */

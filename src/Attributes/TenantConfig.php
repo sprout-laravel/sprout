@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Bud\Attributes;
+namespace Sprout\Attributes;
 
 use Attribute;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Contracts\Container\ContextualAttribute;
-use Sprout\Bud\Bud;
+use Sprout;
 
 /**
  * Config Store Attribute
@@ -37,13 +37,13 @@ final readonly class TenantConfig implements ContextualAttribute
     /**
      * Resolve the config store using this attribute
      *
-     * @param \Sprout\Bud\Attributes\TenantConfig  $attribute
+     * @param \Sprout\Attributes\TenantConfig  $attribute
      * @param \Illuminate\Contracts\Container\Container $container
      *
      * @return array<string, mixed>|null
      *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
-     * @throws \Sprout\Core\Exceptions\MisconfigurationException
+     * @throws \Sprout\Exceptions\MisconfigurationException
      */
     public function resolve(self $attribute, Container $container): ?array
     {

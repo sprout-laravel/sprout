@@ -1,14 +1,14 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Core\Overrides\Session;
+namespace Sprout\Overrides\Session;
 
 use Illuminate\Database\Query\Builder;
 use Illuminate\Database\QueryException;
 use Illuminate\Session\DatabaseSessionHandler;
 use Illuminate\Support\Arr;
-use Sprout\Core\Concerns\AwareOfTenant;
-use Sprout\Core\Contracts\TenantAware;
+use Sprout\Concerns\AwareOfTenant;
+use Sprout\Contracts\TenantAware;
 
 /**
  * Sprout Database Session Handler
@@ -28,8 +28,8 @@ class SproutDatabaseSessionHandler extends DatabaseSessionHandler implements Ten
      *
      * @return \Illuminate\Database\Query\Builder
      *
-     * @throws \Sprout\Core\Exceptions\TenantMissingException
-     * @throws \Sprout\Core\Exceptions\TenancyMissingException
+     * @throws \Sprout\Exceptions\TenantMissingException
+     * @throws \Sprout\Exceptions\TenancyMissingException
      */
     protected function getQuery(?bool $write = false): Builder
     {
@@ -41,8 +41,8 @@ class SproutDatabaseSessionHandler extends DatabaseSessionHandler implements Ten
         $tenant  = $this->getTenant();
 
         /**
-         * @var \Sprout\Core\Contracts\Tenancy<*> $tenancy
-         * @var \Sprout\Core\Contracts\Tenant     $tenant
+         * @var \Sprout\Contracts\Tenancy<*> $tenancy
+         * @var \Sprout\Contracts\Tenant     $tenant
          */
 
         $query = parent::getQuery();
@@ -70,8 +70,8 @@ class SproutDatabaseSessionHandler extends DatabaseSessionHandler implements Ten
             $tenant  = $this->getTenant();
 
             /**
-             * @var \Sprout\Core\Contracts\Tenancy<*> $tenancy
-             * @var \Sprout\Core\Contracts\Tenant     $tenant
+             * @var \Sprout\Contracts\Tenancy<*> $tenancy
+             * @var \Sprout\Contracts\Tenant     $tenant
              */
 
             $payload['tenancy']   = $tenancy->getName();
@@ -93,8 +93,8 @@ class SproutDatabaseSessionHandler extends DatabaseSessionHandler implements Ten
      *
      * @return int
      *
-     * @throws \Sprout\Core\Exceptions\TenancyMissingException
-     * @throws \Sprout\Core\Exceptions\TenantMissingException
+     * @throws \Sprout\Exceptions\TenancyMissingException
+     * @throws \Sprout\Exceptions\TenantMissingException
      */
     protected function performUpdate($sessionId, $payload): int
     {

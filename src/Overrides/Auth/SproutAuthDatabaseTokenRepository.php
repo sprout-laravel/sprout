@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Core\Overrides\Auth;
+namespace Sprout\Overrides\Auth;
 
 use Illuminate\Auth\Passwords\DatabaseTokenRepository;
 use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
@@ -10,10 +10,10 @@ use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Carbon;
 use SensitiveParameter;
-use Sprout\Core\Contracts\Tenancy;
-use Sprout\Core\Exceptions\TenancyMissingException;
-use Sprout\Core\Exceptions\TenantMissingException;
-use Sprout\Core\Sprout;
+use Sprout\Contracts\Tenancy;
+use Sprout\Exceptions\TenancyMissingException;
+use Sprout\Exceptions\TenantMissingException;
+use Sprout\Sprout;
 
 /**
  * Sprout Auth Database Token Repository
@@ -27,7 +27,7 @@ use Sprout\Core\Sprout;
 class SproutAuthDatabaseTokenRepository extends DatabaseTokenRepository
 {
     /**
-     * @var \Sprout\Core\Sprout
+     * @var \Sprout\Sprout
      */
     private Sprout $sprout;
 
@@ -57,10 +57,10 @@ class SproutAuthDatabaseTokenRepository extends DatabaseTokenRepository
     }
 
     /**
-     * @return \Sprout\Core\Contracts\Tenancy<*>
+     * @return \Sprout\Contracts\Tenancy<*>
      *
-     * @throws \Sprout\Core\Exceptions\TenancyMissingException
-     * @throws \Sprout\Core\Exceptions\TenantMissingException
+     * @throws \Sprout\Exceptions\TenancyMissingException
+     * @throws \Sprout\Exceptions\TenantMissingException
      */
     protected function getTenancy(): Tenancy
     {
@@ -85,8 +85,8 @@ class SproutAuthDatabaseTokenRepository extends DatabaseTokenRepository
      *
      * @return array<string, mixed>
      *
-     * @throws \Sprout\Core\Exceptions\TenancyMissingException
-     * @throws \Sprout\Core\Exceptions\TenantMissingException
+     * @throws \Sprout\Exceptions\TenancyMissingException
+     * @throws \Sprout\Exceptions\TenantMissingException
      */
     protected function getPayload($email, #[SensitiveParameter] $token): array
     {
@@ -113,8 +113,8 @@ class SproutAuthDatabaseTokenRepository extends DatabaseTokenRepository
      *
      * @return \Illuminate\Database\Query\Builder
      *
-     * @throws \Sprout\Core\Exceptions\TenancyMissingException
-     * @throws \Sprout\Core\Exceptions\TenantMissingException
+     * @throws \Sprout\Exceptions\TenancyMissingException
+     * @throws \Sprout\Exceptions\TenantMissingException
      */
     protected function getTenantedQuery(string $email): Builder
     {
@@ -137,8 +137,8 @@ class SproutAuthDatabaseTokenRepository extends DatabaseTokenRepository
      *
      * @return object|null
      *
-     * @throws \Sprout\Core\Exceptions\TenancyMissingException
-     * @throws \Sprout\Core\Exceptions\TenantMissingException
+     * @throws \Sprout\Exceptions\TenancyMissingException
+     * @throws \Sprout\Exceptions\TenantMissingException
      */
     protected function getExistingTenantedRecord(CanResetPasswordContract $user): ?object
     {
@@ -152,8 +152,8 @@ class SproutAuthDatabaseTokenRepository extends DatabaseTokenRepository
      *
      * @return int
      *
-     * @throws \Sprout\Core\Exceptions\TenancyMissingException
-     * @throws \Sprout\Core\Exceptions\TenantMissingException
+     * @throws \Sprout\Exceptions\TenancyMissingException
+     * @throws \Sprout\Exceptions\TenantMissingException
      */
     protected function deleteExisting(CanResetPasswordContract $user): int
     {
@@ -168,8 +168,8 @@ class SproutAuthDatabaseTokenRepository extends DatabaseTokenRepository
      *
      * @return bool
      *
-     * @throws \Sprout\Core\Exceptions\TenancyMissingException
-     * @throws \Sprout\Core\Exceptions\TenantMissingException
+     * @throws \Sprout\Exceptions\TenancyMissingException
+     * @throws \Sprout\Exceptions\TenantMissingException
      */
     public function exists(CanResetPasswordContract $user, #[SensitiveParameter] $token): bool
     {
@@ -188,8 +188,8 @@ class SproutAuthDatabaseTokenRepository extends DatabaseTokenRepository
      *
      * @return bool
      *
-     * @throws \Sprout\Core\Exceptions\TenancyMissingException
-     * @throws \Sprout\Core\Exceptions\TenantMissingException
+     * @throws \Sprout\Exceptions\TenancyMissingException
+     * @throws \Sprout\Exceptions\TenantMissingException
      */
     public function recentlyCreatedToken(CanResetPasswordContract $user): bool
     {

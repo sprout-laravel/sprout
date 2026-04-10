@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Bud\Tests\Unit\Overrides\Broadcast;
+namespace Sprout\Tests\Unit\Overrides\Broadcast;
 
 use Illuminate\Broadcasting\Broadcasters\NullBroadcaster;
 use Illuminate\Broadcasting\BroadcastManager;
@@ -11,8 +11,8 @@ use Illuminate\Foundation\Application;
 use InvalidArgumentException;
 use Mockery;
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\Bud\Overrides\Broadcast\BudBroadcastManager;
-use Sprout\Bud\Tests\Unit\UnitTestCase;
+use Sprout\Overrides\Broadcast\BudBroadcastManager;
+use Sprout\Tests\Unit\UnitTestCase;
 
 class BudBroadcastManagerTest extends UnitTestCase
 {

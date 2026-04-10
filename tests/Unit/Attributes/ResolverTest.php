@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Core\Tests\Unit\Attributes;
+namespace Sprout\Tests\Unit\Attributes;
 
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\Core\Attributes\Resolver;
-use Sprout\Core\Contracts\IdentityResolver;
-use Sprout\Core\Managers\IdentityResolverManager;
-use Sprout\Core\Tests\Unit\UnitTestCase;
+use Sprout\Attributes\Resolver;
+use Sprout\Contracts\IdentityResolver;
+use Sprout\Managers\IdentityResolverManager;
+use Sprout\Tests\Unit\UnitTestCase;
 
 class ResolverTest extends UnitTestCase
 {

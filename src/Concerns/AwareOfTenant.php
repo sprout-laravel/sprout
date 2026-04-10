@@ -1,23 +1,23 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Core\Concerns;
+namespace Sprout\Concerns;
 
-use Sprout\Core\Contracts\Tenancy;
-use Sprout\Core\Contracts\Tenant;
+use Sprout\Contracts\Tenancy;
+use Sprout\Contracts\Tenant;
 
 /**
- * @phpstan-require-implements \Sprout\Core\Contracts\TenantAware
+ * @phpstan-require-implements \Sprout\Contracts\TenantAware
  */
 trait AwareOfTenant
 {
     /**
-     * @var \Sprout\Core\Contracts\Tenant|null
+     * @var \Sprout\Contracts\Tenant|null
      */
     private ?Tenant $tenant;
 
     /**
-     * @var \Sprout\Core\Contracts\Tenancy<*>|null
+     * @var \Sprout\Contracts\Tenancy<*>|null
      */
     private ?Tenancy $tenancy;
 
@@ -34,7 +34,7 @@ trait AwareOfTenant
     /**
      * Get the tenant if there is one
      *
-     * @return \Sprout\Core\Contracts\Tenant|null
+     * @return \Sprout\Contracts\Tenant|null
      */
     public function getTenant(): ?Tenant
     {
@@ -57,7 +57,7 @@ trait AwareOfTenant
     /**
      * Set the tenant
      *
-     * @param \Sprout\Core\Contracts\Tenant|null $tenant
+     * @param \Sprout\Contracts\Tenant|null $tenant
      *
      * @return static
      */
@@ -71,7 +71,7 @@ trait AwareOfTenant
     /**
      * Get the tenancy if there is one
      *
-     * @return \Sprout\Core\Contracts\Tenancy<*>|null
+     * @return \Sprout\Contracts\Tenancy<*>|null
      */
     public function getTenancy(): ?Tenancy
     {
@@ -94,8 +94,8 @@ trait AwareOfTenant
     /**
      * Set the tenancy
      *
-     * @template TenantClass of \Sprout\Core\Contracts\Tenant
-     * @param \Sprout\Core\Contracts\Tenancy<TenantClass>|null $tenancy
+     * @template TenantClass of \Sprout\Contracts\Tenant
+     * @param \Sprout\Contracts\Tenancy<TenantClass>|null $tenancy
      *
      * @return static
      */

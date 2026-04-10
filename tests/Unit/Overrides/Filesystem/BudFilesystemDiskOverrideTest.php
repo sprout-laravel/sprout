@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Bud\Tests\Unit\Overrides;
+namespace Sprout\Tests\Unit\Overrides;
 
 use Closure;
 use Illuminate\Config\Repository;
@@ -13,22 +13,22 @@ use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use RuntimeException;
-use Sprout\Bud\Bud;
-use Sprout\Bud\Contracts\ConfigStore;
-use Sprout\Bud\Exceptions\CyclicOverrideException;
-use Sprout\Bud\Managers\ConfigStoreManager;
+use Sprout;
+use Sprout\Contracts\ConfigStore;
+use Sprout\Exceptions\CyclicOverrideException;
+use Sprout\Managers\ConfigStoreManager;
 use Sprout\Overrides\Filesystem\BudFilesystemDiskOverride;
-use Sprout\Bud\Tests\Unit\UnitTestCase;
-use Sprout\Core\Contracts\BootableServiceOverride;
-use Sprout\Core\Contracts\Tenancy;
-use Sprout\Core\Contracts\Tenant;
-use Sprout\Core\Contracts\TenantHasResources;
-use Sprout\Core\Overrides\Filesystem\SproutFilesystemManager;
+use Sprout\Tests\Unit\UnitTestCase;
+use Sprout\Contracts\BootableServiceOverride;
+use Sprout\Contracts\Tenancy;
+use Sprout\Contracts\Tenant;
+use Sprout\Contracts\TenantHasResources;
+use Sprout\Overrides\Filesystem\SproutFilesystemManager;
 use Sprout\Overrides\Filesystem\FilesystemManagerOverride;
-use Sprout\Core\Overrides\StackedOverride;
-use Sprout\Core\Sprout;
-use Sprout\Core\Support\SettingsRepository;
-use function Sprout\Core\sprout;
+use Sprout\Overrides\StackedOverride;
+use Sprout\Sprout;
+use Sprout\Support\SettingsRepository;
+use function Sprout\sprout;
 
 class BudFilesystemDiskOverrideTest extends UnitTestCase
 {
@@ -218,7 +218,7 @@ class BudFilesystemDiskOverrideTest extends UnitTestCase
 
         $override->boot($app, $sprout);
 
-        /** @var \Sprout\Core\Overrides\Filesystem\SproutFilesystemManager $manager */
+        /** @var \Sprout\Overrides\Filesystem\SproutFilesystemManager $manager */
         $manager = $app->make('filesystem');
 
         $this->expectException(RuntimeException::class);
@@ -277,7 +277,7 @@ class BudFilesystemDiskOverrideTest extends UnitTestCase
 
         $override->boot($app, $sprout);
 
-        /** @var \Sprout\Core\Overrides\Filesystem\SproutFilesystemManager $manager */
+        /** @var \Sprout\Overrides\Filesystem\SproutFilesystemManager $manager */
         $manager = $app->make('filesystem');
 
         $this->expectException(CyclicOverrideException::class);
@@ -339,7 +339,7 @@ class BudFilesystemDiskOverrideTest extends UnitTestCase
 
         $override->boot($app, $sprout);
 
-        /** @var \Sprout\Core\Overrides\Filesystem\SproutFilesystemManager $filesystem */
+        /** @var \Sprout\Overrides\Filesystem\SproutFilesystemManager $filesystem */
         $filesystem = $app->make('filesystem');
 
         $filesystem->disk('bud-disk');

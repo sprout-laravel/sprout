@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Bud;
+namespace Sprout;
 
-use Sprout\Core\Contracts\Tenancy;
+use Sprout\Contracts\Tenancy;
 
 /**
  *
@@ -35,7 +35,7 @@ final class BudOptions
     }
 
     /**
-     * @param \Sprout\Core\Contracts\Tenancy<*> $tenancy
+     * @param \Sprout\Contracts\Tenancy<*> $tenancy
      *
      * @return bool
      */
@@ -45,7 +45,7 @@ final class BudOptions
     }
 
     /**
-     * @param \Sprout\Core\Contracts\Tenancy<*> $tenancy
+     * @param \Sprout\Contracts\Tenancy<*> $tenancy
      *
      * @return string|null
      */
@@ -61,7 +61,7 @@ final class BudOptions
     }
 
     /**
-     * @param \Sprout\Core\Contracts\Tenancy<*> $tenancy
+     * @param \Sprout\Contracts\Tenancy<*> $tenancy
      *
      * @return bool
      */
@@ -71,7 +71,7 @@ final class BudOptions
     }
 
     /**
-     * @param \Sprout\Core\Contracts\Tenancy<*> $tenancy
+     * @param \Sprout\Contracts\Tenancy<*> $tenancy
      *
      * @return string|null
      */

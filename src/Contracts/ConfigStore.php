@@ -1,9 +1,9 @@
 <?php
 
-namespace Sprout\Bud\Contracts;
+namespace Sprout\Contracts;
 
-use Sprout\Core\Contracts\Tenancy;
-use Sprout\Core\Contracts\Tenant;
+use Sprout\Contracts\Tenancy;
+use Sprout\Contracts\Tenant;
 
 interface ConfigStore
 {
@@ -17,10 +17,10 @@ interface ConfigStore
     /**
      * Get a config value from the store
      *
-     * @template TenantClass of \Sprout\Core\Contracts\Tenant
+     * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Sprout\Core\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Core\Contracts\Tenant               $tenant
+     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Sprout\Contracts\Tenant               $tenant
      * @param string                                      $service
      * @param string                                      $name
      * @param array<string, mixed>|null                   $default
@@ -40,10 +40,10 @@ interface ConfigStore
     /**
      * Check if the config store has a value
      *
-     * @template TenantClass of \Sprout\Core\Contracts\Tenant
+     * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Sprout\Core\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Core\Contracts\Tenant               $tenant
+     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Sprout\Contracts\Tenant               $tenant
      * @param string                                      $service
      * @param string                                      $name
      *
@@ -65,10 +65,10 @@ interface ConfigStore
      * store for the given tenant, either by adding the entry if there wasn't
      * one, or overwriting one if it already existed.
      *
-     * @template TenantClass of \Sprout\Core\Contracts\Tenant
+     * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Sprout\Core\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Core\Contracts\Tenant               $tenant
+     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Sprout\Contracts\Tenant               $tenant
      * @param string                                      $service
      * @param string                                      $name
      * @param array<string, mixed>                        $config
@@ -92,10 +92,10 @@ interface ConfigStore
      * given tenant if one doesn't already exist. If an entry already exists,
      * this method will return false.
      *
-     * @template TenantClass of \Sprout\Core\Contracts\Tenant
+     * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Sprout\Core\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Core\Contracts\Tenant               $tenant
+     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Sprout\Contracts\Tenant               $tenant
      * @param string                                      $service
      * @param string                                      $name
      * @param array<string, mixed>                        $config

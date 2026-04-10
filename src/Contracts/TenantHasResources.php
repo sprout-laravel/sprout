@@ -1,11 +1,11 @@
 <?php
 
-namespace Sprout\Core\Contracts;
+namespace Sprout\Contracts;
 
 /**
  * Tenant Has Resources Contract
  *
- * This contract marks an implementation of {@see \Sprout\Core\Contracts\Tenant} as
+ * This contract marks an implementation of {@see \Sprout\Contracts\Tenant} as
  * having their own tenant-specific resources.
  */
 interface TenantHasResources

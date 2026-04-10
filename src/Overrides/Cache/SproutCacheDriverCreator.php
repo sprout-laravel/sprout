@@ -1,18 +1,18 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Core\Overrides\Cache;
+namespace Sprout\Overrides\Cache;
 
 use Illuminate\Cache\CacheManager;
 use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Contracts\Foundation\Application;
 use InvalidArgumentException;
-use Sprout\Core\Contracts\Tenancy;
-use Sprout\Core\Contracts\Tenant;
-use Sprout\Core\Exceptions\MisconfigurationException;
-use Sprout\Core\Exceptions\TenancyMissingException;
-use Sprout\Core\Exceptions\TenantMissingException;
-use Sprout\Core\Sprout;
+use Sprout\Contracts\Tenancy;
+use Sprout\Contracts\Tenant;
+use Sprout\Exceptions\MisconfigurationException;
+use Sprout\Exceptions\TenancyMissingException;
+use Sprout\Exceptions\TenantMissingException;
+use Sprout\Sprout;
 
 final class SproutCacheDriverCreator
 {
@@ -32,7 +32,7 @@ final class SproutCacheDriverCreator
     private array $config;
 
     /**
-     * @var \Sprout\Core\Sprout
+     * @var \Sprout\Sprout
      */
     private Sprout $sprout;
 
@@ -42,7 +42,7 @@ final class SproutCacheDriverCreator
      * @param \Illuminate\Contracts\Foundation\Application $app
      * @param \Illuminate\Cache\CacheManager               $manager
      * @param array<string, mixed>                         $config
-     * @param \Sprout\Core\Sprout                          $sprout
+     * @param \Sprout\Sprout                          $sprout
      */
     public function __construct(Application $app, CacheManager $manager, array $config, Sprout $sprout)
     {
@@ -57,9 +57,9 @@ final class SproutCacheDriverCreator
      *
      * @return \Illuminate\Contracts\Cache\Repository
      *
-     * @throws \Sprout\Core\Exceptions\MisconfigurationException
-     * @throws \Sprout\Core\Exceptions\TenancyMissingException
-     * @throws \Sprout\Core\Exceptions\TenantMissingException
+     * @throws \Sprout\Exceptions\MisconfigurationException
+     * @throws \Sprout\Exceptions\TenancyMissingException
+     * @throws \Sprout\Exceptions\TenantMissingException
      */
     public function __invoke(): Repository
     {
@@ -83,7 +83,7 @@ final class SproutCacheDriverCreator
             throw TenantMissingException::make($tenancy->getName());
         }
 
-        /** @var \Sprout\Core\Contracts\Tenant $tenant */
+        /** @var \Sprout\Contracts\Tenant $tenant */
         $tenant = $tenancy->tenant();
 
         // We need to know which store we're overriding to make tenanted
@@ -109,11 +109,11 @@ final class SproutCacheDriverCreator
     /**
      * Get the prefix for the store
      *
-     * @template TenantClass of \Sprout\Core\Contracts\Tenant
+     * @template TenantClass of \Sprout\Contracts\Tenant
      *
      * @param array<string, mixed>                        $config
-     * @param \Sprout\Core\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Core\Contracts\Tenant               $tenant
+     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Sprout\Contracts\Tenant               $tenant
      *
      * @phpstan-param TenantClass                         $tenant
      *

@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Workbench\App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Sprout\Core\Database\Eloquent\Concerns\BelongsToTenant;
+use Sprout\Database\Eloquent\Concerns\BelongsToTenant;
 
 class NoTenantRelationModel extends Model
 {

@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Core\Overrides;
+namespace Sprout\Overrides;
 
-use Sprout\Core\Concerns\AwareOfApp;
-use Sprout\Core\Concerns\AwareOfSprout;
-use Sprout\Core\Contracts\ServiceOverride;
-use Sprout\Core\Contracts\Tenancy;
-use Sprout\Core\Contracts\Tenant;
+use Sprout\Concerns\AwareOfApp;
+use Sprout\Concerns\AwareOfSprout;
+use Sprout\Contracts\ServiceOverride;
+use Sprout\Contracts\Tenancy;
+use Sprout\Contracts\Tenant;
 
 abstract class BaseOverride implements ServiceOverride
 {
@@ -49,10 +49,10 @@ abstract class BaseOverride implements ServiceOverride
      * override.
      * It is called when a new tenant is marked as the current tenant.
      *
-     * @template TenantClass of \Sprout\Core\Contracts\Tenant
+     * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Sprout\Core\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Core\Contracts\Tenant               $tenant
+     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Sprout\Contracts\Tenant               $tenant
      *
      * @phpstan-param TenantClass                         $tenant
      *
@@ -74,10 +74,10 @@ abstract class BaseOverride implements ServiceOverride
      * It will be called before {@see self::setup()}, but only if the previous
      * tenant was not null.
      *
-     * @template TenantClass of \Sprout\Core\Contracts\Tenant
+     * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Sprout\Core\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Core\Contracts\Tenant               $tenant
+     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Sprout\Contracts\Tenant               $tenant
      *
      * @phpstan-param TenantClass                         $tenant
      *

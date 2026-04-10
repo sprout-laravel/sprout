@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Bud\Stores;
+namespace Sprout\Stores;
 
 use Illuminate\Contracts\Encryption\Encrypter;
-use Sprout\Bud\Contracts\ConfigStore;
+use Sprout\Contracts\ConfigStore;
 
 abstract class BaseConfigStore implements ConfigStore
 {

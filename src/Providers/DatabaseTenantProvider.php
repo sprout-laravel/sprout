@@ -1,26 +1,26 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Core\Providers;
+namespace Sprout\Providers;
 
 use Illuminate\Database\ConnectionInterface;
-use Sprout\Core\Contracts\Tenant;
-use Sprout\Core\Contracts\TenantHasResources;
-use Sprout\Core\Exceptions\MisconfigurationException;
-use Sprout\Core\Support\BaseTenantProvider;
-use Sprout\Core\Support\GenericTenant;
+use Sprout\Contracts\Tenant;
+use Sprout\Contracts\TenantHasResources;
+use Sprout\Exceptions\MisconfigurationException;
+use Sprout\Support\BaseTenantProvider;
+use Sprout\Support\GenericTenant;
 
 /**
  * Database Tenant Provider
  *
- * This is an implementation of {@see \Sprout\Core\Contracts\TenantProvider} that
+ * This is an implementation of {@see \Sprout\Contracts\TenantProvider} that
  * uses Laravels base query builder.
  *
  * @package Core
  *
- * @template EntityClass of \Sprout\Core\Contracts\Tenant
+ * @template EntityClass of \Sprout\Contracts\Tenant
  *
- * @extends \Sprout\Core\Support\BaseTenantProvider<EntityClass>
+ * @extends \Sprout\Support\BaseTenantProvider<EntityClass>
  */
 final class DatabaseTenantProvider extends BaseTenantProvider
 {
@@ -35,14 +35,14 @@ final class DatabaseTenantProvider extends BaseTenantProvider
     private string $table;
 
     /**
-     * @var class-string<\Sprout\Core\Contracts\Tenant>
+     * @var class-string<\Sprout\Contracts\Tenant>
      *
      * @phpstan-var class-string<EntityClass>
      */
     private string $entityClass;
 
     /**
-     * @var \Sprout\Core\Contracts\Tenant
+     * @var \Sprout\Contracts\Tenant
      *
      * @phpstan-var EntityClass
      */
@@ -54,7 +54,7 @@ final class DatabaseTenantProvider extends BaseTenantProvider
      * @param string                                      $name
      * @param \Illuminate\Database\ConnectionInterface    $connection
      * @param string                                      $table
-     * @param class-string<\Sprout\Core\Contracts\Tenant> $entityClass
+     * @param class-string<\Sprout\Contracts\Tenant> $entityClass
      *
      * @phpstan-param class-string<EntityClass>           $entityClass
      */
@@ -92,7 +92,7 @@ final class DatabaseTenantProvider extends BaseTenantProvider
     /**
      * Get an instance of the tenant entity
      *
-     * @return \Sprout\Core\Contracts\Tenant
+     * @return \Sprout\Contracts\Tenant
      *
      * @phpstan-return EntityClass
      */
@@ -127,10 +127,10 @@ final class DatabaseTenantProvider extends BaseTenantProvider
      *
      * @param string $identifier
      *
-     * @return \Sprout\Core\Contracts\Tenant|null
+     * @return \Sprout\Contracts\Tenant|null
      *
-     * @see \Sprout\Core\Contracts\Tenant::getTenantIdentifier()
-     * @see \Sprout\Core\Contracts\Tenant::getTenantIdentifierName()
+     * @see \Sprout\Contracts\Tenant::getTenantIdentifier()
+     * @see \Sprout\Contracts\Tenant::getTenantIdentifierName()
      *
      * @phpstan-return EntityClass|null
      */
@@ -156,10 +156,10 @@ final class DatabaseTenantProvider extends BaseTenantProvider
      *
      * @param int|string $key
      *
-     * @return \Sprout\Core\Contracts\Tenant|null
+     * @return \Sprout\Contracts\Tenant|null
      *
-     * @see \Sprout\Core\Contracts\Tenant::getTenantKey()
-     * @see \Sprout\Core\Contracts\Tenant::getTenantKeyName()
+     * @see \Sprout\Contracts\Tenant::getTenantKey()
+     * @see \Sprout\Contracts\Tenant::getTenantKeyName()
      *
      * @phpstan-return EntityClass|null
      */
@@ -182,19 +182,19 @@ final class DatabaseTenantProvider extends BaseTenantProvider
      *
      * Gets an instance of the tenant implementation the provider represents,
      * using a resource key.
-     * The tenant class must implement the {@see \Sprout\Core\Contracts\TenantHasResources}
+     * The tenant class must implement the {@see \Sprout\Contracts\TenantHasResources}
      * interface for this method to work.
      *
      * @param string $resourceKey
      *
-     * @return (\Sprout\Core\Contracts\Tenant&\Sprout\Core\Contracts\TenantHasResources)|null
+     * @return (\Sprout\Contracts\Tenant&\Sprout\Contracts\TenantHasResources)|null
      *
-     * @throws \Sprout\Core\Exceptions\MisconfigurationException
+     * @throws \Sprout\Exceptions\MisconfigurationException
      *
-     * @phpstan-return (EntityClass&\Sprout\Core\Contracts\TenantHasResources)|null
+     * @phpstan-return (EntityClass&\Sprout\Contracts\TenantHasResources)|null
      *
-     * @see \Sprout\Core\Contracts\TenantHasResources::getTenantResourceKeyName()
-     * @see \Sprout\Core\Contracts\TenantHasResources::getTenantResourceKey()
+     * @see \Sprout\Contracts\TenantHasResources::getTenantResourceKeyName()
+     * @see \Sprout\Contracts\TenantHasResources::getTenantResourceKey()
      */
     public function retrieveByResourceKey(string $resourceKey): (Tenant&TenantHasResources)|null
     {

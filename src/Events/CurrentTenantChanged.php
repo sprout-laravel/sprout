@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Core\Events;
+namespace Sprout\Events;
 
 use Illuminate\Foundation\Bus\Dispatchable;
-use Sprout\Core\Contracts\Tenancy;
-use Sprout\Core\Contracts\Tenant;
+use Sprout\Contracts\Tenancy;
+use Sprout\Contracts\Tenant;
 
 /**
  * Current Tenant Changed Event
@@ -37,14 +37,14 @@ final readonly class CurrentTenantChanged
     /**
      * The tenancy whose current tenant changed
      *
-     * @var \Sprout\Core\Contracts\Tenancy<TenantClass>
+     * @var \Sprout\Contracts\Tenancy<TenantClass>
      */
     public Tenancy $tenancy;
 
     /**
      * The current tenant
      *
-     * @var \Sprout\Core\Contracts\Tenant|null
+     * @var \Sprout\Contracts\Tenant|null
      *
      * @phpstan-var TenantClass|null
      */
@@ -53,7 +53,7 @@ final readonly class CurrentTenantChanged
     /**
      * The previous tenant
      *
-     * @var \Sprout\Core\Contracts\Tenant|null
+     * @var \Sprout\Contracts\Tenant|null
      *
      * @phpstan-var TenantClass|null
      */
@@ -62,9 +62,9 @@ final readonly class CurrentTenantChanged
     /**
      * Create a new instance
      *
-     * @param \Sprout\Core\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Core\Contracts\Tenant|null          $previous
-     * @param \Sprout\Core\Contracts\Tenant|null          $current
+     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Sprout\Contracts\Tenant|null          $previous
+     * @param \Sprout\Contracts\Tenant|null          $current
      *
      * @phpstan-param TenantClass|null                    $previous
      * @phpstan-param TenantClass|null                    $current

@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Core\Tests\Unit\Http\Resolvers;
+namespace Sprout\Tests\Unit\Http\Resolvers;
 
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\Request;
@@ -12,13 +12,13 @@ use Illuminate\Support\Facades\URL;
 use Mockery;
 use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\Core\Contracts\Tenancy;
-use Sprout\Core\Contracts\Tenant;
-use Sprout\Core\Http\Resolvers\PathIdentityResolver;
-use Sprout\Core\Sprout;
-use Sprout\Core\Support\ResolutionHook;
-use Sprout\Core\Support\SettingsRepository;
-use Sprout\Core\Tests\Unit\UnitTestCase;
+use Sprout\Contracts\Tenancy;
+use Sprout\Contracts\Tenant;
+use Sprout\Http\Resolvers\PathIdentityResolver;
+use Sprout\Sprout;
+use Sprout\Support\ResolutionHook;
+use Sprout\Support\SettingsRepository;
+use Sprout\Tests\Unit\UnitTestCase;
 
 class PathIdentityResolverTest extends UnitTestCase
 {
@@ -153,7 +153,7 @@ class PathIdentityResolverTest extends UnitTestCase
             $mock->shouldReceive('getTenantIdentifier')->andReturn('my-identifier')->once();
         });
 
-        /** @var \Sprout\Core\Contracts\Tenancy&MockInterface $tenancy */
+        /** @var \Sprout\Contracts\Tenancy&MockInterface $tenancy */
         $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) {
             $mock->shouldReceive('getName')->andReturn('my-tenancy')->times(3);
             $mock->shouldReceive('check')->andReturn(true)->once();
@@ -180,7 +180,7 @@ class PathIdentityResolverTest extends UnitTestCase
     {
         $resolver = new PathIdentityResolver('path');
 
-        /** @var \Sprout\Core\Contracts\Tenancy&MockInterface $tenancy */
+        /** @var \Sprout\Contracts\Tenancy&MockInterface $tenancy */
         $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) {
             $mock->shouldReceive('getName')->andReturn('my-tenancy')->once();
         });
@@ -205,7 +205,7 @@ class PathIdentityResolverTest extends UnitTestCase
     {
         $resolver = new PathIdentityResolver('path', 11);
 
-        /** @var \Sprout\Core\Contracts\Tenancy&MockInterface $tenancy */
+        /** @var \Sprout\Contracts\Tenancy&MockInterface $tenancy */
         $tenancy = Mockery::mock(Tenancy::class);
 
         $request = Mockery::mock(Request::class, static function (MockInterface $mock) {
@@ -223,7 +223,7 @@ class PathIdentityResolverTest extends UnitTestCase
     {
         $resolver = new PathIdentityResolver('path', 11);
 
-        /** @var \Sprout\Core\Contracts\Tenancy&MockInterface $tenancy */
+        /** @var \Sprout\Contracts\Tenancy&MockInterface $tenancy */
         $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) {
             $mock->shouldReceive('getName')->andReturn('my-tenancy')->once();
         });

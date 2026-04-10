@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Core\Tests\Unit;
+namespace Sprout\Tests\Unit;
 
 use Illuminate\Config\Repository;
 use Orchestra\Testbench\Attributes\DefineEnvironment;
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\Core\TenancyOptions;
-use function Sprout\Core\tenancy;
+use Sprout\TenancyOptions;
+use function Sprout\tenancy;
 
 class TenancyOptionsTest extends UnitTestCase
 {

@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Bud\Overrides\Auth;
+namespace Sprout\Overrides\Auth;
 
 use Illuminate\Auth\AuthManager;
 use Illuminate\Contracts\Auth\UserProvider;

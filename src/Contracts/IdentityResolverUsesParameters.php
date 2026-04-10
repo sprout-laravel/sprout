@@ -1,6 +1,6 @@
 <?php
 
-namespace Sprout\Core\Contracts;
+namespace Sprout\Contracts;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
@@ -18,9 +18,9 @@ interface IdentityResolverUsesParameters extends IdentityResolver
     /**
      * Get the name of the route parameter
      *
-     * @template TenantClass of \Sprout\Core\Contracts\Tenant
+     * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Sprout\Core\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
      *
      * @return string
      */
@@ -31,10 +31,10 @@ interface IdentityResolverUsesParameters extends IdentityResolver
      *
      * Locates a tenant identifier within the provided route and returns it.
      *
-     * @template TenantClass of \Sprout\Core\Contracts\Tenant
+     * @template TenantClass of \Sprout\Contracts\Tenant
      *
      * @param \Illuminate\Routing\Route                   $route
-     * @param \Sprout\Core\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
      * @param \Illuminate\Http\Request                    $request
      *
      * @return string|null

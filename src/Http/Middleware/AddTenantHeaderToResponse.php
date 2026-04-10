@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Core\Http\Middleware;
+namespace Sprout\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Sprout\Core\Http\Resolvers\HeaderIdentityResolver;
-use Sprout\Core\Sprout;
-use Sprout\Core\Support\ResolutionHelper;
+use Sprout\Http\Resolvers\HeaderIdentityResolver;
+use Sprout\Sprout;
+use Sprout\Support\ResolutionHelper;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -21,14 +21,14 @@ use Symfony\Component\HttpFoundation\Response;
 final class AddTenantHeaderToResponse
 {
     /**
-     * @var \Sprout\Core\Sprout
+     * @var \Sprout\Sprout
      */
     private Sprout $sprout;
 
     /**
      * Create new instance
      *
-     * @param \Sprout\Core\Sprout $sprout
+     * @param \Sprout\Sprout $sprout
      */
     public function __construct(Sprout $sprout)
     {
@@ -45,7 +45,7 @@ final class AddTenantHeaderToResponse
      * @return \Symfony\Component\HttpFoundation\Response
      *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
-     * @throws \Sprout\Core\Exceptions\MisconfigurationException
+     * @throws \Sprout\Exceptions\MisconfigurationException
      */
     public function handle(Request $request, Closure $next, string ...$options): Response
     {
@@ -54,7 +54,7 @@ final class AddTenantHeaderToResponse
         /** @var \Illuminate\Http\Response $response */
         $response = $next($request);
 
-        /** @var \Sprout\Core\Contracts\Tenancy<*> $tenancy */
+        /** @var \Sprout\Contracts\Tenancy<*> $tenancy */
         $tenancy = $this->sprout->tenancies()->get($tenancyName);
 
         if (! $tenancy->check()) {

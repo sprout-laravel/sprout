@@ -1,15 +1,15 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Bud;
+namespace Sprout;
 
 use Illuminate\Contracts\Foundation\Application;
-use Sprout\Bud\Contracts\ConfigStore;
-use Sprout\Bud\Managers\ConfigStoreManager;
-use Sprout\Core\Concerns\AwareOfTenant;
-use Sprout\Core\Contracts\TenantAware;
-use Sprout\Core\Exceptions\TenancyMissingException;
-use Sprout\Core\Exceptions\TenantMissingException;
+use Sprout\Contracts\ConfigStore;
+use Sprout\Managers\ConfigStoreManager;
+use Sprout\Concerns\AwareOfTenant;
+use Sprout\Contracts\TenantAware;
+use Sprout\Exceptions\TenancyMissingException;
+use Sprout\Exceptions\TenantMissingException;
 
 final class Bud implements TenantAware
 {
@@ -22,7 +22,7 @@ final class Bud implements TenantAware
     private Application $app;
 
     /**
-     * @var \Sprout\Bud\Managers\ConfigStoreManager
+     * @var \Sprout\Managers\ConfigStoreManager
      */
     private ConfigStoreManager $stores;
 
@@ -38,7 +38,7 @@ final class Bud implements TenantAware
     /**
      * Get the config store manager
      *
-     * @return \Sprout\Bud\Managers\ConfigStoreManager
+     * @return \Sprout\Managers\ConfigStoreManager
      */
     public function stores(): ConfigStoreManager
     {
@@ -50,14 +50,14 @@ final class Bud implements TenantAware
      *
      * @param string|null $name
      *
-     * @return \Sprout\Bud\Contracts\ConfigStore
+     * @return \Sprout\Contracts\ConfigStore
      *
-     * @throws \Sprout\Core\Exceptions\MisconfigurationException
+     * @throws \Sprout\Exceptions\MisconfigurationException
      */
     public function store(?string $name = null): ConfigStore
     {
         if ($this->hasTenancy()) {
-            /** @var \Sprout\Core\Contracts\Tenancy<*> $tenancy */
+            /** @var \Sprout\Contracts\Tenancy<*> $tenancy */
             $tenancy = $this->getTenancy();
             
             // If there's a tenancy, we will use their locked store, the store
@@ -80,9 +80,9 @@ final class Bud implements TenantAware
      *
      * @return array<string, mixed>|null
      *
-     * @throws \Sprout\Core\Exceptions\MisconfigurationException
-     * @throws \Sprout\Core\Exceptions\TenancyMissingException
-     * @throws \Sprout\Core\Exceptions\TenantMissingException
+     * @throws \Sprout\Exceptions\MisconfigurationException
+     * @throws \Sprout\Exceptions\TenancyMissingException
+     * @throws \Sprout\Exceptions\TenantMissingException
      */
     public function config(string $service, string $name, ?array $default = null, ?string $store = null): ?array
     {
@@ -90,14 +90,14 @@ final class Bud implements TenantAware
             throw TenancyMissingException::make();
         }
 
-        /** @var \Sprout\Core\Contracts\Tenancy<\Sprout\Core\Contracts\Tenant> $tenancy */
+        /** @var \Sprout\Contracts\Tenancy<\Sprout\Contracts\Tenant> $tenancy */
         $tenancy = $this->getTenancy();
 
         if (! $this->hasTenant()) {
             throw TenantMissingException::make($tenancy->getName());
         }
 
-        /** @var \Sprout\Core\Contracts\Tenant $tenant */
+        /** @var \Sprout\Contracts\Tenant $tenant */
         $tenant = $this->getTenant();
 
         return $this->store($store)

@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Core\Support;
+namespace Sprout\Support;
 
 final class PlaceholderHelper
 {

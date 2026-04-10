@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Bud\Tests\Unit\Stores;
+namespace Sprout\Tests\Unit\Stores;
 
 use Closure;
 use Illuminate\Database\ConnectionInterface;
@@ -11,10 +11,10 @@ use Illuminate\Support\Str;
 use Mockery;
 use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\Bud\Stores\DatabaseConfigStore;
-use Sprout\Bud\Tests\Unit\UnitTestCase;
-use Sprout\Core\Contracts\Tenancy;
-use Sprout\Core\Contracts\Tenant;
+use Sprout\Stores\DatabaseConfigStore;
+use Sprout\Tests\Unit\UnitTestCase;
+use Sprout\Contracts\Tenancy;
+use Sprout\Contracts\Tenant;
 
 class DatabaseConfigStoreTest extends UnitTestCase
 {

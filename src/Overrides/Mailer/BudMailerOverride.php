@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Bud\Overrides;
+namespace Sprout\Overrides;
 
 use Closure;
 use RuntimeException;
-use Sprout\Bud\Bud;
-use Sprout\Bud\Overrides\Mailer\BudMailerTransportCreator;
-use Sprout\Core\Sprout;
+use Sprout;
+use Sprout\Overrides\Mailer\BudMailerTransportCreator;
+use Sprout\Sprout;
 
 /**
  * Mailer Override
@@ -33,8 +33,8 @@ final class BudMailerOverride extends BaseOverride
      * Add a driver to the service.
      *
      * @param object                               $service
-     * @param \Sprout\Bud\Bud                 $bud
-     * @param \Sprout\Core\Sprout                  $sprout
+     * @param \Sprout\Bud                 $bud
+     * @param \Sprout\Sprout                  $sprout
      * @param \Closure                             $tracker
      *
      * @phpstan-param \Illuminate\Mail\MailManager $service

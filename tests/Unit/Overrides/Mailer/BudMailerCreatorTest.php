@@ -1,24 +1,24 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Bud\Tests\Unit\Overrides\Mailer;
+namespace Sprout\Tests\Unit\Overrides\Mailer;
 
 use Illuminate\Foundation\Application;
 use Illuminate\Mail\MailManager;
 use Mockery;
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\Bud\Bud;
-use Sprout\Bud\Contracts\ConfigStore;
-use Sprout\Bud\Managers\ConfigStoreManager;
-use Sprout\Bud\Overrides\Mailer\BudMailerTransportCreator;
-use Sprout\Bud\Tests\Unit\UnitTestCase;
-use Sprout\Core\Contracts\Tenancy;
-use Sprout\Core\Contracts\Tenant;
-use Sprout\Core\Contracts\TenantHasResources;
-use Sprout\Core\Exceptions\TenancyMissingException;
-use Sprout\Core\Exceptions\TenantMissingException;
-use Sprout\Core\Sprout;
-use Sprout\Core\Support\SettingsRepository;
+use Sprout;
+use Sprout\Contracts\ConfigStore;
+use Sprout\Managers\ConfigStoreManager;
+use Sprout\Overrides\Mailer\BudMailerTransportCreator;
+use Sprout\Tests\Unit\UnitTestCase;
+use Sprout\Contracts\Tenancy;
+use Sprout\Contracts\Tenant;
+use Sprout\Contracts\TenantHasResources;
+use Sprout\Exceptions\TenancyMissingException;
+use Sprout\Exceptions\TenantMissingException;
+use Sprout\Sprout;
+use Sprout\Support\SettingsRepository;
 use Symfony\Component\Mailer\Transport\TransportInterface;
 
 class BudMailerCreatorTest extends UnitTestCase

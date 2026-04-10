@@ -1,15 +1,15 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Bud\Stores;
+namespace Sprout\Stores;
 
 use Illuminate\Contracts\Encryption\Encrypter;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Support\Str;
-use Sprout\Core\Contracts\Tenancy;
-use Sprout\Core\Contracts\Tenant;
-use Sprout\Core\Contracts\TenantHasResources;
-use Sprout\Core\Exceptions\MisconfigurationException;
+use Sprout\Contracts\Tenancy;
+use Sprout\Contracts\Tenant;
+use Sprout\Contracts\TenantHasResources;
+use Sprout\Exceptions\MisconfigurationException;
 
 /**
  * Filesystem Config Store
@@ -38,10 +38,10 @@ final class FilesystemConfigStore extends BaseConfigStore
     /**
      * Get the path to the config file
      *
-     * @template TenantClass of \Sprout\Core\Contracts\Tenant
+     * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Sprout\Core\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Core\Contracts\Tenant               $tenant
+     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Sprout\Contracts\Tenant               $tenant
      * @param string                                      $service
      * @param string                                      $name
      *
@@ -49,7 +49,7 @@ final class FilesystemConfigStore extends BaseConfigStore
      *
      * @return string
      *
-     * @throws \Sprout\Core\Exceptions\MisconfigurationException
+     * @throws \Sprout\Exceptions\MisconfigurationException
      */
     protected function getPath(Tenancy $tenancy, Tenant $tenant, string $service, string $name): string
     {
@@ -73,10 +73,10 @@ final class FilesystemConfigStore extends BaseConfigStore
     /**
      * Get a config value from the store
      *
-     * @template TenantClass of \Sprout\Core\Contracts\Tenant
+     * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Sprout\Core\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Core\Contracts\Tenant               $tenant
+     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Sprout\Contracts\Tenant               $tenant
      * @param string                                      $service
      * @param string                                      $name
      * @param array<string, mixed>|null                   $default
@@ -85,7 +85,7 @@ final class FilesystemConfigStore extends BaseConfigStore
      *
      * @return array<string, mixed>|null
      *
-     * @throws \Sprout\Core\Exceptions\MisconfigurationException
+     * @throws \Sprout\Exceptions\MisconfigurationException
      */
     public function get(Tenancy $tenancy, Tenant $tenant, string $service, string $name, ?array $default = null): ?array
     {
@@ -101,10 +101,10 @@ final class FilesystemConfigStore extends BaseConfigStore
     /**
      * Check if the config store has a value
      *
-     * @template TenantClass of \Sprout\Core\Contracts\Tenant
+     * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Sprout\Core\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Core\Contracts\Tenant               $tenant
+     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Sprout\Contracts\Tenant               $tenant
      * @param string                                      $service
      * @param string                                      $name
      *
@@ -112,7 +112,7 @@ final class FilesystemConfigStore extends BaseConfigStore
      *
      * @return bool
      *
-     * @throws \Sprout\Core\Exceptions\MisconfigurationException
+     * @throws \Sprout\Exceptions\MisconfigurationException
      */
     public function has(Tenancy $tenancy, Tenant $tenant, string $service, string $name): bool
     {
@@ -126,10 +126,10 @@ final class FilesystemConfigStore extends BaseConfigStore
      * store for the given tenant, either by adding the entry if there wasn't
      * one, or overwriting one if it already existed.
      *
-     * @template TenantClass of \Sprout\Core\Contracts\Tenant
+     * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Sprout\Core\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Core\Contracts\Tenant               $tenant
+     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Sprout\Contracts\Tenant               $tenant
      * @param string                                      $service
      * @param string                                      $name
      * @param array<string, mixed>                        $config
@@ -139,7 +139,7 @@ final class FilesystemConfigStore extends BaseConfigStore
      * @return bool
      *
      * @throws \JsonException
-     * @throws \Sprout\Core\Exceptions\MisconfigurationException
+     * @throws \Sprout\Exceptions\MisconfigurationException
      */
     public function set(Tenancy $tenancy, Tenant $tenant, string $service, string $name, array $config): bool
     {
@@ -156,10 +156,10 @@ final class FilesystemConfigStore extends BaseConfigStore
      * given tenant if one doesn't already exist. If an entry already exists,
      * this method will return false.
      *
-     * @template TenantClass of \Sprout\Core\Contracts\Tenant
+     * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Sprout\Core\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Core\Contracts\Tenant               $tenant
+     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Sprout\Contracts\Tenant               $tenant
      * @param string                                      $service
      * @param string                                      $name
      * @param array<string, mixed>                        $config
@@ -167,7 +167,7 @@ final class FilesystemConfigStore extends BaseConfigStore
      * @return bool
      *
      * @throws \JsonException
-     * @throws \Sprout\Core\Exceptions\MisconfigurationException
+     * @throws \Sprout\Exceptions\MisconfigurationException
      */
     public function add(Tenancy $tenancy, Tenant $tenant, string $service, string $name, array $config): bool
     {

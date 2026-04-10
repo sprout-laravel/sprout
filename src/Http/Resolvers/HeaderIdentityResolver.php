@@ -1,14 +1,14 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Core\Http\Resolvers;
+namespace Sprout\Http\Resolvers;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\RouteRegistrar;
-use Sprout\Core\Contracts\Tenancy;
-use Sprout\Core\Http\Middleware\AddTenantHeaderToResponse;
-use Sprout\Core\Support\BaseIdentityResolver;
-use Sprout\Core\Support\PlaceholderHelper;
+use Sprout\Contracts\Tenancy;
+use Sprout\Http\Middleware\AddTenantHeaderToResponse;
+use Sprout\Support\BaseIdentityResolver;
+use Sprout\Support\PlaceholderHelper;
 
 /**
  * Header Identity Resolver
@@ -32,7 +32,7 @@ final class HeaderIdentityResolver extends BaseIdentityResolver
      *
      * @param string                                     $name
      * @param string|null                                $header
-     * @param array<\Sprout\Core\Support\ResolutionHook> $hooks
+     * @param array<\Sprout\Support\ResolutionHook> $hooks
      */
     public function __construct(string $name, ?string $header = null, array $hooks = [])
     {
@@ -62,7 +62,7 @@ final class HeaderIdentityResolver extends BaseIdentityResolver
      * You can use an uppercase character for the first character, <code>{Tenancy}</code>
      * and <code>{Resolver}</code>, and it'll be run through {@see \ucfirst()}.
      *
-     * @param \Sprout\Core\Contracts\Tenancy<*> $tenancy
+     * @param \Sprout\Contracts\Tenancy<*> $tenancy
      *
      * @return string
      */
@@ -82,10 +82,10 @@ final class HeaderIdentityResolver extends BaseIdentityResolver
      *
      * Locates a tenant identifier within the provided request and returns it.
      *
-     * @template TenantClass of \Sprout\Core\Contracts\Tenant
+     * @template TenantClass of \Sprout\Contracts\Tenant
      *
      * @param \Illuminate\Http\Request                    $request
-     * @param \Sprout\Core\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
      *
      * @return string|null
      */
@@ -101,7 +101,7 @@ final class HeaderIdentityResolver extends BaseIdentityResolver
      * middleware, and anything else required, besides the default middleware.
      *
      * @param \Illuminate\Routing\RouteRegistrar                            $route
-     * @param \Sprout\Core\Contracts\Tenancy<\Sprout\Core\Contracts\Tenant> $tenancy
+     * @param \Sprout\Contracts\Tenancy<\Sprout\Contracts\Tenant> $tenancy
      *
      * @return void
      */

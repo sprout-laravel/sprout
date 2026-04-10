@@ -1,17 +1,17 @@
 <?php
 
-namespace Sprout\Core;
+namespace Sprout;
 
-use Sprout\Core\Contracts\IdentityResolver;
-use Sprout\Core\Contracts\ServiceOverride;
-use Sprout\Core\Contracts\Tenancy;
-use Sprout\Core\Contracts\TenantProvider;
-use Sprout\Core\Support\SettingsRepository;
+use Sprout\Contracts\IdentityResolver;
+use Sprout\Contracts\ServiceOverride;
+use Sprout\Contracts\Tenancy;
+use Sprout\Contracts\TenantProvider;
+use Sprout\Support\SettingsRepository;
 
 /**
  * Get the core Sprout class
  *
- * @return \Sprout\Core\Sprout
+ * @return \Sprout\Sprout
  *
  * @codeCoverageIgnore
  */
@@ -23,7 +23,7 @@ function sprout(): Sprout
 /**
  * Get the Sprout settings repository
  *
- * @return \Sprout\Core\Support\SettingsRepository
+ * @return \Sprout\Support\SettingsRepository
  *
  * @codeCoverageIgnore
  */
@@ -37,9 +37,9 @@ function settings(): SettingsRepository
  *
  * @param string|null $name
  *
- * @return \Sprout\Core\Contracts\IdentityResolver
+ * @return \Sprout\Contracts\IdentityResolver
  *
- * @throws \Sprout\Core\Exceptions\MisconfigurationException
+ * @throws \Sprout\Exceptions\MisconfigurationException
  *
  * @codeCoverageIgnore
  */
@@ -53,9 +53,9 @@ function resolver(?string $name = null): IdentityResolver
  *
  * @param string|null $name
  *
- * @return \Sprout\Core\Contracts\Tenancy<*>
+ * @return \Sprout\Contracts\Tenancy<*>
  *
- * @throws \Sprout\Core\Exceptions\MisconfigurationException
+ * @throws \Sprout\Exceptions\MisconfigurationException
  *
  * @codeCoverageIgnore
  */
@@ -69,9 +69,9 @@ function tenancy(?string $name = null): Tenancy
  *
  * @param string|null $name
  *
- * @return \Sprout\Core\Contracts\TenantProvider<*>
+ * @return \Sprout\Contracts\TenantProvider<*>
  *
- * @throws \Sprout\Core\Exceptions\MisconfigurationException
+ * @throws \Sprout\Exceptions\MisconfigurationException
  *
  * @codeCoverageIgnore
  */
@@ -85,7 +85,7 @@ function provider(?string $name = null): TenantProvider
  *
  * @param string $service
  *
- * @return \Sprout\Core\Contracts\ServiceOverride|null
+ * @return \Sprout\Contracts\ServiceOverride|null
  *
  * @codeCoverageIgnore
  */

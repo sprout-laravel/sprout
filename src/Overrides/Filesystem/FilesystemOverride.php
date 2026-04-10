@@ -1,17 +1,17 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Core\Overrides;
+namespace Sprout\Overrides;
 
 use Closure;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Filesystem\FilesystemManager;
-use Sprout\Core\Contracts\BootableServiceOverride;
-use Sprout\Core\Contracts\Tenancy;
-use Sprout\Core\Contracts\Tenant;
-use Sprout\Core\Overrides\Filesystem\SproutFilesystemDriverCreator;
-use Sprout\Core\Sprout;
+use Sprout\Contracts\BootableServiceOverride;
+use Sprout\Contracts\Tenancy;
+use Sprout\Contracts\Tenant;
+use Sprout\Overrides\Filesystem\SproutFilesystemDriverCreator;
+use Sprout\Sprout;
 
 final class FilesystemOverride extends BaseOverride implements BootableServiceOverride
 {
@@ -37,7 +37,7 @@ final class FilesystemOverride extends BaseOverride implements BootableServiceOv
      * override that take place during the booting of the framework.
      *
      * @param \Illuminate\Contracts\Foundation\Application $app
-     * @param \Sprout\Core\Sprout                          $sprout
+     * @param \Sprout\Sprout                          $sprout
      *
      * @return void
      *
@@ -84,10 +84,10 @@ final class FilesystemOverride extends BaseOverride implements BootableServiceOv
      * It will be called before {@see self::setup()}, but only if the previous
      * tenant was not null.
      *
-     * @template TenantClass of \Sprout\Core\Contracts\Tenant
+     * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Sprout\Core\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Core\Contracts\Tenant               $tenant
+     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Sprout\Contracts\Tenant               $tenant
      *
      * @phpstan-param TenantClass                         $tenant
      *

@@ -1,19 +1,19 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Core\Overrides;
+namespace Sprout\Overrides;
 
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\Arr;
-use Sprout\Core\Contracts\BootableServiceOverride;
-use Sprout\Core\Contracts\ServiceOverride;
-use Sprout\Core\Contracts\Tenancy;
-use Sprout\Core\Contracts\Tenant;
-use Sprout\Core\Exceptions\MisconfigurationException;
-use Sprout\Core\Sprout;
+use Sprout\Contracts\BootableServiceOverride;
+use Sprout\Contracts\ServiceOverride;
+use Sprout\Contracts\Tenancy;
+use Sprout\Contracts\Tenant;
+use Sprout\Exceptions\MisconfigurationException;
+use Sprout\Sprout;
 
 /**
- * @phpstan-type OverrideClass = \Sprout\Core\Contracts\ServiceOverride|(\Sprout\Core\Contracts\ServiceOverride&\Sprout\Core\Contracts\BootableServiceOverride)
+ * @phpstan-type OverrideClass = \Sprout\Contracts\ServiceOverride|(\Sprout\Contracts\ServiceOverride&\Sprout\Contracts\BootableServiceOverride)
  */
 final class StackedOverride extends BaseOverride implements BootableServiceOverride
 {
@@ -44,12 +44,12 @@ final class StackedOverride extends BaseOverride implements BootableServiceOverr
      * Create the overrides from the config
      *
      * @param \Illuminate\Contracts\Foundation\Application $app
-     * @param \Sprout\Core\Sprout                          $sprout
+     * @param \Sprout\Sprout                          $sprout
      *
      * @return void
      *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
-     * @throws \Sprout\Core\Exceptions\MisconfigurationException
+     * @throws \Sprout\Exceptions\MisconfigurationException
      */
     protected function createOverrides(Application $app, Sprout $sprout): void
     {
@@ -134,7 +134,7 @@ final class StackedOverride extends BaseOverride implements BootableServiceOverr
      *
      * @param class-string<ServiceOverrideClass> $class
      *
-     * @return \Sprout\Core\Contracts\ServiceOverride|null
+     * @return \Sprout\Contracts\ServiceOverride|null
      *
      * @phpstan-require-implements ServiceOverrideClass|null
      */
@@ -150,12 +150,12 @@ final class StackedOverride extends BaseOverride implements BootableServiceOverr
      * override that take place during the booting of the framework.
      *
      * @param \Illuminate\Contracts\Foundation\Application $app
-     * @param \Sprout\Core\Sprout                          $sprout
+     * @param \Sprout\Sprout                          $sprout
      *
      * @return void
      *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
-     * @throws \Sprout\Core\Exceptions\MisconfigurationException
+     * @throws \Sprout\Exceptions\MisconfigurationException
      */
     public function boot(Application $app, Sprout $sprout): void
     {
@@ -175,10 +175,10 @@ final class StackedOverride extends BaseOverride implements BootableServiceOverr
      * override.
      * It is called when a new tenant is marked as the current tenant.
      *
-     * @template TenantClass of \Sprout\Core\Contracts\Tenant
+     * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Sprout\Core\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Core\Contracts\Tenant               $tenant
+     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Sprout\Contracts\Tenant               $tenant
      *
      * @phpstan-param TenantClass                         $tenant
      *
@@ -202,10 +202,10 @@ final class StackedOverride extends BaseOverride implements BootableServiceOverr
      * It will be called before {@see self::setup()}, but only if the previous
      * tenant was not null.
      *
-     * @template TenantClass of \Sprout\Core\Contracts\Tenant
+     * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Sprout\Core\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Core\Contracts\Tenant               $tenant
+     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Sprout\Contracts\Tenant               $tenant
      *
      * @phpstan-param TenantClass                         $tenant
      *

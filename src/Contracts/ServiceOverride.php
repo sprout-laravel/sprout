@@ -1,6 +1,6 @@
 <?php
 
-namespace Sprout\Core\Contracts;
+namespace Sprout\Contracts;
 
 /**
  * Service Override
@@ -27,10 +27,10 @@ interface ServiceOverride
      * override.
      * It is called when a new tenant is marked as the current tenant.
      *
-     * @template TenantClass of \Sprout\Core\Contracts\Tenant
+     * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Sprout\Core\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Core\Contracts\Tenant               $tenant
+     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Sprout\Contracts\Tenant               $tenant
      *
      * @phpstan-param TenantClass                         $tenant
      *
@@ -49,10 +49,10 @@ interface ServiceOverride
      * It will be called before {@see self::setup()}, but only if the previous
      * tenant was not null.
      *
-     * @template TenantClass of \Sprout\Core\Contracts\Tenant
+     * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Sprout\Core\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Core\Contracts\Tenant               $tenant
+     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Sprout\Contracts\Tenant               $tenant
      *
      * @phpstan-param TenantClass                         $tenant
      *

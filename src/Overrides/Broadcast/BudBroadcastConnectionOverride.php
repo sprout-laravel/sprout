@@ -1,16 +1,16 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Bud\Overrides;
+namespace Sprout\Overrides;
 
 use Closure;
 use Illuminate\Broadcasting\BroadcastManager;
 use Illuminate\Contracts\Foundation\Application;
 use LogicException;
-use Sprout\Bud\Bud;
-use Sprout\Bud\Overrides\Broadcast\BudBroadcastConnectionCreator;
-use Sprout\Bud\Overrides\Broadcast\BudBroadcastManager;
-use Sprout\Core\Sprout;
+use Sprout;
+use Sprout\Overrides\Broadcast\BudBroadcastConnectionCreator;
+use Sprout\Overrides\Broadcast\BudBroadcastManager;
+use Sprout\Sprout;
 
 /**
  * Broadcast Connection Override
@@ -36,8 +36,8 @@ final class BudBroadcastConnectionOverride extends BaseOverride
      * Add a driver to the service.
      *
      * @param object                                            $service
-     * @param \Sprout\Bud\Bud                              $bud
-     * @param \Sprout\Core\Sprout                               $sprout
+     * @param \Sprout\Bud                              $bud
+     * @param \Sprout\Sprout                               $sprout
      * @param \Closure                                          $tracker
      *
      * @phpstan-param \Illuminate\Broadcasting\BroadcastManager $service

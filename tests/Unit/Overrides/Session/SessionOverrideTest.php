@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Core\Tests\Unit\Overrides;
+namespace Sprout\Tests\Unit\Overrides;
 
 use Closure;
 use Illuminate\Config\Repository;
@@ -11,16 +11,16 @@ use Mockery;
 use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\Core\Contracts\BootableServiceOverride;
-use Sprout\Core\Contracts\TenantAware;
+use Sprout\Contracts\BootableServiceOverride;
+use Sprout\Contracts\TenantAware;
 use Sprout\Overrides\Session\SessionOverride;
-use Sprout\Core\Sprout;
-use Sprout\Core\Support\Settings;
-use Sprout\Core\Support\SettingsRepository;
-use Sprout\Core\Tests\Unit\UnitTestCase;
+use Sprout\Sprout;
+use Sprout\Support\Settings;
+use Sprout\Support\SettingsRepository;
+use Sprout\Tests\Unit\UnitTestCase;
 use Workbench\App\Models\TenantModel;
-use function Sprout\Core\settings;
-use function Sprout\Core\sprout;
+use function Sprout\settings;
+use function Sprout\sprout;
 
 class SessionOverrideTest extends UnitTestCase
 {

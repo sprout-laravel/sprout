@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Bud\Stores;
+namespace Sprout\Stores;
 
 use Illuminate\Contracts\Encryption\Encrypter;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\Query\Builder;
-use Sprout\Core\Contracts\Tenancy;
-use Sprout\Core\Contracts\Tenant;
+use Sprout\Contracts\Tenancy;
+use Sprout\Contracts\Tenant;
 
 final class DatabaseConfigStore extends BaseConfigStore
 {
@@ -44,10 +44,10 @@ final class DatabaseConfigStore extends BaseConfigStore
     /**
      * Get a query builder for the config store
      *
-     * @template TenantClass of \Sprout\Core\Contracts\Tenant
+     * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Sprout\Core\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Core\Contracts\Tenant               $tenant
+     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Sprout\Contracts\Tenant               $tenant
      * @param string                                      $service
      * @param string                                      $name
      *
@@ -67,10 +67,10 @@ final class DatabaseConfigStore extends BaseConfigStore
     /**
      * Get a config value from the store
      *
-     * @template TenantClass of \Sprout\Core\Contracts\Tenant
+     * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Sprout\Core\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Core\Contracts\Tenant               $tenant
+     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Sprout\Contracts\Tenant               $tenant
      * @param string                                      $service
      * @param string                                      $name
      * @param array<string, mixed>|null                   $default
@@ -96,10 +96,10 @@ final class DatabaseConfigStore extends BaseConfigStore
     /**
      * Check if the config store has a value
      *
-     * @template TenantClass of \Sprout\Core\Contracts\Tenant
+     * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Sprout\Core\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Core\Contracts\Tenant               $tenant
+     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Sprout\Contracts\Tenant               $tenant
      * @param string                                      $service
      * @param string                                      $name
      *
@@ -121,10 +121,10 @@ final class DatabaseConfigStore extends BaseConfigStore
      * store for the given tenant, either by adding the entry if there wasn't
      * one, or overwriting one if it already existed.
      *
-     * @template TenantClass of \Sprout\Core\Contracts\Tenant
+     * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Sprout\Core\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Core\Contracts\Tenant               $tenant
+     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Sprout\Contracts\Tenant               $tenant
      * @param string                                      $service
      * @param string                                      $name
      * @param array<string, mixed>                        $config
@@ -159,10 +159,10 @@ final class DatabaseConfigStore extends BaseConfigStore
      * given tenant if one doesn't already exist. If an entry already exists,
      * this method will return false.
      *
-     * @template TenantClass of \Sprout\Core\Contracts\Tenant
+     * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Sprout\Core\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Core\Contracts\Tenant               $tenant
+     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
+     * @param \Sprout\Contracts\Tenant               $tenant
      * @param string                                      $service
      * @param string                                      $name
      * @param array<string, mixed>                        $config

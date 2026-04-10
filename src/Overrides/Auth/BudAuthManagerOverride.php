@@ -4,10 +4,10 @@ declare(strict_types=1);
 namespace Sprout\\Overrides\\Auth;
 
 use Illuminate\Contracts\Foundation\Application;
-use Sprout\Bud\Overrides\Auth\BudAuthManager;
-use Sprout\Core\Contracts\BootableServiceOverride;
-use Sprout\Core\Overrides\BaseOverride;
-use Sprout\Core\Sprout;
+use Sprout\Overrides\Auth\BudAuthManager;
+use Sprout\Contracts\BootableServiceOverride;
+use Sprout\Overrides\BaseOverride;
+use Sprout\Sprout;
 
 final class BudAuthManagerOverride extends BaseOverride implements BootableServiceOverride
 {
@@ -18,7 +18,7 @@ final class BudAuthManagerOverride extends BaseOverride implements BootableServi
      * override that take place during the booting of the framework.
      *
      * @param \Illuminate\Contracts\Foundation\Application $app
-     * @param \Sprout\Core\Sprout                          $sprout
+     * @param \Sprout\Sprout                          $sprout
      *
      * @return void
      *

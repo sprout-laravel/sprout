@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Core\Tests\Unit\Attributes;
+namespace Sprout\Tests\Unit\Attributes;
 
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\Core\Attributes\Provider;
-use Sprout\Core\Contracts\TenantProvider;
-use Sprout\Core\Managers\TenantProviderManager;
-use Sprout\Core\Tests\Unit\UnitTestCase;
+use Sprout\Attributes\Provider;
+use Sprout\Contracts\TenantProvider;
+use Sprout\Managers\TenantProviderManager;
+use Sprout\Tests\Unit\UnitTestCase;
 use Workbench\App\Models\TenantModel;
 
 class ProviderTest extends UnitTestCase

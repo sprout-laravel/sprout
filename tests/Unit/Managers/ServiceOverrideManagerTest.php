@@ -1,18 +1,18 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Core\Tests\Unit\Managers;
+namespace Sprout\Tests\Unit\Managers;
 
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\Core\Exceptions\MisconfigurationException;
-use Sprout\Core\Exceptions\TenancyMissingException;
-use Sprout\Core\Managers\ServiceOverrideManager;
+use Sprout\Exceptions\MisconfigurationException;
+use Sprout\Exceptions\TenancyMissingException;
+use Sprout\Managers\ServiceOverrideManager;
 use Sprout\Overrides\Cookie\CookieOverride;
 use Sprout\Overrides\Session\SessionOverride;
-use Sprout\Core\TenancyOptions;
-use Sprout\Core\Tests\Unit\UnitTestCase;
+use Sprout\TenancyOptions;
+use Sprout\Tests\Unit\UnitTestCase;
 use Workbench\App\Models\TenantModel;
-use function Sprout\Core\sprout;
+use function Sprout\sprout;
 
 class ServiceOverrideManagerTest extends UnitTestCase
 {

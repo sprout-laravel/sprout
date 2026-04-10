@@ -1,15 +1,15 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Bud\Tests\Unit;
+namespace Sprout\Tests\Unit;
 
 use Illuminate\Foundation\PackageManifest;
 use Illuminate\Support\ServiceProvider;
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\Bud\Bud;
-use Sprout\Bud\BudServiceProvider;
-use Sprout\Bud\Contracts\ConfigStore;
-use Sprout\Bud\Managers\ConfigStoreManager;
+use Sprout;
+use Sprout\BudServiceProvider;
+use Sprout\Contracts\ConfigStore;
+use Sprout\Managers\ConfigStoreManager;
 
 class BudServiceProviderTest extends UnitTestCase
 {

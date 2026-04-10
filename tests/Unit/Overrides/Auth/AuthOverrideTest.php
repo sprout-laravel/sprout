@@ -12,17 +12,17 @@ use Mockery;
 use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\Core\Contracts\BootableServiceOverride;
-use Sprout\Core\Contracts\Tenancy;
-use Sprout\Core\Contracts\Tenant;
-use Sprout\Core\Overrides\Auth\SproutAuthPasswordBrokerManager;
+use Sprout\Contracts\BootableServiceOverride;
+use Sprout\Contracts\Tenancy;
+use Sprout\Contracts\Tenant;
+use Sprout\Overrides\Auth\SproutAuthPasswordBrokerManager;
 use Sprout\Overrides\Auth\AuthGuardOverride;
 use Sprout\Overrides\Auth\AuthPasswordOverride;
-use Sprout\Core\Overrides\StackedOverride;
-use Sprout\Core\Sprout;
-use Sprout\Core\Support\SettingsRepository;
-use Sprout\Core\Tests\Unit\UnitTestCase;
-use function Sprout\Core\sprout;
+use Sprout\Overrides\StackedOverride;
+use Sprout\Sprout;
+use Sprout\Support\SettingsRepository;
+use Sprout\Tests\Unit\UnitTestCase;
+use function Sprout\sprout;
 
 class AuthOverrideTest extends UnitTestCase
 {

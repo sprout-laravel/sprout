@@ -1,14 +1,14 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Bud\Overrides;
+namespace Sprout\Overrides;
 
 use RuntimeException;
-use Sprout\Bud\Bud;
-use Sprout\Bud\Exceptions\CyclicOverrideException;
-use Sprout\Core\Exceptions\TenancyMissingException;
-use Sprout\Core\Exceptions\TenantMissingException;
-use Sprout\Core\Sprout;
+use Sprout;
+use Sprout\Exceptions\CyclicOverrideException;
+use Sprout\Exceptions\TenancyMissingException;
+use Sprout\Exceptions\TenantMissingException;
+use Sprout\Sprout;
 
 abstract class BaseCreator
 {
@@ -20,16 +20,16 @@ abstract class BaseCreator
     abstract protected function getService(): string;
 
     /**
-     * @param \Sprout\Core\Sprout                               $sprout
-     * @param \Sprout\Bud\Bud                              $bud
+     * @param \Sprout\Sprout                               $sprout
+     * @param \Sprout\Bud                              $bud
      * @param array<string, mixed>&array{budStore?:string|null} $config
      * @param string                                            $name
      *
      * @return array<string, mixed>
      *
-     * @throws \Sprout\Core\Exceptions\MisconfigurationException
-     * @throws \Sprout\Core\Exceptions\TenancyMissingException
-     * @throws \Sprout\Core\Exceptions\TenantMissingException
+     * @throws \Sprout\Exceptions\MisconfigurationException
+     * @throws \Sprout\Exceptions\TenancyMissingException
+     * @throws \Sprout\Exceptions\TenantMissingException
      */
     public function getConfig(Sprout $sprout, Bud $bud, array $config, string $name): array
     {
@@ -53,7 +53,7 @@ abstract class BaseCreator
             throw TenantMissingException::make($tenancy->getName());
         }
 
-        /** @var \Sprout\Core\Contracts\Tenant $tenant */
+        /** @var \Sprout\Contracts\Tenant $tenant */
         $tenant = $tenancy->tenant();
 
         // Get the default store, or the one specified in the config, if there

@@ -1,18 +1,18 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Core\Events;
+namespace Sprout\Events;
 
 /**
  * Tenant Identified Event
  *
- * This is a child of {@see \Sprout\Core\Events\TenantFound} that is used to notify
+ * This is a child of {@see \Sprout\Events\TenantFound} that is used to notify
  * the application and provide reactivity when a tenant is found using its
  * identifier, referred to as being "identified".
  *
- * @template TenantClass of \Sprout\Core\Contracts\Tenant
+ * @template TenantClass of \Sprout\Contracts\Tenant
  *
- * @extends \Sprout\Core\Events\TenantFound<TenantClass>
+ * @extends \Sprout\Events\TenantFound<TenantClass>
  *
  * @package Core
  *

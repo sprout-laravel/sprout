@@ -1,17 +1,17 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Core\Facades;
+namespace Sprout\Facades;
 
 use Closure;
 use Illuminate\Support\Facades\Facade;
-use Sprout\Core\Contracts\IdentityResolver;
-use Sprout\Core\Managers\IdentityResolverManager;
+use Sprout\Contracts\IdentityResolver;
+use Sprout\Managers\IdentityResolverManager;
 
 /**
  * Identity Resolvers Facade
  *
- * This is the facade for the {@see \Sprout\Core\Managers\IdentityResolverManager} class.
+ * This is the facade for the {@see \Sprout\Managers\IdentityResolverManager} class.
  *
  * @method static IdentityResolverManager flushResolved()
  * @method static IdentityResolver get(string|null $name = null)

@@ -1,16 +1,16 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Core\Database\Eloquent\Concerns;
+namespace Sprout\Database\Eloquent\Concerns;
 
-use Sprout\Core\Database\Eloquent\Observers\BelongsToManyTenantsObserver;
-use Sprout\Core\Database\Eloquent\Scopes\BelongsToManyTenantsScope;
+use Sprout\Database\Eloquent\Observers\BelongsToManyTenantsObserver;
+use Sprout\Database\Eloquent\Scopes\BelongsToManyTenantsScope;
 
 /**
  * Belongs to many Tenants
  *
  * This trait provides the basic supporting functionality required to automate
- * the relation between an Eloquent model and multiple {@see \Sprout\Core\Contracts\Tenant},
+ * the relation between an Eloquent model and multiple {@see \Sprout\Contracts\Tenant},
  * using a belongs to many relationship.
  *
  * @package        Database\Eloquent

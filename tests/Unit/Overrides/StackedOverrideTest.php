@@ -1,18 +1,18 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Core\Tests\Unit\Overrides;
+namespace Sprout\Tests\Unit\Overrides;
 
 use Illuminate\Contracts\Foundation\Application;
 use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\Core\Exceptions\MisconfigurationException;
+use Sprout\Exceptions\MisconfigurationException;
 use Sprout\Overrides\Auth\AuthGuardOverride;
 use Sprout\Overrides\Auth\AuthPasswordOverride;
-use Sprout\Core\Overrides\StackedOverride;
-use Sprout\Core\Sprout;
-use Sprout\Core\Support\SettingsRepository;
-use Sprout\Core\Tests\Unit\UnitTestCase;
+use Sprout\Overrides\StackedOverride;
+use Sprout\Sprout;
+use Sprout\Support\SettingsRepository;
+use Sprout\Tests\Unit\UnitTestCase;
 use stdClass;
 
 class StackedOverrideTest extends UnitTestCase

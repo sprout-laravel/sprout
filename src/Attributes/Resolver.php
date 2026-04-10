@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Core\Attributes;
+namespace Sprout\Attributes;
 
 use Attribute;
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Container\ContextualAttribute;
-use Sprout\Core\Contracts\IdentityResolver;
-use Sprout\Core\Managers\IdentityResolverManager;
+use Sprout\Contracts\IdentityResolver;
+use Sprout\Managers\IdentityResolverManager;
 
 /**
  * Resolver Attribute
@@ -40,13 +40,13 @@ final readonly class Resolver implements ContextualAttribute
     /**
      * Resolve the tenancy using this attribute
      *
-     * @param \Sprout\Core\Attributes\Resolver $attribute
+     * @param \Sprout\Attributes\Resolver $attribute
      * @param \Illuminate\Container\Container  $container
      *
-     * @return \Sprout\Core\Contracts\IdentityResolver
+     * @return \Sprout\Contracts\IdentityResolver
      *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
-     * @throws \Sprout\Core\Exceptions\MisconfigurationException
+     * @throws \Sprout\Exceptions\MisconfigurationException
      */
     public function resolve(self $attribute, Container $container): IdentityResolver
     {

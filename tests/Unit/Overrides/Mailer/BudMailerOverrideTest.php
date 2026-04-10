@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Bud\Tests\Unit\Overrides;
+namespace Sprout\Tests\Unit\Overrides;
 
 use Closure;
 use Illuminate\Config\Repository;
@@ -11,19 +11,19 @@ use Mockery;
 use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\Bud\Bud;
-use Sprout\Bud\Contracts\ConfigStore;
-use Sprout\Bud\Exceptions\CyclicOverrideException;
-use Sprout\Bud\Managers\ConfigStoreManager;
+use Sprout;
+use Sprout\Contracts\ConfigStore;
+use Sprout\Exceptions\CyclicOverrideException;
+use Sprout\Managers\ConfigStoreManager;
 use Sprout\Overrides\Mailer\BudMailerOverride;
-use Sprout\Bud\Tests\Unit\UnitTestCase;
-use Sprout\Core\Contracts\BootableServiceOverride;
-use Sprout\Core\Contracts\Tenancy;
-use Sprout\Core\Contracts\Tenant;
-use Sprout\Core\Contracts\TenantHasResources;
-use Sprout\Core\Sprout;
-use Sprout\Core\Support\SettingsRepository;
-use function Sprout\Core\sprout;
+use Sprout\Tests\Unit\UnitTestCase;
+use Sprout\Contracts\BootableServiceOverride;
+use Sprout\Contracts\Tenancy;
+use Sprout\Contracts\Tenant;
+use Sprout\Contracts\TenantHasResources;
+use Sprout\Sprout;
+use Sprout\Support\SettingsRepository;
+use function Sprout\sprout;
 
 class BudMailerOverrideTest extends UnitTestCase
 {

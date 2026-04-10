@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Core\Overrides\Session;
+namespace Sprout\Overrides\Session;
 
 use Illuminate\Contracts\Foundation\Application;
-use Sprout\Core\Sprout;
+use Sprout\Sprout;
 
 final class SproutFileSessionHandlerCreator
 {
@@ -14,7 +14,7 @@ final class SproutFileSessionHandlerCreator
     private Application $app;
 
     /**
-     * @var \Sprout\Core\Sprout
+     * @var \Sprout\Sprout
      */
     private Sprout $sprout;
 
@@ -32,7 +32,7 @@ final class SproutFileSessionHandlerCreator
     /**
      * Create the tenant-aware session file driver
      *
-     * @return \Sprout\Core\Overrides\Session\SproutFileSessionHandler
+     * @return \Sprout\Overrides\Session\SproutFileSessionHandler
      *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
      */

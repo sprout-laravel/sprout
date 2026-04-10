@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Core\Exceptions;
+namespace Sprout\Exceptions;
 
 final class DeprecatedException extends SproutException
 {

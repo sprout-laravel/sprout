@@ -13,22 +13,22 @@ use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use RuntimeException;
-use Sprout\Bud\Bud;
-use Sprout\Bud\Contracts\ConfigStore;
-use Sprout\Bud\Exceptions\CyclicOverrideException;
-use Sprout\Bud\Managers\ConfigStoreManager;
-use Sprout\Bud\Overrides\Auth\BudAuthManager;
+use Sprout;
+use Sprout\Contracts\ConfigStore;
+use Sprout\Exceptions\CyclicOverrideException;
+use Sprout\Managers\ConfigStoreManager;
+use Sprout\Overrides\Auth\BudAuthManager;
 use Sprout\Overrides\Auth\BudAuthManagerOverride;
 use Sprout\Overrides\Auth\BudAuthProviderOverride;
-use Sprout\Bud\Tests\Unit\UnitTestCase;
-use Sprout\Core\Contracts\BootableServiceOverride;
-use Sprout\Core\Contracts\Tenancy;
-use Sprout\Core\Contracts\Tenant;
-use Sprout\Core\Contracts\TenantHasResources;
-use Sprout\Core\Overrides\StackedOverride;
-use Sprout\Core\Sprout;
-use Sprout\Core\Support\SettingsRepository;
-use function Sprout\Core\sprout;
+use Sprout\Tests\Unit\UnitTestCase;
+use Sprout\Contracts\BootableServiceOverride;
+use Sprout\Contracts\Tenancy;
+use Sprout\Contracts\Tenant;
+use Sprout\Contracts\TenantHasResources;
+use Sprout\Overrides\StackedOverride;
+use Sprout\Sprout;
+use Sprout\Support\SettingsRepository;
+use function Sprout\sprout;
 
 class BudAuthOverrideTest extends UnitTestCase
 {
@@ -225,7 +225,7 @@ class BudAuthOverrideTest extends UnitTestCase
 
         $override->boot($app, $sprout);
 
-        /** @var \Sprout\Bud\Overrides\Auth\BudAuthManager $manager */
+        /** @var \Sprout\Overrides\Auth\BudAuthManager $manager */
         $manager = $app->make('auth');
 
         $this->expectException(RuntimeException::class);
@@ -281,7 +281,7 @@ class BudAuthOverrideTest extends UnitTestCase
 
         $override->boot($app, $sprout);
 
-        /** @var \Sprout\Bud\Overrides\Auth\BudAuthManager $manager */
+        /** @var \Sprout\Overrides\Auth\BudAuthManager $manager */
         $manager = $app->make('auth');
 
         $this->expectException(CyclicOverrideException::class);
@@ -341,7 +341,7 @@ class BudAuthOverrideTest extends UnitTestCase
 
         $override->boot($app, $sprout);
 
-        /** @var \Sprout\Bud\Overrides\Auth\BudAuthManager $manager */
+        /** @var \Sprout\Overrides\Auth\BudAuthManager $manager */
         $manager = $app->make('auth');
 
         $manager->createUserProviderFromConfig(['provider' => 'bud-provider', 'driver' => 'bud']);
@@ -405,7 +405,7 @@ class BudAuthOverrideTest extends UnitTestCase
 
         $this->assertEmpty($authOverride->getOverrides());
 
-        /** @var \Sprout\Bud\Overrides\Auth\BudAuthManager $manager */
+        /** @var \Sprout\Overrides\Auth\BudAuthManager $manager */
         $manager = $app->make('auth');
 
         $manager->createUserProviderFromConfig(['provider' => 'bud-provider', 'driver' => 'bud']);
@@ -477,7 +477,7 @@ class BudAuthOverrideTest extends UnitTestCase
 
         $this->assertEmpty($authOverride->getOverrides());
 
-        /** @var \Sprout\Bud\Overrides\Auth\BudAuthManager $manager */
+        /** @var \Sprout\Overrides\Auth\BudAuthManager $manager */
         $manager = $app->make('auth');
 
         $manager->createUserProvider('bud-provider');

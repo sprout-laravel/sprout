@@ -1,26 +1,26 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Bud\Tests\Unit\Overrides\Filesystem;
+namespace Sprout\Tests\Unit\Overrides\Filesystem;
 
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Foundation\Application;
 use InvalidArgumentException;
 use Mockery;
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\Bud\Bud;
-use Sprout\Bud\Contracts\ConfigStore;
-use Sprout\Bud\Managers\ConfigStoreManager;
-use Sprout\Bud\Overrides\Filesystem\BudFilesystemDiskCreator;
-use Sprout\Bud\Tests\Unit\UnitTestCase;
-use Sprout\Core\Contracts\Tenancy;
-use Sprout\Core\Contracts\Tenant;
-use Sprout\Core\Contracts\TenantHasResources;
-use Sprout\Core\Exceptions\TenancyMissingException;
-use Sprout\Core\Exceptions\TenantMissingException;
-use Sprout\Core\Overrides\Filesystem\SproutFilesystemManager;
-use Sprout\Core\Sprout;
-use Sprout\Core\Support\SettingsRepository;
+use Sprout;
+use Sprout\Contracts\ConfigStore;
+use Sprout\Managers\ConfigStoreManager;
+use Sprout\Overrides\Filesystem\BudFilesystemDiskCreator;
+use Sprout\Tests\Unit\UnitTestCase;
+use Sprout\Contracts\Tenancy;
+use Sprout\Contracts\Tenant;
+use Sprout\Contracts\TenantHasResources;
+use Sprout\Exceptions\TenancyMissingException;
+use Sprout\Exceptions\TenantMissingException;
+use Sprout\Overrides\Filesystem\SproutFilesystemManager;
+use Sprout\Sprout;
+use Sprout\Support\SettingsRepository;
 
 class BudFilesystemDiskCreatorTest extends UnitTestCase
 {

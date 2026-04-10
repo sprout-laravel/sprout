@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Bud\Overrides;
+namespace Sprout\Overrides;
 
 use Closure;
-use Sprout\Bud\Bud;
-use Sprout\Bud\Overrides\Database\BudDatabaseConnectionCreator;
-use Sprout\Core\Sprout;
+use Sprout;
+use Sprout\Overrides\Database\BudDatabaseConnectionCreator;
+use Sprout\Sprout;
 
 /**
  * Database Connection Override
@@ -32,8 +32,8 @@ final class BudDatabaseConnectionOverride extends BaseOverride
      * Add a driver to the service.
      *
      * @param object                                       $service
-     * @param \Sprout\Bud\Bud                         $bud
-     * @param \Sprout\Core\Sprout                          $sprout
+     * @param \Sprout\Bud                         $bud
+     * @param \Sprout\Sprout                          $sprout
      * @param \Closure                                     $tracker
      *
      * @phpstan-param \Illuminate\Database\DatabaseManager $service

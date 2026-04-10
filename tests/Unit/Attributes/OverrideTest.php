@@ -1,15 +1,15 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Core\Tests\Unit\Attributes;
+namespace Sprout\Tests\Unit\Attributes;
 
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\Core\Attributes\Override;
-use Sprout\Core\Contracts\ServiceOverride;
-use Sprout\Core\Managers\ServiceOverrideManager;
-use Sprout\Core\Tests\Unit\UnitTestCase;
-use function Sprout\Core\sprout;
-use function Sprout\Core\tenancy;
+use Sprout\Attributes\Override;
+use Sprout\Contracts\ServiceOverride;
+use Sprout\Managers\ServiceOverrideManager;
+use Sprout\Tests\Unit\UnitTestCase;
+use function Sprout\sprout;
+use function Sprout\tenancy;
 
 class OverrideTest extends UnitTestCase
 {

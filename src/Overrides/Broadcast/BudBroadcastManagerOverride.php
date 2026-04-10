@@ -1,15 +1,15 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Bud\Overrides;
+namespace Sprout\Overrides;
 
 use Illuminate\Broadcasting\BroadcastManager;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Contracts\Foundation\Application;
-use Sprout\Bud\Overrides\Broadcast\BudBroadcastManager;
-use Sprout\Core\Contracts\BootableServiceOverride;
-use Sprout\Core\Overrides\BaseOverride;
-use Sprout\Core\Sprout;
+use Sprout\Overrides\Broadcast\BudBroadcastManager;
+use Sprout\Contracts\BootableServiceOverride;
+use Sprout\Overrides\BaseOverride;
+use Sprout\Sprout;
 
 final class BudBroadcastManagerOverride extends BaseOverride implements BootableServiceOverride
 {
@@ -20,7 +20,7 @@ final class BudBroadcastManagerOverride extends BaseOverride implements Bootable
      * override that take place during the booting of the framework.
      *
      * @param \Illuminate\Contracts\Foundation\Application $app
-     * @param \Sprout\Core\Sprout                          $sprout
+     * @param \Sprout\Sprout                          $sprout
      *
      * @return void
      *

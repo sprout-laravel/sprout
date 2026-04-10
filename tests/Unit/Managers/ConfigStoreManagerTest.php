@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Bud\Tests\Unit\Managers;
+namespace Sprout\Tests\Unit\Managers;
 
 use Closure;
 use Illuminate\Config\Repository;
@@ -15,11 +15,11 @@ use Illuminate\Support\Str;
 use Mockery;
 use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\Bud\Managers\ConfigStoreManager;
-use Sprout\Bud\Stores\DatabaseConfigStore;
-use Sprout\Bud\Stores\FilesystemConfigStore;
-use Sprout\Bud\Tests\Unit\UnitTestCase;
-use Sprout\Core\Exceptions\MisconfigurationException;
+use Sprout\Managers\ConfigStoreManager;
+use Sprout\Stores\DatabaseConfigStore;
+use Sprout\Stores\FilesystemConfigStore;
+use Sprout\Tests\Unit\UnitTestCase;
+use Sprout\Exceptions\MisconfigurationException;
 
 class ConfigStoreManagerTest extends UnitTestCase
 {

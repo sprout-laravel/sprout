@@ -1,18 +1,18 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Bud\Managers;
+namespace Sprout\Managers;
 
 use Illuminate\Contracts\Encryption\Encrypter as EncrypterContract;
 use Illuminate\Encryption\Encrypter;
 use Illuminate\Support\Str;
-use Sprout\Bud\Stores\DatabaseConfigStore;
-use Sprout\Bud\Stores\FilesystemConfigStore;
-use Sprout\Core\Exceptions\MisconfigurationException;
-use Sprout\Core\Support\BaseFactory;
+use Sprout\Stores\DatabaseConfigStore;
+use Sprout\Stores\FilesystemConfigStore;
+use Sprout\Exceptions\MisconfigurationException;
+use Sprout\Support\BaseFactory;
 
 /**
- * @extends \Sprout\Core\Support\BaseFactory<\Sprout\Bud\Contracts\ConfigStore>
+ * @extends \Sprout\Support\BaseFactory<\Sprout\Contracts\ConfigStore>
  */
 class ConfigStoreManager extends BaseFactory
 {
@@ -89,10 +89,10 @@ class ConfigStoreManager extends BaseFactory
      * @param array<string, mixed> $config
      * @param string               $name
      *
-     * @return \Sprout\Bud\Stores\FilesystemConfigStore
+     * @return \Sprout\Stores\FilesystemConfigStore
      *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
-     * @throws \Sprout\Core\Exceptions\MisconfigurationException
+     * @throws \Sprout\Exceptions\MisconfigurationException
      */
     protected function createFilesystemConfig(array $config, string $name): FilesystemConfigStore
     {
@@ -126,10 +126,10 @@ class ConfigStoreManager extends BaseFactory
      * @param array<string, mixed> $config
      * @param string               $name
      *
-     * @return \Sprout\Bud\Stores\DatabaseConfigStore
+     * @return \Sprout\Stores\DatabaseConfigStore
      *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
-     * @throws \Sprout\Core\Exceptions\MisconfigurationException
+     * @throws \Sprout\Exceptions\MisconfigurationException
      */
     protected function createDatabaseConfig(array $config, string $name): DatabaseConfigStore
     {

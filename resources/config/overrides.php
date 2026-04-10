@@ -20,7 +20,7 @@
 return [
 
     'filesystem' => [
-        'driver'    => \Sprout\Core\Overrides\StackedOverride::class,
+        'driver'    => \Sprout\Overrides\StackedOverride::class,
         'overrides' => [
             \Sprout\Overrides\Filesystem\FilesystemManagerOverride::class,
             \Sprout\Overrides\Filesystem\FilesystemOverride::class,
@@ -36,7 +36,7 @@ return [
     ],
 
     'auth' => [
-        'driver'    => \Sprout\Core\Overrides\StackedOverride::class,
+        'driver'    => \Sprout\Overrides\StackedOverride::class,
         'overrides' => [
             \Sprout\Overrides\Auth\AuthGuardOverride::class,
             \Sprout\Overrides\Auth\AuthPasswordOverride::class,

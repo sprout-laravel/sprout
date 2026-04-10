@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Bud\Attributes;
+namespace Sprout\Attributes;
 
 use Attribute;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Contracts\Container\ContextualAttribute;
-use Sprout\Bud\Contracts\ConfigStore as ConfigStoreContract;
-use Sprout\Bud\Managers\ConfigStoreManager;
+use Sprout\Contracts\ConfigStore as ConfigStoreContract;
+use Sprout\Managers\ConfigStoreManager;
 
 /**
  * Config Store Attribute
@@ -32,13 +32,13 @@ final readonly class ConfigStore implements ContextualAttribute
     /**
      * Resolve the config store using this attribute
      *
-     * @param \Sprout\Bud\Attributes\ConfigStore   $attribute
+     * @param \Sprout\Attributes\ConfigStore   $attribute
      * @param \Illuminate\Contracts\Container\Container $container
      *
-     * @return \Sprout\Bud\Contracts\ConfigStore
+     * @return \Sprout\Contracts\ConfigStore
      *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
-     * @throws \Sprout\Core\Exceptions\MisconfigurationException
+     * @throws \Sprout\Exceptions\MisconfigurationException
      */
     public function resolve(self $attribute, Container $container): ConfigStoreContract
     {

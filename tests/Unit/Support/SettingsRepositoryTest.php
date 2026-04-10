@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Core\Tests\Unit\Support;
+namespace Sprout\Tests\Unit\Support;
 
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\Core\Support\Settings;
-use Sprout\Core\Support\SettingsRepository;
-use Sprout\Core\Tests\Unit\UnitTestCase;
+use Sprout\Support\Settings;
+use Sprout\Support\SettingsRepository;
+use Sprout\Tests\Unit\UnitTestCase;
 
 class SettingsRepositoryTest extends UnitTestCase
 {
