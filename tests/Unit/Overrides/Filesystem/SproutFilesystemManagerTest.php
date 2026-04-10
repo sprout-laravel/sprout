@@ -49,9 +49,10 @@ class SproutFilesystemManagerTest extends UnitTestCase
 
         $sprout = new SproutFilesystemManager($app);
 
-        $sprout->extend('fake', function (Application $app, array $config) {
-            $this->assertArrayHasKey('name', $config);
-            $this->assertSame('fake-disk', $config['name']);
+        $test = $this;
+        $sprout->extend('fake', static function (Application $app, array $config) use ($test) {
+            $test->assertArrayHasKey('name', $config);
+            $test->assertSame('fake-disk', $config['name']);
 
             return Mockery::mock(Filesystem::class);
         });

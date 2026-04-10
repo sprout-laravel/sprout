@@ -49,9 +49,10 @@ class BudBroadcastManagerTest extends UnitTestCase
 
         $sprout = new BudBroadcastManager($app);
 
-        $sprout->extend('fake', function (Application $app, array $config) {
-            $this->assertArrayHasKey('name', $config);
-            $this->assertSame('fake-connection', $config['name']);
+        $test = $this;
+        $sprout->extend('fake', static function (Application $app, array $config) use ($test) {
+            $test->assertArrayHasKey('name', $config);
+            $test->assertSame('fake-connection', $config['name']);
 
             return Mockery::mock(Broadcaster::class);
         });

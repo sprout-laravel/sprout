@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Overrides;
+namespace Sprout\Overrides\Session;
 
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Session\SessionManager;
@@ -9,10 +9,9 @@ use Illuminate\Support\Arr;
 use Sprout\Contracts\BootableServiceOverride;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
-use Sprout\Overrides\Session\SproutDatabaseSessionHandlerCreator;
-use Sprout\Overrides\Session\SproutFileSessionHandlerCreator;
 use Sprout\Sprout;
 use Sprout\Support\Settings;
+use Sprout\Overrides\BaseOverride;
 
 /**
  * Session Override
@@ -54,16 +53,16 @@ final class SessionOverride extends BaseOverride implements BootableServiceOverr
 
     protected function addDriver(SessionManager $manager, Application $app, Sprout $sprout): void
     {
-        $creator = new SproutFileSessionHandlerCreator($app, $sprout);
+        $creator = fn() => (new SproutFileSessionHandlerCreator($app, $sprout))();
 
-        $manager->extend('file', $creator(...));
-        $manager->extend('native', $creator(...));
+        $manager->extend('file', $creator);
+        $manager->extend('native', $creator);
 
         /** @var bool $overrideDatabase */
         $overrideDatabase = $this->config['database'] ?? true;
 
         if ($sprout->settings()->shouldNotOverrideTheDatabase($overrideDatabase) === false) {
-            $manager->extend('database', (new SproutDatabaseSessionHandlerCreator($app, $sprout))(...));
+            $manager->extend('database', fn () => (new SproutDatabaseSessionHandlerCreator($app, $sprout))());
         }
     }
 
