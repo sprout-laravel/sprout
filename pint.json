@@ -160,6 +160,7 @@
     "php_unit_test_class_requires_covers": false,
     "unary_operator_spaces"              : false,
     "return_assignment"                  : false,
-    "modifier_keywords"                  : false
+    "modifier_keywords"                  : false,
+    "single_trait_insert_per_statement"  : false
   }
 }

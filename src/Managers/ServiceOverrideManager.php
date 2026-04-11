@@ -28,8 +28,7 @@ use Sprout\TenancyOptions;
  */
 final class ServiceOverrideManager
 {
-    use AwareOfApp;
-    use AwareOfSprout;
+    use AwareOfApp, AwareOfSprout;
 
     /**
      * @var array<string, ServiceOverride>

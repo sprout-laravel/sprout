@@ -13,8 +13,7 @@ use Workbench\Database\Factories\TenantChildFactory;
 class TenantChild extends Model
 {
     /** @use \Illuminate\Database\Eloquent\Factories\HasFactory<\Workbench\Database\Factories\TenantChildFactory> */
-    use HasFactory;
-    use BelongsToTenant;
+    use HasFactory, BelongsToTenant;
 
     protected static string $factory = TenantChildFactory::class;
 

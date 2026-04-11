@@ -19,8 +19,7 @@ use Sprout\Contracts\Tenant;
  */
 abstract class BaseIdentityResolver implements IdentityResolver
 {
-    use AwareOfSprout;
-    use AwareOfApp;
+    use AwareOfSprout, AwareOfApp;
 
     /**
      * @var string

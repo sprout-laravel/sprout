@@ -14,8 +14,7 @@ use Workbench\Database\Factories\TenantChildOptionalFactory;
 class TenantChildOptional extends Model implements OptionalTenant
 {
     /** @use \Illuminate\Database\Eloquent\Factories\HasFactory<\Workbench\Database\Factories\TenantChildFactory> */
-    use HasFactory;
-    use BelongsToTenant;
+    use HasFactory, BelongsToTenant;
 
     protected static string $factory = TenantChildOptionalFactory::class;
 

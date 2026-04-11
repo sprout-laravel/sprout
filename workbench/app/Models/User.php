@@ -10,9 +10,7 @@ use Workbench\Database\Factories\UserFactory;
 
 class User extends Authenticatable
 {
-    use HasFactory;
-    use Notifiable;
-    use MustVerifyEmail;
+    use HasFactory, Notifiable, MustVerifyEmail;
 
     protected static string $factory = UserFactory::class;
 

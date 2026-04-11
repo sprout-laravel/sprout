@@ -11,8 +11,7 @@ use Sprout\Contracts\Tenant;
 
 abstract class BaseOverride implements ServiceOverride
 {
-    use AwareOfApp;
-    use AwareOfSprout;
+    use AwareOfApp, AwareOfSprout;
 
     public readonly string $service;
 

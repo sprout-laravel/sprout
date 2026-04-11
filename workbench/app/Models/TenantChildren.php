@@ -14,8 +14,7 @@ class TenantChildren extends Model
     /**
      * @use \Illuminate\Database\Eloquent\Factories\HasFactory<\Workbench\Database\Factories\TenantChildrenFactory>
      */
-    use HasFactory;
-    use BelongsToManyTenants;
+    use HasFactory, BelongsToManyTenants;
 
     protected static string $factory = TenantChildrenFactory::class;
 

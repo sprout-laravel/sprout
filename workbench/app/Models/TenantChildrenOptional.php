@@ -15,8 +15,7 @@ class TenantChildrenOptional extends Model implements OptionalTenant
     /**
      * @use \Illuminate\Database\Eloquent\Factories\HasFactory<\Workbench\Database\Factories\TenantChildrenFactory>
      */
-    use HasFactory;
-    use BelongsToManyTenants;
+    use HasFactory, BelongsToManyTenants;
 
     protected static string $factory = TenantChildrenOptionalFactory::class;
 
