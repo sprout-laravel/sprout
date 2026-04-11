@@ -7,6 +7,9 @@ use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Filesystem\FilesystemManager;
 use InvalidArgumentException;
 use Sprout\Bud;
+use Sprout\Exceptions\MisconfigurationException;
+use Sprout\Exceptions\TenancyMissingException;
+use Sprout\Exceptions\TenantMissingException;
 use Sprout\Overrides\BaseCreator;
 use Sprout\Sprout;
 
@@ -30,18 +33,17 @@ final class BudFilesystemDiskCreator extends BaseCreator
     private array $config;
 
     /**
-     * @param \Illuminate\Filesystem\FilesystemManager                      $manager
-     * @param \Sprout\Bud                                          $bud
-     * @param \Sprout\Sprout                                           $sprout
+     * @param FilesystemManager                                             $manager
+     * @param Bud                                                           $bud
+     * @param Sprout                                                        $sprout
      * @param array<string, mixed>&array{budStore?:string|null,name?:mixed} $config
      */
     public function __construct(
         FilesystemManager $manager,
         Bud               $bud,
         Sprout            $sprout,
-        array             $config
-    )
-    {
+        array             $config,
+    ) {
         $this->manager = $manager;
         $this->bud     = $bud;
         $this->sprout  = $sprout;
@@ -51,11 +53,11 @@ final class BudFilesystemDiskCreator extends BaseCreator
     /**
      * Create the connection using Bud.
      *
-     * @return \Illuminate\Contracts\Filesystem\Filesystem
+     * @return Filesystem
      *
-     * @throws \Sprout\Exceptions\MisconfigurationException
-     * @throws \Sprout\Exceptions\TenancyMissingException
-     * @throws \Sprout\Exceptions\TenantMissingException
+     * @throws MisconfigurationException
+     * @throws TenancyMissingException
+     * @throws TenantMissingException
      */
     public function __invoke(): Filesystem
     {
@@ -70,13 +72,13 @@ final class BudFilesystemDiskCreator extends BaseCreator
         $this->checkForCyclicDrivers(
             $config['driver'] ?? null,
             'filesystem disk',
-            $config['name']
+            $config['name'],
         );
 
         return $this->manager->build(
             array_merge([
                 'name' => $config['name'],
-            ], $config)
+            ], $config),
         );
     }
 

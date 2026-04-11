@@ -8,7 +8,7 @@ use Workbench\App\Models\NoResourcesTenantModel;
 /**
  * @template TModel of \Workbench\App\Models\NoResourcesTenantModel
  *
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<TModel>
+ * @extends Factory<TModel>
  */
 class NoResourcesTenantModelFactory extends Factory
 {

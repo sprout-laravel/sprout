@@ -8,8 +8,6 @@ namespace Sprout\Support;
  *
  * This enum is used as a way of identifying the various points within the
  * Laravel request lifecycle where tenants can be resolved.
- *
- * @package Core
  */
 enum ResolutionHook
 {

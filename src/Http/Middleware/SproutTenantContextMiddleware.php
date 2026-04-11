@@ -4,7 +4,9 @@ declare(strict_types=1);
 namespace Sprout\Http\Middleware;
 
 use Closure;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Http\Request;
+use Sprout\Exceptions\MisconfigurationException;
 use Sprout\Exceptions\NoTenantFoundException;
 use Sprout\Sprout;
 use Sprout\Support\ResolutionHelper;
@@ -17,8 +19,6 @@ use Symfony\Component\HttpFoundation\Response;
  * This piece of middleware has a dual function.
  * It marks routes as being multitenanted if resolving during routing, and it
  * will resolve tenants if resolving during middleware.
- *
- * @package Core
  */
 final class SproutTenantContextMiddleware
 {
@@ -28,14 +28,14 @@ final class SproutTenantContextMiddleware
     public const ALIAS = 'sprout.tenanted';
 
     /**
-     * @var \Sprout\Sprout
+     * @var Sprout
      */
     private Sprout $sprout;
 
     /**
      * Create a new instance of the middleware
      *
-     * @param \Sprout\Sprout $sprout
+     * @param Sprout $sprout
      */
     public function __construct(Sprout $sprout)
     {
@@ -45,15 +45,15 @@ final class SproutTenantContextMiddleware
     /**
      * Handle the request
      *
-     * @param \Illuminate\Http\Request $request
-     * @param \Closure                 $next
-     * @param string                   ...$options
+     * @param Request $request
+     * @param Closure $next
+     * @param string  ...$options
      *
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      *
-     * @throws \Sprout\Exceptions\NoTenantFoundException
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
-     * @throws \Sprout\Exceptions\MisconfigurationException
+     * @throws NoTenantFoundException
+     * @throws BindingResolutionException
+     * @throws MisconfigurationException
      */
     public function handle(Request $request, Closure $next, string ...$options): Response
     {
@@ -78,10 +78,7 @@ final class SproutTenantContextMiddleware
              * @var string $defaultTenancy
              */
 
-            throw NoTenantFoundException::make(
-                $resolverName ?? $defaultResolver,
-                $tenancyName ?? $defaultTenancy
-            );
+            throw NoTenantFoundException::make($resolverName ?? $defaultResolver, $tenancyName ?? $defaultTenancy);
         }
 
         /** @phpstan-ignore return.type */

@@ -33,16 +33,6 @@ abstract class BaseOverride implements ServiceOverride
     }
 
     /**
-     * Get the service config
-     *
-     * @return array<string, mixed>
-     */
-    public function getConfig(): array
-    {
-        return $this->config;
-    }
-
-    /**
      * Set up the service override
      *
      * This method should perform any necessary setup actions for the service
@@ -51,8 +41,8 @@ abstract class BaseOverride implements ServiceOverride
      *
      * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Contracts\Tenant               $tenant
+     * @param Tenancy<TenantClass> $tenancy
+     * @param Tenant               $tenant
      *
      * @phpstan-param TenantClass                         $tenant
      *
@@ -61,6 +51,16 @@ abstract class BaseOverride implements ServiceOverride
     public function setup(Tenancy $tenancy, Tenant $tenant): void
     {
         // I'm intentionally empty
+    }
+
+    /**
+     * Get the service config
+     *
+     * @return array<string, mixed>
+     */
+    public function getConfig(): array
+    {
+        return $this->config;
     }
 
     /**
@@ -76,8 +76,8 @@ abstract class BaseOverride implements ServiceOverride
      *
      * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Contracts\Tenant               $tenant
+     * @param Tenancy<TenantClass> $tenancy
+     * @param Tenant               $tenant
      *
      * @phpstan-param TenantClass                         $tenant
      *
@@ -87,5 +87,4 @@ abstract class BaseOverride implements ServiceOverride
     {
         // I'm intentionally empty
     }
-
 }

@@ -9,18 +9,16 @@ use Sprout\Events\CurrentTenantChanged;
 /**
  * Set Current Tenant Context
  *
- * This class is an event listener for {@see \Sprout\Events\CurrentTenantChanged}
+ * This class is an event listener for {@see CurrentTenantChanged}
  * that handles the setting of the current tenants key, within Laravels
  * context service.
- *
- * @package Core
  */
 final class SetCurrentTenantContext
 {
     /**
      * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Sprout\Events\CurrentTenantChanged<TenantClass> $event
+     * @param CurrentTenantChanged<TenantClass> $event
      *
      * @return void
      */

@@ -5,6 +5,7 @@ namespace Workbench\App;
 
 use Sprout\Contracts\Tenant;
 use Sprout\Contracts\TenantHasResources;
+use Sprout\Contracts\TenantProvider;
 
 class CustomTenantEntity implements Tenant, TenantHasResources
 {
@@ -25,60 +26,6 @@ class CustomTenantEntity implements Tenant, TenantHasResources
     public function __construct(array $attributes = [])
     {
         $this->attributes = $attributes;
-    }
-
-    /**
-     * Get the tenant identifier
-     *
-     * Retrieve the identifier used to publicly identify the tenant.
-     *
-     * @return string
-     */
-    public function getTenantIdentifier(): string
-    {
-        /** @phpstan-ignore-next-line */
-        return $this->attributes[$this->getTenantIdentifierName()];
-    }
-
-    /**
-     * Get the name of the tenant identifier
-     *
-     * Retrieve the storage name for the tenant identifier, whether that's an
-     * attribute, column name, array key or something else.
-     * Used primarily by {@see \Sprout\Contracts\TenantProvider}.
-     *
-     * @return string
-     */
-    public function getTenantIdentifierName(): string
-    {
-        return 'identifier';
-    }
-
-    /**
-     * Get the tenant key
-     *
-     * Retrieve the key used to identify a tenant internally.
-     *
-     * @return int|string
-     */
-    public function getTenantKey(): int|string
-    {
-        /** @phpstan-ignore-next-line */
-        return $this->attributes[$this->getTenantKeyName()];
-    }
-
-    /**
-     * Get the name of the tenant key
-     *
-     * Retrieve the storage name for the tenant key, whether that's an
-     * attribute, column name, array key or something else.
-     * Used primarily by {@see \Sprout\Contracts\TenantProvider}.
-     *
-     * @return string
-     */
-    public function getTenantKeyName(): string
-    {
-        return 'id';
     }
 
     /**
@@ -128,6 +75,60 @@ class CustomTenantEntity implements Tenant, TenantHasResources
     public function __unset(string $key): void
     {
         unset($this->attributes[$key]);
+    }
+
+    /**
+     * Get the tenant identifier
+     *
+     * Retrieve the identifier used to publicly identify the tenant.
+     *
+     * @return string
+     */
+    public function getTenantIdentifier(): string
+    {
+        /** @phpstan-ignore-next-line */
+        return $this->attributes[$this->getTenantIdentifierName()];
+    }
+
+    /**
+     * Get the name of the tenant identifier
+     *
+     * Retrieve the storage name for the tenant identifier, whether that's an
+     * attribute, column name, array key or something else.
+     * Used primarily by {@see TenantProvider}.
+     *
+     * @return string
+     */
+    public function getTenantIdentifierName(): string
+    {
+        return 'identifier';
+    }
+
+    /**
+     * Get the tenant key
+     *
+     * Retrieve the key used to identify a tenant internally.
+     *
+     * @return int|string
+     */
+    public function getTenantKey(): int|string
+    {
+        /** @phpstan-ignore-next-line */
+        return $this->attributes[$this->getTenantKeyName()];
+    }
+
+    /**
+     * Get the name of the tenant key
+     *
+     * Retrieve the storage name for the tenant key, whether that's an
+     * attribute, column name, array key or something else.
+     * Used primarily by {@see TenantProvider}.
+     *
+     * @return string
+     */
+    public function getTenantKeyName(): string
+    {
+        return 'id';
     }
 
     /**

@@ -9,8 +9,6 @@ namespace Sprout\Exceptions;
  * This exception is used when a component of Sprout is not compatible with
  * another.
  *
- * @package Core
- *
  * @codeCoverageIgnore
  */
 final class CompatibilityException extends SproutException

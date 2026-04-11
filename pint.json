@@ -1,0 +1,166 @@
+{
+  "preset" : "symfony",
+  "exclude": [
+    "build/",
+    "resources/",
+    "tests/"
+  ],
+  "rules"  : {
+    "braces_position"                    : {
+      "classes_opening_brace"            : "next_line_unless_newline_at_signature_end",
+      "functions_opening_brace"          : "next_line_unless_newline_at_signature_end",
+      "anonymous_classes_opening_brace"  : "same_line",
+      "anonymous_functions_opening_brace": "same_line",
+      "control_structures_opening_brace" : "same_line"
+    },
+    "fully_qualified_strict_types"       : {
+      "import_symbols"                     : true,
+      "leading_backslash_in_global_namespace": false,
+      "phpdoc_tags"                        : [
+        "param",
+        "return",
+        "var",
+        "throws",
+        "see",
+        "property",
+        "property-read",
+        "property-write",
+        "method",
+        "extends",
+        "implements",
+        "mixin",
+        "template",
+        "template-extends",
+        "template-implements",
+        "template-covariant",
+        "phpstan-param",
+        "phpstan-return",
+        "phpstan-var",
+        "phpstan-property",
+        "phpstan-property-read",
+        "phpstan-property-write",
+        "phpstan-assert",
+        "phpstan-assert-if-true",
+        "phpstan-import-type",
+        "phpstan-self-out",
+        "phpstan-this-out",
+        "phpstan-type",
+        "psalm-param",
+        "psalm-return",
+        "psalm-var",
+        "psalm-property",
+        "psalm-property-read",
+        "psalm-property-write",
+        "psalm-assert",
+        "psalm-assert-if-true",
+        "psalm-import-type",
+        "psalm-self-out",
+        "psalm-this-out",
+        "psalm-type"
+      ]
+    },
+    "elseif"                             : false,
+    "concat_space"                       : {
+      "spacing": "one"
+    },
+    "blank_line_after_opening_tag"       : false,
+    "linebreak_after_opening_tag"        : true,
+    "array_syntax"                       : {
+      "syntax": "short"
+    },
+    "trailing_comma_in_multiline"        : {
+      "elements"     : ["arguments", "arrays", "match", "parameters"],
+      "after_heredoc": false
+    },
+    "types_spaces"                       : {
+      "space": "none"
+    },
+    "phpdoc_types_order"                 : {
+      "null_adjustment": "always_last",
+      "sort_algorithm" : "none"
+    },
+    "phpdoc_align"                       : {
+      "align": "vertical",
+      "tags" : ["param", "property", "property-read", "property-write", "return", "throws", "type", "var", "method"]
+    },
+    "no_superfluous_phpdoc_tags"         : false,
+    "ordered_imports"                    : {
+      "sort_algorithm": "alpha",
+      "imports_order" : ["class", "function", "const"]
+    },
+    "class_attributes_separation"        : {
+      "elements": {
+        "method"      : "one",
+        "property"    : "one",
+        "const"       : "one",
+        "case"        : "one",
+        "trait_import": "one"
+      }
+    },
+    "single_line_empty_body"             : false,
+    "nullable_type_declaration"          : false,
+    "constant_case"                      : {
+      "case": "lower"
+    },
+    "cast_spaces"                        : {
+      "space": "single"
+    },
+    "no_extra_blank_lines"               : {
+      "tokens": [
+        "curly_brace_block",
+        "extra",
+        "parenthesis_brace_block",
+        "square_brace_block",
+        "throw",
+        "use",
+        "use_trait"
+      ]
+    },
+    "binary_operator_spaces"             : {
+      "default": "align_single_space_minimal"
+    },
+    "global_namespace_import"            : false,
+    "phpdoc_to_comment"                  : false,
+    "method_argument_space"              : {
+      "on_multiline"       : "ensure_fully_multiline",
+      "attribute_placement": "same_line"
+    },
+    "yoda_style"                         : false,
+    "ordered_class_elements"             : {
+      "order": [
+        "use_trait",
+        "case",
+        "constant_public",
+        "constant_protected",
+        "constant_private",
+        "property_public_static",
+        "property_protected_static",
+        "property_private_static",
+        "method_public_static",
+        "method_protected_static",
+        "method_private_static",
+        "property_public",
+        "property_protected",
+        "property_private",
+        "construct",
+        "destruct",
+        "magic",
+        "phpunit",
+        "method_public",
+        "method_protected",
+        "method_private"
+      ]
+    },
+    "phpdoc_summary"                     : false,
+    "no_empty_comment"                   : false,
+    "function_typehint_space"            : false,
+    "type_declaration_spaces"            : false,
+    "blank_line_before_statement"        : false,
+    "php_unit_internal_class"            : false,
+    "php_unit_test_class_requires_covers": false,
+    "unary_operator_spaces"              : false,
+    "return_assignment"                  : false,
+    "modifier_keywords"                  : false,
+    "single_trait_insert_per_statement"  : false
+  }
+}

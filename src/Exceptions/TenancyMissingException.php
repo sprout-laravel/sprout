@@ -9,8 +9,6 @@ namespace Sprout\Exceptions;
  * This exception is used when there is no current tenancy, but one is
  * expected/required.
  *
- * @package Core
- *
  * @codeCoverageIgnore
  */
 final class TenancyMissingException extends SproutException
@@ -23,7 +21,7 @@ final class TenancyMissingException extends SproutException
     public static function make(): self
     {
         return new self(
-            'There is no current tenancy'
+            'There is no current tenancy',
         );
     }
 }

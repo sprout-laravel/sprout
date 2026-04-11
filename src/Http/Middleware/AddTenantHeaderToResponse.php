@@ -4,7 +4,9 @@ declare(strict_types=1);
 namespace Sprout\Http\Middleware;
 
 use Closure;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Http\Request;
+use Sprout\Exceptions\MisconfigurationException;
 use Sprout\Http\Resolvers\HeaderIdentityResolver;
 use Sprout\Sprout;
 use Sprout\Support\ResolutionHelper;
@@ -15,20 +17,18 @@ use Symfony\Component\HttpFoundation\Response;
  *
  * This piece of middleware is responsible for adding the tenant identifier
  * header to responses when using the header-based identity resolver.
- *
- * @package Http\Resolvers
  */
 final class AddTenantHeaderToResponse
 {
     /**
-     * @var \Sprout\Sprout
+     * @var Sprout
      */
     private Sprout $sprout;
 
     /**
      * Create new instance
      *
-     * @param \Sprout\Sprout $sprout
+     * @param Sprout $sprout
      */
     public function __construct(Sprout $sprout)
     {
@@ -38,14 +38,14 @@ final class AddTenantHeaderToResponse
     /**
      * Handle the request
      *
-     * @param \Illuminate\Http\Request $request
-     * @param \Closure                 $next
-     * @param string                   ...$options
+     * @param Request $request
+     * @param Closure $next
+     * @param string  ...$options
      *
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
-     * @throws \Sprout\Exceptions\MisconfigurationException
+     * @throws BindingResolutionException
+     * @throws MisconfigurationException
      */
     public function handle(Request $request, Closure $next, string ...$options): Response
     {

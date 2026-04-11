@@ -4,14 +4,14 @@ declare(strict_types=1);
 namespace Sprout\Overrides\Cache;
 
 use Closure;
+use Illuminate\Cache\CacheManager;
 use Illuminate\Foundation\Application;
 use Sprout\Bud;
 use Sprout\Overrides\BudBaseOverride;
-use Sprout\Overrides\Cache\BudCacheStoreCreator;
 use Sprout\Sprout;
 
 /**
- * @extends \Sprout\Overrides\BudBaseOverride<\Illuminate\Cache\CacheManager>
+ * @extends BudBaseOverride<CacheManager>
  */
 final class BudCacheStoreOverride extends BudBaseOverride
 {
@@ -28,12 +28,12 @@ final class BudCacheStoreOverride extends BudBaseOverride
     /**
      * Add a driver to the service.
      *
-     * @param object                                 $service
-     * @param \Sprout\Bud                   $bud
-     * @param \Sprout\Sprout                    $sprout
-     * @param \Closure                               $tracker
+     * @param object  $service
+     * @param Bud     $bud
+     * @param Sprout  $sprout
+     * @param Closure $tracker
      *
-     * @phpstan-param \Illuminate\Cache\CacheManager $service
+     * @phpstan-param CacheManager $service
      *
      * @return void
      */
@@ -54,10 +54,10 @@ final class BudCacheStoreOverride extends BudBaseOverride
     /**
      * Clean-up an overridden service.
      *
-     * @param object                                 $service
-     * @param string                                 $name
+     * @param object $service
+     * @param string $name
      *
-     * @phpstan-param \Illuminate\Cache\CacheManager $service
+     * @phpstan-param CacheManager $service
      *
      * @return void
      */

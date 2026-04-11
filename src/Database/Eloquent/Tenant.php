@@ -12,8 +12,6 @@ use Sprout\Database\Eloquent\Concerns\IsTenant;
  *
  * This class exists for simplicity’s sake, allowing users to extend
  * rather than implement.
- *
- * @package Database\Eloquent
  */
 abstract class Tenant extends Model implements TenantContract
 {

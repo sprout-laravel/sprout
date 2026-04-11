@@ -11,14 +11,13 @@ use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 use Sprout\Exceptions\TenantMissingException;
 use Sprout\Support\BaseIdentityResolver;
+use Sprout\Support\ResolutionHook;
 
 /**
  * The Subdomain Identity Resolver
  *
  * This class is responsible for resolving tenant identities from the current
  * request using a subdomain.
- *
- * @package Http\Resolvers
  */
 final class SubdomainIdentityResolver extends BaseIdentityResolver implements IdentityResolverUsesParameters
 {
@@ -36,11 +35,11 @@ final class SubdomainIdentityResolver extends BaseIdentityResolver implements Id
     /**
      * Create a new instance
      *
-     * @param string                                     $name
-     * @param string                                     $domain
-     * @param string|null                                $pattern
-     * @param string|null                                $parameter
-     * @param array<\Sprout\Support\ResolutionHook> $hooks
+     * @param string                $name
+     * @param string                $domain
+     * @param string|null           $pattern
+     * @param string|null           $parameter
+     * @param array<ResolutionHook> $hooks
      */
     public function __construct(string $name, string $domain, ?string $pattern = null, ?string $parameter = null, array $hooks = [])
     {
@@ -52,14 +51,46 @@ final class SubdomainIdentityResolver extends BaseIdentityResolver implements Id
     }
 
     /**
+     * Perform setup actions for the tenant
+     *
+     * When a tenant is marked as the current tenant within a tenancy, this
+     * method will be called to perform any necessary setup actions.
+     * This method is also called if there is no current tenant, as there may
+     * be actions needed.
+     *
+     * @template TenantClass of \Sprout\Contracts\Tenant
+     *
+     * @param Tenancy<TenantClass> $tenancy
+     * @param Tenant|null          $tenant
+     *
+     * @phpstan-param TenantClass|null                    $tenant
+     *
+     * @return void
+     *
+     * @throws TenantMissingException
+     */
+    public function setup(Tenancy $tenancy, ?Tenant $tenant): void
+    {
+        // Call the parent implementation in case there's something there
+        parent::setup($tenancy, $tenant);
+
+        // Call the trait setup so that parameter has a default value
+        $this->parameterSetup($tenancy, $tenant);
+
+        if ($tenant !== null) {
+            $this->getSprout()->settings()->setUrlDomain($this->getTenantRouteDomain($tenancy));
+        }
+    }
+
+    /**
      * Get an identifier from the request
      *
      * Locates a tenant identifier within the provided request and returns it.
      *
      * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Illuminate\Http\Request                    $request
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
+     * @param Request              $request
+     * @param Tenancy<TenantClass> $tenancy
      *
      * @return string|null
      */
@@ -89,7 +120,7 @@ final class SubdomainIdentityResolver extends BaseIdentityResolver implements Id
      *
      * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
+     * @param Tenancy<TenantClass> $tenancy
      *
      * @return string
      */
@@ -104,8 +135,8 @@ final class SubdomainIdentityResolver extends BaseIdentityResolver implements Id
      * Configures a provided route to work with itself, adding parameters,
      * middleware, and anything else required, besides the default middleware.
      *
-     * @param \Illuminate\Routing\RouteRegistrar                            $route
-     * @param \Sprout\Contracts\Tenancy<\Sprout\Contracts\Tenant> $tenancy
+     * @param RouteRegistrar  $route
+     * @param Tenancy<Tenant> $tenancy
      *
      * @return void
      */
@@ -113,7 +144,7 @@ final class SubdomainIdentityResolver extends BaseIdentityResolver implements Id
     {
         $this->applyParameterPatternMapping(
             $route->domain($this->getRouteDomain($tenancy)),
-            $tenancy
+            $tenancy,
         );
     }
 
@@ -122,11 +153,11 @@ final class SubdomainIdentityResolver extends BaseIdentityResolver implements Id
      *
      * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
+     * @param Tenancy<TenantClass> $tenancy
      *
      * @return string
      *
-     * @throws \Sprout\Exceptions\TenantMissingException
+     * @throws TenantMissingException
      */
     public function getTenantRouteDomain(Tenancy $tenancy): string
     {
@@ -140,39 +171,7 @@ final class SubdomainIdentityResolver extends BaseIdentityResolver implements Id
         return str_replace(
             '{' . $this->getRouteParameterName($tenancy) . '}',
             $identifier,
-            $this->getRouteDomain($tenancy)
+            $this->getRouteDomain($tenancy),
         );
-    }
-
-    /**
-     * Perform setup actions for the tenant
-     *
-     * When a tenant is marked as the current tenant within a tenancy, this
-     * method will be called to perform any necessary setup actions.
-     * This method is also called if there is no current tenant, as there may
-     * be actions needed.
-     *
-     * @template TenantClass of \Sprout\Contracts\Tenant
-     *
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Contracts\Tenant|null          $tenant
-     *
-     * @phpstan-param TenantClass|null                    $tenant
-     *
-     * @return void
-     *
-     * @throws \Sprout\Exceptions\TenantMissingException
-     */
-    public function setup(Tenancy $tenancy, ?Tenant $tenant): void
-    {
-        // Call the parent implementation in case there's something there
-        parent::setup($tenancy, $tenant);
-
-        // Call the trait setup so that parameter has a default value
-        $this->parameterSetup($tenancy, $tenant);
-
-        if ($tenant !== null) {
-            $this->getSprout()->settings()->setUrlDomain($this->getTenantRouteDomain($tenancy));
-        }
     }
 }

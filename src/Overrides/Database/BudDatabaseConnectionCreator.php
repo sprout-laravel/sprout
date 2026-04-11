@@ -6,6 +6,9 @@ namespace Sprout\Overrides\Database;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\DatabaseManager;
 use Sprout\Bud;
+use Sprout\Exceptions\MisconfigurationException;
+use Sprout\Exceptions\TenancyMissingException;
+use Sprout\Exceptions\TenantMissingException;
 use Sprout\Overrides\BaseCreator;
 use Sprout\Sprout;
 
@@ -31,9 +34,9 @@ final class BudDatabaseConnectionCreator extends BaseCreator
     private array $config;
 
     /**
-     * @param \Illuminate\Database\DatabaseManager              $manager
-     * @param \Sprout\Bud                              $bud
-     * @param \Sprout\Sprout                               $sprout
+     * @param DatabaseManager                                   $manager
+     * @param Bud                                               $bud
+     * @param Sprout                                            $sprout
      * @param string                                            $name
      * @param array<string, mixed>&array{budStore?:string|null} $config
      */
@@ -42,9 +45,8 @@ final class BudDatabaseConnectionCreator extends BaseCreator
         Bud             $bud,
         Sprout          $sprout,
         string          $name,
-        array           $config
-    )
-    {
+        array           $config,
+    ) {
         $this->manager = $manager;
         $this->bud     = $bud;
         $this->sprout  = $sprout;
@@ -55,11 +57,11 @@ final class BudDatabaseConnectionCreator extends BaseCreator
     /**
      * Create the connection using Bud.
      *
-     * @return \Illuminate\Database\ConnectionInterface
+     * @return ConnectionInterface
      *
-     * @throws \Sprout\Exceptions\MisconfigurationException
-     * @throws \Sprout\Exceptions\TenancyMissingException
-     * @throws \Sprout\Exceptions\TenantMissingException
+     * @throws MisconfigurationException
+     * @throws TenancyMissingException
+     * @throws TenantMissingException
      */
     public function __invoke(): ConnectionInterface
     {
@@ -70,7 +72,7 @@ final class BudDatabaseConnectionCreator extends BaseCreator
         $this->checkForCyclicDrivers(
             $config['driver'] ?? null,
             'database connection',
-            $this->name
+            $this->name,
         );
 
         // If we're here, it's not cyclic, so we'll create a dynamic connection.
@@ -79,7 +81,7 @@ final class BudDatabaseConnectionCreator extends BaseCreator
         return $this->manager->connectUsing(
             $this->name,
             $config,
-            true // This is important, it needs to be here to avoid side-effect errors.
+            true, // This is important, it needs to be here to avoid side-effect errors.
         );
     }
 

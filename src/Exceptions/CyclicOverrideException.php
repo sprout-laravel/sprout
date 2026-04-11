@@ -10,7 +10,7 @@ final class CyclicOverrideException extends BudException
         return new self(sprintf(
             'Attempt to create cyclic bud %s [%s] detected',
             $term,
-            $name
+            $name,
         ));
     }
 }

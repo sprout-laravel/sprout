@@ -13,8 +13,6 @@ use Sprout\Support\ResolutionHook;
  * This also includes cases where instances of certain classes/interfaces is
  * expected, but not provided.
  *
- * @package Core
- *
  * @codeCoverageIgnore
  */
 final class MisconfigurationException extends SproutException
@@ -90,7 +88,7 @@ final class MisconfigurationException extends SproutException
     /**
      * Create a new exception for when a resolution hook is not supported
      *
-     * @param \Sprout\Support\ResolutionHook $hook
+     * @param ResolutionHook $hook
      *
      * @return self
      */

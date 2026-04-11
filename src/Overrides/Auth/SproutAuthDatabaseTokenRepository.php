@@ -19,15 +19,13 @@ use Sprout\Sprout;
  * Sprout Auth Database Token Repository
  *
  * This is a database token repository that wraps the default
- * {@see \Illuminate\Auth\Passwords\DatabaseTokenRepository} to query based on
+ * {@see DatabaseTokenRepository} to query based on
  * the current tenant.
- *
- * @package Overrides
  */
 class SproutAuthDatabaseTokenRepository extends DatabaseTokenRepository
 {
     /**
-     * @var \Sprout\Sprout
+     * @var Sprout
      */
     private Sprout $sprout;
 
@@ -39,9 +37,8 @@ class SproutAuthDatabaseTokenRepository extends DatabaseTokenRepository
         string              $table,
         string              $hashKey,
         int                 $expires = 60,
-        int                 $throttle = 60
-    )
-    {
+        int                 $throttle = 60,
+    ) {
         parent::__construct($connection, $hasher, $table, $hashKey, $expires, $throttle);
         $this->sprout = $sprout;
     }
@@ -57,10 +54,52 @@ class SproutAuthDatabaseTokenRepository extends DatabaseTokenRepository
     }
 
     /**
+     * Determine if a token record exists and is valid.
+     *
+     * @param CanResetPasswordContract $user
+     * @param string                   $token
+     *
+     * @return bool
+     *
+     * @throws TenancyMissingException
+     * @throws TenantMissingException
+     */
+    public function exists(CanResetPasswordContract $user, #[SensitiveParameter] $token): bool
+    {
+        /** @var array{token?: string, created_at?: string} $record */
+        $record = (array) $this->getExistingTenantedRecord($user);
+
+        return ! empty($record)
+               && isset($record['token'], $record['created_at'])
+               && ! $this->tokenExpired($record['created_at'])
+               && $this->hasher->check($token, $record['token']);
+    }
+
+    /**
+     * Determine if the given user recently created a password reset token.
+     *
+     * @param CanResetPasswordContract $user
+     *
+     * @return bool
+     *
+     * @throws TenancyMissingException
+     * @throws TenantMissingException
+     */
+    public function recentlyCreatedToken(CanResetPasswordContract $user): bool
+    {
+        /** @var array{token?: string, created_at?: string} $record */
+        $record = (array) $this->getExistingTenantedRecord($user);
+
+        return ! empty($record)
+               && isset($record['created_at'])
+               && $this->tokenRecentlyCreated($record['created_at']);
+    }
+
+    /**
      * @return \Sprout\Contracts\Tenancy<*>
      *
-     * @throws \Sprout\Exceptions\TenancyMissingException
-     * @throws \Sprout\Exceptions\TenantMissingException
+     * @throws TenancyMissingException
+     * @throws TenantMissingException
      */
     protected function getTenancy(): Tenancy
     {
@@ -85,8 +124,8 @@ class SproutAuthDatabaseTokenRepository extends DatabaseTokenRepository
      *
      * @return array<string, mixed>
      *
-     * @throws \Sprout\Exceptions\TenancyMissingException
-     * @throws \Sprout\Exceptions\TenantMissingException
+     * @throws TenancyMissingException
+     * @throws TenantMissingException
      */
     protected function getPayload($email, #[SensitiveParameter] $token): array
     {
@@ -111,10 +150,10 @@ class SproutAuthDatabaseTokenRepository extends DatabaseTokenRepository
      *
      * @param string $email
      *
-     * @return \Illuminate\Database\Query\Builder
+     * @return Builder
      *
-     * @throws \Sprout\Exceptions\TenancyMissingException
-     * @throws \Sprout\Exceptions\TenantMissingException
+     * @throws TenancyMissingException
+     * @throws TenantMissingException
      */
     protected function getTenantedQuery(string $email): Builder
     {
@@ -133,12 +172,12 @@ class SproutAuthDatabaseTokenRepository extends DatabaseTokenRepository
     /**
      * Get the record for a user
      *
-     * @param \Illuminate\Contracts\Auth\CanResetPassword $user
+     * @param CanResetPasswordContract $user
      *
      * @return object|null
      *
-     * @throws \Sprout\Exceptions\TenancyMissingException
-     * @throws \Sprout\Exceptions\TenantMissingException
+     * @throws TenancyMissingException
+     * @throws TenantMissingException
      */
     protected function getExistingTenantedRecord(CanResetPasswordContract $user): ?object
     {
@@ -148,57 +187,15 @@ class SproutAuthDatabaseTokenRepository extends DatabaseTokenRepository
     /**
      * Delete all existing reset tokens from the database.
      *
-     * @param \Illuminate\Contracts\Auth\CanResetPassword $user
+     * @param CanResetPasswordContract $user
      *
      * @return int
      *
-     * @throws \Sprout\Exceptions\TenancyMissingException
-     * @throws \Sprout\Exceptions\TenantMissingException
+     * @throws TenancyMissingException
+     * @throws TenantMissingException
      */
     protected function deleteExisting(CanResetPasswordContract $user): int
     {
         return $this->getTenantedQuery($user->getEmailForPasswordReset())->delete();
-    }
-
-    /**
-     * Determine if a token record exists and is valid.
-     *
-     * @param \Illuminate\Contracts\Auth\CanResetPassword $user
-     * @param string                                      $token
-     *
-     * @return bool
-     *
-     * @throws \Sprout\Exceptions\TenancyMissingException
-     * @throws \Sprout\Exceptions\TenantMissingException
-     */
-    public function exists(CanResetPasswordContract $user, #[SensitiveParameter] $token): bool
-    {
-        /** @var array{token?: string, created_at?: string} $record */
-        $record = (array)$this->getExistingTenantedRecord($user);
-
-        return ! empty($record) &&
-               isset($record['token'], $record['created_at']) &&
-               ! $this->tokenExpired($record['created_at']) &&
-               $this->hasher->check($token, $record['token']);
-    }
-
-    /**
-     * Determine if the given user recently created a password reset token.
-     *
-     * @param \Illuminate\Contracts\Auth\CanResetPassword $user
-     *
-     * @return bool
-     *
-     * @throws \Sprout\Exceptions\TenancyMissingException
-     * @throws \Sprout\Exceptions\TenantMissingException
-     */
-    public function recentlyCreatedToken(CanResetPasswordContract $user): bool
-    {
-        /** @var array{token?: string, created_at?: string} $record */
-        $record = (array)$this->getExistingTenantedRecord($user);
-
-        return ! empty($record) &&
-               isset($record['created_at']) &&
-               $this->tokenRecentlyCreated($record['created_at']);
     }
 }

@@ -10,9 +10,8 @@ use Illuminate\Contracts\Foundation\Application;
 use Sprout\Contracts\BootableServiceOverride;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
-use Sprout\Overrides\Cache\SproutCacheDriverCreator;
-use Sprout\Sprout;
 use Sprout\Overrides\BaseOverride;
+use Sprout\Sprout;
 
 final class CacheOverride extends BaseOverride implements BootableServiceOverride
 {
@@ -27,8 +26,8 @@ final class CacheOverride extends BaseOverride implements BootableServiceOverrid
      * This method should perform any initial steps required for the service
      * override that take place during the booting of the framework.
      *
-     * @param \Illuminate\Contracts\Foundation\Application $app
-     * @param \Sprout\Sprout                          $sprout
+     * @param Application $app
+     * @param Sprout      $sprout
      *
      * @return void
      */
@@ -47,19 +46,6 @@ final class CacheOverride extends BaseOverride implements BootableServiceOverrid
                 $this->addDriver($manager, $sprout, $tracker);
             });
         }
-    }
-
-    protected function addDriver(CacheManager $manager, Sprout $sprout, Closure $tracker): void
-    {
-        $manager->extend('sprout', function (Application $app, array $config) use ($manager, $sprout, $tracker): Repository {
-            // The cache manager adds the store name to the config, so we'll
-            // _STORE_ that ;)
-            $tracker($config['store']);
-
-            /** @var array<string, mixed> $config */
-
-            return (new SproutCacheDriverCreator($app, $manager, $config, $sprout))();
-        });
     }
 
     /**
@@ -85,8 +71,8 @@ final class CacheOverride extends BaseOverride implements BootableServiceOverrid
      *
      * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Contracts\Tenant               $tenant
+     * @param Tenancy<TenantClass> $tenancy
+     * @param Tenant               $tenant
      *
      * @phpstan-param TenantClass                         $tenant
      *
@@ -99,5 +85,18 @@ final class CacheOverride extends BaseOverride implements BootableServiceOverrid
 
             $this->drivers = [];
         }
+    }
+
+    protected function addDriver(CacheManager $manager, Sprout $sprout, Closure $tracker): void
+    {
+        $manager->extend('sprout', function (Application $app, array $config) use ($manager, $sprout, $tracker): Repository {
+            // The cache manager adds the store name to the config, so we'll
+            // _STORE_ that ;)
+            $tracker($config['store']);
+
+            /** @var array<string, mixed> $config */
+
+            return (new SproutCacheDriverCreator($app, $manager, $config, $sprout))();
+        });
     }
 }

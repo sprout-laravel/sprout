@@ -9,8 +9,6 @@ use Sprout\Contracts\Tenancy;
  * Tenancy Options
  *
  * This is a helper class for providing and check for tenancy options.
- *
- * @package Core
  */
 class TenancyOptions
 {
@@ -100,7 +98,7 @@ class TenancyOptions
 
     /**
      * @param \Sprout\Contracts\Tenancy<*> $tenancy
-     * @param string                            $service
+     * @param string $service
      *
      * @return bool
      */

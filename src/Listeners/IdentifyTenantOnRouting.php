@@ -3,10 +3,13 @@ declare(strict_types=1);
 
 namespace Sprout\Listeners;
 
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Routing\Route;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Sprout\Exceptions\MisconfigurationException;
+use Sprout\Exceptions\NoTenantFoundException;
 use Sprout\Http\Middleware\SproutOptionalTenantContextMiddleware;
 use Sprout\Http\Middleware\SproutTenantContextMiddleware;
 use Sprout\Sprout;
@@ -16,15 +19,13 @@ use Sprout\Support\ResolutionHook;
 /**
  * Identify Tenant on Routing
  *
- * This class is an event listener for {@see \Illuminate\Routing\Events\RouteMatched}
+ * This class is an event listener for {@see RouteMatched}
  * that handles tenant identification if it's enabled.
- *
- * @package Core
  */
 final class IdentifyTenantOnRouting
 {
     /**
-     * @var \Sprout\Sprout
+     * @var Sprout
      */
     private Sprout $sprout;
 
@@ -36,13 +37,13 @@ final class IdentifyTenantOnRouting
     /**
      * Handle the event
      *
-     * @param \Illuminate\Routing\Events\RouteMatched $event
+     * @param RouteMatched $event
      *
      * @return void
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
-     * @throws \Sprout\Exceptions\MisconfigurationException
-     * @throws \Sprout\Exceptions\NoTenantFoundException
+     * @throws BindingResolutionException
+     * @throws MisconfigurationException
+     * @throws NoTenantFoundException
      */
     public function handle(RouteMatched $event): void
     {
@@ -60,14 +61,14 @@ final class IdentifyTenantOnRouting
             $this->sprout,
             $resolverName,
             $tenancyName,
-            false
+            false,
         );
     }
 
     /**
      * Parse the route middleware stack to find the marker middleware
      *
-     * @param \Illuminate\Routing\Route $route
+     * @param Route $route
      *
      * @return array<int, string|null>|null
      *

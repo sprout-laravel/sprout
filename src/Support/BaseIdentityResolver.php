@@ -14,10 +14,8 @@ use Sprout\Contracts\Tenant;
 /**
  * Base Identity Resolver
  *
- * This is an abstract {@see \Sprout\Contracts\IdentityResolver} to provide
+ * This is an abstract {@see IdentityResolver} to provide
  *  a shared implementation of common functionality.
- *
- * @package Core
  */
 abstract class BaseIdentityResolver implements IdentityResolver
 {
@@ -29,20 +27,42 @@ abstract class BaseIdentityResolver implements IdentityResolver
     private string $name;
 
     /**
-     * @var array<\Sprout\Support\ResolutionHook>
+     * @var array<ResolutionHook>
      */
     private array $hooks;
 
     /**
      * Create a new instance
      *
-     * @param string                                     $name
-     * @param array<\Sprout\Support\ResolutionHook> $hooks
+     * @param string                $name
+     * @param array<ResolutionHook> $hooks
      */
     public function __construct(string $name, array $hooks = [])
     {
         $this->name  = $name;
         $this->hooks = empty($hooks) ? [ResolutionHook::Routing] : $hooks;
+    }
+
+    /**
+     * Perform setup actions for the tenant
+     *
+     * When a tenant is marked as the current tenant within a tenancy, this
+     * method will be called to perform any necessary setup actions.
+     * This method is also called if there is no current tenant, as there may
+     * be actions needed.
+     *
+     * @template TenantClass of \Sprout\Contracts\Tenant
+     *
+     * @param Tenancy<TenantClass> $tenancy
+     * @param Tenant|null          $tenant
+     *
+     * @phpstan-param Tenant|null                         $tenant
+     *
+     * @return void
+     */
+    public function setup(Tenancy $tenancy, ?Tenant $tenant): void
+    {
+        // This is intentionally empty
     }
 
     /**
@@ -58,33 +78,11 @@ abstract class BaseIdentityResolver implements IdentityResolver
     /**
      * Get the hooks this resolver uses
      *
-     * @return array<\Sprout\Support\ResolutionHook>
+     * @return array<ResolutionHook>
      */
     public function getHooks(): array
     {
         return $this->hooks;
-    }
-
-    /**
-     * Perform setup actions for the tenant
-     *
-     * When a tenant is marked as the current tenant within a tenancy, this
-     * method will be called to perform any necessary setup actions.
-     * This method is also called if there is no current tenant, as there may
-     * be actions needed.
-     *
-     * @template TenantClass of \Sprout\Contracts\Tenant
-     *
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Contracts\Tenant|null          $tenant
-     *
-     * @phpstan-param Tenant|null                         $tenant
-     *
-     * @return void
-     */
-    public function setup(Tenancy $tenancy, ?Tenant $tenant): void
-    {
-        // This is intentionally empty
     }
 
     /**
@@ -95,9 +93,9 @@ abstract class BaseIdentityResolver implements IdentityResolver
      *
      * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Illuminate\Http\Request                    $request
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Support\ResolutionHook         $hook
+     * @param Request              $request
+     * @param Tenancy<TenantClass> $tenancy
+     * @param ResolutionHook       $hook
      *
      * @return bool
      */
@@ -119,11 +117,11 @@ abstract class BaseIdentityResolver implements IdentityResolver
      *
      * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param string                                      $name
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Contracts\Tenant               $tenant
-     * @param array<string, mixed>                        $parameters
-     * @param bool                                        $absolute
+     * @param string               $name
+     * @param Tenancy<TenantClass> $tenancy
+     * @param Tenant               $tenant
+     * @param array<string, mixed> $parameters
+     * @param bool                 $absolute
      *
      * @phpstan-param TenantClass                         $tenant
      *
@@ -140,8 +138,8 @@ abstract class BaseIdentityResolver implements IdentityResolver
      * Configures a provided route to work with itself, adding parameters,
      * middleware, and anything else required, besides the default middleware.
      *
-     * @param \Illuminate\Routing\RouteRegistrar                            $route
-     * @param \Sprout\Contracts\Tenancy<\Sprout\Contracts\Tenant> $tenancy
+     * @param RouteRegistrar  $route
+     * @param Tenancy<Tenant> $tenancy
      *
      * @return void
      */

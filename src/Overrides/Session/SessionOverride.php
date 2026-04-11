@@ -3,69 +3,26 @@ declare(strict_types=1);
 
 namespace Sprout\Overrides\Session;
 
+use Illuminate\Contracts\Config\Repository;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Session\SessionManager;
 use Illuminate\Support\Arr;
 use Sprout\Contracts\BootableServiceOverride;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
+use Sprout\Overrides\BaseOverride;
 use Sprout\Sprout;
 use Sprout\Support\Settings;
-use Sprout\Overrides\BaseOverride;
 
 /**
  * Session Override
  *
  * This class provides the override/multitenancy extension/features for Laravels
  * session service.
- *
- * @package Overrides
  */
 final class SessionOverride extends BaseOverride implements BootableServiceOverride
 {
-    /**
-     * Boot a service override
-     *
-     * This method should perform any initial steps required for the service
-     * override that take place during the booting of the framework.
-     *
-     * @param \Illuminate\Contracts\Foundation\Application $app
-     * @param \Sprout\Sprout                          $sprout
-     *
-     * @return void
-     */
-    public function boot(Application $app, Sprout $sprout): void
-    {
-        $this->setApp($app)->setSprout($sprout);
-
-        // If the session manager has been resolved, we can add the driver
-        if ($app->resolved('session')) {
-            $manager = $app->make('session');
-            $this->addDriver($manager, $app, $sprout);
-            $manager->forgetDrivers();
-        } else {
-            // But if it hasn't, we'll add it once it is
-            $app->afterResolving('session', function (SessionManager $manager) use ($app, $sprout) {
-                $this->addDriver($manager, $app, $sprout);
-            });
-        }
-    }
-
-    protected function addDriver(SessionManager $manager, Application $app, Sprout $sprout): void
-    {
-        $creator = fn() => (new SproutFileSessionHandlerCreator($app, $sprout))();
-
-        $manager->extend('file', $creator);
-        $manager->extend('native', $creator);
-
-        /** @var bool $overrideDatabase */
-        $overrideDatabase = $this->config['database'] ?? true;
-
-        if ($sprout->settings()->shouldNotOverrideTheDatabase($overrideDatabase) === false) {
-            $manager->extend('database', fn () => (new SproutDatabaseSessionHandlerCreator($app, $sprout))());
-        }
-    }
-
     /**
      * Set up the service override
      *
@@ -75,8 +32,8 @@ final class SessionOverride extends BaseOverride implements BootableServiceOverr
      *
      * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Contracts\Tenant               $tenant
+     * @param Tenancy<TenantClass> $tenancy
+     * @param Tenant               $tenant
      *
      * @phpstan-param TenantClass                         $tenant
      *
@@ -84,7 +41,7 @@ final class SessionOverride extends BaseOverride implements BootableServiceOverr
      */
     public function setup(Tenancy $tenancy, Tenant $tenant): void
     {
-        /** @var \Illuminate\Contracts\Config\Repository $config */
+        /** @var Repository $config */
         $config   = $this->getApp()->make('config');
         $settings = $this->getSprout()->settings();
 
@@ -93,7 +50,7 @@ final class SessionOverride extends BaseOverride implements BootableServiceOverr
             $original = $config->get('session');
             $settings->set(
                 'original.session',
-                Arr::only($original, ['path', 'domain', 'secure', 'same_site'])
+                Arr::only($original, ['path', 'domain', 'secure', 'same_site']),
             );
         }
 
@@ -119,6 +76,34 @@ final class SessionOverride extends BaseOverride implements BootableServiceOverr
     }
 
     /**
+     * Boot a service override
+     *
+     * This method should perform any initial steps required for the service
+     * override that take place during the booting of the framework.
+     *
+     * @param Application $app
+     * @param Sprout      $sprout
+     *
+     * @return void
+     */
+    public function boot(Application $app, Sprout $sprout): void
+    {
+        $this->setApp($app)->setSprout($sprout);
+
+        // If the session manager has been resolved, we can add the driver
+        if ($app->resolved('session')) {
+            $manager = $app->make('session');
+            $this->addDriver($manager, $app, $sprout);
+            $manager->forgetDrivers();
+        } else {
+            // But if it hasn't, we'll add it once it is
+            $app->afterResolving('session', function (SessionManager $manager) use ($app, $sprout) {
+                $this->addDriver($manager, $app, $sprout);
+            });
+        }
+    }
+
+    /**
      * Clean up the service override
      *
      * This method should perform any necessary setup actions for the service
@@ -131,8 +116,8 @@ final class SessionOverride extends BaseOverride implements BootableServiceOverr
      *
      * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Contracts\Tenant               $tenant
+     * @param Tenancy<TenantClass> $tenancy
+     * @param Tenant               $tenant
      *
      * @phpstan-param TenantClass                         $tenant
      *
@@ -140,7 +125,7 @@ final class SessionOverride extends BaseOverride implements BootableServiceOverr
      */
     public function cleanup(Tenancy $tenancy, Tenant $tenant): void
     {
-        /** @var \Illuminate\Contracts\Config\Repository $config */
+        /** @var Repository $config */
         $config   = $this->getApp()->make('config');
         $settings = $this->getSprout()->settings();
 
@@ -165,9 +150,24 @@ final class SessionOverride extends BaseOverride implements BootableServiceOverr
         $this->refreshSessionStore();
     }
 
+    protected function addDriver(SessionManager $manager, Application $app, Sprout $sprout): void
+    {
+        $creator = fn () => (new SproutFileSessionHandlerCreator($app, $sprout))();
+
+        $manager->extend('file', $creator);
+        $manager->extend('native', $creator);
+
+        /** @var bool $overrideDatabase */
+        $overrideDatabase = $this->config['database'] ?? true;
+
+        if ($sprout->settings()->shouldNotOverrideTheDatabase($overrideDatabase) === false) {
+            $manager->extend('database', fn () => (new SproutDatabaseSessionHandlerCreator($app, $sprout))());
+        }
+    }
+
     /**
      * @param \Sprout\Contracts\Tenancy<*> $tenancy
-     * @param \Sprout\Contracts\Tenant     $tenant
+     * @param Tenant $tenant
      *
      * @return string
      */
@@ -181,7 +181,7 @@ final class SessionOverride extends BaseOverride implements BootableServiceOverr
      *
      * @return void
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws BindingResolutionException
      */
     private function refreshSessionStore(): void
     {

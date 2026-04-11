@@ -24,8 +24,6 @@ use Sprout\Contracts\Tenant;
  * @method static void dispatchIf(bool $condition, Tenancy $tenancy, Tenant|null $previous, Tenant|null $current)
  * @method static void dispatchUnless(bool $condition, Tenancy $tenancy, Tenant|null $previous, Tenant|null $current)
  *
- * @package        Core
- *
  * @codeCoverageIgnore
  *
  * @phpstan-ignore missingType.generics, missingType.generics, missingType.generics
@@ -37,14 +35,14 @@ final readonly class CurrentTenantChanged
     /**
      * The tenancy whose current tenant changed
      *
-     * @var \Sprout\Contracts\Tenancy<TenantClass>
+     * @var Tenancy<TenantClass>
      */
     public Tenancy $tenancy;
 
     /**
      * The current tenant
      *
-     * @var \Sprout\Contracts\Tenant|null
+     * @var Tenant|null
      *
      * @phpstan-var TenantClass|null
      */
@@ -53,7 +51,7 @@ final readonly class CurrentTenantChanged
     /**
      * The previous tenant
      *
-     * @var \Sprout\Contracts\Tenant|null
+     * @var Tenant|null
      *
      * @phpstan-var TenantClass|null
      */
@@ -62,9 +60,9 @@ final readonly class CurrentTenantChanged
     /**
      * Create a new instance
      *
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Contracts\Tenant|null          $previous
-     * @param \Sprout\Contracts\Tenant|null          $current
+     * @param Tenancy<TenantClass> $tenancy
+     * @param Tenant|null          $previous
+     * @param Tenant|null          $current
      *
      * @phpstan-param TenantClass|null                    $previous
      * @phpstan-param TenantClass|null                    $current
@@ -72,9 +70,8 @@ final readonly class CurrentTenantChanged
     public function __construct(
         Tenancy $tenancy,
         ?Tenant $previous = null,
-        ?Tenant $current = null
-    )
-    {
+        ?Tenant $current = null,
+    ) {
         $this->tenancy  = $tenancy;
         $this->previous = $previous;
         $this->current  = $current;

@@ -6,7 +6,10 @@ namespace Sprout\Database\Eloquent\Scopes;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Sprout\Contracts\Tenancy;
+use Sprout\Database\Eloquent\Concerns\BelongsToManyTenants;
+use Sprout\Database\Eloquent\Concerns\BelongsToTenant;
 use Sprout\Exceptions\TenantMissingException;
+
 use function Sprout\sprout;
 
 /**
@@ -18,9 +21,7 @@ use function Sprout\sprout;
  * It automatically adds the necessary clauses to queries to help avoid data
  * leaking between tenants in a "Shared Database, Shared Schema" setup.
  *
- * @see     \Sprout\Database\Eloquent\Concerns\BelongsToManyTenants
- *
- * @package Database\Eloquent
+ * @see     BelongsToManyTenants
  */
 final class BelongsToTenantScope extends TenantChildScope
 {
@@ -29,14 +30,14 @@ final class BelongsToTenantScope extends TenantChildScope
      *
      * @template ModelClass of \Illuminate\Database\Eloquent\Model
      *
-     * @param \Illuminate\Database\Eloquent\Builder<ModelClass>                                           $builder
-     * @param \Illuminate\Database\Eloquent\Model&\Sprout\Database\Eloquent\Concerns\BelongsToTenant $model
+     * @param Builder<ModelClass>   $builder
+     * @param Model&BelongsToTenant $model
      *
      * @phpstan-param ModelClass                                                                          $model
      *
      * @return void
      *
-     * @throws \Sprout\Exceptions\TenantMissingException
+     * @throws TenantMissingException
      */
     public function apply(Builder $builder, Model $model): void
     {
@@ -44,7 +45,7 @@ final class BelongsToTenantScope extends TenantChildScope
          * This has to be here because it errors if it's in the method docblock,
          * though I've no idea why.
          *
-         * @var ModelClass&\Sprout\Database\Eloquent\Concerns\BelongsToTenant $model
+         * @var ModelClass&BelongsToTenant $model
          */
 
         /**
@@ -94,8 +95,8 @@ final class BelongsToTenantScope extends TenantChildScope
      *
      * @template ModelClass of \Illuminate\Database\Eloquent\Model
      *
-     * @param \Illuminate\Database\Eloquent\Builder<ModelClass>                                           $builder
-     * @param \Illuminate\Database\Eloquent\Model&\Sprout\Database\Eloquent\Concerns\BelongsToTenant $model
+     * @param Builder<ModelClass>   $builder
+     * @param Model&BelongsToTenant $model
      * @param \Sprout\Contracts\Tenancy<*>                                                           $tenancy
      *
      * @phpstan-param ModelClass                                                                          $model
@@ -108,7 +109,7 @@ final class BelongsToTenantScope extends TenantChildScope
          * This has to be here because it errors if it's in the method docblock,
          * though I've no idea why.
          *
-         * @var ModelClass&\Sprout\Database\Eloquent\Concerns\BelongsToTenant $model
+         * @var ModelClass&BelongsToTenant $model
          */
 
         /** @var \Illuminate\Database\Eloquent\Relations\BelongsTo<*, *> $relation */
@@ -117,7 +118,7 @@ final class BelongsToTenantScope extends TenantChildScope
         $builder->where(
             $relation->getForeignKeyName(),
             '=',
-            $tenancy->key()
+            $tenancy->key(),
         );
     }
 }

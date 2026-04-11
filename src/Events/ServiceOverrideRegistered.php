@@ -11,9 +11,7 @@ namespace Sprout\Events;
  *
  * @template OverrideClass of \Sprout\Contracts\ServiceOverride
  *
- * @extends \Sprout\Events\ServiceOverrideEvent<OverrideClass>
- *
- * @package Overrides
+ * @extends ServiceOverrideEvent<OverrideClass>
  *
  * @codeCoverageIgnore
  */

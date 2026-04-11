@@ -9,8 +9,6 @@ namespace Sprout\Exceptions;
  * This exception is used when a tenant was unable to be found for a given
  * tenancy, and was required/necessary.
  *
- * @package Core
- *
  * @codeCoverageIgnore
  */
 final class NoTenantFoundException extends SproutException

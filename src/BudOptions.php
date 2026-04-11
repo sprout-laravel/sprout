@@ -5,9 +5,6 @@ namespace Sprout;
 
 use Sprout\Contracts\Tenancy;
 
-/**
- *
- */
 final class BudOptions
 {
     /**

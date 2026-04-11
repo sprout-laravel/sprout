@@ -5,27 +5,27 @@ namespace Sprout\Listeners;
 
 use Illuminate\Queue\Events\JobProcessing;
 use Illuminate\Support\Facades\Context;
+use Sprout\Contracts\Tenancy;
+use Sprout\Contracts\Tenant;
 use Sprout\Managers\TenancyManager;
 use Sprout\Sprout;
 
 /**
  * Set Current Tenant For Job
  *
- * This class is an event listener for {@see \Illuminate\Queue\Events\JobProcessing}
+ * This class is an event listener for {@see JobProcessing}
  * that ensures there are current tenants when processing jobs, utilising
  * Laravels context service.
- *
- * @package Overrides
  */
 final class SetCurrentTenantForJob
 {
     /**
-     * @var \Sprout\Sprout
+     * @var Sprout
      */
     private Sprout $sprout;
 
     /**
-     * @var \Sprout\Managers\TenancyManager
+     * @var TenancyManager
      */
     private TenancyManager $tenancies;
 
@@ -45,7 +45,7 @@ final class SetCurrentTenantForJob
          * @var int|string $key
          */
         foreach ($tenants as $tenancyName => $key) {
-            /** @var \Sprout\Contracts\Tenancy<\Sprout\Contracts\Tenant> $tenancy */
+            /** @var Tenancy<Tenant> $tenancy */
             $tenancy = $this->tenancies->get($tenancyName);
 
             // It's always the key, so we load instead of identifying

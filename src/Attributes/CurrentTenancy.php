@@ -5,6 +5,7 @@ namespace Sprout\Attributes;
 
 use Attribute;
 use Illuminate\Container\Container;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Container\ContextualAttribute;
 use Sprout\Contracts\Tenancy;
 use Sprout\Sprout;
@@ -15,9 +16,7 @@ use Sprout\Sprout;
  * This is a contextual attribute that allows for the auto-injection of the
  * current tenancy.
  *
- * @link     https://laravel.com/docs/12.x/container#contextual-attributes
- *
- * @package  Core
+ * @see     https://laravel.com/docs/12.x/container#contextual-attributes
  */
 #[Attribute(Attribute::TARGET_PARAMETER)]
 final readonly class CurrentTenancy implements ContextualAttribute
@@ -25,12 +24,12 @@ final readonly class CurrentTenancy implements ContextualAttribute
     /**
      * Resolve the tenancy using this attribute
      *
-     * @param \Sprout\Attributes\CurrentTenancy $attribute
-     * @param \Illuminate\Container\Container        $container
+     * @param CurrentTenancy $attribute
+     * @param Container      $container
      *
      * @return \Sprout\Contracts\Tenancy<*>|null
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws BindingResolutionException
      */
     public function resolve(self $attribute, Container $container): ?Tenancy
     {

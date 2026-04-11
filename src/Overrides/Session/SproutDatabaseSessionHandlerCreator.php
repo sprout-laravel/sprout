@@ -3,25 +3,26 @@ declare(strict_types=1);
 
 namespace Sprout\Overrides\Session;
 
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Foundation\Application;
 use Sprout\Sprout;
 
 final class SproutDatabaseSessionHandlerCreator
 {
     /**
-     * @var \Illuminate\Contracts\Foundation\Application
+     * @var Application
      */
     private Application $app;
 
     /**
-     * @var \Sprout\Sprout
+     * @var Sprout
      */
     private Sprout $sprout;
 
     /**
      * Create a new instance
      *
-     * @param \Illuminate\Contracts\Foundation\Application $app
+     * @param Application $app
      */
     public function __construct(Application $app, Sprout $sprout)
     {
@@ -32,9 +33,9 @@ final class SproutDatabaseSessionHandlerCreator
     /**
      * Create the tenant-aware session database driver
      *
-     * @return \Sprout\Overrides\Session\SproutDatabaseSessionHandler
+     * @return SproutDatabaseSessionHandler
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws BindingResolutionException
      */
     public function __invoke(): SproutDatabaseSessionHandler
     {
@@ -47,12 +48,11 @@ final class SproutDatabaseSessionHandlerCreator
          * @var string      $table
          * @var int         $lifetime
          */
-
         $handler = new SproutDatabaseSessionHandler(
             $this->app->make('db')->connection($connection),
             $table,
             $lifetime,
-            $this->app
+            $this->app,
         );
 
         if ($this->sprout->withinContext()) {

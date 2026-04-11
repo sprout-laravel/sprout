@@ -15,31 +15,29 @@ use Sprout\Events\TenantLoaded;
 /**
  * Default Tenancy
  *
- * This is a default implementation of the {@see \Sprout\Contracts\Tenancy}
+ * This is a default implementation of the {@see Tenancy}
  * interface.
- *
- * @package Core
  *
  * @template TenantClass of \Sprout\Contracts\Tenant
  *
- * @implements \Sprout\Contracts\Tenancy<TenantClass>
+ * @implements Tenancy<TenantClass>
  */
 final class DefaultTenancy implements Tenancy
 {
     private string $name;
 
     /**
-     * @var \Sprout\Contracts\TenantProvider<TenantClass>
+     * @var TenantProvider<TenantClass>
      */
     private TenantProvider $provider;
 
     /**
-     * @var \Sprout\Contracts\IdentityResolver|null
+     * @var IdentityResolver|null
      */
     private ?IdentityResolver $resolver = null;
 
     /**
-     * @var \Sprout\Contracts\Tenant|null
+     * @var Tenant|null
      *
      * @phpstan-var TenantClass|null
      */
@@ -56,7 +54,7 @@ final class DefaultTenancy implements Tenancy
     private array $optionConfig = [];
 
     /**
-     * @var \Sprout\Support\ResolutionHook|null
+     * @var ResolutionHook|null
      */
     private ?ResolutionHook $hook = null;
 
@@ -64,7 +62,7 @@ final class DefaultTenancy implements Tenancy
      * Create a new instance
      *
      * @param string                                                           $name
-     * @param \Sprout\Contracts\TenantProvider<TenantClass>               $provider
+     * @param TenantProvider<TenantClass>                                      $provider
      * @param array<array-key, scalar|array<string, array<array-key, scalar>>> $options
      */
     public function __construct(string $name, TenantProvider $provider, array $options)
@@ -119,7 +117,7 @@ final class DefaultTenancy implements Tenancy
      * Implementations may attempt to load a tenant if one isn't present, though
      * this is not required.
      *
-     * @return \Sprout\Contracts\Tenant|null
+     * @return Tenant|null
      *
      * @phpstan-return TenantClass|null
      */
@@ -135,7 +133,7 @@ final class DefaultTenancy implements Tenancy
      *
      * @return int|string|null
      *
-     * @see \Sprout\Contracts\Tenant::getTenantKey()
+     * @see Tenant::getTenantKey()
      */
     public function key(): int|string|null
     {
@@ -149,7 +147,7 @@ final class DefaultTenancy implements Tenancy
      *
      * @return string|null
      *
-     * @see \Sprout\Contracts\Tenant::getTenantIdentifier()
+     * @see Tenant::getTenantIdentifier()
      */
     public function identifier(): ?string
     {
@@ -215,7 +213,7 @@ final class DefaultTenancy implements Tenancy
      *
      * Get the tenant provider used by this tenancy.
      *
-     * @return \Sprout\Contracts\TenantProvider<TenantClass>
+     * @return TenantProvider<TenantClass>
      */
     public function provider(): TenantProvider
     {
@@ -225,7 +223,7 @@ final class DefaultTenancy implements Tenancy
     /**
      * Set the identity resolved used
      *
-     * @param \Sprout\Contracts\IdentityResolver $resolver
+     * @param IdentityResolver $resolver
      *
      * @return static
      */
@@ -239,7 +237,7 @@ final class DefaultTenancy implements Tenancy
     /**
      * Get the used identity resolver
      *
-     * @return \Sprout\Contracts\IdentityResolver|null
+     * @return IdentityResolver|null
      */
     public function resolver(): ?IdentityResolver
     {
@@ -259,7 +257,7 @@ final class DefaultTenancy implements Tenancy
     /**
      * Set the current tenant
      *
-     * @param \Sprout\Contracts\Tenant|null $tenant
+     * @param Tenant|null $tenant
      *
      * @phpstan-param TenantClass|null           $tenant
      *
@@ -369,7 +367,7 @@ final class DefaultTenancy implements Tenancy
     /**
      * Set the hook where the tenant was resolved
      *
-     * @param \Sprout\Support\ResolutionHook $hook
+     * @param ResolutionHook $hook
      *
      * @return $this
      */
@@ -383,7 +381,7 @@ final class DefaultTenancy implements Tenancy
     /**
      * Get the hook where the tenant was resolved
      *
-     * @return \Sprout\Support\ResolutionHook|null
+     * @return ResolutionHook|null
      */
     public function hook(): ?ResolutionHook
     {

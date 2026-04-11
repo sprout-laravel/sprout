@@ -10,8 +10,6 @@ use Illuminate\Routing\Route;
  *
  * This contract marks an identity resolver as being capable of using route
  * parameters to resolve the identifier for a tenant.
- *
- * @package Resolvers
  */
 interface IdentityResolverUsesParameters extends IdentityResolver
 {
@@ -20,7 +18,7 @@ interface IdentityResolverUsesParameters extends IdentityResolver
      *
      * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
+     * @param Tenancy<TenantClass> $tenancy
      *
      * @return string
      */
@@ -33,9 +31,9 @@ interface IdentityResolverUsesParameters extends IdentityResolver
      *
      * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Illuminate\Routing\Route                   $route
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Illuminate\Http\Request                    $request
+     * @param Route                $route
+     * @param Tenancy<TenantClass> $tenancy
+     * @param Request              $request
      *
      * @return string|null
      */

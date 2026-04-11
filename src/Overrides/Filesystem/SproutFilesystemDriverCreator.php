@@ -19,18 +19,16 @@ use Sprout\Support\PlaceholderHelper;
  *
  * This class is an abstraction of the logic used to create the 'sprout' driver
  * with Laravel's filesystem service.
- *
- * @package Overrides\Filesystem
  */
 final readonly class SproutFilesystemDriverCreator
 {
     /**
-     * @var \Illuminate\Contracts\Foundation\Application
+     * @var Application
      */
     private Application $app;
 
     /**
-     * @var \Illuminate\Filesystem\FilesystemManager
+     * @var FilesystemManager
      */
     private FilesystemManager $manager;
 
@@ -40,17 +38,17 @@ final readonly class SproutFilesystemDriverCreator
     private array $config;
 
     /**
-     * @var \Sprout\Sprout
+     * @var Sprout
      */
     private Sprout $sprout;
 
     /**
      * Create a new instance
      *
-     * @param \Illuminate\Contracts\Foundation\Application $app
-     * @param \Illuminate\Filesystem\FilesystemManager     $manager
-     * @param array<string, mixed>                         $config
-     * @param \Sprout\Sprout                          $sprout
+     * @param Application          $app
+     * @param FilesystemManager    $manager
+     * @param array<string, mixed> $config
+     * @param Sprout               $sprout
      */
     public function __construct(Application $app, FilesystemManager $manager, array $config, Sprout $sprout)
     {
@@ -63,11 +61,11 @@ final readonly class SproutFilesystemDriverCreator
     /**
      * Create the sprout filesystem driver
      *
-     * @return \Illuminate\Contracts\Filesystem\Filesystem
+     * @return Filesystem
      *
-     * @throws \Sprout\Exceptions\MisconfigurationException
-     * @throws \Sprout\Exceptions\TenancyMissingException
-     * @throws \Sprout\Exceptions\TenantMissingException
+     * @throws MisconfigurationException
+     * @throws TenancyMissingException
+     * @throws TenantMissingException
      */
     public function __invoke(): Filesystem
     {
@@ -94,7 +92,7 @@ final readonly class SproutFilesystemDriverCreator
         $tenant = $tenancy->tenant();
 
         // If the tenant isn't configured for resources, this is another issue
-        if (! ($tenant instanceof TenantHasResources)) {
+        if (! $tenant instanceof TenantHasResources) {
             throw MisconfigurationException::misconfigured('tenant', $tenancy->getName(), 'resources');
         }
 
@@ -109,11 +107,11 @@ final readonly class SproutFilesystemDriverCreator
      * Make the disk config tenant-specific
      *
      * @param \Sprout\Contracts\Tenancy<*>         $tenancy
-     * @param \Sprout\Contracts\TenantHasResources $tenant
+     * @param TenantHasResources $tenant
      *
      * @return array<string, mixed>
      */
-    protected function getTenantSpecificDiskConfig(Tenancy $tenancy, TenantHasResources $tenant): array
+    private function getTenantSpecificDiskConfig(Tenancy $tenancy, TenantHasResources $tenant): array
     {
         /** @var string $pathPrefix */
         $pathPrefix = $this->config['path'] ?? ('{tenancy}' . DIRECTORY_SEPARATOR . '{tenant}');
@@ -135,19 +133,19 @@ final readonly class SproutFilesystemDriverCreator
      * Create a storage prefix using the current tenant
      *
      * @param \Sprout\Contracts\Tenancy<*>         $tenancy
-     * @param \Sprout\Contracts\TenantHasResources $tenant
-     * @param string                                    $pathPrefix
+     * @param TenantHasResources $tenant
+     * @param string             $pathPrefix
      *
      * @return string
      */
-    protected function createTenantedPrefix(Tenancy $tenancy, TenantHasResources $tenant, string $pathPrefix): string
+    private function createTenantedPrefix(Tenancy $tenancy, TenantHasResources $tenant, string $pathPrefix): string
     {
         return PlaceholderHelper::replace(
             $pathPrefix,
             [
                 'tenancy' => $tenancy->getName(),
                 'tenant'  => $tenant->getTenantResourceKey(),
-            ]
+            ],
         );
     }
 
@@ -156,7 +154,7 @@ final readonly class SproutFilesystemDriverCreator
      *
      * @return array<string, mixed>
      */
-    protected function getTrueDiskConfig(): array
+    private function getTrueDiskConfig(): array
     {
         if (isset($this->config['disk']) && is_array($this->config['disk'])) {
             $diskConfig = $this->config['disk'];

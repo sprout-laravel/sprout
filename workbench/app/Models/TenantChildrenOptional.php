@@ -17,12 +17,12 @@ class TenantChildrenOptional extends Model implements OptionalTenant
      */
     use HasFactory, BelongsToManyTenants;
 
-    protected $table = 'tenant_child2';
-
     protected static string $factory = TenantChildrenOptionalFactory::class;
 
+    protected $table = 'tenant_child2';
+
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<\Workbench\App\Models\TenantModel>
+     * @return BelongsToMany<TenantModel>
      */
     public function tenants(): BelongsToMany
     {

@@ -2,9 +2,6 @@
 
 namespace Sprout\Contracts;
 
-use Sprout\Contracts\Tenancy;
-use Sprout\Contracts\Tenant;
-
 interface ConfigStore
 {
     /**
@@ -19,11 +16,11 @@ interface ConfigStore
      *
      * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Contracts\Tenant               $tenant
-     * @param string                                      $service
-     * @param string                                      $name
-     * @param array<string, mixed>|null                   $default
+     * @param Tenancy<TenantClass>      $tenancy
+     * @param Tenant                    $tenant
+     * @param string                    $service
+     * @param string                    $name
+     * @param array<string, mixed>|null $default
      *
      * @phpstan-param TenantClass                         $tenant
      *
@@ -34,7 +31,7 @@ interface ConfigStore
         Tenant  $tenant,
         string  $service,
         string  $name,
-        ?array  $default = null
+        ?array  $default = null,
     ): ?array;
 
     /**
@@ -42,10 +39,10 @@ interface ConfigStore
      *
      * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Contracts\Tenant               $tenant
-     * @param string                                      $service
-     * @param string                                      $name
+     * @param Tenancy<TenantClass> $tenancy
+     * @param Tenant               $tenant
+     * @param string               $service
+     * @param string               $name
      *
      * @phpstan-param TenantClass                         $tenant
      *
@@ -67,11 +64,11 @@ interface ConfigStore
      *
      * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Contracts\Tenant               $tenant
-     * @param string                                      $service
-     * @param string                                      $name
-     * @param array<string, mixed>                        $config
+     * @param Tenancy<TenantClass> $tenancy
+     * @param Tenant               $tenant
+     * @param string               $service
+     * @param string               $name
+     * @param array<string, mixed> $config
      *
      * @phpstan-param TenantClass                         $tenant
      *
@@ -82,7 +79,7 @@ interface ConfigStore
         Tenant  $tenant,
         string  $service,
         string  $name,
-        array   $config
+        array   $config,
     ): bool;
 
     /**
@@ -94,11 +91,11 @@ interface ConfigStore
      *
      * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Contracts\Tenant               $tenant
-     * @param string                                      $service
-     * @param string                                      $name
-     * @param array<string, mixed>                        $config
+     * @param Tenancy<TenantClass> $tenancy
+     * @param Tenant               $tenant
+     * @param string               $service
+     * @param string               $name
+     * @param array<string, mixed> $config
      *
      * @phpstan-param TenantClass                         $tenant
      *
@@ -109,6 +106,6 @@ interface ConfigStore
         Tenant  $tenant,
         string  $service,
         string  $name,
-        array   $config
+        array   $config,
     ): bool;
 }

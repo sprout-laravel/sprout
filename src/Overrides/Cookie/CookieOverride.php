@@ -13,8 +13,6 @@ use Sprout\Overrides\BaseOverride;
  *
  * This class provides the override/multitenancy extension/features for Laravels
  * cookie service.
- *
- * @package Overrides
  */
 final class CookieOverride extends BaseOverride
 {
@@ -26,7 +24,7 @@ final class CookieOverride extends BaseOverride
      * It is called when a new tenant is marked as the current tenant.
      *
      * @param \Sprout\Contracts\Tenancy<*> $tenancy
-     * @param \Sprout\Contracts\Tenant     $tenant
+     * @param Tenant $tenant
      *
      * @return void
      */

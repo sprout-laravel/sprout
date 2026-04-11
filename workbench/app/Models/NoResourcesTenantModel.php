@@ -16,9 +16,9 @@ class NoResourcesTenantModel extends Model implements Tenant
      */
     use IsTenant, HasFactory;
 
-    protected $table = 'tenants';
-
     protected static string $factory = NoResourcesTenantModelFactory::class;
+
+    protected $table = 'tenants';
 
     protected $fillable = [
         'name',

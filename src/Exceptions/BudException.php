@@ -7,5 +7,4 @@ use Exception;
 
 abstract class BudException extends Exception
 {
-
 }

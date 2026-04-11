@@ -8,10 +8,8 @@ use Sprout\Events\CurrentTenantChanged;
 /**
  * Perform Identity Resolver Setup
  *
- * This class is an event listener for {@see \Sprout\Events\CurrentTenantChanged}
+ * This class is an event listener for {@see CurrentTenantChanged}
  * that handles the setup action hook for the current resolver.
- *
- * @package Core
  */
 final class PerformIdentityResolverSetup
 {
@@ -20,7 +18,7 @@ final class PerformIdentityResolverSetup
      *
      * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Sprout\Events\CurrentTenantChanged<TenantClass> $event
+     * @param CurrentTenantChanged<TenantClass> $event
      *
      * @return void
      */

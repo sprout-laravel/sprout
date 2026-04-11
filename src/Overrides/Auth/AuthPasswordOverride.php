@@ -3,32 +3,47 @@ declare(strict_types=1);
 
 namespace Sprout\Overrides\Auth;
 
+use Illuminate\Auth\Passwords\PasswordBrokerManager;
 use Illuminate\Contracts\Foundation\Application;
 use Sprout\Contracts\BootableServiceOverride;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
-use Sprout\Overrides\Auth\SproutAuthPasswordBrokerManager;
-use Sprout\Sprout;
 use Sprout\Overrides\BaseOverride;
+use Sprout\Sprout;
 
 /**
  * Auth Password Override
  *
  * This class provides the override/multitenancy extension/features for Laravels
  * auth password broker service.
- *
- * @package Overrides
  */
 final class AuthPasswordOverride extends BaseOverride implements BootableServiceOverride
 {
+    /**
+     * Set up the service override
+     *
+     * This method should perform any necessary setup actions for the service
+     * override.
+     * It is called when a new tenant is marked as the current tenant.
+     *
+     * @param \Sprout\Contracts\Tenancy<*> $tenancy
+     * @param Tenant $tenant
+     *
+     * @return void
+     */
+    public function setup(Tenancy $tenancy, Tenant $tenant): void
+    {
+        $this->flushPasswordBrokers();
+    }
+
     /**
      * Boot a service override
      *
      * This method should perform any initial steps required for the service
      * override that take place during the booting of the framework.
      *
-     * @param \Illuminate\Contracts\Foundation\Application&\Illuminate\Foundation\Application $app
-     * @param \Sprout\Sprout                                                             $sprout
+     * @param Application&\Illuminate\Foundation\Application $app
+     * @param Sprout                                         $sprout
      *
      * @return void
      */
@@ -59,23 +74,6 @@ final class AuthPasswordOverride extends BaseOverride implements BootableService
     }
 
     /**
-     * Set up the service override
-     *
-     * This method should perform any necessary setup actions for the service
-     * override.
-     * It is called when a new tenant is marked as the current tenant.
-     *
-     * @param \Sprout\Contracts\Tenancy<*> $tenancy
-     * @param \Sprout\Contracts\Tenant     $tenant
-     *
-     * @return void
-     */
-    public function setup(Tenancy $tenancy, Tenant $tenant): void
-    {
-        $this->flushPasswordBrokers();
-    }
-
-    /**
      * Clean up the service override
      *
      * This method should perform any necessary setup actions for the service
@@ -87,7 +85,7 @@ final class AuthPasswordOverride extends BaseOverride implements BootableService
      * tenant was not null.
      *
      * @param \Sprout\Contracts\Tenancy<*> $tenancy
-     * @param \Sprout\Contracts\Tenant     $tenant
+     * @param Tenant $tenant
      *
      * @return void
      */
@@ -106,7 +104,7 @@ final class AuthPasswordOverride extends BaseOverride implements BootableService
         // Same as with 'auth' above, we only want to run this code if the
         // password broker has been resolved already.
         if ($this->getApp()->resolved('auth.password')) {
-            /** @var \Illuminate\Auth\Passwords\PasswordBrokerManager $passwordBroker */
+            /** @var PasswordBrokerManager $passwordBroker */
             $passwordBroker = $this->getApp()->make('auth.password');
 
             // The flush method only exists on our custom implementation

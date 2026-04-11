@@ -5,7 +5,9 @@ namespace Sprout\Overrides;
 
 use RuntimeException;
 use Sprout\Bud;
+use Sprout\Contracts\Tenant;
 use Sprout\Exceptions\CyclicOverrideException;
+use Sprout\Exceptions\MisconfigurationException;
 use Sprout\Exceptions\TenancyMissingException;
 use Sprout\Exceptions\TenantMissingException;
 use Sprout\Sprout;
@@ -13,23 +15,16 @@ use Sprout\Sprout;
 abstract class BaseCreator
 {
     /**
-     * Get the name of the service for the creator.
-     *
-     * @return string
-     */
-    abstract protected function getService(): string;
-
-    /**
-     * @param \Sprout\Sprout                               $sprout
-     * @param \Sprout\Bud                              $bud
+     * @param Sprout                                            $sprout
+     * @param Bud                                               $bud
      * @param array<string, mixed>&array{budStore?:string|null} $config
      * @param string                                            $name
      *
      * @return array<string, mixed>
      *
-     * @throws \Sprout\Exceptions\MisconfigurationException
-     * @throws \Sprout\Exceptions\TenancyMissingException
-     * @throws \Sprout\Exceptions\TenantMissingException
+     * @throws MisconfigurationException
+     * @throws TenancyMissingException
+     * @throws TenantMissingException
      */
     public function getConfig(Sprout $sprout, Bud $bud, array $config, string $name): array
     {
@@ -53,7 +48,7 @@ abstract class BaseCreator
             throw TenantMissingException::make($tenancy->getName());
         }
 
-        /** @var \Sprout\Contracts\Tenant $tenant */
+        /** @var Tenant $tenant */
         $tenant = $tenancy->tenant();
 
         // Get the default store, or the one specified in the config, if there
@@ -73,16 +68,18 @@ abstract class BaseCreator
         // If there isn't any config, it's an error.
         if ($budConfig === null) {
             // TODO: Throw a better exception
-            throw new RuntimeException(sprintf(
-                'Unable to find configuration for [%s] for tenant [%s] on tenancy [%s]',
-                $service . '.' . $name,
-                $tenant->getTenantIdentifier(),
-                $tenancy->getName()
-            ));
+            throw new RuntimeException(sprintf('Unable to find configuration for [%s] for tenant [%s] on tenancy [%s]', $service . '.' . $name, $tenant->getTenantIdentifier(), $tenancy->getName()));
         }
 
         return array_merge($config, $budConfig);
     }
+
+    /**
+     * Get the name of the service for the creator.
+     *
+     * @return string
+     */
+    abstract protected function getService(): string;
 
     /**
      * Check if the driver is cyclic.
@@ -92,7 +89,6 @@ abstract class BaseCreator
      * @param string      $name
      *
      * @return void
-     *
      */
     protected function checkForCyclicDrivers(?string $driver, string $term, string $name): void
     {

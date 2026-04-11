@@ -18,8 +18,6 @@ use Sprout\Overrides\BaseOverride;
  * possible that one could be loaded without the other.
  * Instead, the code that deals with the various services is wrapped in a
  * condition to only run if the service itself has been loaded.
- *
- * @package Overrides
  */
 final class AuthGuardOverride extends BaseOverride
 {
@@ -31,7 +29,7 @@ final class AuthGuardOverride extends BaseOverride
      * It is called when a new tenant is marked as the current tenant.
      *
      * @param \Sprout\Contracts\Tenancy<*> $tenancy
-     * @param \Sprout\Contracts\Tenant     $tenant
+     * @param Tenant $tenant
      *
      * @return void
      */
@@ -52,7 +50,7 @@ final class AuthGuardOverride extends BaseOverride
      * tenant was not null.
      *
      * @param \Sprout\Contracts\Tenancy<*> $tenancy
-     * @param \Sprout\Contracts\Tenant     $tenant
+     * @param Tenant $tenant
      *
      * @return void
      */
@@ -72,7 +70,7 @@ final class AuthGuardOverride extends BaseOverride
         // multiple services, we only want to actually run this code if
         // the auth manager has been resolved.
         if ($this->getApp()->resolved('auth')) {
-            /** @var \Illuminate\Auth\AuthManager $authManager */
+            /** @var AuthManager $authManager */
             $authManager = $this->getApp()->make(AuthManager::class);
 
             if ($authManager->hasResolvedGuards()) {

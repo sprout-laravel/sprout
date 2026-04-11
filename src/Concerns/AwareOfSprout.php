@@ -8,7 +8,7 @@ use Sprout\Sprout;
 trait AwareOfSprout
 {
     /**
-     * @var \Sprout\Sprout
+     * @var Sprout
      */
     private Sprout $sprout;
 

@@ -11,14 +11,13 @@ use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 use Sprout\Exceptions\TenantMissingException;
 use Sprout\Support\BaseIdentityResolver;
+use Sprout\Support\ResolutionHook;
 
 /**
  * Path Identity Resolver
  *
  * This class is responsible for resolving tenant identities from the current
  * request using the path.
- *
- * @package Http\Resolvers
  */
 final class PathIdentityResolver extends BaseIdentityResolver implements IdentityResolverUsesParameters
 {
@@ -36,11 +35,11 @@ final class PathIdentityResolver extends BaseIdentityResolver implements Identit
     /**
      * Create a new instance
      *
-     * @param string                                     $name
-     * @param int|null                                   $segment
-     * @param string|null                                $pattern
-     * @param string|null                                $parameter
-     * @param array<\Sprout\Support\ResolutionHook> $hooks
+     * @param string                $name
+     * @param int|null              $segment
+     * @param string|null           $pattern
+     * @param string|null           $parameter
+     * @param array<ResolutionHook> $hooks
      */
     public function __construct(string $name, ?int $segment = null, ?string $pattern = null, ?string $parameter = null, array $hooks = [])
     {
@@ -54,14 +53,46 @@ final class PathIdentityResolver extends BaseIdentityResolver implements Identit
     }
 
     /**
+     * Perform setup actions for the tenant
+     *
+     * When a tenant is marked as the current tenant within a tenancy, this
+     * method will be called to perform any necessary setup actions.
+     * This method is also called if there is no current tenant, as there may
+     * be actions needed.
+     *
+     * @template TenantClass of \Sprout\Contracts\Tenant
+     *
+     * @param Tenancy<TenantClass> $tenancy
+     * @param Tenant|null          $tenant
+     *
+     * @phpstan-param TenantClass|null                    $tenant
+     *
+     * @return void
+     *
+     * @throws TenantMissingException
+     */
+    public function setup(Tenancy $tenancy, ?Tenant $tenant): void
+    {
+        // Call the parent implementation in case there's something there
+        parent::setup($tenancy, $tenant);
+
+        // Call the trait setup so that parameter has a default value
+        $this->parameterSetup($tenancy, $tenant);
+
+        if ($tenant !== null) {
+            $this->getSprout()->settings()->setUrlPath($this->getTenantRoutePrefix($tenancy));
+        }
+    }
+
+    /**
      * Get an identifier from the request
      *
      * Locates a tenant identifier within the provided request and returns it.
      *
      * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Illuminate\Http\Request                    $request
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
+     * @param Request              $request
+     * @param Tenancy<TenantClass> $tenancy
      *
      * @return string|null
      */
@@ -86,8 +117,8 @@ final class PathIdentityResolver extends BaseIdentityResolver implements Identit
      * Configures a provided route to work with itself, adding parameters,
      * middleware, and anything else required, besides the default middleware.
      *
-     * @param \Illuminate\Routing\RouteRegistrar                            $route
-     * @param \Sprout\Contracts\Tenancy<\Sprout\Contracts\Tenant> $tenancy
+     * @param RouteRegistrar  $route
+     * @param Tenancy<Tenant> $tenancy
      *
      * @return void
      */
@@ -95,7 +126,7 @@ final class PathIdentityResolver extends BaseIdentityResolver implements Identit
     {
         $this->applyParameterPatternMapping(
             $route->prefix($this->getRoutePrefix($tenancy)),
-            $tenancy
+            $tenancy,
         );
     }
 
@@ -104,7 +135,7 @@ final class PathIdentityResolver extends BaseIdentityResolver implements Identit
      *
      * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
+     * @param Tenancy<TenantClass> $tenancy
      *
      * @return string
      */
@@ -118,11 +149,11 @@ final class PathIdentityResolver extends BaseIdentityResolver implements Identit
      *
      * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
+     * @param Tenancy<TenantClass> $tenancy
      *
      * @return string
      *
-     * @throws \Sprout\Exceptions\TenantMissingException
+     * @throws TenantMissingException
      */
     public function getTenantRoutePrefix(Tenancy $tenancy): string
     {
@@ -136,39 +167,7 @@ final class PathIdentityResolver extends BaseIdentityResolver implements Identit
         return str_replace(
             '{' . $this->getRouteParameterName($tenancy) . '}',
             $identifier,
-            $this->getRoutePrefix($tenancy)
+            $this->getRoutePrefix($tenancy),
         );
-    }
-
-    /**
-     * Perform setup actions for the tenant
-     *
-     * When a tenant is marked as the current tenant within a tenancy, this
-     * method will be called to perform any necessary setup actions.
-     * This method is also called if there is no current tenant, as there may
-     * be actions needed.
-     *
-     * @template TenantClass of \Sprout\Contracts\Tenant
-     *
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Contracts\Tenant|null          $tenant
-     *
-     * @phpstan-param TenantClass|null                    $tenant
-     *
-     * @return void
-     *
-     * @throws \Sprout\Exceptions\TenantMissingException
-     */
-    public function setup(Tenancy $tenancy, ?Tenant $tenant): void
-    {
-        // Call the parent implementation in case there's something there
-        parent::setup($tenancy, $tenant);
-
-        // Call the trait setup so that parameter has a default value
-        $this->parameterSetup($tenancy, $tenant);
-
-        if ($tenant !== null) {
-            $this->getSprout()->settings()->setUrlPath($this->getTenantRoutePrefix($tenancy));
-        }
     }
 }

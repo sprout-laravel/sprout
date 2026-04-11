@@ -7,6 +7,10 @@ use Illuminate\Cache\CacheManager;
 use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Support\Arr;
 use Sprout\Bud;
+use Sprout\Exceptions\CyclicOverrideException;
+use Sprout\Exceptions\MisconfigurationException;
+use Sprout\Exceptions\TenancyMissingException;
+use Sprout\Exceptions\TenantMissingException;
 use Sprout\Overrides\BaseCreator;
 use Sprout\Sprout;
 
@@ -26,9 +30,9 @@ final class BudCacheStoreCreator extends BaseCreator
     private array $config;
 
     /**
-     * @param \Illuminate\Cache\CacheManager                    $manager
-     * @param \Sprout\Bud                              $bud
-     * @param \Sprout\Sprout                               $sprout
+     * @param CacheManager                                      $manager
+     * @param Bud                                               $bud
+     * @param Sprout                                            $sprout
      * @param string                                            $name
      * @param array<string, mixed>&array{budStore?:string|null} $config
      */
@@ -37,9 +41,8 @@ final class BudCacheStoreCreator extends BaseCreator
         Bud          $bud,
         Sprout       $sprout,
         string       $name,
-        array        $config = []
-    )
-    {
+        array        $config = [],
+    ) {
         $this->manager = $manager;
         $this->bud     = $bud;
         $this->sprout  = $sprout;
@@ -48,22 +51,12 @@ final class BudCacheStoreCreator extends BaseCreator
     }
 
     /**
-     * Get the name of the service for the creator.
+     * @return Repository
      *
-     * @return string
-     */
-    protected function getService(): string
-    {
-        return 'cache';
-    }
-
-    /**
-     * @return \Illuminate\Contracts\Cache\Repository
-     *
-     * @throws \Sprout\Exceptions\CyclicOverrideException
-     * @throws \Sprout\Exceptions\MisconfigurationException
-     * @throws \Sprout\Exceptions\TenancyMissingException
-     * @throws \Sprout\Exceptions\TenantMissingException
+     * @throws CyclicOverrideException
+     * @throws MisconfigurationException
+     * @throws TenancyMissingException
+     * @throws TenantMissingException
      */
     public function __invoke(): Repository
     {
@@ -74,9 +67,19 @@ final class BudCacheStoreCreator extends BaseCreator
         $this->checkForCyclicDrivers(
             $config['driver'],
             'cache store',
-            $this->name
+            $this->name,
         );
 
         return $this->manager->build(Arr::except($config, ['store']));
+    }
+
+    /**
+     * Get the name of the service for the creator.
+     *
+     * @return string
+     */
+    protected function getService(): string
+    {
+        return 'cache';
     }
 }

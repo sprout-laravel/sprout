@@ -6,17 +6,17 @@ namespace Sprout\Http\Resolvers;
 use Illuminate\Http\Request;
 use Illuminate\Routing\RouteRegistrar;
 use Sprout\Contracts\Tenancy;
+use Sprout\Contracts\Tenant;
 use Sprout\Http\Middleware\AddTenantHeaderToResponse;
 use Sprout\Support\BaseIdentityResolver;
 use Sprout\Support\PlaceholderHelper;
+use Sprout\Support\ResolutionHook;
 
 /**
  * Header Identity Resolver
  *
  * This class is responsible for resolving tenant identities from the current
  * request using headers.
- *
- * @package Http\Resolvers
  */
 final class HeaderIdentityResolver extends BaseIdentityResolver
 {
@@ -30,9 +30,9 @@ final class HeaderIdentityResolver extends BaseIdentityResolver
     /**
      * Create a new instance
      *
-     * @param string                                     $name
-     * @param string|null                                $header
-     * @param array<\Sprout\Support\ResolutionHook> $hooks
+     * @param string                $name
+     * @param string|null           $header
+     * @param array<ResolutionHook> $hooks
      */
     public function __construct(string $name, ?string $header = null, array $hooks = [])
     {
@@ -73,7 +73,7 @@ final class HeaderIdentityResolver extends BaseIdentityResolver
             [
                 'tenancy'  => $tenancy->getName(),
                 'resolver' => $this->getName(),
-            ]
+            ],
         );
     }
 
@@ -84,8 +84,8 @@ final class HeaderIdentityResolver extends BaseIdentityResolver
      *
      * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Illuminate\Http\Request                    $request
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
+     * @param Request              $request
+     * @param Tenancy<TenantClass> $tenancy
      *
      * @return string|null
      */
@@ -100,8 +100,8 @@ final class HeaderIdentityResolver extends BaseIdentityResolver
      * Configures a provided route to work with itself, adding parameters,
      * middleware, and anything else required, besides the default middleware.
      *
-     * @param \Illuminate\Routing\RouteRegistrar                            $route
-     * @param \Sprout\Contracts\Tenancy<\Sprout\Contracts\Tenant> $tenancy
+     * @param RouteRegistrar  $route
+     * @param Tenancy<Tenant> $tenancy
      *
      * @return void
      */

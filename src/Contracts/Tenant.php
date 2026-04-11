@@ -7,8 +7,6 @@ namespace Sprout\Contracts;
  *
  * This contract marks a class as being a tenant, and enforces the existence of
  * a tenant identifier and tenant key.
- *
- * @package Core
  */
 interface Tenant
 {
@@ -26,7 +24,7 @@ interface Tenant
      *
      * Retrieve the storage name for the tenant identifier, whether that's an
      * attribute, column name, array key or something else.
-     * Used primarily by {@see \Sprout\Contracts\TenantProvider}.
+     * Used primarily by {@see TenantProvider}.
      *
      * @return string
      */
@@ -46,7 +44,7 @@ interface Tenant
      *
      * Retrieve the storage name for the tenant key, whether that's an
      * attribute, column name, array key or something else.
-     * Used primarily by {@see \Sprout\Contracts\TenantProvider}.
+     * Used primarily by {@see TenantProvider}.
      *
      * @return string
      */

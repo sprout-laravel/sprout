@@ -9,6 +9,8 @@ use Sprout\Concerns\AwareOfTenant;
 use Sprout\Contracts\Tenant;
 use Sprout\Contracts\TenantAware;
 use Sprout\Contracts\TenantHasResources;
+use Sprout\Exceptions\TenancyMissingException;
+use Sprout\Exceptions\TenantMissingException;
 use Symfony\Component\Finder\Finder;
 
 /**
@@ -27,7 +29,7 @@ final class SproutFileSessionHandler extends FileSessionHandler implements Tenan
             return $this->path;
         }
 
-        /** @var \Sprout\Contracts\Tenant&\Sprout\Contracts\TenantHasResources $tenant */
+        /** @var Tenant&TenantHasResources $tenant */
         $tenant = $this->getTenant();
 
         return rtrim($this->path, DIRECTORY_SEPARATOR)
@@ -44,8 +46,8 @@ final class SproutFileSessionHandler extends FileSessionHandler implements Tenan
      */
     public function read($sessionId): string
     {
-        if ($this->files->isFile($path = $this->getPath() . '/' . $sessionId) &&
-            $this->files->lastModified($path) >= Carbon::now()->subMinutes($this->minutes)->getTimestamp()) {
+        if ($this->files->isFile($path = $this->getPath() . '/' . $sessionId)
+            && $this->files->lastModified($path) >= Carbon::now()->subMinutes($this->minutes)->getTimestamp()) {
             return $this->files->sharedGet($path);
         }
 
@@ -57,8 +59,8 @@ final class SproutFileSessionHandler extends FileSessionHandler implements Tenan
      *
      * @return bool
      *
-     * @throws \Sprout\Exceptions\TenancyMissingException
-     * @throws \Sprout\Exceptions\TenantMissingException
+     * @throws TenancyMissingException
+     * @throws TenantMissingException
      */
     public function write($sessionId, $data): bool
     {
@@ -97,7 +99,7 @@ final class SproutFileSessionHandler extends FileSessionHandler implements Tenan
 
         foreach ($files as $file) {
             $this->files->delete($file->getRealPath());
-            $deletedSessions++;
+            ++$deletedSessions;
         }
 
         return $deletedSessions;

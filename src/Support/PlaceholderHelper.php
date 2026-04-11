@@ -32,7 +32,7 @@ final class PlaceholderHelper
                 $newString,
                 $placeholder,
                 ! is_string($replacement) ? $replacement() : $replacement,
-                $forParameter
+                $forParameter,
             );
         }
 
@@ -68,7 +68,7 @@ final class PlaceholderHelper
         return str_replace(
             $search,
             $replace,
-            $string
+            $string,
         );
     }
 }

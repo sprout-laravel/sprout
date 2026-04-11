@@ -3,8 +3,13 @@ declare(strict_types=1);
 
 namespace Sprout\Support;
 
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Route;
+use Sprout\Contracts\IdentityResolver;
 use Sprout\Contracts\IdentityResolverUsesParameters;
+use Sprout\Contracts\Tenancy;
+use Sprout\Contracts\Tenant;
 use Sprout\Exceptions\MisconfigurationException;
 use Sprout\Exceptions\NoTenantFoundException;
 use Sprout\Sprout;
@@ -22,7 +27,7 @@ class ResolutionHelper
             [$resolverName, $tenancyName] = $options;
         } else if (count($options) === 1) {
             [$resolverName] = $options;
-            $tenancyName = null;
+            $tenancyName    = null;
         } else {
             $resolverName = $tenancyName = null;
         }
@@ -31,17 +36,17 @@ class ResolutionHelper
     }
 
     /**
-     * @param \Illuminate\Http\Request            $request
-     * @param \Sprout\Support\ResolutionHook $hook
-     * @param string|null                         $resolverName
-     * @param string|null                         $tenancyName
-     * @param bool                                $throw
+     * @param Request        $request
+     * @param ResolutionHook $hook
+     * @param string|null    $resolverName
+     * @param string|null    $tenancyName
+     * @param bool           $throw
      *
      * @return bool
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
-     * @throws \Sprout\Exceptions\MisconfigurationException
-     * @throws \Sprout\Exceptions\NoTenantFoundException
+     * @throws BindingResolutionException
+     * @throws MisconfigurationException
+     * @throws NoTenantFoundException
      */
     public static function handleResolution(
         Request        $request,
@@ -50,9 +55,8 @@ class ResolutionHelper
         ?string        $resolverName = null,
         ?string        $tenancyName = null,
         bool           $throw = true,
-        bool           $optional = false
-    ): bool
-    {
+        bool           $optional = false,
+    ): bool {
         // Set the current hook
         $sprout->setCurrentHook($hook);
 
@@ -65,17 +69,16 @@ class ResolutionHelper
         $tenancy  = $sprout->tenancies()->get($tenancyName);
 
         /**
-         * @var \Sprout\Contracts\IdentityResolver                       $resolver
-         * @var \Sprout\Contracts\Tenancy<\Sprout\Contracts\Tenant> $tenancy
+         * @var IdentityResolver $resolver
+         * @var Tenancy<Tenant>  $tenancy
          */
-
         if ($tenancy->check() || ! $resolver->canResolve($request, $tenancy, $hook)) {
             return false;
         }
 
         $sprout->setCurrentTenancy($tenancy);
 
-        /** @var \Illuminate\Routing\Route|null $route */
+        /** @var Route|null $route */
         $route = $request->route();
 
         // Is the resolver using a parameter, and is the parameter present?

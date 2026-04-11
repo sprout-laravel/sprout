@@ -4,6 +4,8 @@ declare(strict_types=1);
 namespace Sprout\Managers;
 
 use Illuminate\Contracts\Foundation\Application;
+use Sprout\Contracts\Tenancy;
+use Sprout\Contracts\Tenant;
 use Sprout\Support\BaseFactory;
 use Sprout\Support\DefaultTenancy;
 
@@ -11,22 +13,22 @@ use Sprout\Support\DefaultTenancy;
  * Tenancy Manager
  *
  * This is a manager and factory, responsible for creating and storing
- * implementations of {@see \Sprout\Contracts\Tenancy}.
+ * implementations of {@see Tenancy}.
  *
- * @extends \Sprout\Support\BaseFactory<\Sprout\Contracts\Tenancy>
+ * @extends BaseFactory<Tenancy>
  */
 final class TenancyManager extends BaseFactory
 {
     /**
-     * @var \Sprout\Managers\TenantProviderManager
+     * @var TenantProviderManager
      */
     private TenantProviderManager $providerManager;
 
     /**
      * Create a new instance
      *
-     * @param \Illuminate\Contracts\Foundation\Application $app
-     * @param \Sprout\Managers\TenantProviderManager  $providerManager
+     * @param Application           $app
+     * @param TenantProviderManager $providerManager
      */
     public function __construct(Application $app, TenantProviderManager $providerManager)
     {
@@ -60,19 +62,19 @@ final class TenancyManager extends BaseFactory
     /**
      * Create the default implementation
      *
-     * @param array<string, mixed>                                          $config
-     * @param string                                                        $name
+     * @param array<string, mixed> $config
+     * @param string               $name
      *
      * @phpstan-param array{provider?: string|null, options?: list<string>} $config
      *
-     * @return \Sprout\Support\DefaultTenancy<\Sprout\Contracts\Tenant>
+     * @return DefaultTenancy<Tenant>
      */
     protected function createDefaultTenancy(array $config, string $name): DefaultTenancy
     {
         return new DefaultTenancy(
             $name,
             $this->providerManager->get($config['provider'] ?? null),
-            $config['options'] ?? []
+            $config['options'] ?? [],
         );
     }
 }

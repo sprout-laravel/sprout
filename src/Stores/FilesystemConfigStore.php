@@ -20,54 +20,18 @@ use Sprout\Exceptions\MisconfigurationException;
 final class FilesystemConfigStore extends BaseConfigStore
 {
     /**
-     * @var \Illuminate\Contracts\Filesystem\Filesystem
+     * @var Filesystem
      */
     private Filesystem $filesystem;
 
     public function __construct(
         string     $name,
         Encrypter  $encrypter,
-        Filesystem $filesystem
-    )
-    {
+        Filesystem $filesystem,
+    ) {
         parent::__construct($name, $encrypter);
 
         $this->filesystem = $filesystem;
-    }
-
-    /**
-     * Get the path to the config file
-     *
-     * @template TenantClass of \Sprout\Contracts\Tenant
-     *
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Contracts\Tenant               $tenant
-     * @param string                                      $service
-     * @param string                                      $name
-     *
-     * @phpstan-param TenantClass                         $tenant
-     *
-     * @return string
-     *
-     * @throws \Sprout\Exceptions\MisconfigurationException
-     */
-    protected function getPath(Tenancy $tenancy, Tenant $tenant, string $service, string $name): string
-    {
-        if (! ($tenant instanceof TenantHasResources)) {
-            throw MisconfigurationException::misconfigured('tenant', (string)$tenant->getTenantKey(), 'resources');
-        }
-
-        $resourceKey = $tenant->getTenantResourceKey();
-
-        return $tenancy->getName()
-               . DIRECTORY_SEPARATOR
-               . Str::substr($resourceKey, 0, 2)
-               . DIRECTORY_SEPARATOR
-               . Str::substr($resourceKey, 2)
-               . DIRECTORY_SEPARATOR
-               . Str::slug($service)
-               . DIRECTORY_SEPARATOR
-               . Str::slug($name);
     }
 
     /**
@@ -75,17 +39,17 @@ final class FilesystemConfigStore extends BaseConfigStore
      *
      * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Contracts\Tenant               $tenant
-     * @param string                                      $service
-     * @param string                                      $name
-     * @param array<string, mixed>|null                   $default
+     * @param Tenancy<TenantClass>      $tenancy
+     * @param Tenant                    $tenant
+     * @param string                    $service
+     * @param string                    $name
+     * @param array<string, mixed>|null $default
      *
      * @phpstan-param TenantClass                         $tenant
      *
      * @return array<string, mixed>|null
      *
-     * @throws \Sprout\Exceptions\MisconfigurationException
+     * @throws MisconfigurationException
      */
     public function get(Tenancy $tenancy, Tenant $tenant, string $service, string $name, ?array $default = null): ?array
     {
@@ -103,16 +67,16 @@ final class FilesystemConfigStore extends BaseConfigStore
      *
      * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Contracts\Tenant               $tenant
-     * @param string                                      $service
-     * @param string                                      $name
+     * @param Tenancy<TenantClass> $tenancy
+     * @param Tenant               $tenant
+     * @param string               $service
+     * @param string               $name
      *
      * @phpstan-param TenantClass                         $tenant
      *
      * @return bool
      *
-     * @throws \Sprout\Exceptions\MisconfigurationException
+     * @throws MisconfigurationException
      */
     public function has(Tenancy $tenancy, Tenant $tenant, string $service, string $name): bool
     {
@@ -128,24 +92,24 @@ final class FilesystemConfigStore extends BaseConfigStore
      *
      * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Contracts\Tenant               $tenant
-     * @param string                                      $service
-     * @param string                                      $name
-     * @param array<string, mixed>                        $config
+     * @param Tenancy<TenantClass> $tenancy
+     * @param Tenant               $tenant
+     * @param string               $service
+     * @param string               $name
+     * @param array<string, mixed> $config
      *
      * @phpstan-param TenantClass                         $tenant
      *
      * @return bool
      *
      * @throws \JsonException
-     * @throws \Sprout\Exceptions\MisconfigurationException
+     * @throws MisconfigurationException
      */
     public function set(Tenancy $tenancy, Tenant $tenant, string $service, string $name, array $config): bool
     {
         return $this->filesystem->put(
             $this->getPath($tenancy, $tenant, $service, $name),
-            $this->encryptConfig($config)
+            $this->encryptConfig($config),
         );
     }
 
@@ -158,16 +122,16 @@ final class FilesystemConfigStore extends BaseConfigStore
      *
      * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Contracts\Tenant               $tenant
-     * @param string                                      $service
-     * @param string                                      $name
-     * @param array<string, mixed>                        $config
+     * @param Tenancy<TenantClass> $tenancy
+     * @param Tenant               $tenant
+     * @param string               $service
+     * @param string               $name
+     * @param array<string, mixed> $config
      *
      * @return bool
      *
      * @throws \JsonException
-     * @throws \Sprout\Exceptions\MisconfigurationException
+     * @throws MisconfigurationException
      */
     public function add(Tenancy $tenancy, Tenant $tenant, string $service, string $name, array $config): bool
     {
@@ -176,5 +140,40 @@ final class FilesystemConfigStore extends BaseConfigStore
         }
 
         return $this->set($tenancy, $tenant, $service, $name, $config);
+    }
+
+    /**
+     * Get the path to the config file
+     *
+     * @template TenantClass of \Sprout\Contracts\Tenant
+     *
+     * @param Tenancy<TenantClass> $tenancy
+     * @param Tenant               $tenant
+     * @param string               $service
+     * @param string               $name
+     *
+     * @phpstan-param TenantClass                         $tenant
+     *
+     * @return string
+     *
+     * @throws MisconfigurationException
+     */
+    protected function getPath(Tenancy $tenancy, Tenant $tenant, string $service, string $name): string
+    {
+        if (! $tenant instanceof TenantHasResources) {
+            throw MisconfigurationException::misconfigured('tenant', (string) $tenant->getTenantKey(), 'resources');
+        }
+
+        $resourceKey = $tenant->getTenantResourceKey();
+
+        return $tenancy->getName()
+               . DIRECTORY_SEPARATOR
+               . Str::substr($resourceKey, 0, 2)
+               . DIRECTORY_SEPARATOR
+               . Str::substr($resourceKey, 2)
+               . DIRECTORY_SEPARATOR
+               . Str::slug($service)
+               . DIRECTORY_SEPARATOR
+               . Str::slug($name);
     }
 }

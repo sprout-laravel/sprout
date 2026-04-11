@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Sprout\Http\Resolvers;
 
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Encryption\Encrypter;
 use Illuminate\Cookie\CookieJar;
 use Illuminate\Cookie\CookieValuePrefix;
@@ -21,8 +22,6 @@ use Sprout\TenancyOptions;
  *
  * This class is responsible for resolving tenant identities from the current
  * request using cookies.
- *
- * @package Http\Resolvers
  */
 final class CookieIdentityResolver extends BaseIdentityResolver
 {
@@ -43,10 +42,10 @@ final class CookieIdentityResolver extends BaseIdentityResolver
     /**
      * Create a new instance
      *
-     * @param string                                     $name
-     * @param string|null                                $cookie
-     * @param array<string, mixed>                       $options
-     * @param array<\Sprout\Support\ResolutionHook> $hooks
+     * @param string                $name
+     * @param string|null           $cookie
+     * @param array<string, mixed>  $options
+     * @param array<ResolutionHook> $hooks
      */
     public function __construct(string $name, ?string $cookie = null, array $options = [], array $hooks = [])
     {
@@ -54,6 +53,48 @@ final class CookieIdentityResolver extends BaseIdentityResolver
 
         $this->cookie  = $cookie ?? '{Tenancy}-Identifier';
         $this->options = $options;
+    }
+
+    /**
+     * Perform setup actions for the tenant
+     *
+     * When a tenant is marked as the current tenant within a tenancy, this
+     * method will be called to perform any necessary setup actions.
+     * This method is also called if there is no current tenant, as there may
+     * be actions needed.
+     *
+     * @template TenantClass of \Sprout\Contracts\Tenant
+     *
+     * @param Tenancy<TenantClass> $tenancy
+     * @param Tenant|null          $tenant
+     *
+     * @phpstan-param Tenant|null                         $tenant
+     *
+     * @return void
+     *
+     * @throws BindingResolutionException
+     */
+    public function setup(Tenancy $tenancy, ?Tenant $tenant): void
+    {
+        if ($tenant !== null && $tenancy->check()) {
+            /**
+             * @var array{name:string, value:string} $details
+             */
+            $details = $this->getCookieDetails(
+                [
+                    'name'  => $this->getRequestCookieName($tenancy),
+                    'value' => $tenancy->identifier(),
+                ],
+            );
+
+            $this->getApp()
+                 ->make(CookieJar::class)
+                 ->queue(Cookie::make(...$details));
+        } else if ($tenant === null) {
+            $this->getApp()
+                 ->make(CookieJar::class)
+                 ->expire($this->getRequestCookieName($tenancy));
+        }
     }
 
     /**
@@ -98,7 +139,7 @@ final class CookieIdentityResolver extends BaseIdentityResolver
             [
                 'tenancy'  => $tenancy->getName(),
                 'resolver' => $this->getName(),
-            ]
+            ],
         );
     }
 
@@ -109,12 +150,12 @@ final class CookieIdentityResolver extends BaseIdentityResolver
      *
      * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Illuminate\Http\Request                    $request
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
+     * @param Request              $request
+     * @param Tenancy<TenantClass> $tenancy
      *
      * @return string|null
      *
-     * @throws \Sprout\Exceptions\CompatibilityException
+     * @throws CompatibilityException
      */
     public function resolveFromRequest(Request $request, Tenancy $tenancy): ?string
     {
@@ -136,48 +177,6 @@ final class CookieIdentityResolver extends BaseIdentityResolver
         }
 
         return $cookie;
-    }
-
-    /**
-     * Perform setup actions for the tenant
-     *
-     * When a tenant is marked as the current tenant within a tenancy, this
-     * method will be called to perform any necessary setup actions.
-     * This method is also called if there is no current tenant, as there may
-     * be actions needed.
-     *
-     * @template TenantClass of \Sprout\Contracts\Tenant
-     *
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Contracts\Tenant|null          $tenant
-     *
-     * @phpstan-param Tenant|null                         $tenant
-     *
-     * @return void
-     *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
-     */
-    public function setup(Tenancy $tenancy, ?Tenant $tenant): void
-    {
-        if ($tenant !== null && $tenancy->check()) {
-            /**
-             * @var array{name:string, value:string} $details
-             */
-            $details = $this->getCookieDetails(
-                [
-                    'name'  => $this->getRequestCookieName($tenancy),
-                    'value' => $tenancy->identifier(),
-                ]
-            );
-
-            $this->getApp()
-                 ->make(CookieJar::class)
-                 ->queue(Cookie::make(...$details));
-        } else if ($tenant === null) {
-            $this->getApp()
-                 ->make(CookieJar::class)
-                 ->expire($this->getRequestCookieName($tenancy));
-        }
     }
 
     /**
@@ -226,7 +225,7 @@ final class CookieIdentityResolver extends BaseIdentityResolver
      *
      * @return string|null
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws BindingResolutionException
      */
     private function decryptCookie(string $key, string $cookie): ?string
     {

@@ -4,15 +4,14 @@ declare(strict_types=1);
 namespace Sprout\Http;
 
 use Closure;
+use Illuminate\Routing\Router;
 use Illuminate\Routing\RouteRegistrar;
 
 /**
  * Route Methods Mixin
  *
  * This class is used as a mixin to add Sprout specific methods to
- * {@see \Illuminate\Routing\Router}.
- *
- * @package Core
+ * {@see Router}.
  */
 class RouterMethods
 {
@@ -23,7 +22,7 @@ class RouterMethods
      * @param string|null $resolver
      * @param string|null $tenancy
      *
-     * @return \Illuminate\Routing\RouteRegistrar
+     * @return RouteRegistrar
      *
      * @noinspection   PhpDocSignatureInspection
      *
@@ -43,7 +42,7 @@ class RouterMethods
      * @param string|null $resolver
      * @param string|null $tenancy
      *
-     * @return \Illuminate\Routing\RouteRegistrar
+     * @return RouteRegistrar
      *
      * @noinspection   PhpDocSignatureInspection
      *

@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Sprout\Http\Resolvers;
 
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Http\Request;
 use Illuminate\Session\SessionManager;
 use Sprout\Contracts\Tenancy;
@@ -18,8 +19,6 @@ use Sprout\TenancyOptions;
  *
  * This class is responsible for resolving tenant identities from the current
  * request using the session.
- *
- * @package Http\Resolvers
  */
 final class SessionIdentityResolver extends BaseIdentityResolver
 {
@@ -41,6 +40,38 @@ final class SessionIdentityResolver extends BaseIdentityResolver
         parent::__construct($name, [ResolutionHook::Middleware]);
 
         $this->session = $session ?? 'multitenancy.{tenancy}';
+    }
+
+    /**
+     * Perform setup actions for the tenant
+     *
+     * When a tenant is marked as the current tenant within a tenancy, this
+     * method will be called to perform any necessary setup actions.
+     * This method is also called if there is no current tenant, as there may
+     * be actions needed.
+     *
+     * @template TenantClass of \Sprout\Contracts\Tenant
+     *
+     * @param Tenancy<TenantClass> $tenancy
+     * @param Tenant|null          $tenant
+     *
+     * @phpstan-param Tenant|null                         $tenant
+     *
+     * @return void
+     *
+     * @throws BindingResolutionException
+     */
+    public function setup(Tenancy $tenancy, ?Tenant $tenant): void
+    {
+        if ($tenant !== null && $tenancy->check()) {
+            $this->getApp()
+                 ->make(SessionManager::class)
+                 ->put($this->getRequestSessionName($tenancy), $tenant->getTenantIdentifier());
+        } else if ($tenant === null) {
+            $this->getApp()
+                 ->make(SessionManager::class)
+                 ->forget($this->getRequestSessionName($tenancy));
+        }
     }
 
     /**
@@ -75,7 +106,7 @@ final class SessionIdentityResolver extends BaseIdentityResolver
             [
                 'tenancy'  => $tenancy->getName(),
                 'resolver' => $this->getName(),
-            ]
+            ],
         );
     }
 
@@ -86,12 +117,12 @@ final class SessionIdentityResolver extends BaseIdentityResolver
      *
      * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Illuminate\Http\Request                    $request
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
+     * @param Request              $request
+     * @param Tenancy<TenantClass> $tenancy
      *
      * @return string|null
      *
-     * @throws \Sprout\Exceptions\CompatibilityException
+     * @throws CompatibilityException
      */
     public function resolveFromRequest(Request $request, Tenancy $tenancy): ?string
     {
@@ -110,38 +141,6 @@ final class SessionIdentityResolver extends BaseIdentityResolver
     }
 
     /**
-     * Perform setup actions for the tenant
-     *
-     * When a tenant is marked as the current tenant within a tenancy, this
-     * method will be called to perform any necessary setup actions.
-     * This method is also called if there is no current tenant, as there may
-     * be actions needed.
-     *
-     * @template TenantClass of \Sprout\Contracts\Tenant
-     *
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Contracts\Tenant|null          $tenant
-     *
-     * @phpstan-param Tenant|null                         $tenant
-     *
-     * @return void
-     *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
-     */
-    public function setup(Tenancy $tenancy, ?Tenant $tenant): void
-    {
-        if ($tenant !== null && $tenancy->check()) {
-            $this->getApp()
-                 ->make(SessionManager::class)
-                 ->put($this->getRequestSessionName($tenancy), $tenant->getTenantIdentifier());
-        } else if ($tenant === null) {
-            $this->getApp()
-                 ->make(SessionManager::class)
-                 ->forget($this->getRequestSessionName($tenancy));
-        }
-    }
-
-    /**
      * Can the resolver run on the request
      *
      * This method allows a resolver to prevent resolution with the request in
@@ -149,9 +148,9 @@ final class SessionIdentityResolver extends BaseIdentityResolver
      *
      * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Illuminate\Http\Request                    $request
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Support\ResolutionHook         $hook
+     * @param Request              $request
+     * @param Tenancy<TenantClass> $tenancy
+     * @param ResolutionHook       $hook
      *
      * @return bool
      */

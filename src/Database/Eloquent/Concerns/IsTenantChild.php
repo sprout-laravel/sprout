@@ -3,12 +3,14 @@ declare(strict_types=1);
 
 namespace Sprout\Database\Eloquent\Concerns;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
 use Sprout\Attributes\TenantRelation;
 use Sprout\Contracts\Tenancy;
+use Sprout\Contracts\Tenant;
 use Sprout\Database\Eloquent\Contracts\OptionalTenant;
 use Sprout\Exceptions\TenantRelationException;
 use Sprout\Managers\TenancyManager;
@@ -18,13 +20,11 @@ use Sprout\Managers\TenancyManager;
  *
  * This trait provides helper methods and functionality that supports the
  * automatic handling of Eloquent models that are direct descendants of
- * {@see \Sprout\Contracts\Tenant} models.
+ * {@see Tenant} models.
  *
  * @phpstan-require-extends \Illuminate\Database\Eloquent\Model
  *
- * @mixin \Illuminate\Database\Eloquent\Model
- *
- * @package        Database\Eloquent
+ * @mixin Model
  *
  * @phpstan-ignore trait.unused
  */
@@ -101,7 +101,7 @@ trait IsTenantChild
      *
      * @return bool
      *
-     * @see \Sprout\Database\Eloquent\Contracts\OptionalTenant
+     * @see OptionalTenant
      */
     public static function isTenantOptional(): bool
     {
@@ -109,43 +109,11 @@ trait IsTenantChild
     }
 
     /**
-     * Attempt to find the name of the tenant relation
-     *
-     * @return string
-     *
-     * @throws \Sprout\Exceptions\TenantRelationException
-     *
-     * @see \Sprout\Attributes\TenantRelation
-     */
-    private function findTenantRelationName(): string
-    {
-        try {
-            $methods = collect((new ReflectionClass(static::class))->getMethods(ReflectionMethod::IS_PUBLIC))
-                ->filter(function (ReflectionMethod $method) {
-                    return ! $method->isStatic() && $method->getAttributes(TenantRelation::class);
-                })
-                ->map(fn (ReflectionMethod $method) => $method->getName());
-
-            if ($methods->isEmpty()) {
-                throw TenantRelationException::missing(static::class);
-            }
-
-            if ($methods->count() > 1) {
-                throw TenantRelationException::tooMany(static::class, $methods->count());
-            }
-
-            return $methods->first();
-        } catch (ReflectionException $exception) {
-            throw TenantRelationException::missing(static::class, previous: $exception); // @codeCoverageIgnore
-        }
-    }
-
-    /**
      * Get the name of the tenant relation
      *
      * @return string|null
      *
-     * @throws \Sprout\Exceptions\TenantRelationException
+     * @throws TenantRelationException
      */
     public function getTenantRelationName(): ?string
     {
@@ -169,11 +137,11 @@ trait IsTenantChild
     /**
      * Get the tenancy this model relates to a tenant of
      *
-     * @return \Sprout\Contracts\Tenancy
+     * @return Tenancy
      */
     public function getTenancy(): Tenancy
     {
-        /** @var \Sprout\Managers\TenancyManager $tenancyManager */
+        /** @var TenancyManager $tenancyManager */
         $tenancyManager = app(TenancyManager::class);
 
         return $tenancyManager->get($this->getTenancyName());
@@ -182,10 +150,42 @@ trait IsTenantChild
     /**
      * Get the tenant relation
      *
-     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     * @return Relation
      */
     public function getTenantRelation(): Relation
     {
         return $this->{$this->getTenantRelationName()}();
+    }
+
+    /**
+     * Attempt to find the name of the tenant relation
+     *
+     * @return string
+     *
+     * @throws TenantRelationException
+     *
+     * @see TenantRelation
+     */
+    private function findTenantRelationName(): string
+    {
+        try {
+            $methods = collect((new ReflectionClass(static::class))->getMethods(ReflectionMethod::IS_PUBLIC))
+                ->filter(function (ReflectionMethod $method) {
+                    return ! $method->isStatic() && $method->getAttributes(TenantRelation::class);
+                })
+                ->map(fn (ReflectionMethod $method) => $method->getName());
+
+            if ($methods->isEmpty()) {
+                throw TenantRelationException::missing(static::class);
+            }
+
+            if ($methods->count() > 1) {
+                throw TenantRelationException::tooMany(static::class, $methods->count());
+            }
+
+            return $methods->first();
+        } catch (ReflectionException $exception) {
+            throw TenantRelationException::missing(static::class, previous: $exception); // @codeCoverageIgnore
+        }
     }
 }

@@ -24,8 +24,6 @@ use Sprout\Support\SettingsRepository;
 
 /**
  * Sprout Service Provider
- *
- * @package Core
  */
 class SproutServiceProvider extends ServiceProvider
 {
@@ -40,6 +38,37 @@ class SproutServiceProvider extends ServiceProvider
         $this->registerRouteMixin();
         $this->registerServiceOverrideBooting();
         $this->registerTenantAwareHandling();
+    }
+
+    public function boot(): void
+    {
+        $this->publishConfig();
+        $this->registerServiceOverrides();
+        $this->registerEventListeners();
+        $this->registerTenancyBootstrappers();
+    }
+
+    protected function registerRouteMixin(): void
+    {
+        Router::mixin(new RouterMethods());
+    }
+
+    protected function registerServiceOverrideBooting(): void
+    {
+        $this->app->booted($this->sprout->overrides()->bootOverrides(...));
+    }
+
+    protected function registerTenantAwareHandling(): void
+    {
+        // If something is resolved, that is aware of tenants...
+        $this->app->afterResolving(TenantAware::class, function (TenantAware $tenantAware) {
+            // And it wants to be refreshed...
+            if ($tenantAware->shouldBeRefreshed()) {
+                // Make sure it's notified when the tenant or tenancy change
+                $this->app->refresh(Tenant::class, $tenantAware, 'setTenant');
+                $this->app->refresh(Tenancy::class, $tenantAware, 'setTenancy');
+            }
+        });
     }
 
     private function registerSprout(): void
@@ -83,7 +112,7 @@ class SproutServiceProvider extends ServiceProvider
 
     private function registerMiddleware(): void
     {
-        /** @var \Illuminate\Routing\Router $router */
+        /** @var Router $router */
         $router = $this->app->make(Router::class);
 
         // Alias the basic tenant middleware
@@ -91,37 +120,6 @@ class SproutServiceProvider extends ServiceProvider
 
         // Alias the optional tenant middleware
         $router->aliasMiddleware(SproutOptionalTenantContextMiddleware::ALIAS, SproutOptionalTenantContextMiddleware::class);
-    }
-
-    protected function registerRouteMixin(): void
-    {
-        Router::mixin(new RouterMethods());
-    }
-
-    protected function registerServiceOverrideBooting(): void
-    {
-        $this->app->booted($this->sprout->overrides()->bootOverrides(...));
-    }
-
-    protected function registerTenantAwareHandling(): void
-    {
-        // If something is resolved, that is aware of tenants...
-        $this->app->afterResolving(TenantAware::class, function (TenantAware $tenantAware) {
-            // And it wants to be refreshed...
-            if ($tenantAware->shouldBeRefreshed()) {
-                // Make sure it's notified when the tenant or tenancy change
-                $this->app->refresh(Tenant::class, $tenantAware, 'setTenant');
-                $this->app->refresh(Tenancy::class, $tenantAware, 'setTenancy');
-            }
-        });
-    }
-
-    public function boot(): void
-    {
-        $this->publishConfig();
-        $this->registerServiceOverrides();
-        $this->registerEventListeners();
-        $this->registerTenancyBootstrappers();
     }
 
     private function publishConfig(): void
@@ -140,7 +138,7 @@ class SproutServiceProvider extends ServiceProvider
 
     private function registerEventListeners(): void
     {
-        /** @var \Illuminate\Contracts\Events\Dispatcher $events */
+        /** @var Dispatcher $events */
         $events = $this->app->make(Dispatcher::class);
 
         // If we should be listening for routing
@@ -151,7 +149,7 @@ class SproutServiceProvider extends ServiceProvider
 
     private function registerTenancyBootstrappers(): void
     {
-        /** @var \Illuminate\Contracts\Events\Dispatcher $events */
+        /** @var Dispatcher $events */
         $events = $this->app->make(Dispatcher::class);
 
         /** @var array<class-string> $bootstrappers */

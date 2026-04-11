@@ -5,6 +5,7 @@ namespace Sprout\Attributes;
 
 use Attribute;
 use Illuminate\Container\Container;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Container\ContextualAttribute;
 use Sprout\Contracts\ServiceOverride;
 use Sprout\Managers\ServiceOverrideManager;
@@ -16,8 +17,6 @@ use Sprout\Managers\ServiceOverrideManager;
  * service override using its registered name.
  *
  * @see     https://laravel.com/docs/12.x/container#contextual-attributes
- *
- * @package Core
  */
 #[Attribute(Attribute::TARGET_PARAMETER)]
 final readonly class Override implements ContextualAttribute
@@ -42,12 +41,12 @@ final readonly class Override implements ContextualAttribute
     /**
      * Resolve the tenancy using this attribute
      *
-     * @param \Sprout\Attributes\Override $attribute
-     * @param \Illuminate\Container\Container  $container
+     * @param Override  $attribute
+     * @param Container $container
      *
-     * @return \Sprout\Contracts\ServiceOverride|null
+     * @return ServiceOverride|null
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws BindingResolutionException
      */
     public function resolve(self $attribute, Container $container): ?ServiceOverride
     {

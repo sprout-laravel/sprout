@@ -18,9 +18,9 @@ class TenantModel extends Model implements Tenant, TenantHasResources
      */
     use IsTenant, HasFactory, HasTenantResources;
 
-    protected $table = 'tenants';
-
     protected static string $factory = TenantModelFactory::class;
+
+    protected $table = 'tenants';
 
     protected $fillable = [
         'name',
