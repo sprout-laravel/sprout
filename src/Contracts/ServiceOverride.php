@@ -7,8 +7,6 @@ namespace Sprout\Contracts;
  *
  * This contract marks a class as being responsible for handling the overriding
  * of a core Laravel service, such as cookies, sessions, or the database.
- *
- * @package Overrides
  */
 interface ServiceOverride
 {
@@ -29,8 +27,8 @@ interface ServiceOverride
      *
      * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Contracts\Tenant               $tenant
+     * @param Tenancy<TenantClass> $tenancy
+     * @param Tenant               $tenant
      *
      * @phpstan-param TenantClass                         $tenant
      *
@@ -51,8 +49,8 @@ interface ServiceOverride
      *
      * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Contracts\Tenant               $tenant
+     * @param Tenancy<TenantClass> $tenancy
+     * @param Tenant               $tenant
      *
      * @phpstan-param TenantClass                         $tenant
      *

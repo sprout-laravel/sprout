@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Sprout\Contracts\Tenancy;
 use Sprout\Exceptions\TenantMissingException;
+
 use function Sprout\sprout;
 
 /**
@@ -19,8 +20,6 @@ use function Sprout\sprout;
  * leaking between tenants in a "Shared Database, Shared Schema" setup.
  *
  * @see     \Sprout\Database\Eloquent\Concerns\BelongsToManyTenants
- *
- * @package Database\Eloquent
  */
 final class BelongsToManyTenantsScope extends TenantChildScope
 {
@@ -29,14 +28,14 @@ final class BelongsToManyTenantsScope extends TenantChildScope
      *
      * @template ModelClass of \Illuminate\Database\Eloquent\Model
      *
-     * @param \Illuminate\Database\Eloquent\Builder<ModelClass>                                           $builder
-     * @param \Illuminate\Database\Eloquent\Model&\Sprout\Database\Eloquent\Concerns\BelongsToTenant $model
+     * @param Builder<ModelClass>                                      $builder
+     * @param Model&\Sprout\Database\Eloquent\Concerns\BelongsToTenant $model
      *
      * @phpstan-param ModelClass                                                                          $model
      *
      * @return void
      *
-     * @throws \Sprout\Exceptions\TenantMissingException
+     * @throws TenantMissingException
      * @throws \Sprout\Exceptions\TenantRelationException
      */
     public function apply(Builder $builder, Model $model): void
@@ -98,13 +97,14 @@ final class BelongsToManyTenantsScope extends TenantChildScope
      *
      * @template ModelClass of \Illuminate\Database\Eloquent\Model
      *
-     * @param \Illuminate\Database\Eloquent\Builder<ModelClass>                                           $builder
-     * @param \Illuminate\Database\Eloquent\Model&\Sprout\Database\Eloquent\Concerns\BelongsToTenant $model
+     * @param Builder<ModelClass>                                      $builder
+     * @param Model&\Sprout\Database\Eloquent\Concerns\BelongsToTenant $model
      * @param \Sprout\Contracts\Tenancy<*>                                                           $tenancy
      *
      * @phpstan-param ModelClass                                                                          $model
      *
      * @return void
+     *
      * @throws \Sprout\Exceptions\TenantRelationException
      */
     protected function applyTenantClause(Builder $builder, Model $model, Tenancy $tenancy): void

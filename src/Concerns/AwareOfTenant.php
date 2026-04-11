@@ -12,7 +12,7 @@ use Sprout\Contracts\Tenant;
 trait AwareOfTenant
 {
     /**
-     * @var \Sprout\Contracts\Tenant|null
+     * @var Tenant|null
      */
     private ?Tenant $tenant;
 
@@ -34,7 +34,7 @@ trait AwareOfTenant
     /**
      * Get the tenant if there is one
      *
-     * @return \Sprout\Contracts\Tenant|null
+     * @return Tenant|null
      */
     public function getTenant(): ?Tenant
     {
@@ -47,6 +47,7 @@ trait AwareOfTenant
      * @return bool
      *
      * @phpstan-assert-if-true !null $this->tenant
+     *
      * @phpstan-assert-if-false null $this->tenant
      */
     public function hasTenant(): bool
@@ -57,7 +58,7 @@ trait AwareOfTenant
     /**
      * Set the tenant
      *
-     * @param \Sprout\Contracts\Tenant|null $tenant
+     * @param Tenant|null $tenant
      *
      * @return static
      */
@@ -84,6 +85,7 @@ trait AwareOfTenant
      * @return bool
      *
      * @phpstan-assert-if-true !null $this->tenancy
+     *
      * @phpstan-assert-if-false null $this->tenancy
      */
     public function hasTenancy(): bool
@@ -95,7 +97,8 @@ trait AwareOfTenant
      * Set the tenancy
      *
      * @template TenantClass of \Sprout\Contracts\Tenant
-     * @param \Sprout\Contracts\Tenancy<TenantClass>|null $tenancy
+     *
+     * @param Tenancy<TenantClass>|null $tenancy
      *
      * @return static
      */

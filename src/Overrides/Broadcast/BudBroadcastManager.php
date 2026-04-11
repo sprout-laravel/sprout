@@ -31,27 +31,13 @@ class BudBroadcastManager extends BroadcastManager
     }
 
     /**
-     * Sync the original manager in case things have been registered
-     *
-     * @param \Illuminate\Broadcasting\BroadcastManager $original
-     *
-     * @return void
-     */
-    private function syncOriginal(BroadcastManager $original): void
-    {
-        $this->drivers            = array_merge($original->drivers, $this->drivers);
-        $this->customCreators     = array_merge($original->customCreators, $this->customCreators);
-        $this->syncedFromOriginal = true;
-    }
-
-    /**
      * Get a driver instance using the given config.
      *
      * @param string                                    $name
      * @param array<string, mixed>&array{driver:string} $config
      * @param bool                                      $force
      *
-     * @return \Illuminate\Contracts\Broadcasting\Broadcaster
+     * @return Broadcaster
      */
     public function connectUsing(string $name, array $config, bool $force = false): Broadcaster
     {
@@ -61,8 +47,36 @@ class BudBroadcastManager extends BroadcastManager
 
         $config['name'] = $name;
 
-        /** @var \Illuminate\Contracts\Broadcasting\Broadcaster */
+        /** @var Broadcaster */
         return $this->drivers[$name] ?? ($this->drivers[$name] = $this->resolveUsing($config));
+    }
+
+    /**
+     * Resolve the given broadcaster.
+     *
+     * @param array<string, mixed>&array{driver:string,name:string} $config
+     *
+     * @return Broadcaster
+     */
+    public function resolveUsing(array $config): Broadcaster
+    {
+        if (empty($config['driver'])) {
+            throw new InvalidArgumentException("Broadcast connection [{$config['name']}] does not have a configured driver.");
+        }
+
+        if (isset($this->customCreators[$config['driver']])) {
+            /** @var Broadcaster */
+            return $this->callCustomCreator($config);
+        }
+
+        $driverMethod = 'create' . ucfirst($config['driver']) . 'Driver';
+
+        if (! method_exists($this, $driverMethod)) {
+            throw new InvalidArgumentException("Driver [{$config['driver']}] is not supported.");
+        }
+
+        /** @var Broadcaster */
+        return $this->{$driverMethod}($config);
     }
 
     /**
@@ -70,9 +84,9 @@ class BudBroadcastManager extends BroadcastManager
      *
      * @param string $name
      *
-     * @return \Illuminate\Contracts\Broadcasting\Broadcaster
+     * @return Broadcaster
      *
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     protected function resolve($name): Broadcaster
     {
@@ -89,31 +103,16 @@ class BudBroadcastManager extends BroadcastManager
     }
 
     /**
-     * Resolve the given broadcaster.
+     * Sync the original manager in case things have been registered
      *
-     * @param array<string, mixed>&array{driver:string,name:string} $config
+     * @param BroadcastManager $original
      *
-     * @return \Illuminate\Contracts\Broadcasting\Broadcaster
-     *
+     * @return void
      */
-    public function resolveUsing(array $config): Broadcaster
+    private function syncOriginal(BroadcastManager $original): void
     {
-        if (empty($config['driver'])) {
-            throw new InvalidArgumentException("Broadcast connection [{$config['name']}] does not have a configured driver.");
-        }
-
-        if (isset($this->customCreators[$config['driver']])) {
-            /** @var \Illuminate\Contracts\Broadcasting\Broadcaster */
-            return $this->callCustomCreator($config);
-        }
-
-        $driverMethod = 'create' . ucfirst($config['driver']) . 'Driver';
-
-        if (! method_exists($this, $driverMethod)) {
-            throw new InvalidArgumentException("Driver [{$config['driver']}] is not supported.");
-        }
-
-        /** @var \Illuminate\Contracts\Broadcasting\Broadcaster */
-        return $this->{$driverMethod}($config);
+        $this->drivers            = array_merge($original->drivers, $this->drivers);
+        $this->customCreators     = array_merge($original->customCreators, $this->customCreators);
+        $this->syncedFromOriginal = true;
     }
 }

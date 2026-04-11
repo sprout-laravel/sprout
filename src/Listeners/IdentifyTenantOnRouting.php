@@ -16,15 +16,13 @@ use Sprout\Support\ResolutionHook;
 /**
  * Identify Tenant on Routing
  *
- * This class is an event listener for {@see \Illuminate\Routing\Events\RouteMatched}
+ * This class is an event listener for {@see RouteMatched}
  * that handles tenant identification if it's enabled.
- *
- * @package Core
  */
 final class IdentifyTenantOnRouting
 {
     /**
-     * @var \Sprout\Sprout
+     * @var Sprout
      */
     private Sprout $sprout;
 
@@ -36,7 +34,7 @@ final class IdentifyTenantOnRouting
     /**
      * Handle the event
      *
-     * @param \Illuminate\Routing\Events\RouteMatched $event
+     * @param RouteMatched $event
      *
      * @return void
      *
@@ -60,14 +58,14 @@ final class IdentifyTenantOnRouting
             $this->sprout,
             $resolverName,
             $tenancyName,
-            false
+            false,
         );
     }
 
     /**
      * Parse the route middleware stack to find the marker middleware
      *
-     * @param \Illuminate\Routing\Route $route
+     * @param Route $route
      *
      * @return array<int, string|null>|null
      *

@@ -13,8 +13,6 @@ namespace Sprout\Events;
  *
  * @extends \Sprout\Events\ServiceOverrideEvent<OverrideClass>
  *
- * @package Overrides
- *
  * @codeCoverageIgnore
  */
 final class ServiceOverrideRegistered extends ServiceOverrideEvent

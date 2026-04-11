@@ -18,8 +18,6 @@ use Sprout\Support\PlaceholderHelper;
  * methods required by the {@see \Sprout\Contracts\IdentityResolverUsesParameters}
  * interface.
  *
- * @package Resolvers
- *
  * @phpstan-require-implements \Sprout\Contracts\IdentityResolverUsesParameters
  */
 trait FindsIdentityInRouteParameter
@@ -39,23 +37,30 @@ trait FindsIdentityInRouteParameter
     private string $parameter = '{tenancy}_{resolver}';
 
     /**
-     * Initialise the pattern and parameter name values
+     * Perform setup actions for the tenant
      *
-     * This method sets the value for {@see self::$pattern}, and optionally
-     * {@see self::$parameter} if the value isn't null.
+     * When a tenant is marked as the current tenant within a tenancy, this
+     * method will be called to perform any necessary setup actions.
+     * This method is also called if there is no current tenant, as there may
+     * be actions needed.
      *
-     * @param string|null $pattern
-     * @param string|null $parameter
+     * @template TenantClass of \Sprout\Contracts\Tenant
+     *
+     * @param Tenancy<TenantClass> $tenancy
+     * @param Tenant|null          $tenant
+     *
+     * @phpstan-param Tenant|null                         $tenant
      *
      * @return void
      */
-    protected function initialiseRouteParameter(?string $pattern = null, ?string $parameter = null): void
+    public function setup(Tenancy $tenancy, ?Tenant $tenant): void
     {
-        $this->setPattern($pattern);
-
-        if ($parameter !== null) {
-            $this->setParameter($parameter);
-        }
+        // Set the default value of the parameter
+        URL::defaults(
+            [
+                $this->getRouteParameterName($tenancy) => $tenant?->getTenantIdentifier(),
+            ],
+        );
     }
 
     /**
@@ -91,7 +96,7 @@ trait FindsIdentityInRouteParameter
      *
      * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
+     * @param Tenancy<TenantClass> $tenancy
      *
      * @return string
      */
@@ -113,7 +118,7 @@ trait FindsIdentityInRouteParameter
      * {@see self::getRouteParameterName()}, but wrapped with curly braces for
      * use in route definitions.
      *
-     * @param \Sprout\Contracts\Tenancy<\Sprout\Contracts\Tenant> $tenancy
+     * @param Tenancy<Tenant> $tenancy
      *
      * @return string
      */
@@ -138,6 +143,7 @@ trait FindsIdentityInRouteParameter
      * @return bool
      *
      * @phpstan-assert-if-true string $this->getPattern()
+     *
      * @phpstan-assert-if-false null $this->getPattern()
      */
     public function hasPattern(): bool
@@ -156,61 +162,15 @@ trait FindsIdentityInRouteParameter
     }
 
     /**
-     * Get the route parameter pattern mapping
-     *
-     * This method returns an array mapping the route parameter name to its
-     * pattern, for use in route definitions.
-     *
-     * @template TenantClass of \Sprout\Contracts\Tenant
-     *
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     *
-     * @return array<string, string>
-     */
-    protected function getParameterPatternMapping(Tenancy $tenancy): array
-    {
-        if (! $this->hasPattern()) {
-            return []; // @codeCoverageIgnore
-        }
-
-        return [
-            $this->getRouteParameterName($tenancy) => $this->getPattern(),
-        ];
-    }
-
-    /**
-     * Apply the route parameter pattern mapping to a route
-     *
-     * This method applies the route parameter pattern mapping provided by
-     * {@see self::getParameterPatternMapping()} to a supplied route registrar,
-     * for a supplied tenancy.
-     *
-     * @template TenantClass of \Sprout\Contracts\Tenant
-     *
-     * @param \Illuminate\Routing\RouteRegistrar          $registrar
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     *
-     * @return \Illuminate\Routing\RouteRegistrar
-     */
-    protected function applyParameterPatternMapping(RouteRegistrar $registrar, Tenancy $tenancy): RouteRegistrar
-    {
-        if (! $this->hasPattern()) {
-            return $registrar;
-        }
-
-        return $registrar->where($this->getParameterPatternMapping($tenancy));
-    }
-
-    /**
      * Get an identifier from the route
      *
      * Locates a tenant identifier within the provided route and returns it.
      *
      * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Illuminate\Routing\Route                   $route
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Illuminate\Http\Request                    $request
+     * @param Route                $route
+     * @param Tenancy<TenantClass> $tenancy
+     * @param Request              $request
      *
      * @return string|null
      */
@@ -234,33 +194,6 @@ trait FindsIdentityInRouteParameter
     }
 
     /**
-     * Perform setup actions for the tenant
-     *
-     * When a tenant is marked as the current tenant within a tenancy, this
-     * method will be called to perform any necessary setup actions.
-     * This method is also called if there is no current tenant, as there may
-     * be actions needed.
-     *
-     * @template TenantClass of \Sprout\Contracts\Tenant
-     *
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Contracts\Tenant|null          $tenant
-     *
-     * @phpstan-param Tenant|null                         $tenant
-     *
-     * @return void
-     */
-    public function setup(Tenancy $tenancy, ?Tenant $tenant): void
-    {
-        // Set the default value of the parameter
-        URL::defaults(
-            [
-                $this->getRouteParameterName($tenancy) => $tenant?->getTenantIdentifier(),
-            ]
-        );
-    }
-
-    /**
      * Generate a URL for a tenanted route
      *
      * This method wraps Laravel's {@see \route()} helper to allow for
@@ -273,11 +206,11 @@ trait FindsIdentityInRouteParameter
      *
      * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param string                                      $name
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Contracts\Tenant               $tenant
-     * @param array<string, mixed>                        $parameters
-     * @param bool                                        $absolute
+     * @param string               $name
+     * @param Tenancy<TenantClass> $tenancy
+     * @param Tenant               $tenant
+     * @param array<string, mixed> $parameters
+     * @param bool                 $absolute
      *
      * @phpstan-param TenantClass                         $tenant
      *
@@ -292,5 +225,71 @@ trait FindsIdentityInRouteParameter
         }
 
         return route($name, $parameters, $absolute);
+    }
+
+    /**
+     * Initialise the pattern and parameter name values
+     *
+     * This method sets the value for {@see self::$pattern}, and optionally
+     * {@see self::$parameter} if the value isn't null.
+     *
+     * @param string|null $pattern
+     * @param string|null $parameter
+     *
+     * @return void
+     */
+    protected function initialiseRouteParameter(?string $pattern = null, ?string $parameter = null): void
+    {
+        $this->setPattern($pattern);
+
+        if ($parameter !== null) {
+            $this->setParameter($parameter);
+        }
+    }
+
+    /**
+     * Get the route parameter pattern mapping
+     *
+     * This method returns an array mapping the route parameter name to its
+     * pattern, for use in route definitions.
+     *
+     * @template TenantClass of \Sprout\Contracts\Tenant
+     *
+     * @param Tenancy<TenantClass> $tenancy
+     *
+     * @return array<string, string>
+     */
+    protected function getParameterPatternMapping(Tenancy $tenancy): array
+    {
+        if (! $this->hasPattern()) {
+            return []; // @codeCoverageIgnore
+        }
+
+        return [
+            $this->getRouteParameterName($tenancy) => $this->getPattern(),
+        ];
+    }
+
+    /**
+     * Apply the route parameter pattern mapping to a route
+     *
+     * This method applies the route parameter pattern mapping provided by
+     * {@see self::getParameterPatternMapping()} to a supplied route registrar,
+     * for a supplied tenancy.
+     *
+     * @template TenantClass of \Sprout\Contracts\Tenant
+     *
+     * @param RouteRegistrar       $registrar
+     * @param Tenancy<TenantClass> $tenancy
+     *
+     * @return RouteRegistrar
+     */
+    protected function applyParameterPatternMapping(RouteRegistrar $registrar, Tenancy $tenancy): RouteRegistrar
+    {
+        if (! $this->hasPattern()) {
+            return $registrar;
+        }
+
+        return $registrar->where($this->getParameterPatternMapping($tenancy));
     }
 }

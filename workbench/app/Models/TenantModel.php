@@ -16,11 +16,13 @@ class TenantModel extends Model implements Tenant, TenantHasResources
     /**
      * @use \Illuminate\Database\Eloquent\Factories\HasFactory<TenantModelFactory>
      */
-    use IsTenant, HasFactory, HasTenantResources;
-
-    protected $table = 'tenants';
+    use IsTenant;
+    use HasFactory;
+    use HasTenantResources;
 
     protected static string $factory = TenantModelFactory::class;
+
+    protected $table = 'tenants';
 
     protected $fillable = [
         'name',

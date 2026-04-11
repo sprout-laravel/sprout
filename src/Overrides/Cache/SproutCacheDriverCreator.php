@@ -17,12 +17,12 @@ use Sprout\Sprout;
 final class SproutCacheDriverCreator
 {
     /**
-     * @var \Illuminate\Contracts\Foundation\Application
+     * @var Application
      */
     private Application $app;
 
     /**
-     * @var \Illuminate\Cache\CacheManager
+     * @var CacheManager
      */
     private CacheManager $manager;
 
@@ -32,17 +32,17 @@ final class SproutCacheDriverCreator
     private array $config;
 
     /**
-     * @var \Sprout\Sprout
+     * @var Sprout
      */
     private Sprout $sprout;
 
     /**
      * Create a new instance
      *
-     * @param \Illuminate\Contracts\Foundation\Application $app
-     * @param \Illuminate\Cache\CacheManager               $manager
-     * @param array<string, mixed>                         $config
-     * @param \Sprout\Sprout                          $sprout
+     * @param Application          $app
+     * @param CacheManager         $manager
+     * @param array<string, mixed> $config
+     * @param Sprout               $sprout
      */
     public function __construct(Application $app, CacheManager $manager, array $config, Sprout $sprout)
     {
@@ -55,11 +55,11 @@ final class SproutCacheDriverCreator
     /**
      * Create the Sprout cache driver
      *
-     * @return \Illuminate\Contracts\Cache\Repository
+     * @return Repository
      *
-     * @throws \Sprout\Exceptions\MisconfigurationException
-     * @throws \Sprout\Exceptions\TenancyMissingException
-     * @throws \Sprout\Exceptions\TenantMissingException
+     * @throws MisconfigurationException
+     * @throws TenancyMissingException
+     * @throws TenantMissingException
      */
     public function __invoke(): Repository
     {
@@ -83,7 +83,7 @@ final class SproutCacheDriverCreator
             throw TenantMissingException::make($tenancy->getName());
         }
 
-        /** @var \Sprout\Contracts\Tenant $tenant */
+        /** @var Tenant $tenant */
         $tenant = $tenancy->tenant();
 
         // We need to know which store we're overriding to make tenanted
@@ -111,15 +111,15 @@ final class SproutCacheDriverCreator
      *
      * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param array<string, mixed>                        $config
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Contracts\Tenant               $tenant
+     * @param array<string, mixed> $config
+     * @param Tenancy<TenantClass> $tenancy
+     * @param Tenant               $tenant
      *
      * @phpstan-param TenantClass                         $tenant
      *
      * @return string
      */
-    protected function getStorePrefix(array $config, Tenancy $tenancy, Tenant $tenant): string
+    private function getStorePrefix(array $config, Tenancy $tenancy, Tenant $tenant): string
     {
         return (isset($config['prefix']) && is_string($config['prefix']) ? $config['prefix'] . '_' : '')
                . $tenancy->getName()

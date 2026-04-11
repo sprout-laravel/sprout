@@ -14,10 +14,8 @@ use Sprout\Contracts\TenantAware;
  * Sprout Database Session Handler
  *
  * This is a database session driver that wraps the default
- * {@see \Illuminate\Session\DatabaseSessionHandler} and adds a where clause
+ * {@see DatabaseSessionHandler} and adds a where clause
  * to the query to ensure sessions are tenanted.
- *
- * @package Overrides
  */
 class SproutDatabaseSessionHandler extends DatabaseSessionHandler implements TenantAware
 {
@@ -26,7 +24,7 @@ class SproutDatabaseSessionHandler extends DatabaseSessionHandler implements Ten
     /**
      * Get a fresh query builder instance for the table.
      *
-     * @return \Illuminate\Database\Query\Builder
+     * @return Builder
      *
      * @throws \Sprout\Exceptions\TenantMissingException
      * @throws \Sprout\Exceptions\TenancyMissingException
@@ -42,9 +40,8 @@ class SproutDatabaseSessionHandler extends DatabaseSessionHandler implements Ten
 
         /**
          * @var \Sprout\Contracts\Tenancy<*> $tenancy
-         * @var \Sprout\Contracts\Tenant     $tenant
+         * @var \Sprout\Contracts\Tenant $tenant
          */
-
         $query = parent::getQuery();
 
         if ($write === false) {
@@ -71,9 +68,8 @@ class SproutDatabaseSessionHandler extends DatabaseSessionHandler implements Ten
 
             /**
              * @var \Sprout\Contracts\Tenancy<*> $tenancy
-             * @var \Sprout\Contracts\Tenant     $tenant
+             * @var \Sprout\Contracts\Tenant $tenant
              */
-
             $payload['tenancy']   = $tenancy->getName();
             $payload['tenant_id'] = $tenant->getTenantKey();
         }

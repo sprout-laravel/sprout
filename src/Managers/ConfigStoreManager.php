@@ -6,9 +6,9 @@ namespace Sprout\Managers;
 use Illuminate\Contracts\Encryption\Encrypter as EncrypterContract;
 use Illuminate\Encryption\Encrypter;
 use Illuminate\Support\Str;
+use Sprout\Exceptions\MisconfigurationException;
 use Sprout\Stores\DatabaseConfigStore;
 use Sprout\Stores\FilesystemConfigStore;
-use Sprout\Exceptions\MisconfigurationException;
 use Sprout\Support\BaseFactory;
 
 /**
@@ -47,13 +47,13 @@ class ConfigStoreManager extends BaseFactory
      * @param string|null $key
      * @param string|null $cipher
      *
-     * @return \Illuminate\Contracts\Encryption\Encrypter
+     * @return EncrypterContract
      *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
      */
     protected function getEncrypter(?string $key, ?string $cipher): EncrypterContract
     {
-        /** @var \Illuminate\Contracts\Encryption\Encrypter $encrypter */
+        /** @var EncrypterContract $encrypter */
         $encrypter = $key ? $this->buildEncrypter($key, $cipher) : $this->app->make('encrypter');
 
         return $encrypter;
@@ -65,7 +65,7 @@ class ConfigStoreManager extends BaseFactory
      * @param string      $key
      * @param string|null $cipher
      *
-     * @return \Illuminate\Contracts\Encryption\Encrypter
+     * @return EncrypterContract
      *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
      */
@@ -89,15 +89,14 @@ class ConfigStoreManager extends BaseFactory
      * @param array<string, mixed> $config
      * @param string               $name
      *
-     * @return \Sprout\Stores\FilesystemConfigStore
+     * @return FilesystemConfigStore
      *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
-     * @throws \Sprout\Exceptions\MisconfigurationException
+     * @throws MisconfigurationException
      */
     protected function createFilesystemConfig(array $config, string $name): FilesystemConfigStore
     {
         /** @var array{disk?:string,directory?:string,key?:string,cipher?:string|null} $config */
-
         if (! isset($config['disk'])) {
             throw MisconfigurationException::missingConfig('disk', 'config store', $name);
         }
@@ -116,7 +115,7 @@ class ConfigStoreManager extends BaseFactory
         return new FilesystemConfigStore(
             $name,
             $this->getEncrypter($config['key'] ?? null, $config['cipher'] ?? null),
-            $disk
+            $disk,
         );
     }
 
@@ -126,15 +125,14 @@ class ConfigStoreManager extends BaseFactory
      * @param array<string, mixed> $config
      * @param string               $name
      *
-     * @return \Sprout\Stores\DatabaseConfigStore
+     * @return DatabaseConfigStore
      *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
-     * @throws \Sprout\Exceptions\MisconfigurationException
+     * @throws MisconfigurationException
      */
     protected function createDatabaseConfig(array $config, string $name): DatabaseConfigStore
     {
         /** @var array{connection?:string|null,table?:string,key?:string,cipher?:string|null} $config */
-
         if (! isset($config['table'])) {
             throw MisconfigurationException::missingConfig('table', 'config store', $name);
         }
@@ -143,7 +141,7 @@ class ConfigStoreManager extends BaseFactory
             $name,
             $this->getEncrypter($config['key'] ?? null, $config['cipher'] ?? null),
             $this->app->make('db')->connection($config['connection'] ?? null),
-            $config['table']
+            $config['table'],
         );
     }
 }

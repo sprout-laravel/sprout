@@ -14,11 +14,12 @@ class NoResourcesTenantModel extends Model implements Tenant
     /**
      * @use \Illuminate\Database\Eloquent\Factories\HasFactory<NoResourcesTenantModelFactory>
      */
-    use IsTenant, HasFactory;
-
-    protected $table = 'tenants';
+    use IsTenant;
+    use HasFactory;
 
     protected static string $factory = NoResourcesTenantModelFactory::class;
+
+    protected $table = 'tenants';
 
     protected $fillable = [
         'name',

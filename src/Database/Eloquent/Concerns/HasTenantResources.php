@@ -12,13 +12,12 @@ use Sprout\Contracts\TenantHasResources;
  *
  * This trait provides helper methods alongside default implementations and
  * functionality to support a {@see \Sprout\Contracts\Tenant} model that also
- * implements the {@see \Sprout\Contracts\TenantHasResources} interface.
+ * implements the {@see TenantHasResources} interface.
  *
  * @phpstan-require-implements \Sprout\Contracts\Tenant
  * @phpstan-require-implements \Sprout\Contracts\TenantHasResources
- * @phpstan-require-extends \Illuminate\Database\Eloquent\Model
  *
- * @package        Database\Eloquent
+ * @phpstan-require-extends \Illuminate\Database\Eloquent\Model
  *
  * @phpstan-ignore trait.unused
  */
@@ -37,7 +36,7 @@ trait HasTenantResources
                     $model->getTenantResourceKeyName(),
                     method_exists($model, 'generateNewResourceKey')
                         ? $model->generateNewResourceKey()
-                        : Str::uuid()
+                        : Str::uuid(),
                 );
             }
         });
@@ -60,7 +59,7 @@ trait HasTenantResources
      */
     public function getTenantResourceKey(): string
     {
-        return (string)$this->getAttribute($this->getTenantResourceKeyName());
+        return (string) $this->getAttribute($this->getTenantResourceKeyName());
     }
 
     /**

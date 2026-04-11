@@ -11,5 +11,4 @@ namespace Sprout\Database\Eloquent\Contracts;
  */
 interface OptionalTenant
 {
-
 }

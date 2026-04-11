@@ -13,8 +13,6 @@ use Sprout\Database\Eloquent\Scopes\BelongsToTenantScope;
  * the relation between an Eloquent model and a {@see \Sprout\Contracts\Tenant},
  * using a belongs to relationship.
  *
- * @package        Database\Eloquent
- *
  * @phpstan-ignore trait.unused
  */
 trait BelongsToTenant

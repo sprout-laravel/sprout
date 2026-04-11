@@ -27,7 +27,7 @@ final class SproutFileSessionHandler extends FileSessionHandler implements Tenan
             return $this->path;
         }
 
-        /** @var \Sprout\Contracts\Tenant&\Sprout\Contracts\TenantHasResources $tenant */
+        /** @var Tenant&TenantHasResources $tenant */
         $tenant = $this->getTenant();
 
         return rtrim($this->path, DIRECTORY_SEPARATOR)
@@ -44,8 +44,8 @@ final class SproutFileSessionHandler extends FileSessionHandler implements Tenan
      */
     public function read($sessionId): string
     {
-        if ($this->files->isFile($path = $this->getPath() . '/' . $sessionId) &&
-            $this->files->lastModified($path) >= Carbon::now()->subMinutes($this->minutes)->getTimestamp()) {
+        if ($this->files->isFile($path = $this->getPath() . '/' . $sessionId)
+            && $this->files->lastModified($path) >= Carbon::now()->subMinutes($this->minutes)->getTimestamp()) {
             return $this->files->sharedGet($path);
         }
 
@@ -97,7 +97,7 @@ final class SproutFileSessionHandler extends FileSessionHandler implements Tenan
 
         foreach ($files as $file) {
             $this->files->delete($file->getRealPath());
-            $deletedSessions++;
+            ++$deletedSessions;
         }
 
         return $deletedSessions;

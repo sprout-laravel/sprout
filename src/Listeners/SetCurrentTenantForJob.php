@@ -11,21 +11,19 @@ use Sprout\Sprout;
 /**
  * Set Current Tenant For Job
  *
- * This class is an event listener for {@see \Illuminate\Queue\Events\JobProcessing}
+ * This class is an event listener for {@see JobProcessing}
  * that ensures there are current tenants when processing jobs, utilising
  * Laravels context service.
- *
- * @package Overrides
  */
 final class SetCurrentTenantForJob
 {
     /**
-     * @var \Sprout\Sprout
+     * @var Sprout
      */
     private Sprout $sprout;
 
     /**
-     * @var \Sprout\Managers\TenancyManager
+     * @var TenancyManager
      */
     private TenancyManager $tenancies;
 

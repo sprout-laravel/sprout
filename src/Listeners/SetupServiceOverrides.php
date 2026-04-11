@@ -9,22 +9,20 @@ use Sprout\Managers\ServiceOverrideManager;
 /**
  * Setup Service Overrides
  *
- * This class is an event listener for {@see \Sprout\Events\CurrentTenantChanged}
+ * This class is an event listener for {@see CurrentTenantChanged}
  * that sets up any service overrides using their setup action hook.
- *
- * @package Override
  */
 final class SetupServiceOverrides
 {
     /**
-     * @var \Sprout\Managers\ServiceOverrideManager
+     * @var ServiceOverrideManager
      */
     private ServiceOverrideManager $overrides;
 
     /**
      * Create a new instance
      *
-     * @param \Sprout\Managers\ServiceOverrideManager $overrides
+     * @param ServiceOverrideManager $overrides
      */
     public function __construct(ServiceOverrideManager $overrides)
     {
@@ -36,7 +34,7 @@ final class SetupServiceOverrides
      *
      * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Sprout\Events\CurrentTenantChanged<TenantClass> $event
+     * @param CurrentTenantChanged<TenantClass> $event
      *
      * @return void
      */

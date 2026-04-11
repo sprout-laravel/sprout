@@ -8,7 +8,7 @@ use Sprout\Sprout;
 /**
  * Bootable Service Override
  *
- * This contract marks a {@see \Sprout\Contracts\ServiceOverride} as being
+ * This contract marks a {@see ServiceOverride} as being
  * bootable, meaning that it can perform actions during the boot stage of the
  * framework.
  */
@@ -20,8 +20,8 @@ interface BootableServiceOverride extends ServiceOverride
      * This method should perform any initial steps required for the service
      * override that take place during the booting of the framework.
      *
-     * @param \Illuminate\Contracts\Foundation\Application $app
-     * @param \Sprout\Sprout                          $sprout
+     * @param Application $app
+     * @param Sprout      $sprout
      *
      * @return void
      */

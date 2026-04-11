@@ -15,7 +15,7 @@ use Sprout\Sprout;
 class SproutAuthCacheTokenRepository extends CacheTokenRepository
 {
     /**
-     * @var \Sprout\Sprout
+     * @var Sprout
      */
     private Sprout $sprout;
 
@@ -29,9 +29,8 @@ class SproutAuthCacheTokenRepository extends CacheTokenRepository
         string         $hashKey,
         int            $expires = 3600,
         int            $throttle = 60,
-        string         $prefix = ''
-    )
-    {
+        string         $prefix = '',
+    ) {
         parent::__construct($cache, $hasher, $hashKey, $expires, $throttle);
 
         $this->prefix = $prefix;
@@ -51,8 +50,8 @@ class SproutAuthCacheTokenRepository extends CacheTokenRepository
     /**
      * @return string
      *
-     * @throws \Sprout\Exceptions\TenancyMissingException
-     * @throws \Sprout\Exceptions\TenantMissingException
+     * @throws TenancyMissingException
+     * @throws TenantMissingException
      */
     public function getPrefix(): string
     {
@@ -70,10 +69,25 @@ class SproutAuthCacheTokenRepository extends CacheTokenRepository
     }
 
     /**
+     * Determine the cache key for the given user.
+     *
+     * @param CanResetPasswordContract $user
+     *
      * @return string
      *
-     * @throws \Sprout\Exceptions\TenancyMissingException
-     * @throws \Sprout\Exceptions\TenantMissingException
+     * @throws TenancyMissingException
+     * @throws TenantMissingException
+     */
+    public function cacheKey(CanResetPasswordContract $user): string
+    {
+        return hash('sha256', $this->getPrefix() . $user->getEmailForPasswordReset());
+    }
+
+    /**
+     * @return string
+     *
+     * @throws TenancyMissingException
+     * @throws TenantMissingException
      */
     protected function getTenantedPrefix(): string
     {
@@ -95,20 +109,5 @@ class SproutAuthCacheTokenRepository extends CacheTokenRepository
         $tenant = $tenancy->tenant();
 
         return $tenancy->getName() . '.' . ($tenant instanceof TenantHasResources ? $tenant->getTenantResourceKey() : $tenant->getTenantKey());
-    }
-
-    /**
-     * Determine the cache key for the given user.
-     *
-     * @param \Illuminate\Contracts\Auth\CanResetPassword $user
-     *
-     * @return string
-     *
-     * @throws \Sprout\Exceptions\TenancyMissingException
-     * @throws \Sprout\Exceptions\TenantMissingException
-     */
-    public function cacheKey(CanResetPasswordContract $user): string
-    {
-        return hash('sha256', $this->getPrefix() . $user->getEmailForPasswordReset());
     }
 }

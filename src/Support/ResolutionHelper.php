@@ -22,7 +22,7 @@ class ResolutionHelper
             [$resolverName, $tenancyName] = $options;
         } else if (count($options) === 1) {
             [$resolverName] = $options;
-            $tenancyName = null;
+            $tenancyName    = null;
         } else {
             $resolverName = $tenancyName = null;
         }
@@ -31,17 +31,17 @@ class ResolutionHelper
     }
 
     /**
-     * @param \Illuminate\Http\Request            $request
-     * @param \Sprout\Support\ResolutionHook $hook
-     * @param string|null                         $resolverName
-     * @param string|null                         $tenancyName
-     * @param bool                                $throw
+     * @param Request        $request
+     * @param ResolutionHook $hook
+     * @param string|null    $resolverName
+     * @param string|null    $tenancyName
+     * @param bool           $throw
      *
      * @return bool
      *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
-     * @throws \Sprout\Exceptions\MisconfigurationException
-     * @throws \Sprout\Exceptions\NoTenantFoundException
+     * @throws MisconfigurationException
+     * @throws NoTenantFoundException
      */
     public static function handleResolution(
         Request        $request,
@@ -50,9 +50,8 @@ class ResolutionHelper
         ?string        $resolverName = null,
         ?string        $tenancyName = null,
         bool           $throw = true,
-        bool           $optional = false
-    ): bool
-    {
+        bool           $optional = false,
+    ): bool {
         // Set the current hook
         $sprout->setCurrentHook($hook);
 
@@ -65,10 +64,9 @@ class ResolutionHelper
         $tenancy  = $sprout->tenancies()->get($tenancyName);
 
         /**
-         * @var \Sprout\Contracts\IdentityResolver                       $resolver
+         * @var \Sprout\Contracts\IdentityResolver                  $resolver
          * @var \Sprout\Contracts\Tenancy<\Sprout\Contracts\Tenant> $tenancy
          */
-
         if ($tenancy->check() || ! $resolver->canResolve($request, $tenancy, $hook)) {
             return false;
         }

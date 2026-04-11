@@ -17,7 +17,7 @@ class TooManyTenantRelationModel extends Model
     protected $table = 'tenant_child1';
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\Workbench\App\Models\TenantModel, self>
+     * @return BelongsTo<TenantModel, self>
      */
     #[TenantRelation]
     public function tenant(): BelongsTo
@@ -26,7 +26,7 @@ class TooManyTenantRelationModel extends Model
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<\Workbench\App\Models\TenantModel>
+     * @return BelongsToMany<TenantModel>
      */
     #[TenantRelation]
     public function tenants(): BelongsToMany

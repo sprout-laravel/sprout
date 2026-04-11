@@ -36,20 +36,118 @@ final class StackedOverride extends BaseOverride implements BootableServiceOverr
         }
 
         /** @var array{overrides:array<int, class-string<OverrideClass>|array<string, mixed>|OverrideClass>} $config */
-
         $this->overridesClasses = $config['overrides'];
+    }
+
+    /**
+     * Set up the service override
+     *
+     * This method should perform any necessary setup actions for the service
+     * override.
+     * It is called when a new tenant is marked as the current tenant.
+     *
+     * @template TenantClass of \Sprout\Contracts\Tenant
+     *
+     * @param Tenancy<TenantClass> $tenancy
+     * @param Tenant               $tenant
+     *
+     * @phpstan-param TenantClass                         $tenant
+     *
+     * @return void
+     */
+    public function setup(Tenancy $tenancy, Tenant $tenant): void
+    {
+        foreach ($this->overrides as $override) {
+            $override->setup($tenancy, $tenant);
+        }
+    }
+
+    /**
+     * Get the created overrides
+     *
+     * @return array<class-string<OverrideClass>, OverrideClass>
+     */
+    public function getOverrides(): array
+    {
+        return $this->overrides;
+    }
+
+    /**
+     * @template ServiceOverrideClass of OverrideClass
+     *
+     * @param class-string<ServiceOverrideClass> $class
+     *
+     * @return ServiceOverride|null
+     *
+     * @phpstan-require-implements ServiceOverrideClass|null
+     */
+    public function getOverride(string $class): ?ServiceOverride
+    {
+        return $this->overrides[$class] ?? null;
+    }
+
+    /**
+     * Boot a service override
+     *
+     * This method should perform any initial steps required for the service
+     * override that take place during the booting of the framework.
+     *
+     * @param Application $app
+     * @param Sprout      $sprout
+     *
+     * @return void
+     *
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws MisconfigurationException
+     */
+    public function boot(Application $app, Sprout $sprout): void
+    {
+        $this->createOverrides($app, $sprout);
+
+        foreach ($this->overrides as $override) {
+            if ($override instanceof BootableServiceOverride) {
+                $override->boot($app, $sprout);
+            }
+        }
+    }
+
+    /**
+     * Clean up the service override
+     *
+     * This method should perform any necessary setup actions for the service
+     * override.
+     * It is called when the current tenant is unset, either to be replaced
+     * by another tenant, or none.
+     *
+     * It will be called before {@see self::setup()}, but only if the previous
+     * tenant was not null.
+     *
+     * @template TenantClass of \Sprout\Contracts\Tenant
+     *
+     * @param Tenancy<TenantClass> $tenancy
+     * @param Tenant               $tenant
+     *
+     * @phpstan-param TenantClass                         $tenant
+     *
+     * @return void
+     */
+    public function cleanup(Tenancy $tenancy, Tenant $tenant): void
+    {
+        foreach ($this->overrides as $override) {
+            $override->cleanup($tenancy, $tenant);
+        }
     }
 
     /**
      * Create the overrides from the config
      *
-     * @param \Illuminate\Contracts\Foundation\Application $app
-     * @param \Sprout\Sprout                          $sprout
+     * @param Application $app
+     * @param Sprout      $sprout
      *
      * @return void
      *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
-     * @throws \Sprout\Exceptions\MisconfigurationException
+     * @throws MisconfigurationException
      */
     protected function createOverrides(Application $app, Sprout $sprout): void
     {
@@ -82,7 +180,6 @@ final class StackedOverride extends BaseOverride implements BootableServiceOverr
                 /** @phpstan-ignore function.alreadyNarrowedType */
             } else if (is_array($value)) {
                 /** @var array{driver?: scalar} $value */
-
                 if (! isset($value['driver'])) {
                     throw MisconfigurationException::missingConfig('overrides.*.driver', 'service override', $this->service);
                 }
@@ -105,7 +202,6 @@ final class StackedOverride extends BaseOverride implements BootableServiceOverr
             }
 
             /** @var OverrideClass $override */
-
             if (method_exists($override, 'setApp')) {
                 $override->setApp($app);
             }
@@ -115,105 +211,6 @@ final class StackedOverride extends BaseOverride implements BootableServiceOverr
             }
 
             $this->overrides[$overrideClass] = $override;
-        }
-    }
-
-    /**
-     * Get the created overrides
-     *
-     * @return array<class-string<OverrideClass>, OverrideClass>
-     */
-    public function getOverrides(): array
-    {
-        return $this->overrides;
-    }
-
-    /**
-     * @template ServiceOverrideClass of OverrideClass
-     *
-     * @param class-string<ServiceOverrideClass> $class
-     *
-     * @return \Sprout\Contracts\ServiceOverride|null
-     *
-     * @phpstan-require-implements ServiceOverrideClass|null
-     */
-    public function getOverride(string $class): ?ServiceOverride
-    {
-        return $this->overrides[$class] ?? null;
-    }
-
-    /**
-     * Boot a service override
-     *
-     * This method should perform any initial steps required for the service
-     * override that take place during the booting of the framework.
-     *
-     * @param \Illuminate\Contracts\Foundation\Application $app
-     * @param \Sprout\Sprout                          $sprout
-     *
-     * @return void
-     *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
-     * @throws \Sprout\Exceptions\MisconfigurationException
-     */
-    public function boot(Application $app, Sprout $sprout): void
-    {
-        $this->createOverrides($app, $sprout);
-
-        foreach ($this->overrides as $override) {
-            if ($override instanceof BootableServiceOverride) {
-                $override->boot($app, $sprout);
-            }
-        }
-    }
-
-    /**
-     * Set up the service override
-     *
-     * This method should perform any necessary setup actions for the service
-     * override.
-     * It is called when a new tenant is marked as the current tenant.
-     *
-     * @template TenantClass of \Sprout\Contracts\Tenant
-     *
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Contracts\Tenant               $tenant
-     *
-     * @phpstan-param TenantClass                         $tenant
-     *
-     * @return void
-     */
-    public function setup(Tenancy $tenancy, Tenant $tenant): void
-    {
-        foreach ($this->overrides as $override) {
-            $override->setup($tenancy, $tenant);
-        }
-    }
-
-    /**
-     * Clean up the service override
-     *
-     * This method should perform any necessary setup actions for the service
-     * override.
-     * It is called when the current tenant is unset, either to be replaced
-     * by another tenant, or none.
-     *
-     * It will be called before {@see self::setup()}, but only if the previous
-     * tenant was not null.
-     *
-     * @template TenantClass of \Sprout\Contracts\Tenant
-     *
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Contracts\Tenant               $tenant
-     *
-     * @phpstan-param TenantClass                         $tenant
-     *
-     * @return void
-     */
-    public function cleanup(Tenancy $tenancy, Tenant $tenant): void
-    {
-        foreach ($this->overrides as $override) {
-            $override->cleanup($tenancy, $tenant);
         }
     }
 }

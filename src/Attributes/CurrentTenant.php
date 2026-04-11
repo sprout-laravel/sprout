@@ -16,8 +16,6 @@ use Sprout\Managers\TenancyManager;
  * current tenant for the default, or a given tenancy.
  *
  * @see     https://laravel.com/docs/12.x/container#contextual-attributes
- *
- * @package Core
  */
 #[Attribute(Attribute::TARGET_PARAMETER)]
 final readonly class CurrentTenant implements ContextualAttribute
@@ -42,10 +40,11 @@ final readonly class CurrentTenant implements ContextualAttribute
     /**
      * Resolve the tenant using this attribute
      *
-     * @param \Sprout\Attributes\CurrentTenant $tenant
-     * @param \Illuminate\Container\Container       $container
+     * @param CurrentTenant $tenant
+     * @param Container     $container
      *
-     * @return \Sprout\Contracts\Tenant|null
+     * @return Tenant|null
+     *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
      */
     public function resolve(self $tenant, Container $container): ?Tenant

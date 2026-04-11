@@ -8,7 +8,7 @@ use Sprout\Contracts\Tenant;
 /**
  * Generic Tenant
  *
- * This is a default implementation of the {@see \Sprout\Contracts\Tenant}
+ * This is a default implementation of the {@see Tenant}
  * interface for the use with {@see \Sprout\Providers\DatabaseTenantProvider}
  * as the tenant entity.
  *
@@ -35,6 +35,55 @@ class GenericTenant implements Tenant
     public function __construct(array $attributes = [])
     {
         $this->attributes = $attributes;
+    }
+
+    /**
+     * Dynamically access the tenant's attributes.
+     *
+     * @param string $key
+     *
+     * @return mixed
+     */
+    public function __get(string $key): mixed
+    {
+        return $this->attributes[$key];
+    }
+
+    /**
+     * Dynamically set an attribute on the tenant.
+     *
+     * @param string $key
+     * @param mixed  $value
+     *
+     * @return void
+     */
+    public function __set(string $key, mixed $value): void
+    {
+        $this->attributes[$key] = $value;
+    }
+
+    /**
+     * Dynamically check if a value is set on the tenant.
+     *
+     * @param string $key
+     *
+     * @return bool
+     */
+    public function __isset(string $key): bool
+    {
+        return isset($this->attributes[$key]);
+    }
+
+    /**
+     * Dynamically unset a value on the tenant.
+     *
+     * @param string $key
+     *
+     * @return void
+     */
+    public function __unset(string $key): void
+    {
+        unset($this->attributes[$key]);
     }
 
     /**
@@ -89,54 +138,5 @@ class GenericTenant implements Tenant
     public function getTenantKeyName(): string
     {
         return 'id';
-    }
-
-    /**
-     * Dynamically access the tenant's attributes.
-     *
-     * @param string $key
-     *
-     * @return mixed
-     */
-    public function __get(string $key): mixed
-    {
-        return $this->attributes[$key];
-    }
-
-    /**
-     * Dynamically set an attribute on the tenant.
-     *
-     * @param string $key
-     * @param mixed  $value
-     *
-     * @return void
-     */
-    public function __set(string $key, mixed $value): void
-    {
-        $this->attributes[$key] = $value;
-    }
-
-    /**
-     * Dynamically check if a value is set on the tenant.
-     *
-     * @param string $key
-     *
-     * @return bool
-     */
-    public function __isset(string $key): bool
-    {
-        return isset($this->attributes[$key]);
-    }
-
-    /**
-     * Dynamically unset a value on the tenant.
-     *
-     * @param string $key
-     *
-     * @return void
-     */
-    public function __unset(string $key): void
-    {
-        unset($this->attributes[$key]);
     }
 }

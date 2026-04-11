@@ -13,14 +13,15 @@ use Workbench\Database\Factories\TenantChildFactory;
 class TenantChild extends Model
 {
     /** @use \Illuminate\Database\Eloquent\Factories\HasFactory<\Workbench\Database\Factories\TenantChildFactory> */
-    use HasFactory, BelongsToTenant;
-
-    protected $table = 'tenant_child1';
+    use HasFactory;
+    use BelongsToTenant;
 
     protected static string $factory = TenantChildFactory::class;
 
+    protected $table = 'tenant_child1';
+
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\Workbench\App\Models\TenantModel, $this>
+     * @return BelongsTo<TenantModel, $this>
      */
     #[TenantRelation]
     public function tenant(): BelongsTo

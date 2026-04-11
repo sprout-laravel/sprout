@@ -13,8 +13,6 @@ use Attribute;
  *
  * This is primarily used in the tenant child/descendant functionality that
  * comes with Sprout.
- *
- * @package Database\Eloquent
  */
 #[Attribute(Attribute::TARGET_METHOD)]
 final class TenantRelation

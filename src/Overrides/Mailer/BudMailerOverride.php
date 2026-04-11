@@ -32,10 +32,10 @@ final class BudMailerOverride extends BudBaseOverride
     /**
      * Add a driver to the service.
      *
-     * @param object                               $service
-     * @param \Sprout\Bud                 $bud
-     * @param \Sprout\Sprout                  $sprout
-     * @param \Closure                             $tracker
+     * @param object  $service
+     * @param Bud     $bud
+     * @param Sprout  $sprout
+     * @param Closure $tracker
      *
      * @phpstan-param \Illuminate\Mail\MailManager $service
      *
@@ -48,7 +48,6 @@ final class BudMailerOverride extends BudBaseOverride
             /**
              * @var array<string, mixed>&array{budStore?:string|null,name?:mixed} $config
              */
-
             if (! isset($config['name']) || ! is_string($config['name']) || $config['name'] === '') {
                 throw new RuntimeException('Cannot create a mailer using bud without a name'); // @codeCoverageIgnore
             }
@@ -63,8 +62,8 @@ final class BudMailerOverride extends BudBaseOverride
     /**
      * Clean-up an overridden service.
      *
-     * @param object                               $service
-     * @param string                               $name
+     * @param object $service
+     * @param string $name
      *
      * @phpstan-param \Illuminate\Mail\MailManager $service
      *

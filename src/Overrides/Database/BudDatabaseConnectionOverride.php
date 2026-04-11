@@ -5,9 +5,7 @@ namespace Sprout\Overrides\Database;
 
 use Closure;
 use Sprout\Bud;
-use Sprout\Overrides\BaseOverride;
 use Sprout\Overrides\BudBaseOverride;
-use Sprout\Overrides\Database\BudDatabaseConnectionCreator;
 use Sprout\Sprout;
 
 /**
@@ -33,10 +31,10 @@ final class BudDatabaseConnectionOverride extends BudBaseOverride
     /**
      * Add a driver to the service.
      *
-     * @param object                                       $service
-     * @param \Sprout\Bud                         $bud
-     * @param \Sprout\Sprout                          $sprout
-     * @param \Closure                                     $tracker
+     * @param object  $service
+     * @param Bud     $bud
+     * @param Sprout  $sprout
+     * @param Closure $tracker
      *
      * @phpstan-param \Illuminate\Database\DatabaseManager $service
      *
@@ -61,8 +59,8 @@ final class BudDatabaseConnectionOverride extends BudBaseOverride
     /**
      * Clean-up an overridden service.
      *
-     * @param object                                       $service
-     * @param string                                       $name
+     * @param object $service
+     * @param string $name
      *
      * @phpstan-param \Illuminate\Database\DatabaseManager $service
      *

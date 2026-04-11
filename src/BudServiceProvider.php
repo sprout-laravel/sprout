@@ -21,6 +21,12 @@ class BudServiceProvider extends ServiceProvider
         $this->registerManagers();
     }
 
+    public function boot(): void
+    {
+        $this->publishConfig();
+        $this->publishMigrations();
+    }
+
     private function registerBud(): void
     {
         $this->bud = new Bud($this->app);
@@ -42,12 +48,6 @@ class BudServiceProvider extends ServiceProvider
 
         // Alias the managers with simple names
         $this->app->alias(ConfigStoreManager::class, 'sprout.bud.stores');
-    }
-
-    public function boot(): void
-    {
-        $this->publishConfig();
-        $this->publishMigrations();
     }
 
     private function publishConfig(): void

@@ -25,13 +25,6 @@ abstract class BudBaseOverride extends SproutBaseOverride implements BootableSer
     protected bool $tracksOverrides = true;
 
     /**
-     * Get the name of the service being overridden.
-     *
-     * @return string
-     */
-    abstract protected function serviceName(): string;
-
-    /**
      * Get the overridden driver names.
      *
      * @return string[]
@@ -47,8 +40,8 @@ abstract class BudBaseOverride extends SproutBaseOverride implements BootableSer
      * This method should perform any initial steps required for the service
      * override that take place during the booting of the framework.
      *
-     * @param \Illuminate\Contracts\Foundation\Application $app
-     * @param \Sprout\Sprout                          $sprout
+     * @param Application $app
+     * @param Sprout      $sprout
      *
      * @return void
      *
@@ -70,24 +63,10 @@ abstract class BudBaseOverride extends SproutBaseOverride implements BootableSer
                 function (object $service, Application $app) use ($sprout, $tracker) {
                     /** @var OverrideService $service */
                     $this->addDriver($service, $app->make(Bud::class), $sprout, $tracker);
-                }
+                },
             );
         }
     }
-
-    /**
-     * Add a driver to the service.
-     *
-     * @param object                  $service
-     * @param \Sprout\Bud    $bud
-     * @param \Sprout\Sprout     $sprout
-     * @param \Closure                $tracker
-     *
-     * @phpstan-param OverrideService $service
-     *
-     * @return void
-     */
-    abstract protected function addDriver(object $service, Bud $bud, Sprout $sprout, Closure $tracker): void;
 
     /**
      * Clean up the service override
@@ -102,8 +81,8 @@ abstract class BudBaseOverride extends SproutBaseOverride implements BootableSer
      *
      * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Contracts\Tenant               $tenant
+     * @param Tenancy<TenantClass> $tenancy
+     * @param Tenant               $tenant
      *
      * @phpstan-param TenantClass                         $tenant
      *
@@ -135,10 +114,31 @@ abstract class BudBaseOverride extends SproutBaseOverride implements BootableSer
     }
 
     /**
+     * Get the name of the service being overridden.
+     *
+     * @return string
+     */
+    abstract protected function serviceName(): string;
+
+    /**
+     * Add a driver to the service.
+     *
+     * @param object  $service
+     * @param Bud     $bud
+     * @param Sprout  $sprout
+     * @param Closure $tracker
+     *
+     * @phpstan-param OverrideService $service
+     *
+     * @return void
+     */
+    abstract protected function addDriver(object $service, Bud $bud, Sprout $sprout, Closure $tracker): void;
+
+    /**
      * Clean-up an overridden service.
      *
-     * @param object                  $service
-     * @param string                  $name
+     * @param object $service
+     * @param string $name
      *
      * @phpstan-param OverrideService $service
      *

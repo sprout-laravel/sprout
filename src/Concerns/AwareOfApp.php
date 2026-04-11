@@ -8,7 +8,7 @@ use Illuminate\Contracts\Foundation\Application;
 trait AwareOfApp
 {
     /**
-     * @var \Illuminate\Contracts\Foundation\Application
+     * @var Application
      */
     private Application $app;
 

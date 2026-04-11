@@ -13,14 +13,12 @@ use Sprout\Support\BaseTenantProvider;
  * Eloquent Tenant Provider
  *
  * This class provides an implementation of the {@see \Sprout\Contracts\TenantProvider}
- * contract for situations where the {@see \Sprout\Contracts\Tenant} is an
+ * contract for situations where the {@see Tenant} is an
  * Eloquent model.
  *
  * @template TenantModel of \Illuminate\Database\Eloquent\Model&\Sprout\Contracts\Tenant
  *
  * @extends \Sprout\Support\BaseTenantProvider<TenantModel>
- *
- * @package  Providers
  *
  * @internal New instances are created with {@see \Sprout\Managers\TenantProviderManager::createEloquentProvider()}, and shouldn't be created manually
  */
@@ -38,7 +36,7 @@ final class EloquentTenantProvider extends BaseTenantProvider
     /**
      * A model instance to work from
      *
-     * @var \Illuminate\Database\Eloquent\Model
+     * @var Model
      *
      * @phpstan-var TenantModel
      */
@@ -47,8 +45,8 @@ final class EloquentTenantProvider extends BaseTenantProvider
     /**
      * Create a new instance of the eloquent tenant provider
      *
-     * @param string                            $name
-     * @param class-string                      $modelClass
+     * @param string       $name
+     * @param class-string $modelClass
      *
      * @phpstan-param class-string<TenantModel> $modelClass
      */
@@ -72,22 +70,6 @@ final class EloquentTenantProvider extends BaseTenantProvider
     }
 
     /**
-     * Get an instance of the tenant model
-     *
-     * @return \Illuminate\Database\Eloquent\Model&\Sprout\Contracts\Tenant
-     *
-     * @phpstan-return TenantModel
-     */
-    private function getModel(): Model&Tenant
-    {
-        if (! isset($this->model)) {
-            $this->model = new $this->modelClass();
-        }
-
-        return $this->model;
-    }
-
-    /**
      * Retrieve a tenant by its identifier
      *
      * Gets an instance of the tenant implementation the provider represents,
@@ -95,10 +77,10 @@ final class EloquentTenantProvider extends BaseTenantProvider
      *
      * @param string $identifier
      *
-     * @return \Sprout\Contracts\Tenant|null
+     * @return Tenant|null
      *
-     * @see \Sprout\Contracts\Tenant::getTenantIdentifier()
-     * @see \Sprout\Contracts\Tenant::getTenantIdentifierName()
+     * @see Tenant::getTenantIdentifier()
+     * @see Tenant::getTenantIdentifierName()
      *
      * @phpstan-return TenantModel|null
      */
@@ -120,10 +102,10 @@ final class EloquentTenantProvider extends BaseTenantProvider
      *
      * @param int|string $key
      *
-     * @return \Sprout\Contracts\Tenant|null
+     * @return Tenant|null
      *
-     * @see \Sprout\Contracts\Tenant::getTenantKey()
-     * @see \Sprout\Contracts\Tenant::getTenantKeyName()
+     * @see Tenant::getTenantKey()
+     * @see Tenant::getTenantKeyName()
      *
      * @phpstan-return TenantModel|null
      */
@@ -142,31 +124,47 @@ final class EloquentTenantProvider extends BaseTenantProvider
      *
      * Gets an instance of the tenant implementation the provider represents,
      * using a resource key.
-     * The tenant class must implement the {@see \Sprout\Contracts\TenantHasResources}
+     * The tenant class must implement the {@see TenantHasResources}
      * interface for this method to work.
      *
      * @param string $resourceKey
      *
-     * @return (\Sprout\Contracts\Tenant&\Sprout\Contracts\TenantHasResources)|null
+     * @return (Tenant&TenantHasResources)|null
      *
-     * @throws \Sprout\Exceptions\MisconfigurationException
+     * @phpstan-return (TenantModel&TenantHasResources)|null
      *
-     * @phpstan-return (TenantModel&\Sprout\Contracts\TenantHasResources)|null
+     * @throws MisconfigurationException
      *
-     * @see \Sprout\Contracts\TenantHasResources::getTenantResourceKeyName()
-     * @see \Sprout\Contracts\TenantHasResources::getTenantResourceKey()
+     * @see TenantHasResources::getTenantResourceKeyName()
+     * @see TenantHasResources::getTenantResourceKey()
      */
     public function retrieveByResourceKey(string $resourceKey): (Tenant&TenantHasResources)|null
     {
         $model = $this->getModel();
 
-        if (! ($model instanceof TenantHasResources)) {
+        if (! $model instanceof TenantHasResources) {
             throw MisconfigurationException::misconfigured('tenant', $model::class, 'resources');
         }
 
-        /** @var (TenantModel&\Sprout\Contracts\TenantHasResources)|null */
+        /** @var (TenantModel&TenantHasResources)|null */
         return $model->newModelQuery()
                      ->where($model->getTenantResourceKeyName(), $resourceKey)
                      ->first();
+    }
+
+    /**
+     * Get an instance of the tenant model
+     *
+     * @return Model&Tenant
+     *
+     * @phpstan-return TenantModel
+     */
+    private function getModel(): Model&Tenant
+    {
+        if (! isset($this->model)) {
+            $this->model = new $this->modelClass();
+        }
+
+        return $this->model;
     }
 }

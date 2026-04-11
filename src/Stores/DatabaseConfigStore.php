@@ -12,7 +12,7 @@ use Sprout\Contracts\Tenant;
 final class DatabaseConfigStore extends BaseConfigStore
 {
     /**
-     * @var \Illuminate\Database\ConnectionInterface
+     * @var ConnectionInterface
      */
     private ConnectionInterface $connection;
 
@@ -22,9 +22,8 @@ final class DatabaseConfigStore extends BaseConfigStore
         string              $name,
         Encrypter           $encrypter,
         ConnectionInterface $connection,
-        string              $table
-    )
-    {
+        string              $table,
+    ) {
         parent::__construct($name, $encrypter);
 
         $this->connection = $connection;
@@ -42,38 +41,15 @@ final class DatabaseConfigStore extends BaseConfigStore
     }
 
     /**
-     * Get a query builder for the config store
-     *
-     * @template TenantClass of \Sprout\Contracts\Tenant
-     *
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Contracts\Tenant               $tenant
-     * @param string                                 $service
-     * @param string                                 $name
-     *
-     * @phpstan-param TenantClass                    $tenant
-     *
-     * @return \Illuminate\Database\Query\Builder
-     */
-    protected function getQuery(Tenancy $tenancy, Tenant $tenant, string $service, string $name): Builder
-    {
-        return $this->connection->table($this->table)
-                                ->where('tenancy', '=', $tenancy->getName())
-                                ->where('tenant_id', '=', $tenant->getTenantKey())
-                                ->where('service', '=', $service)
-                                ->where('name', '=', $name);
-    }
-
-    /**
      * Get a config value from the store
      *
      * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Contracts\Tenant               $tenant
-     * @param string                                 $service
-     * @param string                                 $name
-     * @param array<string, mixed>|null              $default
+     * @param Tenancy<TenantClass>      $tenancy
+     * @param Tenant                    $tenant
+     * @param string                    $service
+     * @param string                    $name
+     * @param array<string, mixed>|null $default
      *
      * @phpstan-param Tenant                         $tenant
      *
@@ -85,7 +61,6 @@ final class DatabaseConfigStore extends BaseConfigStore
                       ->value('config');
 
         /** @var string|null $value */
-
         if ($value === null) {
             return $default;
         }
@@ -98,10 +73,10 @@ final class DatabaseConfigStore extends BaseConfigStore
      *
      * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Contracts\Tenant               $tenant
-     * @param string                                 $service
-     * @param string                                 $name
+     * @param Tenancy<TenantClass> $tenancy
+     * @param Tenant               $tenant
+     * @param string               $service
+     * @param string               $name
      *
      * @phpstan-param Tenant                         $tenant
      *
@@ -123,11 +98,11 @@ final class DatabaseConfigStore extends BaseConfigStore
      *
      * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Contracts\Tenant               $tenant
-     * @param string                                 $service
-     * @param string                                 $name
-     * @param array<string, mixed>                   $config
+     * @param Tenancy<TenantClass> $tenancy
+     * @param Tenant               $tenant
+     * @param string               $service
+     * @param string               $name
+     * @param array<string, mixed> $config
      *
      * @phpstan-param Tenant                         $tenant
      *
@@ -161,11 +136,11 @@ final class DatabaseConfigStore extends BaseConfigStore
      *
      * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Contracts\Tenant               $tenant
-     * @param string                                 $service
-     * @param string                                 $name
-     * @param array<string, mixed>                   $config
+     * @param Tenancy<TenantClass> $tenancy
+     * @param Tenant               $tenant
+     * @param string               $service
+     * @param string               $name
+     * @param array<string, mixed> $config
      *
      * @phpstan-param Tenant                         $tenant
      *
@@ -181,6 +156,7 @@ final class DatabaseConfigStore extends BaseConfigStore
 
         /**
          * This is here because Laravel doesn't honour its own return type
+         *
          * @phpstan-ignore notIdentical.alwaysTrue
          */
         return $this->connection->table($this->table)
@@ -191,5 +167,28 @@ final class DatabaseConfigStore extends BaseConfigStore
                                     'name'      => $name,
                                     'config'    => $this->encryptConfig($config),
                                 ]) !== 0;
+    }
+
+    /**
+     * Get a query builder for the config store
+     *
+     * @template TenantClass of \Sprout\Contracts\Tenant
+     *
+     * @param Tenancy<TenantClass> $tenancy
+     * @param Tenant               $tenant
+     * @param string               $service
+     * @param string               $name
+     *
+     * @phpstan-param TenantClass                    $tenant
+     *
+     * @return Builder
+     */
+    protected function getQuery(Tenancy $tenancy, Tenant $tenant, string $service, string $name): Builder
+    {
+        return $this->connection->table($this->table)
+                                ->where('tenancy', '=', $tenancy->getName())
+                                ->where('tenant_id', '=', $tenant->getTenantKey())
+                                ->where('service', '=', $service)
+                                ->where('name', '=', $name);
     }
 }

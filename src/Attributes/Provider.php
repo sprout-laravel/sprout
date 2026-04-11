@@ -16,8 +16,6 @@ use Sprout\Managers\TenantProviderManager;
  * tenant provider using its registered name, or the default.
  *
  * @see     https://laravel.com/docs/12.x/container#contextual-attributes
- *
- * @package Core
  */
 #[Attribute(Attribute::TARGET_PARAMETER)]
 final readonly class Provider implements ContextualAttribute
@@ -40,8 +38,8 @@ final readonly class Provider implements ContextualAttribute
     /**
      * Resolve the tenancy using this attribute
      *
-     * @param \Sprout\Attributes\Provider $attribute
-     * @param \Illuminate\Container\Container  $container
+     * @param Provider  $attribute
+     * @param Container $container
      *
      * @return \Sprout\Contracts\TenantProvider<*>
      *

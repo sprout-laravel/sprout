@@ -5,9 +5,8 @@ namespace Sprout\Overrides\Filesystem;
 
 use Illuminate\Contracts\Foundation\Application;
 use Sprout\Contracts\BootableServiceOverride;
-use Sprout\Overrides\Filesystem\SproutFilesystemManager;
-use Sprout\Sprout;
 use Sprout\Overrides\BaseOverride;
+use Sprout\Sprout;
 
 final class FilesystemManagerOverride extends BaseOverride implements BootableServiceOverride
 {
@@ -17,8 +16,8 @@ final class FilesystemManagerOverride extends BaseOverride implements BootableSe
      * This method should perform any initial steps required for the service
      * override that take place during the booting of the framework.
      *
-     * @param \Illuminate\Contracts\Foundation\Application $app
-     * @param \Sprout\Sprout                          $sprout
+     * @param Application $app
+     * @param Sprout      $sprout
      *
      * @return void
      *

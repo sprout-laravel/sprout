@@ -15,8 +15,8 @@ use Sprout\Contracts\Tenant;
  * It is an abstract base class that exists so that developers can listen to
  * all events where tenants are found, regardless of the method used.
  *
- * @see            \Sprout\Events\TenantIdentified
- * @see            \Sprout\Events\TenantLoaded
+ * @see            TenantIdentified
+ * @see            TenantLoaded
  *
  * @template TenantClass of Tenant
  *
@@ -35,16 +35,16 @@ abstract readonly class TenantFound
     /**
      * The tenancy whose tenant was found
      *
-     * @var \Sprout\Contracts\Tenancy
+     * @var Tenancy
      *
-     * @phpstan-var \Sprout\Contracts\Tenancy<TenantClass>
+     * @phpstan-var Tenancy<TenantClass>
      */
     public Tenancy $tenancy;
 
     /**
      * The tenant that was found
      *
-     * @var \Sprout\Contracts\Tenant
+     * @var Tenant
      *
      * @phpstan-var TenantClass
      */
@@ -53,17 +53,16 @@ abstract readonly class TenantFound
     /**
      * Create a new instance
      *
-     * @param \Sprout\Contracts\Tenant                       $tenant
-     * @param \Sprout\Contracts\Tenancy                      $tenancy
+     * @param Tenant  $tenant
+     * @param Tenancy $tenancy
      *
      * @phpstan-param TenantClass                                 $tenant
-     * @phpstan-param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
+     * @phpstan-param Tenancy<TenantClass> $tenancy
      */
     public function __construct(
         Tenant  $tenant,
         Tenancy $tenancy,
-    )
-    {
+    ) {
         $this->tenant  = $tenant;
         $this->tenancy = $tenancy;
     }

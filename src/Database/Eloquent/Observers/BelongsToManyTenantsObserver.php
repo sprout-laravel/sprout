@@ -10,6 +10,7 @@ use Sprout\Contracts\Tenant;
 use Sprout\Exceptions\TenantMismatchException;
 use Sprout\Exceptions\TenantMissingException;
 use Sprout\TenancyOptions;
+
 use function Sprout\sprout;
 
 /**
@@ -23,19 +24,147 @@ use function Sprout\sprout;
  * @template TenantModel of \Illuminate\Database\Eloquent\Model&\Sprout\Contracts\Tenant
  *
  * @see     \Sprout\Database\Eloquent\Concerns\BelongsToManyTenants
- *
- * @package Database\Eloquent
  */
 class BelongsToManyTenantsObserver
 {
     private bool $loadedRelation = false;
 
     /**
+     * Handle the created event on the model
+     *
+     * The created event is fired after a model is persisted to the database.
+     *
+     * @param Model&\Sprout\Database\Eloquent\Concerns\BelongsToManyTenants $model
+     *
+     * @phpstan-param ChildModel                                                                               $model
+     *
+     * @return void
+     *
+     * @throws TenantMissingException
+     * @throws TenantMismatchException
+     */
+    public function created(Model $model): void
+    {
+        if (! sprout()->withinContext()) {
+            return;
+        }
+
+        /**
+         * @var BelongsToMany<ChildModel, TenantModel> $relation
+         *
+         * @phpstan-ignore-next-line
+         */
+        $relation = $model->getTenantRelation();
+
+        /**
+         * @var Tenancy<TenantModel> $tenancy
+         *
+         * @phpstan-ignore-next-line
+         */
+        $tenancy = $model->getTenancy();
+
+        // If the initial checks do not pass
+        if (! $this->passesInitialChecks($model, $tenancy, $relation)) {
+            // Just exit, an exception will have been thrown
+            return;
+        }
+
+        if ($this->loadedRelation) {
+            $model->unsetRelation($relation->getRelationName());
+            $this->loadedRelation = false;
+        }
+
+        /**
+         * @var Model&Tenant $tenant
+         *
+         * @phpstan-var TenantModel                                               $tenant
+         */
+        $tenant = $tenancy->tenant();
+
+        // Attach the tenant
+        $relation->attach($tenant);
+
+        if (! TenancyOptions::shouldHydrateTenantRelation($tenancy)) {
+            return;
+        }
+
+        // Set the relation to contain the tenant
+        $this->setRelation($model, $relation, $tenant);
+    }
+
+    /**
+     * Handle the retrieved event on the model
+     *
+     * The retrieved event is fired after a model is retrieved from
+     * persistent storage and hydrated.
+     *
+     * @param Model&\Sprout\Database\Eloquent\Concerns\BelongsToManyTenants $model
+     *
+     * @phpstan-param ChildModel                                                                               $model
+     *
+     * @return void
+     *
+     * @throws TenantMissingException
+     * @throws TenantMismatchException
+     */
+    public function retrieved(Model $model): void
+    {
+        if (! sprout()->withinContext()) {
+            return;
+        }
+
+        /**
+         * @var BelongsToMany<ChildModel, TenantModel> $relation
+         *
+         * @phpstan-ignore-next-line
+         */
+        $relation = $model->getTenantRelation();
+
+        /**
+         * @var Tenancy<TenantModel> $tenancy
+         *
+         * @phpstan-ignore-next-line
+         */
+        $tenancy = $model->getTenancy();
+
+        // If the initial checks do not pass
+        if (! $this->passesInitialChecks($model, $tenancy, $relation, true)) {
+            // Just exit, an exception will have been thrown
+            return;
+        }
+
+        if (! TenancyOptions::shouldHydrateTenantRelation($tenancy)) {
+            if ($this->loadedRelation) {
+                $model->unsetRelation($relation->getRelationName());
+                $this->loadedRelation = false;
+            }
+
+            return;
+        }
+
+        /**
+         * @var Model&Tenant $tenant
+         *
+         * @phpstan-var TenantModel                                               $tenant
+         */
+        $tenant = $tenancy->tenant();
+
+        if ($this->loadedRelation) {
+            $this->loadedRelation = false;
+
+            return;
+        }
+
+        // Set the relation to contain the tenant
+        $this->setRelation($model, $relation, $tenant);
+    }
+
+    /**
      * Check if a model already has a tenant set
      *
-     * @param \Illuminate\Database\Eloquent\Model                                            $model
-     * @param \Illuminate\Database\Eloquent\Relations\BelongsToMany<ChildModel, TenantModel> $relation
-     * @param \Sprout\Contracts\Tenancy<TenantModel>                                    $tenancy
+     * @param Model                                  $model
+     * @param BelongsToMany<ChildModel, TenantModel> $relation
+     * @param Tenancy<TenantModel>                   $tenancy
      *
      * @return bool
      */
@@ -58,9 +187,9 @@ class BelongsToManyTenantsObserver
     /**
      * Check if a model belongs to a different tenant
      *
-     * @param \Illuminate\Database\Eloquent\Model                                            $model
-     * @param \Illuminate\Database\Eloquent\Model&\Sprout\Contracts\Tenant              $tenant
-     * @param \Illuminate\Database\Eloquent\Relations\BelongsToMany<ChildModel, TenantModel> $relation
+     * @param Model                                  $model
+     * @param Model&Tenant                           $tenant
+     * @param BelongsToMany<ChildModel, TenantModel> $relation
      *
      * @return bool
      */
@@ -72,24 +201,24 @@ class BelongsToManyTenantsObserver
         // If the tenant model isn't in the loaded relation, or the relation is
         // null, there's a mismatch
         return $relatedModels?->first(function (Tenant&Model $model) use ($tenant) {
-                return $model->is($tenant);
-            }) === null;
+            return $model->is($tenant);
+        }) === null;
     }
 
     /**
      * Perform initial checks and return they passed or not
      *
-     * @param \Illuminate\Database\Eloquent\Model&\Sprout\Database\Eloquent\Concerns\BelongsToManyTenants $model
-     * @param \Sprout\Contracts\Tenancy<TenantModel>                                                      $tenancy
-     * @param \Illuminate\Database\Eloquent\Relations\BelongsToMany<ChildModel, TenantModel>                   $relation
-     * @param bool                                                                                             $succeedOnMatch
-     *
-     * @return bool
+     * @param Model&\Sprout\Database\Eloquent\Concerns\BelongsToManyTenants $model
+     * @param Tenancy<TenantModel>                                          $tenancy
+     * @param BelongsToMany<ChildModel, TenantModel>                        $relation
+     * @param bool                                                          $succeedOnMatch
      *
      * @phpstan-param ChildModel                                                                               $model
      *
-     * @throws \Sprout\Exceptions\TenantMismatchException
-     * @throws \Sprout\Exceptions\TenantMissingException
+     * @return bool
+     *
+     * @throws TenantMismatchException
+     * @throws TenantMissingException
      */
     private function passesInitialChecks(Model $model, Tenancy $tenancy, BelongsToMany $relation, bool $succeedOnMatch = false): bool
     {
@@ -117,7 +246,8 @@ class BelongsToManyTenantsObserver
         }
 
         /**
-         * @var \Illuminate\Database\Eloquent\Model&\Sprout\Contracts\Tenant $tenant
+         * @var Model&Tenant $tenant
+         *
          * @phpstan-var TenantModel                                               $tenant
          */
         $tenant = $tenancy->tenant();
@@ -150,135 +280,11 @@ class BelongsToManyTenantsObserver
     }
 
     /**
-     * Handle the created event on the model
-     *
-     * The created event is fired after a model is persisted to the database.
-     *
-     * @param \Illuminate\Database\Eloquent\Model&\Sprout\Database\Eloquent\Concerns\BelongsToManyTenants $model
-     *
-     * @return void
-     *
-     * @phpstan-param ChildModel                                                                               $model
-     *
-     * @throws \Sprout\Exceptions\TenantMissingException
-     * @throws \Sprout\Exceptions\TenantMismatchException
-     */
-    public function created(Model $model): void
-    {
-        if (! sprout()->withinContext()) {
-            return;
-        }
-
-        /**
-         * @var \Illuminate\Database\Eloquent\Relations\BelongsToMany<ChildModel, TenantModel> $relation
-         * @phpstan-ignore-next-line
-         */
-        $relation = $model->getTenantRelation();
-
-        /**
-         * @var \Sprout\Contracts\Tenancy<TenantModel> $tenancy
-         * @phpstan-ignore-next-line
-         */
-        $tenancy = $model->getTenancy();
-
-        // If the initial checks do not pass
-        if (! $this->passesInitialChecks($model, $tenancy, $relation)) {
-            // Just exit, an exception will have been thrown
-            return;
-        }
-
-        if ($this->loadedRelation) {
-            $model->unsetRelation($relation->getRelationName());
-            $this->loadedRelation = false;
-        }
-
-        /**
-         * @var \Illuminate\Database\Eloquent\Model&\Sprout\Contracts\Tenant $tenant
-         * @phpstan-var TenantModel                                               $tenant
-         */
-        $tenant = $tenancy->tenant();
-
-        // Attach the tenant
-        $relation->attach($tenant);
-
-        if (! TenancyOptions::shouldHydrateTenantRelation($tenancy)) {
-            return;
-        }
-
-        // Set the relation to contain the tenant
-        $this->setRelation($model, $relation, $tenant);
-    }
-
-    /**
-     * Handle the retrieved event on the model
-     *
-     * The retrieved event is fired after a model is retrieved from
-     * persistent storage and hydrated.
-     *
-     * @param \Illuminate\Database\Eloquent\Model&\Sprout\Database\Eloquent\Concerns\BelongsToManyTenants $model
-     *
-     * @return void
-     *
-     * @phpstan-param ChildModel                                                                               $model
-     *
-     * @throws \Sprout\Exceptions\TenantMissingException
-     * @throws \Sprout\Exceptions\TenantMismatchException
-     */
-    public function retrieved(Model $model): void
-    {
-        if (! sprout()->withinContext()) {
-            return;
-        }
-
-        /**
-         * @var \Illuminate\Database\Eloquent\Relations\BelongsToMany<ChildModel, TenantModel> $relation
-         * @phpstan-ignore-next-line
-         */
-        $relation = $model->getTenantRelation();
-
-        /**
-         * @var \Sprout\Contracts\Tenancy<TenantModel> $tenancy
-         * @phpstan-ignore-next-line
-         */
-        $tenancy = $model->getTenancy();
-
-        // If the initial checks do not pass
-        if (! $this->passesInitialChecks($model, $tenancy, $relation, true)) {
-            // Just exit, an exception will have been thrown
-            return;
-        }
-
-        if (! TenancyOptions::shouldHydrateTenantRelation($tenancy)) {
-            if ($this->loadedRelation) {
-                $model->unsetRelation($relation->getRelationName());
-                $this->loadedRelation = false;
-            }
-
-            return;
-        }
-
-        /**
-         * @var \Illuminate\Database\Eloquent\Model&\Sprout\Contracts\Tenant $tenant
-         * @phpstan-var TenantModel                                               $tenant
-         */
-        $tenant = $tenancy->tenant();
-
-        if ($this->loadedRelation) {
-            $this->loadedRelation = false;
-
-            return;
-        }
-
-        // Set the relation to contain the tenant
-        $this->setRelation($model, $relation, $tenant);
-    }
-
-    /**
      * Set the hydrate value of a relation
      *
-     * @param \Illuminate\Database\Eloquent\Model                                            $model
-     * @param \Illuminate\Database\Eloquent\Relations\BelongsToMany<ChildModel, TenantModel> $relation
-     * @param \Sprout\Contracts\Tenant                                                  $tenant
+     * @param Model                                  $model
+     * @param BelongsToMany<ChildModel, TenantModel> $relation
+     * @param Tenant                                 $tenant
      *
      * @phpstan-param ChildModel                                                             $model
      * @phpstan-param TenantModel                                                            $tenant

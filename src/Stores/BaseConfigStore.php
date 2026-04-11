@@ -11,13 +11,13 @@ abstract class BaseConfigStore implements ConfigStore
     private string $name;
 
     /**
-     * @var \Illuminate\Contracts\Encryption\Encrypter
+     * @var Encrypter
      */
     private Encrypter $encrypter;
 
     /**
-     * @param string                                     $name
-     * @param \Illuminate\Contracts\Encryption\Encrypter $encrypter
+     * @param string    $name
+     * @param Encrypter $encrypter
      */
     public function __construct(string $name, Encrypter $encrypter)
     {
@@ -38,7 +38,7 @@ abstract class BaseConfigStore implements ConfigStore
     /**
      * Get the encrypter for the config store
      *
-     * @return \Illuminate\Contracts\Encryption\Encrypter
+     * @return Encrypter
      */
     public function getEncrypter(): Encrypter
     {

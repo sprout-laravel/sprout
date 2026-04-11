@@ -16,8 +16,6 @@ use Sprout\Managers\ConfigStoreManager;
  * config store, either using its registered name or the default.
  *
  * @see     https://laravel.com/docs/12.x/container#contextual-attributes
- *
- * @package Core
  */
 #[Attribute(Attribute::TARGET_PARAMETER)]
 final readonly class ConfigStore implements ContextualAttribute
@@ -32,10 +30,10 @@ final readonly class ConfigStore implements ContextualAttribute
     /**
      * Resolve the config store using this attribute
      *
-     * @param \Sprout\Attributes\ConfigStore   $attribute
-     * @param \Illuminate\Contracts\Container\Container $container
+     * @param ConfigStore $attribute
+     * @param Container   $container
      *
-     * @return \Sprout\Contracts\ConfigStore
+     * @return ConfigStoreContract
      *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
      * @throws \Sprout\Exceptions\MisconfigurationException

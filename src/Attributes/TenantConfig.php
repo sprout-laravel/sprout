@@ -15,15 +15,13 @@ use Sprout\Bud;
  * tenant config, using the name of the service and the name of the config.
  *
  * @see     https://laravel.com/docs/12.x/container#contextual-attributes
- *
- * @package Core
  */
 #[Attribute(Attribute::TARGET_PARAMETER)]
 final readonly class TenantConfig implements ContextualAttribute
 {
-    private string $service;
-
     public string $name;
+
+    private string $service;
 
     private ?string $store;
 
@@ -37,8 +35,8 @@ final readonly class TenantConfig implements ContextualAttribute
     /**
      * Resolve the config store using this attribute
      *
-     * @param \Sprout\Attributes\TenantConfig  $attribute
-     * @param \Illuminate\Contracts\Container\Container $container
+     * @param TenantConfig $attribute
+     * @param Container    $container
      *
      * @return array<string, mixed>|null
      *
@@ -50,7 +48,7 @@ final readonly class TenantConfig implements ContextualAttribute
         return $container->make(Bud::class)->config(
             $attribute->service,
             $attribute->name,
-            store: $attribute->store
+            store: $attribute->store,
         );
     }
 }

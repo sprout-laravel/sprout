@@ -16,10 +16,8 @@ use Symfony\Component\HttpFoundation\Response;
  * This piece of middleware has a dual function.
  * It marks routes as being multitenanted if resolving during routing, and it
  * will resolve tenants if resolving during middleware.
- * Unlike {@see \Sprout\Http\Middleware\SproutTenantContextMiddleware}, no
+ * Unlike {@see SproutTenantContextMiddleware}, no
  * exception will be thrown if there's no tenant.
- *
- * @package Core
  */
 final class SproutOptionalTenantContextMiddleware
 {
@@ -29,14 +27,14 @@ final class SproutOptionalTenantContextMiddleware
     public const ALIAS = 'sprout.tenanted.optional';
 
     /**
-     * @var \Sprout\Sprout
+     * @var Sprout
      */
     private Sprout $sprout;
 
     /**
      * Create a new instance of the middleware
      *
-     * @param \Sprout\Sprout $sprout
+     * @param Sprout $sprout
      */
     public function __construct(Sprout $sprout)
     {
@@ -46,11 +44,11 @@ final class SproutOptionalTenantContextMiddleware
     /**
      * Handle the request
      *
-     * @param \Illuminate\Http\Request $request
-     * @param \Closure                 $next
-     * @param string                   ...$options
+     * @param Request $request
+     * @param Closure $next
+     * @param string  ...$options
      *
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      *
      * @throws \Sprout\Exceptions\NoTenantFoundException
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
@@ -68,7 +66,7 @@ final class SproutOptionalTenantContextMiddleware
                 $resolverName,
                 $tenancyName,
                 false,
-                true
+                true,
             );
         }
 

@@ -16,8 +16,6 @@ use Sprout\Managers\IdentityResolverManager;
  * identity resolver using its registered name, or the default.
  *
  * @see     https://laravel.com/docs/12.x/container#contextual-attributes
- *
- * @package Core
  */
 #[Attribute(Attribute::TARGET_PARAMETER)]
 final readonly class Resolver implements ContextualAttribute
@@ -40,10 +38,10 @@ final readonly class Resolver implements ContextualAttribute
     /**
      * Resolve the tenancy using this attribute
      *
-     * @param \Sprout\Attributes\Resolver $attribute
-     * @param \Illuminate\Container\Container  $container
+     * @param Resolver  $attribute
+     * @param Container $container
      *
-     * @return \Sprout\Contracts\IdentityResolver
+     * @return IdentityResolver
      *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
      * @throws \Sprout\Exceptions\MisconfigurationException

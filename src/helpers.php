@@ -11,7 +11,7 @@ use Sprout\Support\SettingsRepository;
 /**
  * Get the core Sprout class
  *
- * @return \Sprout\Sprout
+ * @return Sprout
  *
  * @codeCoverageIgnore
  */
@@ -23,7 +23,7 @@ function sprout(): Sprout
 /**
  * Get the Sprout settings repository
  *
- * @return \Sprout\Support\SettingsRepository
+ * @return SettingsRepository
  *
  * @codeCoverageIgnore
  */
@@ -37,9 +37,9 @@ function settings(): SettingsRepository
  *
  * @param string|null $name
  *
- * @return \Sprout\Contracts\IdentityResolver
+ * @return IdentityResolver
  *
- * @throws \Sprout\Exceptions\MisconfigurationException
+ * @throws Exceptions\MisconfigurationException
  *
  * @codeCoverageIgnore
  */
@@ -55,7 +55,7 @@ function resolver(?string $name = null): IdentityResolver
  *
  * @return \Sprout\Contracts\Tenancy<*>
  *
- * @throws \Sprout\Exceptions\MisconfigurationException
+ * @throws Exceptions\MisconfigurationException
  *
  * @codeCoverageIgnore
  */
@@ -71,7 +71,7 @@ function tenancy(?string $name = null): Tenancy
  *
  * @return \Sprout\Contracts\TenantProvider<*>
  *
- * @throws \Sprout\Exceptions\MisconfigurationException
+ * @throws Exceptions\MisconfigurationException
  *
  * @codeCoverageIgnore
  */
@@ -85,7 +85,7 @@ function provider(?string $name = null): TenantProvider
  *
  * @param string $service
  *
- * @return \Sprout\Contracts\ServiceOverride|null
+ * @return ServiceOverride|null
  *
  * @codeCoverageIgnore
  */

@@ -16,8 +16,6 @@ use Sprout\Managers\TenancyManager;
  * tenancy, either using its registered name or the default.
  *
  * @see     https://laravel.com/docs/12.x/container#contextual-attributes
- *
- * @package Core
  */
 #[Attribute(Attribute::TARGET_PARAMETER)]
 final readonly class Tenancy implements ContextualAttribute
@@ -40,8 +38,8 @@ final readonly class Tenancy implements ContextualAttribute
     /**
      * Resolve the tenancy using this attribute
      *
-     * @param \Sprout\Attributes\Tenancy $attribute
-     * @param \Illuminate\Container\Container $container
+     * @param Tenancy   $attribute
+     * @param Container $container
      *
      * @return \Sprout\Contracts\Tenancy<*>
      *

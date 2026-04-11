@@ -16,8 +16,6 @@ use Sprout\Support\GenericTenant;
  * This is an implementation of {@see \Sprout\Contracts\TenantProvider} that
  * uses Laravels base query builder.
  *
- * @package Core
- *
  * @template EntityClass of \Sprout\Contracts\Tenant
  *
  * @extends \Sprout\Support\BaseTenantProvider<EntityClass>
@@ -25,7 +23,7 @@ use Sprout\Support\GenericTenant;
 final class DatabaseTenantProvider extends BaseTenantProvider
 {
     /**
-     * @var \Illuminate\Database\ConnectionInterface
+     * @var ConnectionInterface
      */
     private ConnectionInterface $connection;
 
@@ -35,14 +33,14 @@ final class DatabaseTenantProvider extends BaseTenantProvider
     private string $table;
 
     /**
-     * @var class-string<\Sprout\Contracts\Tenant>
+     * @var class-string<Tenant>
      *
      * @phpstan-var class-string<EntityClass>
      */
     private string $entityClass;
 
     /**
-     * @var \Sprout\Contracts\Tenant
+     * @var Tenant
      *
      * @phpstan-var EntityClass
      */
@@ -51,10 +49,10 @@ final class DatabaseTenantProvider extends BaseTenantProvider
     /**
      * Create a new instance of the database tenant provider
      *
-     * @param string                                      $name
-     * @param \Illuminate\Database\ConnectionInterface    $connection
-     * @param string                                      $table
-     * @param class-string<\Sprout\Contracts\Tenant> $entityClass
+     * @param string               $name
+     * @param ConnectionInterface  $connection
+     * @param string               $table
+     * @param class-string<Tenant> $entityClass
      *
      * @phpstan-param class-string<EntityClass>           $entityClass
      */
@@ -90,36 +88,6 @@ final class DatabaseTenantProvider extends BaseTenantProvider
     }
 
     /**
-     * Get an instance of the tenant entity
-     *
-     * @return \Sprout\Contracts\Tenant
-     *
-     * @phpstan-return EntityClass
-     */
-    private function getEntity(): Tenant
-    {
-        if (! isset($this->entity)) {
-            $this->entity = new $this->entityClass();
-        }
-
-        return $this->entity;
-    }
-
-    /**
-     * Make a new instance of the entity class
-     *
-     * @param array<string, mixed>|object $attributes
-     *
-     * @return object
-     *
-     * @phpstan-return EntityClass
-     */
-    private function makeEntity(array|object $attributes): object
-    {
-        return new $this->entityClass((array)$attributes);
-    }
-
-    /**
      * Retrieve a tenant by its identifier
      *
      * Gets an instance of the tenant implementation the provider represents,
@@ -127,10 +95,10 @@ final class DatabaseTenantProvider extends BaseTenantProvider
      *
      * @param string $identifier
      *
-     * @return \Sprout\Contracts\Tenant|null
+     * @return Tenant|null
      *
-     * @see \Sprout\Contracts\Tenant::getTenantIdentifier()
-     * @see \Sprout\Contracts\Tenant::getTenantIdentifierName()
+     * @see Tenant::getTenantIdentifier()
+     * @see Tenant::getTenantIdentifierName()
      *
      * @phpstan-return EntityClass|null
      */
@@ -156,10 +124,10 @@ final class DatabaseTenantProvider extends BaseTenantProvider
      *
      * @param int|string $key
      *
-     * @return \Sprout\Contracts\Tenant|null
+     * @return Tenant|null
      *
-     * @see \Sprout\Contracts\Tenant::getTenantKey()
-     * @see \Sprout\Contracts\Tenant::getTenantKeyName()
+     * @see Tenant::getTenantKey()
+     * @see Tenant::getTenantKeyName()
      *
      * @phpstan-return EntityClass|null
      */
@@ -182,25 +150,25 @@ final class DatabaseTenantProvider extends BaseTenantProvider
      *
      * Gets an instance of the tenant implementation the provider represents,
      * using a resource key.
-     * The tenant class must implement the {@see \Sprout\Contracts\TenantHasResources}
+     * The tenant class must implement the {@see TenantHasResources}
      * interface for this method to work.
      *
      * @param string $resourceKey
      *
-     * @return (\Sprout\Contracts\Tenant&\Sprout\Contracts\TenantHasResources)|null
+     * @return (Tenant&TenantHasResources)|null
      *
-     * @throws \Sprout\Exceptions\MisconfigurationException
+     * @phpstan-return (EntityClass&TenantHasResources)|null
      *
-     * @phpstan-return (EntityClass&\Sprout\Contracts\TenantHasResources)|null
+     * @throws MisconfigurationException
      *
-     * @see \Sprout\Contracts\TenantHasResources::getTenantResourceKeyName()
-     * @see \Sprout\Contracts\TenantHasResources::getTenantResourceKey()
+     * @see TenantHasResources::getTenantResourceKeyName()
+     * @see TenantHasResources::getTenantResourceKey()
      */
     public function retrieveByResourceKey(string $resourceKey): (Tenant&TenantHasResources)|null
     {
         $entity = $this->getEntity();
 
-        if (! ($entity instanceof TenantHasResources)) {
+        if (! $entity instanceof TenantHasResources) {
             throw MisconfigurationException::misconfigured('tenant', $entity::class, 'resources');
         }
 
@@ -213,5 +181,35 @@ final class DatabaseTenantProvider extends BaseTenantProvider
         }
 
         return null;
+    }
+
+    /**
+     * Get an instance of the tenant entity
+     *
+     * @return Tenant
+     *
+     * @phpstan-return EntityClass
+     */
+    private function getEntity(): Tenant
+    {
+        if (! isset($this->entity)) {
+            $this->entity = new $this->entityClass();
+        }
+
+        return $this->entity;
+    }
+
+    /**
+     * Make a new instance of the entity class
+     *
+     * @param array<string, mixed>|object $attributes
+     *
+     * @return object
+     *
+     * @phpstan-return EntityClass
+     */
+    private function makeEntity(array|object $attributes): object
+    {
+        return new $this->entityClass((array) $attributes);
     }
 }

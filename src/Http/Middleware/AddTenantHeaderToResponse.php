@@ -15,20 +15,18 @@ use Symfony\Component\HttpFoundation\Response;
  *
  * This piece of middleware is responsible for adding the tenant identifier
  * header to responses when using the header-based identity resolver.
- *
- * @package Http\Resolvers
  */
 final class AddTenantHeaderToResponse
 {
     /**
-     * @var \Sprout\Sprout
+     * @var Sprout
      */
     private Sprout $sprout;
 
     /**
      * Create new instance
      *
-     * @param \Sprout\Sprout $sprout
+     * @param Sprout $sprout
      */
     public function __construct(Sprout $sprout)
     {
@@ -38,11 +36,11 @@ final class AddTenantHeaderToResponse
     /**
      * Handle the request
      *
-     * @param \Illuminate\Http\Request $request
-     * @param \Closure                 $next
-     * @param string                   ...$options
+     * @param Request $request
+     * @param Closure $next
+     * @param string  ...$options
      *
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
      * @throws \Sprout\Exceptions\MisconfigurationException

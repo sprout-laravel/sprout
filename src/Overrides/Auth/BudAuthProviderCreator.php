@@ -24,9 +24,9 @@ final class BudAuthProviderCreator extends BaseCreator
     private array $config;
 
     /**
-     * @param \Sprout\Overrides\Auth\BudAuthManager    $manager
-     * @param \Sprout\Bud                              $bud
-     * @param \Sprout\Sprout                               $sprout
+     * @param BudAuthManager                                    $manager
+     * @param Bud                                               $bud
+     * @param Sprout                                            $sprout
      * @param string                                            $name
      * @param array<string, mixed>&array{budStore?:string|null} $config
      */
@@ -35,25 +35,13 @@ final class BudAuthProviderCreator extends BaseCreator
         Bud            $bud,
         Sprout         $sprout,
         string         $name,
-        array          $config
-    )
-    {
+        array          $config,
+    ) {
         $this->manager = $manager;
         $this->bud     = $bud;
         $this->sprout  = $sprout;
         $this->name    = $name;
         $this->config  = $config;
-    }
-
-
-    /**
-     * Get the name of the service for the creator.
-     *
-     * @return string
-     */
-    protected function getService(): string
-    {
-        return 'auth';
     }
 
     public function __invoke(): ?UserProvider
@@ -65,9 +53,19 @@ final class BudAuthProviderCreator extends BaseCreator
         $this->checkForCyclicDrivers(
             $config['driver'] ?? null,
             'auth provider',
-            $this->name
+            $this->name,
         );
 
         return $this->manager->createUserProviderFromConfig($config);
+    }
+
+    /**
+     * Get the name of the service for the creator.
+     *
+     * @return string
+     */
+    protected function getService(): string
+    {
+        return 'auth';
     }
 }

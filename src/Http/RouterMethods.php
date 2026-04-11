@@ -11,8 +11,6 @@ use Illuminate\Routing\RouteRegistrar;
  *
  * This class is used as a mixin to add Sprout specific methods to
  * {@see \Illuminate\Routing\Router}.
- *
- * @package Core
  */
 class RouterMethods
 {
@@ -23,7 +21,7 @@ class RouterMethods
      * @param string|null $resolver
      * @param string|null $tenancy
      *
-     * @return \Illuminate\Routing\RouteRegistrar
+     * @return RouteRegistrar
      *
      * @noinspection   PhpDocSignatureInspection
      *
@@ -43,7 +41,7 @@ class RouterMethods
      * @param string|null $resolver
      * @param string|null $tenancy
      *
-     * @return \Illuminate\Routing\RouteRegistrar
+     * @return RouteRegistrar
      *
      * @noinspection   PhpDocSignatureInspection
      *

@@ -9,8 +9,6 @@ namespace Sprout\Exceptions;
  * This exception is used when a child model belongs to a tenant other than
  * the current one.
  *
- * @package Core
- *
  * @codeCoverageIgnore
  */
 final class TenantMismatchException extends SproutException
@@ -27,7 +25,7 @@ final class TenantMismatchException extends SproutException
     {
         return new self(
             'Model [' . $model . '] already has a tenant, but it is not the current tenant for the tenancy'
-            . ($tenancy ? ' [' . $tenancy . ']' : '')
+            . ($tenancy ? ' [' . $tenancy . ']' : ''),
         );
     }
 }

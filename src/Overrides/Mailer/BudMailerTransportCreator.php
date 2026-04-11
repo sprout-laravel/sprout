@@ -31,9 +31,9 @@ final class BudMailerTransportCreator extends BaseCreator
     private array $config;
 
     /**
-     * @param \Illuminate\Mail\MailManager                      $manager
-     * @param \Sprout\Bud                              $bud
-     * @param \Sprout\Sprout                               $sprout
+     * @param MailManager                                       $manager
+     * @param Bud                                               $bud
+     * @param Sprout                                            $sprout
      * @param string                                            $name
      * @param array<string, mixed>&array{budStore?:string|null} $config
      */
@@ -42,9 +42,8 @@ final class BudMailerTransportCreator extends BaseCreator
         Bud         $bud,
         Sprout      $sprout,
         string      $name,
-        array       $config = []
-    )
-    {
+        array       $config = [],
+    ) {
         $this->manager = $manager;
         $this->bud     = $bud;
         $this->sprout  = $sprout;
@@ -53,7 +52,7 @@ final class BudMailerTransportCreator extends BaseCreator
     }
 
     /**
-     * @return \Symfony\Component\Mailer\Transport\TransportInterface
+     * @return TransportInterface
      *
      * @throws \Sprout\Exceptions\MisconfigurationException
      * @throws \Sprout\Exceptions\TenancyMissingException
@@ -68,7 +67,7 @@ final class BudMailerTransportCreator extends BaseCreator
         $this->checkForCyclicDrivers(
             $config['transport'] ?? null,
             'mailer',
-            $this->name
+            $this->name,
         );
 
         return $this->manager->createSymfonyTransport($config);

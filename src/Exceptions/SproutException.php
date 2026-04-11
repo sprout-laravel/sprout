@@ -11,11 +11,8 @@ use Exception;
  * A base abstract exception to easily identify exceptions as belonging
  * to Sprout.
  *
- * @package Core
- *
  * @codeCoverageIgnore
  */
 abstract class SproutException extends Exception
 {
-
 }

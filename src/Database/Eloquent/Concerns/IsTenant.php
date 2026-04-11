@@ -10,6 +10,7 @@ namespace Sprout\Database\Eloquent\Concerns;
  * interface to simplify the creation of tenant models.
  *
  * @phpstan-require-implements \Sprout\Contracts\Tenant
+ *
  * @phpstan-require-extends \Illuminate\Database\Eloquent\Model
  *
  * @pacakge Database\Eloquent

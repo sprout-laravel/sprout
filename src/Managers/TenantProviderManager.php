@@ -18,8 +18,6 @@ use Sprout\Support\GenericTenant;
  * implementations of {@see \Sprout\Contracts\TenantProvider}.
  *
  * @extends \Sprout\Support\BaseFactory<\Sprout\Contracts\TenantProvider>
- *
- * @package Core
  */
 final class TenantProviderManager extends BaseFactory
 {
@@ -48,18 +46,18 @@ final class TenantProviderManager extends BaseFactory
     /**
      * Create the eloquent tenant provider
      *
-     * @param array<string, mixed>                             $config
-     * @param string                                           $name
-     *
-     * @return \Sprout\Providers\EloquentTenantProvider
+     * @param array<string, mixed> $config
+     * @param string               $name
      *
      * @template TenantModel of \Illuminate\Database\Eloquent\Model&\Sprout\Contracts\Tenant
      *
      * @phpstan-param array{model?: class-string<TenantModel>} $config
      *
-     * @phpstan-return \Sprout\Providers\EloquentTenantProvider<TenantModel>
+     * @return EloquentTenantProvider
      *
-     * @throws \Sprout\Exceptions\MisconfigurationException
+     * @phpstan-return EloquentTenantProvider<TenantModel>
+     *
+     * @throws MisconfigurationException
      */
     protected function createEloquentProvider(array $config, string $name): EloquentTenantProvider
     {
@@ -81,18 +79,18 @@ final class TenantProviderManager extends BaseFactory
     /**
      * Create the database tenant provider
      *
-     * @param array<string, mixed>                                                                                                                      $config
-     * @param string                                                                                                                                    $name
-     *
-     * @return \Sprout\Providers\DatabaseTenantProvider
+     * @param array<string, mixed> $config
+     * @param string               $name
      *
      * @template TenantEntity of \Sprout\Contracts\Tenant
      *
-     * @phpstan-param array{entity?: class-string<TenantEntity>, table?: string|class-string<\Illuminate\Database\Eloquent\Model>, connection?: string} $config
+     * @phpstan-param array{entity?: class-string<TenantEntity>, table?: string|class-string<Model>, connection?: string} $config
      *
-     * @phpstan-return \Sprout\Providers\DatabaseTenantProvider<TenantEntity>
+     * @return DatabaseTenantProvider
      *
-     * @throws \Sprout\Exceptions\MisconfigurationException
+     * @phpstan-return DatabaseTenantProvider<TenantEntity>
+     *
+     * @throws MisconfigurationException
      */
     protected function createDatabaseProvider(array $config, string $name): DatabaseTenantProvider
     {
@@ -129,6 +127,7 @@ final class TenantProviderManager extends BaseFactory
 
         /**
          * @var \Illuminate\Database\ConnectionInterface $connection
+         *
          * @phpstan-ignore-next-line
          */
         $connection = $this->app['db']->connection($connection);
@@ -137,7 +136,7 @@ final class TenantProviderManager extends BaseFactory
             $name,
             $connection,
             $table,
-            $config['entity'] ?? GenericTenant::class
+            $config['entity'] ?? GenericTenant::class,
         );
     }
 }

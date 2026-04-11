@@ -28,6 +28,55 @@ class CustomTenantEntity implements Tenant, TenantHasResources
     }
 
     /**
+     * Dynamically access the tenant's attributes.
+     *
+     * @param string $key
+     *
+     * @return mixed
+     */
+    public function __get(string $key): mixed
+    {
+        return $this->attributes[$key];
+    }
+
+    /**
+     * Dynamically set an attribute on the tenant.
+     *
+     * @param string $key
+     * @param mixed  $value
+     *
+     * @return void
+     */
+    public function __set(string $key, mixed $value): void
+    {
+        $this->attributes[$key] = $value;
+    }
+
+    /**
+     * Dynamically check if a value is set on the tenant.
+     *
+     * @param string $key
+     *
+     * @return bool
+     */
+    public function __isset(string $key): bool
+    {
+        return isset($this->attributes[$key]);
+    }
+
+    /**
+     * Dynamically unset a value on the tenant.
+     *
+     * @param string $key
+     *
+     * @return void
+     */
+    public function __unset(string $key): void
+    {
+        unset($this->attributes[$key]);
+    }
+
+    /**
      * Get the tenant identifier
      *
      * Retrieve the identifier used to publicly identify the tenant.
@@ -79,55 +128,6 @@ class CustomTenantEntity implements Tenant, TenantHasResources
     public function getTenantKeyName(): string
     {
         return 'id';
-    }
-
-    /**
-     * Dynamically access the tenant's attributes.
-     *
-     * @param string $key
-     *
-     * @return mixed
-     */
-    public function __get(string $key): mixed
-    {
-        return $this->attributes[$key];
-    }
-
-    /**
-     * Dynamically set an attribute on the tenant.
-     *
-     * @param string $key
-     * @param mixed  $value
-     *
-     * @return void
-     */
-    public function __set(string $key, mixed $value): void
-    {
-        $this->attributes[$key] = $value;
-    }
-
-    /**
-     * Dynamically check if a value is set on the tenant.
-     *
-     * @param string $key
-     *
-     * @return bool
-     */
-    public function __isset(string $key): bool
-    {
-        return isset($this->attributes[$key]);
-    }
-
-    /**
-     * Dynamically unset a value on the tenant.
-     *
-     * @param string $key
-     *
-     * @return void
-     */
-    public function __unset(string $key): void
-    {
-        unset($this->attributes[$key]);
     }
 
     /**

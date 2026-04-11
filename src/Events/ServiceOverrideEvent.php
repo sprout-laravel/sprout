@@ -17,8 +17,6 @@ use Sprout\Contracts\ServiceOverride;
  * @method static self dispatchIf(bool $boolean, string $service, ServiceOverride $override)
  * @method static self dispatchUnless(bool $boolean, string $service, ServiceOverride $override)
  *
- * @package        Overrides
- *
  * @codeCoverageIgnore
  *
  * @phpstan-ignore missingType.generics, missingType.generics, missingType.generics
@@ -33,15 +31,15 @@ abstract class ServiceOverrideEvent
     public readonly string $service;
 
     /**
-     * @var \Sprout\Contracts\ServiceOverride
+     * @var ServiceOverride
      *
      * @phpstam-var OverrideClass
      */
     public readonly ServiceOverride $override;
 
     /**
-     * @param string                                 $service
-     * @param \Sprout\Contracts\ServiceOverride $override
+     * @param string          $service
+     * @param ServiceOverride $override
      *
      * @phpstan-param OverrideClass                  $override
      */

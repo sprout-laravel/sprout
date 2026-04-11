@@ -11,8 +11,6 @@ use Throwable;
  * This exception is used for issues that arise with tenant child/descendant
  * relations.
  *
- * @package Database\Eloquent
- *
  * @codeCoverageIgnore
  */
 final class TenantRelationException extends SproutException
@@ -20,8 +18,8 @@ final class TenantRelationException extends SproutException
     /**
      * Create an exception for when the tenant relation is missing
      *
-     * @param string          $model
-     * @param \Throwable|null $previous
+     * @param string         $model
+     * @param Throwable|null $previous
      *
      * @return self
      */

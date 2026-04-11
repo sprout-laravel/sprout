@@ -29,18 +29,17 @@ final class BudBroadcastConnectionCreator extends BaseCreator
     private array $config;
 
     /**
-     * @param \Sprout\Overrides\Broadcast\BudBroadcastManager      $manager
-     * @param \Sprout\Bud                                          $bud
-     * @param \Sprout\Sprout                                           $sprout
+     * @param BudBroadcastManager                                           $manager
+     * @param Bud                                                           $bud
+     * @param Sprout                                                        $sprout
      * @param array<string, mixed>&array{budStore?:string|null,name?:mixed} $config
      */
     public function __construct(
         BudBroadcastManager $manager,
         Bud                 $bud,
         Sprout              $sprout,
-        array               $config
-    )
-    {
+        array               $config,
+    ) {
         $this->manager = $manager;
         $this->bud     = $bud;
         $this->sprout  = $sprout;
@@ -50,7 +49,7 @@ final class BudBroadcastConnectionCreator extends BaseCreator
     /**
      * Create the connection using Bud.
      *
-     * @return \Illuminate\Contracts\Broadcasting\Broadcaster
+     * @return Broadcaster
      *
      * @throws \Sprout\Exceptions\MisconfigurationException
      * @throws \Sprout\Exceptions\TenancyMissingException
@@ -69,7 +68,7 @@ final class BudBroadcastConnectionCreator extends BaseCreator
         $this->checkForCyclicDrivers(
             $config['driver'],
             'broadcast connection',
-            $this->config['name']
+            $this->config['name'],
         );
 
         // If we're here, it's not cyclic, so we'll create a dynamic connection,
@@ -77,7 +76,7 @@ final class BudBroadcastConnectionCreator extends BaseCreator
         return $this->manager->connectUsing(
             $config['name'],
             $config,
-            true // This is important, it needs to be here to avoid side-effect errors.
+            true, // This is important, it needs to be here to avoid side-effect errors.
         );
     }
 

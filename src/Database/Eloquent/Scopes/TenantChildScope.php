@@ -12,10 +12,8 @@ use Illuminate\Database\Eloquent\Scope;
  * A base scope utilised to provide a withoutTenants extension method to the
  * Eloquent query builder.
  *
- * @see     \Sprout\Database\Eloquent\Scopes\BelongsToManyTenantsScope
- * @see     \Sprout\Database\Eloquent\Scopes\BelongsToTenantScope
- *
- * @package Database\Eloquent
+ * @see     BelongsToManyTenantsScope
+ * @see     BelongsToTenantScope
  */
 abstract class TenantChildScope implements Scope
 {
@@ -29,7 +27,7 @@ abstract class TenantChildScope implements Scope
      *
      * @template ModelClass of \Illuminate\Database\Eloquent\Model
      *
-     * @param \Illuminate\Database\Eloquent\Builder<ModelClass> $builder
+     * @param Builder<ModelClass> $builder
      *
      * @return void
      */

@@ -10,9 +10,8 @@ use Illuminate\Filesystem\FilesystemManager;
 use Sprout\Contracts\BootableServiceOverride;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
-use Sprout\Overrides\Filesystem\SproutFilesystemDriverCreator;
-use Sprout\Sprout;
 use Sprout\Overrides\BaseOverride;
+use Sprout\Sprout;
 
 final class FilesystemOverride extends BaseOverride implements BootableServiceOverride
 {
@@ -37,8 +36,8 @@ final class FilesystemOverride extends BaseOverride implements BootableServiceOv
      * This method should perform any initial steps required for the service
      * override that take place during the booting of the framework.
      *
-     * @param \Illuminate\Contracts\Foundation\Application $app
-     * @param \Sprout\Sprout                          $sprout
+     * @param Application $app
+     * @param Sprout      $sprout
      *
      * @return void
      *
@@ -59,21 +58,6 @@ final class FilesystemOverride extends BaseOverride implements BootableServiceOv
         }
     }
 
-    protected function addDriver(FilesystemManager $manager, Sprout $sprout, Closure $tracker): void
-    {
-        $manager->extend('sprout', function (Application $app, array $config) use ($manager, $sprout, $tracker): Filesystem {
-            // If the config contains the disk name
-            if (isset($config['name'])) {
-                // Track it
-                $tracker($config['name']);
-            }
-
-            /** @var array<string, mixed> $config */
-
-            return (new SproutFilesystemDriverCreator($app, $manager, $config, $sprout))();
-        });
-    }
-
     /**
      * Clean up the service override
      *
@@ -87,8 +71,8 @@ final class FilesystemOverride extends BaseOverride implements BootableServiceOv
      *
      * @template TenantClass of \Sprout\Contracts\Tenant
      *
-     * @param \Sprout\Contracts\Tenancy<TenantClass> $tenancy
-     * @param \Sprout\Contracts\Tenant               $tenant
+     * @param Tenancy<TenantClass> $tenancy
+     * @param Tenant               $tenant
      *
      * @phpstan-param TenantClass                         $tenant
      *
@@ -97,7 +81,7 @@ final class FilesystemOverride extends BaseOverride implements BootableServiceOv
     public function cleanup(Tenancy $tenancy, Tenant $tenant): void
     {
         if ($this->getApp()->resolved('filesystem')) {
-            /** @var \Illuminate\Filesystem\FilesystemManager $filesystemManager */
+            /** @var FilesystemManager $filesystemManager */
             $filesystemManager = $this->getApp()->make(FilesystemManager::class);
 
             // If we're tracking some drivers we can simply forget those
@@ -117,5 +101,20 @@ final class FilesystemOverride extends BaseOverride implements BootableServiceOv
                 }
             }
         }
+    }
+
+    protected function addDriver(FilesystemManager $manager, Sprout $sprout, Closure $tracker): void
+    {
+        $manager->extend('sprout', function (Application $app, array $config) use ($manager, $sprout, $tracker): Filesystem {
+            // If the config contains the disk name
+            if (isset($config['name'])) {
+                // Track it
+                $tracker($config['name']);
+            }
+
+            /** @var array<string, mixed> $config */
+
+            return (new SproutFilesystemDriverCreator($app, $manager, $config, $sprout))();
+        });
     }
 }

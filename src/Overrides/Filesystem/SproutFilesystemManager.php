@@ -31,28 +31,14 @@ class SproutFilesystemManager extends FilesystemManager
     }
 
     /**
-     * Sync the original manager in case things have been registered
-     *
-     * @param \Illuminate\Filesystem\FilesystemManager $original
-     *
-     * @return void
-     */
-    private function syncOriginal(FilesystemManager $original): void
-    {
-        $this->disks              = array_merge($original->disks, $this->disks);
-        $this->customCreators     = array_merge($original->customCreators, $this->customCreators);
-        $this->syncedFromOriginal = true;
-    }
-
-    /**
      * Resolve the given disk.
      *
      * @param string                    $name
      * @param array<string, mixed>|null $config
      *
-     * @return \Illuminate\Contracts\Filesystem\Filesystem
+     * @return Filesystem
      *
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     protected function resolve($name, $config = null): Filesystem
     {
@@ -76,7 +62,21 @@ class SproutFilesystemManager extends FilesystemManager
             throw new InvalidArgumentException("Driver [{$driver}] is not supported.");
         }
 
-        /** @var \Illuminate\Contracts\Filesystem\Filesystem */
+        /** @var Filesystem */
         return $this->{$driverMethod}($config, $name);
+    }
+
+    /**
+     * Sync the original manager in case things have been registered
+     *
+     * @param FilesystemManager $original
+     *
+     * @return void
+     */
+    private function syncOriginal(FilesystemManager $original): void
+    {
+        $this->disks              = array_merge($original->disks, $this->disks);
+        $this->customCreators     = array_merge($original->customCreators, $this->customCreators);
+        $this->syncedFromOriginal = true;
     }
 }
