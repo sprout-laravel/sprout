@@ -7,6 +7,7 @@ use Illuminate\Auth\Passwords\CacheTokenRepository;
 use Illuminate\Cache\Repository;
 use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
 use Illuminate\Contracts\Hashing\Hasher as HasherContract;
+use Sprout\Contracts\Tenant;
 use Sprout\Contracts\TenantHasResources;
 use Sprout\Exceptions\TenancyMissingException;
 use Sprout\Exceptions\TenantMissingException;
@@ -105,7 +106,7 @@ class SproutAuthCacheTokenRepository extends CacheTokenRepository
             throw TenantMissingException::make($tenancy->getName());
         }
 
-        /** @var \Sprout\Contracts\Tenant $tenant */
+        /** @var Tenant $tenant */
         $tenant = $tenancy->tenant();
 
         return $tenancy->getName() . '.' . ($tenant instanceof TenantHasResources ? $tenant->getTenantResourceKey() : $tenant->getTenantKey());

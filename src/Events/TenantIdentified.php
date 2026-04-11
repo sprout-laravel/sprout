@@ -12,7 +12,7 @@ namespace Sprout\Events;
  *
  * @template TenantClass of \Sprout\Contracts\Tenant
  *
- * @extends \Sprout\Events\TenantFound<TenantClass>
+ * @extends TenantFound<TenantClass>
  *
  * @codeCoverageIgnore
  */

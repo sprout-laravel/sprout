@@ -4,9 +4,11 @@ declare(strict_types=1);
 namespace Sprout\Attributes;
 
 use Attribute;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Contracts\Container\ContextualAttribute;
 use Sprout\Contracts\ConfigStore as ConfigStoreContract;
+use Sprout\Exceptions\MisconfigurationException;
 use Sprout\Managers\ConfigStoreManager;
 
 /**
@@ -35,8 +37,8 @@ final readonly class ConfigStore implements ContextualAttribute
      *
      * @return ConfigStoreContract
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
-     * @throws \Sprout\Exceptions\MisconfigurationException
+     * @throws BindingResolutionException
+     * @throws MisconfigurationException
      */
     public function resolve(self $attribute, Container $container): ConfigStoreContract
     {

@@ -4,13 +4,14 @@ declare(strict_types=1);
 namespace Sprout\Http;
 
 use Closure;
+use Illuminate\Routing\Router;
 use Illuminate\Routing\RouteRegistrar;
 
 /**
  * Route Methods Mixin
  *
  * This class is used as a mixin to add Sprout specific methods to
- * {@see \Illuminate\Routing\Router}.
+ * {@see Router}.
  */
 class RouterMethods
 {

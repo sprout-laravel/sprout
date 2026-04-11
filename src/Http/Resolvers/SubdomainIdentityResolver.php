@@ -11,6 +11,7 @@ use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 use Sprout\Exceptions\TenantMissingException;
 use Sprout\Support\BaseIdentityResolver;
+use Sprout\Support\ResolutionHook;
 
 /**
  * The Subdomain Identity Resolver
@@ -34,11 +35,11 @@ final class SubdomainIdentityResolver extends BaseIdentityResolver implements Id
     /**
      * Create a new instance
      *
-     * @param string                                $name
-     * @param string                                $domain
-     * @param string|null                           $pattern
-     * @param string|null                           $parameter
-     * @param array<\Sprout\Support\ResolutionHook> $hooks
+     * @param string                $name
+     * @param string                $domain
+     * @param string|null           $pattern
+     * @param string|null           $parameter
+     * @param array<ResolutionHook> $hooks
      */
     public function __construct(string $name, string $domain, ?string $pattern = null, ?string $parameter = null, array $hooks = [])
     {

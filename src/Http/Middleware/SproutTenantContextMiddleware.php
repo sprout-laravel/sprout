@@ -4,7 +4,9 @@ declare(strict_types=1);
 namespace Sprout\Http\Middleware;
 
 use Closure;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Http\Request;
+use Sprout\Exceptions\MisconfigurationException;
 use Sprout\Exceptions\NoTenantFoundException;
 use Sprout\Sprout;
 use Sprout\Support\ResolutionHelper;
@@ -50,8 +52,8 @@ final class SproutTenantContextMiddleware
      * @return Response
      *
      * @throws NoTenantFoundException
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
-     * @throws \Sprout\Exceptions\MisconfigurationException
+     * @throws BindingResolutionException
+     * @throws MisconfigurationException
      */
     public function handle(Request $request, Closure $next, string ...$options): Response
     {

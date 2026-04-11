@@ -3,10 +3,12 @@ declare(strict_types=1);
 
 namespace Sprout\Database\Eloquent\Observers;
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
+use Sprout\Database\Eloquent\Concerns\BelongsToManyTenants;
 use Sprout\Exceptions\TenantMismatchException;
 use Sprout\Exceptions\TenantMissingException;
 use Sprout\TenancyOptions;
@@ -23,7 +25,7 @@ use function Sprout\sprout;
  * @template ChildModel of \Illuminate\Database\Eloquent\Model
  * @template TenantModel of \Illuminate\Database\Eloquent\Model&\Sprout\Contracts\Tenant
  *
- * @see     \Sprout\Database\Eloquent\Concerns\BelongsToManyTenants
+ * @see     BelongsToManyTenants
  */
 class BelongsToManyTenantsObserver
 {
@@ -34,7 +36,7 @@ class BelongsToManyTenantsObserver
      *
      * The created event is fired after a model is persisted to the database.
      *
-     * @param Model&\Sprout\Database\Eloquent\Concerns\BelongsToManyTenants $model
+     * @param Model&BelongsToManyTenants $model
      *
      * @phpstan-param ChildModel                                                                               $model
      *
@@ -98,7 +100,7 @@ class BelongsToManyTenantsObserver
      * The retrieved event is fired after a model is retrieved from
      * persistent storage and hydrated.
      *
-     * @param Model&\Sprout\Database\Eloquent\Concerns\BelongsToManyTenants $model
+     * @param Model&BelongsToManyTenants $model
      *
      * @phpstan-param ChildModel                                                                               $model
      *
@@ -177,7 +179,7 @@ class BelongsToManyTenantsObserver
             $this->loadedRelation = true;
         }
 
-        /** @var \Illuminate\Database\Eloquent\Collection<int, TenantModel> $relatedModels */
+        /** @var Collection<int, TenantModel> $relatedModels */
         $relatedModels = $model->getRelation($relation->getRelationName());
 
         // If it's not empty, there are already tenants
@@ -195,7 +197,7 @@ class BelongsToManyTenantsObserver
      */
     private function isTenantMismatched(Model $model, Tenant&Model $tenant, BelongsToMany $relation): bool
     {
-        /** @var \Illuminate\Database\Eloquent\Collection<int, TenantModel>|null $relatedModels */
+        /** @var Collection<int, TenantModel>|null $relatedModels */
         $relatedModels = $model->getRelation($relation->getRelationName());
 
         // If the tenant model isn't in the loaded relation, or the relation is
@@ -208,10 +210,10 @@ class BelongsToManyTenantsObserver
     /**
      * Perform initial checks and return they passed or not
      *
-     * @param Model&\Sprout\Database\Eloquent\Concerns\BelongsToManyTenants $model
-     * @param Tenancy<TenantModel>                                          $tenancy
-     * @param BelongsToMany<ChildModel, TenantModel>                        $relation
-     * @param bool                                                          $succeedOnMatch
+     * @param Model&BelongsToManyTenants             $model
+     * @param Tenancy<TenantModel>                   $tenancy
+     * @param BelongsToMany<ChildModel, TenantModel> $relation
+     * @param bool                                   $succeedOnMatch
      *
      * @phpstan-param ChildModel                                                                               $model
      *

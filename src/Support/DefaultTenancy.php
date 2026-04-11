@@ -20,7 +20,7 @@ use Sprout\Events\TenantLoaded;
  *
  * @template TenantClass of \Sprout\Contracts\Tenant
  *
- * @implements \Sprout\Contracts\Tenancy<TenantClass>
+ * @implements Tenancy<TenantClass>
  */
 final class DefaultTenancy implements Tenancy
 {

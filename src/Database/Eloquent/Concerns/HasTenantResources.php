@@ -5,13 +5,14 @@ namespace Sprout\Database\Eloquent\Concerns;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use Sprout\Contracts\Tenant;
 use Sprout\Contracts\TenantHasResources;
 
 /**
  * Has Tenant Resources
  *
  * This trait provides helper methods alongside default implementations and
- * functionality to support a {@see \Sprout\Contracts\Tenant} model that also
+ * functionality to support a {@see Tenant} model that also
  * implements the {@see TenantHasResources} interface.
  *
  * @phpstan-require-implements \Sprout\Contracts\Tenant

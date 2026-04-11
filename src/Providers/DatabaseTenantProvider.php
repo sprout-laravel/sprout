@@ -6,6 +6,7 @@ namespace Sprout\Providers;
 use Illuminate\Database\ConnectionInterface;
 use Sprout\Contracts\Tenant;
 use Sprout\Contracts\TenantHasResources;
+use Sprout\Contracts\TenantProvider;
 use Sprout\Exceptions\MisconfigurationException;
 use Sprout\Support\BaseTenantProvider;
 use Sprout\Support\GenericTenant;
@@ -13,12 +14,12 @@ use Sprout\Support\GenericTenant;
 /**
  * Database Tenant Provider
  *
- * This is an implementation of {@see \Sprout\Contracts\TenantProvider} that
+ * This is an implementation of {@see TenantProvider} that
  * uses Laravels base query builder.
  *
  * @template EntityClass of \Sprout\Contracts\Tenant
  *
- * @extends \Sprout\Support\BaseTenantProvider<EntityClass>
+ * @extends BaseTenantProvider<EntityClass>
  */
 final class DatabaseTenantProvider extends BaseTenantProvider
 {

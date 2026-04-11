@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Sprout\Overrides\Session;
 
+use Illuminate\Contracts\Config\Repository;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Session\SessionManager;
 use Illuminate\Support\Arr;
@@ -39,7 +41,7 @@ final class SessionOverride extends BaseOverride implements BootableServiceOverr
      */
     public function setup(Tenancy $tenancy, Tenant $tenant): void
     {
-        /** @var \Illuminate\Contracts\Config\Repository $config */
+        /** @var Repository $config */
         $config   = $this->getApp()->make('config');
         $settings = $this->getSprout()->settings();
 
@@ -123,7 +125,7 @@ final class SessionOverride extends BaseOverride implements BootableServiceOverr
      */
     public function cleanup(Tenancy $tenancy, Tenant $tenant): void
     {
-        /** @var \Illuminate\Contracts\Config\Repository $config */
+        /** @var Repository $config */
         $config   = $this->getApp()->make('config');
         $settings = $this->getSprout()->settings();
 
@@ -179,7 +181,7 @@ final class SessionOverride extends BaseOverride implements BootableServiceOverr
      *
      * @return void
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws BindingResolutionException
      */
     private function refreshSessionStore(): void
     {

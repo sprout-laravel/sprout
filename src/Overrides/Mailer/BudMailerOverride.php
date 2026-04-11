@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Sprout\Overrides\Mailer;
 
 use Closure;
+use Illuminate\Mail\MailManager;
 use RuntimeException;
 use Sprout\Bud;
 use Sprout\Overrides\BudBaseOverride;
@@ -15,7 +16,7 @@ use Sprout\Sprout;
  * This override specifically allows for the creation of mailers
  * using Bud config stores.
  *
- * @extends \Sprout\Overrides\BudBaseOverride<\Illuminate\Mail\MailManager>
+ * @extends BudBaseOverride<MailManager>
  */
 final class BudMailerOverride extends BudBaseOverride
 {
@@ -37,7 +38,7 @@ final class BudMailerOverride extends BudBaseOverride
      * @param Sprout  $sprout
      * @param Closure $tracker
      *
-     * @phpstan-param \Illuminate\Mail\MailManager $service
+     * @phpstan-param MailManager $service
      *
      * @return void
      */
@@ -65,7 +66,7 @@ final class BudMailerOverride extends BudBaseOverride
      * @param object $service
      * @param string $name
      *
-     * @phpstan-param \Illuminate\Mail\MailManager $service
+     * @phpstan-param MailManager $service
      *
      * @return void
      */

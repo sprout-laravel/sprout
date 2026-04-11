@@ -3,10 +3,13 @@ declare(strict_types=1);
 
 namespace Sprout\Listeners;
 
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Routing\Route;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Sprout\Exceptions\MisconfigurationException;
+use Sprout\Exceptions\NoTenantFoundException;
 use Sprout\Http\Middleware\SproutOptionalTenantContextMiddleware;
 use Sprout\Http\Middleware\SproutTenantContextMiddleware;
 use Sprout\Sprout;
@@ -38,9 +41,9 @@ final class IdentifyTenantOnRouting
      *
      * @return void
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
-     * @throws \Sprout\Exceptions\MisconfigurationException
-     * @throws \Sprout\Exceptions\NoTenantFoundException
+     * @throws BindingResolutionException
+     * @throws MisconfigurationException
+     * @throws NoTenantFoundException
      */
     public function handle(RouteMatched $event): void
     {

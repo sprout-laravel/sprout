@@ -4,9 +4,11 @@ declare(strict_types=1);
 namespace Sprout\Attributes;
 
 use Attribute;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Contracts\Container\ContextualAttribute;
 use Sprout\Bud;
+use Sprout\Exceptions\MisconfigurationException;
 
 /**
  * Config Store Attribute
@@ -40,8 +42,8 @@ final readonly class TenantConfig implements ContextualAttribute
      *
      * @return array<string, mixed>|null
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
-     * @throws \Sprout\Exceptions\MisconfigurationException
+     * @throws BindingResolutionException
+     * @throws MisconfigurationException
      */
     public function resolve(self $attribute, Container $container): ?array
     {

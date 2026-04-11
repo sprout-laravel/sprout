@@ -5,6 +5,7 @@ namespace Sprout\Attributes;
 
 use Attribute;
 use Illuminate\Container\Container;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Container\ContextualAttribute;
 use Sprout\Contracts\Tenant;
 use Sprout\Managers\TenancyManager;
@@ -45,7 +46,7 @@ final readonly class CurrentTenant implements ContextualAttribute
      *
      * @return Tenant|null
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws BindingResolutionException
      */
     public function resolve(self $tenant, Container $container): ?Tenant
     {

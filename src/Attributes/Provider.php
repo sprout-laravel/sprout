@@ -5,8 +5,10 @@ namespace Sprout\Attributes;
 
 use Attribute;
 use Illuminate\Container\Container;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Container\ContextualAttribute;
 use Sprout\Contracts\TenantProvider;
+use Sprout\Exceptions\MisconfigurationException;
 use Sprout\Managers\TenantProviderManager;
 
 /**
@@ -43,8 +45,8 @@ final readonly class Provider implements ContextualAttribute
      *
      * @return \Sprout\Contracts\TenantProvider<*>
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
-     * @throws \Sprout\Exceptions\MisconfigurationException
+     * @throws BindingResolutionException
+     * @throws MisconfigurationException
      */
     public function resolve(self $attribute, Container $container): TenantProvider
     {

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
+use Sprout\Database\Eloquent\Concerns\BelongsToTenant;
 use Sprout\Exceptions\TenantMismatchException;
 use Sprout\Exceptions\TenantMissingException;
 use Sprout\TenancyOptions;
@@ -23,7 +24,7 @@ use function Sprout\sprout;
  * @template ChildModel of \Illuminate\Database\Eloquent\Model
  * @template TenantModel of \Illuminate\Database\Eloquent\Model&\Sprout\Contracts\Tenant
  *
- * @see     \Sprout\Database\Eloquent\Concerns\BelongsToTenant
+ * @see     BelongsToTenant
  */
 class BelongsToTenantObserver
 {
@@ -33,7 +34,7 @@ class BelongsToTenantObserver
      * The creating event is fired right before a model is persisted to the
      * database.
      *
-     * @param Model&\Sprout\Database\Eloquent\Concerns\BelongsToTenant $model
+     * @param Model&BelongsToTenant $model
      *
      * @phpstan-param ChildModel                                                                          $model
      *
@@ -80,7 +81,7 @@ class BelongsToTenantObserver
      * The retrieved event is fired after a model is retrieved from
      * persistent storage and hydrated.
      *
-     * @param Model&\Sprout\Database\Eloquent\Concerns\BelongsToTenant $model
+     * @param Model&BelongsToTenant $model
      *
      * @phpstan-param ChildModel                                                                          $model
      *
@@ -153,10 +154,10 @@ class BelongsToTenantObserver
     /**
      * Perform initial checks and return they passed or not
      *
-     * @param Model&\Sprout\Database\Eloquent\Concerns\BelongsToTenant $model
-     * @param Tenancy<TenantModel>                                     $tenancy
-     * @param BelongsTo<ChildModel, TenantModel>                       $relation
-     * @param bool                                                     $succeedOnMatch
+     * @param Model&BelongsToTenant              $model
+     * @param Tenancy<TenantModel>               $tenancy
+     * @param BelongsTo<ChildModel, TenantModel> $relation
+     * @param bool                               $succeedOnMatch
      *
      * @phpstan-param ChildModel                                                                          $model
      *

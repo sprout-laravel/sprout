@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Sprout\Http\Resolvers;
 
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Encryption\Encrypter;
 use Illuminate\Cookie\CookieJar;
 use Illuminate\Cookie\CookieValuePrefix;
@@ -71,7 +72,7 @@ final class CookieIdentityResolver extends BaseIdentityResolver
      *
      * @return void
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws BindingResolutionException
      */
     public function setup(Tenancy $tenancy, ?Tenant $tenant): void
     {
@@ -224,7 +225,7 @@ final class CookieIdentityResolver extends BaseIdentityResolver
      *
      * @return string|null
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws BindingResolutionException
      */
     private function decryptCookie(string $key, string $cookie): ?string
     {

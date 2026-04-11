@@ -5,6 +5,7 @@ namespace Sprout\Overrides\Auth;
 
 use Illuminate\Auth\AuthManager;
 use Illuminate\Contracts\Auth\UserProvider;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\Arr;
 use InvalidArgumentException;
 
@@ -74,7 +75,7 @@ class BudAuthManager extends AuthManager
         /** @var string $driver */
         if (isset($this->customProviderCreators[$driver])) {
             $creator = $this->customProviderCreators[$driver];
-            /** @var \Closure(\Illuminate\Contracts\Foundation\Application, array<string, mixed>):UserProvider|null $creator */
+            /** @var \Closure(Application, array<string, mixed>):UserProvider|null $creator */
 
             /**
              * This has to be here because no matter how I provide it, it

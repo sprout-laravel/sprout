@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Sprout\Managers;
 
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Foundation\Application;
 use Sprout\Concerns\AwareOfApp;
 use Sprout\Concerns\AwareOfSprout;
@@ -97,7 +98,7 @@ final class ServiceOverrideManager
      *
      * @return bool
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws BindingResolutionException
      * @throws TenancyMissingException
      */
     public function hasOverrideBeenSetUp(string $service, ?Tenancy $tenancy = null): bool
@@ -118,7 +119,7 @@ final class ServiceOverrideManager
      *
      * @return bool
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws BindingResolutionException
      * @throws TenancyMissingException
      *
      * @codeCoverageIgnore
@@ -201,7 +202,7 @@ final class ServiceOverrideManager
      *
      * @return void
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws BindingResolutionException
      * @throws MisconfigurationException
      * @throws ServiceOverrideException
      */
@@ -222,7 +223,7 @@ final class ServiceOverrideManager
      *
      * @throws MisconfigurationException
      * @throws ServiceOverrideException
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws BindingResolutionException
      */
     public function bootOverrides(): void
     {
@@ -309,7 +310,7 @@ final class ServiceOverrideManager
      *
      * @return array<string, mixed>|null
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws BindingResolutionException
      */
     protected function getServiceConfig(string $service): ?array
     {
@@ -326,7 +327,7 @@ final class ServiceOverrideManager
      *
      * @return static
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws BindingResolutionException
      * @throws MisconfigurationException
      * @throws ServiceOverrideException
      */
@@ -403,7 +404,7 @@ final class ServiceOverrideManager
      *
      * @return static
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws BindingResolutionException
      * @throws MisconfigurationException
      * @throws ServiceOverrideException
      */

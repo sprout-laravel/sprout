@@ -5,6 +5,7 @@ namespace Sprout\Overrides\Auth;
 
 use Illuminate\Auth\Passwords\PasswordBrokerManager;
 use Illuminate\Auth\Passwords\TokenRepositoryInterface;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Foundation\Application;
 use Sprout\Sprout;
 
@@ -62,7 +63,7 @@ class SproutAuthPasswordBrokerManager extends PasswordBrokerManager
      *
      * @return TokenRepositoryInterface
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws BindingResolutionException
      */
     protected function createTokenRepository(array $config): TokenRepositoryInterface
     {

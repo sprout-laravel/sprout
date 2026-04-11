@@ -9,6 +9,8 @@ use Sprout\Concerns\AwareOfTenant;
 use Sprout\Contracts\Tenant;
 use Sprout\Contracts\TenantAware;
 use Sprout\Contracts\TenantHasResources;
+use Sprout\Exceptions\TenancyMissingException;
+use Sprout\Exceptions\TenantMissingException;
 use Symfony\Component\Finder\Finder;
 
 /**
@@ -57,8 +59,8 @@ final class SproutFileSessionHandler extends FileSessionHandler implements Tenan
      *
      * @return bool
      *
-     * @throws \Sprout\Exceptions\TenancyMissingException
-     * @throws \Sprout\Exceptions\TenantMissingException
+     * @throws TenancyMissingException
+     * @throws TenantMissingException
      */
     public function write($sessionId, $data): bool
     {

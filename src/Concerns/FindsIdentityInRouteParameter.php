@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
 use Illuminate\Routing\RouteRegistrar;
 use Illuminate\Support\Facades\URL;
+use Sprout\Contracts\IdentityResolverUsesParameters;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 use Sprout\Support\PlaceholderHelper;
@@ -15,7 +16,7 @@ use Sprout\Support\PlaceholderHelper;
  * Find Identity in Route Parameter
  *
  * This trait provides both helper methods and default implementations for
- * methods required by the {@see \Sprout\Contracts\IdentityResolverUsesParameters}
+ * methods required by the {@see IdentityResolverUsesParameters}
  * interface.
  *
  * @phpstan-require-implements \Sprout\Contracts\IdentityResolverUsesParameters

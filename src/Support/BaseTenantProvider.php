@@ -13,7 +13,7 @@ use Sprout\Contracts\TenantProvider;
  *
  * @template EntityClass of \Sprout\Contracts\Tenant
  *
- * @implements \Sprout\Contracts\TenantProvider<EntityClass>
+ * @implements TenantProvider<EntityClass>
  */
 abstract class BaseTenantProvider implements TenantProvider
 {

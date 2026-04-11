@@ -4,7 +4,9 @@ declare(strict_types=1);
 namespace Sprout\Http\Middleware;
 
 use Closure;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Http\Request;
+use Sprout\Exceptions\MisconfigurationException;
 use Sprout\Http\Resolvers\HeaderIdentityResolver;
 use Sprout\Sprout;
 use Sprout\Support\ResolutionHelper;
@@ -42,8 +44,8 @@ final class AddTenantHeaderToResponse
      *
      * @return Response
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
-     * @throws \Sprout\Exceptions\MisconfigurationException
+     * @throws BindingResolutionException
+     * @throws MisconfigurationException
      */
     public function handle(Request $request, Closure $next, string ...$options): Response
     {

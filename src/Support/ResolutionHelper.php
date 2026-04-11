@@ -3,8 +3,13 @@ declare(strict_types=1);
 
 namespace Sprout\Support;
 
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Route;
+use Sprout\Contracts\IdentityResolver;
 use Sprout\Contracts\IdentityResolverUsesParameters;
+use Sprout\Contracts\Tenancy;
+use Sprout\Contracts\Tenant;
 use Sprout\Exceptions\MisconfigurationException;
 use Sprout\Exceptions\NoTenantFoundException;
 use Sprout\Sprout;
@@ -39,7 +44,7 @@ class ResolutionHelper
      *
      * @return bool
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws BindingResolutionException
      * @throws MisconfigurationException
      * @throws NoTenantFoundException
      */
@@ -64,8 +69,8 @@ class ResolutionHelper
         $tenancy  = $sprout->tenancies()->get($tenancyName);
 
         /**
-         * @var \Sprout\Contracts\IdentityResolver                  $resolver
-         * @var \Sprout\Contracts\Tenancy<\Sprout\Contracts\Tenant> $tenancy
+         * @var IdentityResolver $resolver
+         * @var Tenancy<Tenant>  $tenancy
          */
         if ($tenancy->check() || ! $resolver->canResolve($request, $tenancy, $hook)) {
             return false;
@@ -73,7 +78,7 @@ class ResolutionHelper
 
         $sprout->setCurrentTenancy($tenancy);
 
-        /** @var \Illuminate\Routing\Route|null $route */
+        /** @var Route|null $route */
         $route = $request->route();
 
         // Is the resolver using a parameter, and is the parameter present?

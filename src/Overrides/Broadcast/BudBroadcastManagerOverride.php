@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Sprout\Overrides\Broadcast;
 
 use Illuminate\Broadcasting\BroadcastManager;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Contracts\Foundation\Application;
 use Sprout\Contracts\BootableServiceOverride;
@@ -23,7 +24,7 @@ final class BudBroadcastManagerOverride extends BaseOverride implements Bootable
      *
      * @return void
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws BindingResolutionException
      */
     public function boot(Application $app, Sprout $sprout): void
     {

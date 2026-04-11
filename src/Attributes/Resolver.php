@@ -5,8 +5,10 @@ namespace Sprout\Attributes;
 
 use Attribute;
 use Illuminate\Container\Container;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Container\ContextualAttribute;
 use Sprout\Contracts\IdentityResolver;
+use Sprout\Exceptions\MisconfigurationException;
 use Sprout\Managers\IdentityResolverManager;
 
 /**
@@ -43,8 +45,8 @@ final readonly class Resolver implements ContextualAttribute
      *
      * @return IdentityResolver
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
-     * @throws \Sprout\Exceptions\MisconfigurationException
+     * @throws BindingResolutionException
+     * @throws MisconfigurationException
      */
     public function resolve(self $attribute, Container $container): IdentityResolver
     {

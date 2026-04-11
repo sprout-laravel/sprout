@@ -5,7 +5,9 @@ namespace Sprout\Overrides;
 
 use RuntimeException;
 use Sprout\Bud;
+use Sprout\Contracts\Tenant;
 use Sprout\Exceptions\CyclicOverrideException;
+use Sprout\Exceptions\MisconfigurationException;
 use Sprout\Exceptions\TenancyMissingException;
 use Sprout\Exceptions\TenantMissingException;
 use Sprout\Sprout;
@@ -20,7 +22,7 @@ abstract class BaseCreator
      *
      * @return array<string, mixed>
      *
-     * @throws \Sprout\Exceptions\MisconfigurationException
+     * @throws MisconfigurationException
      * @throws TenancyMissingException
      * @throws TenantMissingException
      */
@@ -46,7 +48,7 @@ abstract class BaseCreator
             throw TenantMissingException::make($tenancy->getName());
         }
 
-        /** @var \Sprout\Contracts\Tenant $tenant */
+        /** @var Tenant $tenant */
         $tenant = $tenancy->tenant();
 
         // Get the default store, or the one specified in the config, if there

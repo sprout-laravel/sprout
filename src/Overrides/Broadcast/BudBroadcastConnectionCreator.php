@@ -6,6 +6,9 @@ namespace Sprout\Overrides\Broadcast;
 use Illuminate\Contracts\Broadcasting\Broadcaster;
 use InvalidArgumentException;
 use Sprout\Bud;
+use Sprout\Exceptions\MisconfigurationException;
+use Sprout\Exceptions\TenancyMissingException;
+use Sprout\Exceptions\TenantMissingException;
 use Sprout\Overrides\BaseCreator;
 use Sprout\Sprout;
 
@@ -51,9 +54,9 @@ final class BudBroadcastConnectionCreator extends BaseCreator
      *
      * @return Broadcaster
      *
-     * @throws \Sprout\Exceptions\MisconfigurationException
-     * @throws \Sprout\Exceptions\TenancyMissingException
-     * @throws \Sprout\Exceptions\TenantMissingException
+     * @throws MisconfigurationException
+     * @throws TenancyMissingException
+     * @throws TenantMissingException
      */
     public function __invoke(): Broadcaster
     {

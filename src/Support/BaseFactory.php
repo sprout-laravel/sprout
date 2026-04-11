@@ -5,6 +5,7 @@ namespace Sprout\Support;
 
 use Closure;
 use Illuminate\Contracts\Config\Repository;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Foundation\Application;
 use Sprout\Exceptions\MisconfigurationException;
 use Sprout\Sprout;
@@ -225,7 +226,7 @@ abstract class BaseFactory
      * @phpstan-return FactoryClass
      *
      * @throws MisconfigurationException
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws BindingResolutionException
      */
     protected function resolve(string $name): object
     {
@@ -276,7 +277,7 @@ abstract class BaseFactory
      *
      * @phpstan-return FactoryClass
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws BindingResolutionException
      */
     protected function setupResolvedObject(object $object): object
     {
@@ -296,7 +297,7 @@ abstract class BaseFactory
      *
      * @return Repository
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws BindingResolutionException
      */
     protected function getAppConfig(): Repository
     {

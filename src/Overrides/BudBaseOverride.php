@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Sprout\Overrides;
 
 use Closure;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Foundation\Application;
 use Sprout\Bud;
 use Sprout\Contracts\BootableServiceOverride;
@@ -45,7 +46,7 @@ abstract class BudBaseOverride extends SproutBaseOverride implements BootableSer
      *
      * @return void
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws BindingResolutionException
      */
     public function boot(Application $app, Sprout $sprout): void
     {
@@ -88,7 +89,7 @@ abstract class BudBaseOverride extends SproutBaseOverride implements BootableSer
      *
      * @return void
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws BindingResolutionException
      */
     public function cleanup(Tenancy $tenancy, Tenant $tenant): void
     {

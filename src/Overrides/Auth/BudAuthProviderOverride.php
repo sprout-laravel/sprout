@@ -4,6 +4,8 @@ declare(strict_types=1);
 namespace Sprout\Overrides\Auth;
 
 use Closure;
+use Illuminate\Auth\AuthManager;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Application;
 use LogicException;
 use RuntimeException;
@@ -14,7 +16,7 @@ use Sprout\Overrides\BudBaseOverride;
 use Sprout\Sprout;
 
 /**
- * @extends \Sprout\Overrides\BudBaseOverride<\Illuminate\Auth\AuthManager>
+ * @extends BudBaseOverride<AuthManager>
  */
 final class BudAuthProviderOverride extends BudBaseOverride
 {
@@ -38,12 +40,12 @@ final class BudAuthProviderOverride extends BudBaseOverride
      *
      * @return void
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws BindingResolutionException
      */
     public function cleanup(Tenancy $tenancy, Tenant $tenant): void
     {
         if ($this->getApp()->resolved($this->serviceName())) {
-            /** @var \Illuminate\Auth\AuthManager $service */
+            /** @var AuthManager $service */
             $service = $this->getApp()->make('auth');
 
             // Providers cannot be cleaned up in the same way as other services,
@@ -73,7 +75,7 @@ final class BudAuthProviderOverride extends BudBaseOverride
      * @param Sprout  $sprout
      * @param Closure $tracker
      *
-     * @phpstan-param \Illuminate\Auth\AuthManager $service
+     * @phpstan-param AuthManager $service
      *
      * @return void
      */
@@ -103,7 +105,7 @@ final class BudAuthProviderOverride extends BudBaseOverride
      * @param object $service
      * @param string $name
      *
-     * @phpstan-param \Illuminate\Auth\AuthManager $service
+     * @phpstan-param AuthManager $service
      *
      * @return void
      *

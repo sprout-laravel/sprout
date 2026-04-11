@@ -5,6 +5,7 @@ namespace Sprout\Listeners;
 
 use Illuminate\Foundation\Application;
 use Sprout\Contracts\Tenant;
+use Sprout\Contracts\TenantAware;
 use Sprout\Events\CurrentTenantChanged;
 
 /**
@@ -12,7 +13,7 @@ use Sprout\Events\CurrentTenantChanged;
  *
  * This class is an event listener for {@see CurrentTenantChanged}
  * that handles the refreshing of the current tenant on classes resolved through
- * the container that implement {@see \Sprout\Contracts\TenantAware}.
+ * the container that implement {@see TenantAware}.
  */
 final class RefreshTenantAwareDependencies
 {

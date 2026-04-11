@@ -3,8 +3,10 @@ declare(strict_types=1);
 
 namespace Sprout\Managers;
 
+use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\Eloquent\Model;
 use Sprout\Contracts\Tenant;
+use Sprout\Contracts\TenantProvider;
 use Sprout\Exceptions\MisconfigurationException;
 use Sprout\Providers\DatabaseTenantProvider;
 use Sprout\Providers\EloquentTenantProvider;
@@ -15,9 +17,9 @@ use Sprout\Support\GenericTenant;
  * Tenant Provider Manager
  *
  * This is a manager and factory, responsible for creating and storing
- * implementations of {@see \Sprout\Contracts\TenantProvider}.
+ * implementations of {@see TenantProvider}.
  *
- * @extends \Sprout\Support\BaseFactory<\Sprout\Contracts\TenantProvider>
+ * @extends BaseFactory<TenantProvider>
  */
 final class TenantProviderManager extends BaseFactory
 {
@@ -126,7 +128,7 @@ final class TenantProviderManager extends BaseFactory
         }
 
         /**
-         * @var \Illuminate\Database\ConnectionInterface $connection
+         * @var ConnectionInterface $connection
          *
          * @phpstan-ignore-next-line
          */

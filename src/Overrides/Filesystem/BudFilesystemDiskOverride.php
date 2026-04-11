@@ -5,6 +5,7 @@ namespace Sprout\Overrides\Filesystem;
 
 use Closure;
 use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Filesystem\FilesystemManager;
 use LogicException;
 use Sprout\Bud;
 use Sprout\Overrides\BudBaseOverride;
@@ -16,7 +17,7 @@ use Sprout\Sprout;
  * This override specifically allows for the creation of filesystem disks
  * using the Bud config store.
  *
- * @extends \Sprout\Overrides\BudBaseOverride<\Illuminate\Filesystem\FilesystemManager>
+ * @extends BudBaseOverride<FilesystemManager>
  */
 final class BudFilesystemDiskOverride extends BudBaseOverride
 {
@@ -38,7 +39,7 @@ final class BudFilesystemDiskOverride extends BudBaseOverride
      * @param Sprout  $sprout
      * @param Closure $tracker
      *
-     * @phpstan-param \Illuminate\Filesystem\FilesystemManager $service
+     * @phpstan-param FilesystemManager $service
      *
      * @return void
      */
@@ -68,7 +69,7 @@ final class BudFilesystemDiskOverride extends BudBaseOverride
      * @param object $service
      * @param string $name
      *
-     * @phpstan-param \Illuminate\Filesystem\FilesystemManager $service
+     * @phpstan-param FilesystemManager $service
      *
      * @return void
      */

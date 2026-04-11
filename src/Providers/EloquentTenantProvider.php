@@ -6,21 +6,23 @@ namespace Sprout\Providers;
 use Illuminate\Database\Eloquent\Model;
 use Sprout\Contracts\Tenant;
 use Sprout\Contracts\TenantHasResources;
+use Sprout\Contracts\TenantProvider;
 use Sprout\Exceptions\MisconfigurationException;
+use Sprout\Managers\TenantProviderManager;
 use Sprout\Support\BaseTenantProvider;
 
 /**
  * Eloquent Tenant Provider
  *
- * This class provides an implementation of the {@see \Sprout\Contracts\TenantProvider}
+ * This class provides an implementation of the {@see TenantProvider}
  * contract for situations where the {@see Tenant} is an
  * Eloquent model.
  *
  * @template TenantModel of \Illuminate\Database\Eloquent\Model&\Sprout\Contracts\Tenant
  *
- * @extends \Sprout\Support\BaseTenantProvider<TenantModel>
+ * @extends BaseTenantProvider<TenantModel>
  *
- * @internal New instances are created with {@see \Sprout\Managers\TenantProviderManager::createEloquentProvider()}, and shouldn't be created manually
+ * @internal New instances are created with {@see TenantProviderManager::createEloquentProvider()}, and shouldn't be created manually
  */
 final class EloquentTenantProvider extends BaseTenantProvider
 {

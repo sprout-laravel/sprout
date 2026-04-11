@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Sprout\Overrides\Auth;
 
+use Illuminate\Auth\Passwords\PasswordBrokerManager;
 use Illuminate\Contracts\Foundation\Application;
 use Sprout\Contracts\BootableServiceOverride;
 use Sprout\Contracts\Tenancy;
@@ -103,7 +104,7 @@ final class AuthPasswordOverride extends BaseOverride implements BootableService
         // Same as with 'auth' above, we only want to run this code if the
         // password broker has been resolved already.
         if ($this->getApp()->resolved('auth.password')) {
-            /** @var \Illuminate\Auth\Passwords\PasswordBrokerManager $passwordBroker */
+            /** @var PasswordBrokerManager $passwordBroker */
             $passwordBroker = $this->getApp()->make('auth.password');
 
             // The flush method only exists on our custom implementation

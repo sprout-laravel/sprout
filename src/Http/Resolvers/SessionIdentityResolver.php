@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Sprout\Http\Resolvers;
 
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Http\Request;
 use Illuminate\Session\SessionManager;
 use Sprout\Contracts\Tenancy;
@@ -58,7 +59,7 @@ final class SessionIdentityResolver extends BaseIdentityResolver
      *
      * @return void
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws BindingResolutionException
      */
     public function setup(Tenancy $tenancy, ?Tenant $tenant): void
     {

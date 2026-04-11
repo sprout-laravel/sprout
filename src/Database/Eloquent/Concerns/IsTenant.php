@@ -3,10 +3,13 @@ declare(strict_types=1);
 
 namespace Sprout\Database\Eloquent\Concerns;
 
+use Sprout\Contracts\Tenant;
+use Sprout\Contracts\TenantProvider;
+
 /**
  * Is Tenant
  *
- * This trait provides a default implementation of the {@see \Sprout\Contracts\Tenant}
+ * This trait provides a default implementation of the {@see Tenant}
  * interface to simplify the creation of tenant models.
  *
  * @phpstan-require-implements \Sprout\Contracts\Tenant
@@ -37,7 +40,7 @@ trait IsTenant
      *
      * Retrieve the storage name for the tenant identifier, whether that's an
      * attribute, column name, array key or something else.
-     * Used primarily by {@see \Sprout\Contracts\TenantProvider}.
+     * Used primarily by {@see TenantProvider}.
      *
      * @return string
      *
@@ -68,7 +71,7 @@ trait IsTenant
      *
      * Retrieve the storage name for the tenant key, whether that's an
      * attribute, column name, array key or something else.
-     * Used primarily by {@see \Sprout\Contracts\TenantProvider}.
+     * Used primarily by {@see TenantProvider}.
      *
      * @return string
      *

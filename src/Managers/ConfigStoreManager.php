@@ -3,16 +3,18 @@ declare(strict_types=1);
 
 namespace Sprout\Managers;
 
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Encryption\Encrypter as EncrypterContract;
 use Illuminate\Encryption\Encrypter;
 use Illuminate\Support\Str;
+use Sprout\Contracts\ConfigStore;
 use Sprout\Exceptions\MisconfigurationException;
 use Sprout\Stores\DatabaseConfigStore;
 use Sprout\Stores\FilesystemConfigStore;
 use Sprout\Support\BaseFactory;
 
 /**
- * @extends \Sprout\Support\BaseFactory<\Sprout\Contracts\ConfigStore>
+ * @extends BaseFactory<ConfigStore>
  */
 class ConfigStoreManager extends BaseFactory
 {
@@ -49,7 +51,7 @@ class ConfigStoreManager extends BaseFactory
      *
      * @return EncrypterContract
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws BindingResolutionException
      */
     protected function getEncrypter(?string $key, ?string $cipher): EncrypterContract
     {
@@ -67,7 +69,7 @@ class ConfigStoreManager extends BaseFactory
      *
      * @return EncrypterContract
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws BindingResolutionException
      */
     protected function buildEncrypter(string $key, ?string $cipher = null): EncrypterContract
     {
@@ -91,7 +93,7 @@ class ConfigStoreManager extends BaseFactory
      *
      * @return FilesystemConfigStore
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws BindingResolutionException
      * @throws MisconfigurationException
      */
     protected function createFilesystemConfig(array $config, string $name): FilesystemConfigStore
@@ -127,7 +129,7 @@ class ConfigStoreManager extends BaseFactory
      *
      * @return DatabaseConfigStore
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws BindingResolutionException
      * @throws MisconfigurationException
      */
     protected function createDatabaseConfig(array $config, string $name): DatabaseConfigStore

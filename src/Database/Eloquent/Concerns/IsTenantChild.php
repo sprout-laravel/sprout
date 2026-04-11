@@ -3,12 +3,14 @@ declare(strict_types=1);
 
 namespace Sprout\Database\Eloquent\Concerns;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
 use Sprout\Attributes\TenantRelation;
 use Sprout\Contracts\Tenancy;
+use Sprout\Contracts\Tenant;
 use Sprout\Database\Eloquent\Contracts\OptionalTenant;
 use Sprout\Exceptions\TenantRelationException;
 use Sprout\Managers\TenancyManager;
@@ -18,11 +20,11 @@ use Sprout\Managers\TenancyManager;
  *
  * This trait provides helper methods and functionality that supports the
  * automatic handling of Eloquent models that are direct descendants of
- * {@see \Sprout\Contracts\Tenant} models.
+ * {@see Tenant} models.
  *
  * @phpstan-require-extends \Illuminate\Database\Eloquent\Model
  *
- * @mixin \Illuminate\Database\Eloquent\Model
+ * @mixin Model
  *
  * @phpstan-ignore trait.unused
  */

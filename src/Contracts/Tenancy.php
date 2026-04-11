@@ -31,7 +31,7 @@ interface Tenancy
      *
      * @return bool
      *
-     * @phpstan-assert-if-true \Sprout\Contracts\Tenant $this->tenant()
+     * @phpstan-assert-if-true Tenant $this->tenant()
      * @phpstan-assert-if-true string $this->identifier()
      * @phpstan-assert-if-true string|int $this->key()
      *
@@ -144,7 +144,7 @@ interface Tenancy
      *
      * @return bool
      *
-     * @phpstan-assert-if-true \Sprout\Contracts\IdentityResolver $this->resolver()
+     * @phpstan-assert-if-true IdentityResolver $this->resolver()
      *
      * @phpstan-assert-if-false null $this->resolver()
      */

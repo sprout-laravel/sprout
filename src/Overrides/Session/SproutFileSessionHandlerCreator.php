@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Sprout\Overrides\Session;
 
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Foundation\Application;
 use Sprout\Sprout;
 
@@ -34,7 +35,7 @@ final class SproutFileSessionHandlerCreator
      *
      * @return SproutFileSessionHandler
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws BindingResolutionException
      */
     public function __invoke(): SproutFileSessionHandler
     {

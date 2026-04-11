@@ -11,6 +11,7 @@ use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 use Sprout\Exceptions\TenantMissingException;
 use Sprout\Support\BaseIdentityResolver;
+use Sprout\Support\ResolutionHook;
 
 /**
  * Path Identity Resolver
@@ -34,11 +35,11 @@ final class PathIdentityResolver extends BaseIdentityResolver implements Identit
     /**
      * Create a new instance
      *
-     * @param string                                $name
-     * @param int|null                              $segment
-     * @param string|null                           $pattern
-     * @param string|null                           $parameter
-     * @param array<\Sprout\Support\ResolutionHook> $hooks
+     * @param string                $name
+     * @param int|null              $segment
+     * @param string|null           $pattern
+     * @param string|null           $parameter
+     * @param array<ResolutionHook> $hooks
      */
     public function __construct(string $name, ?int $segment = null, ?string $pattern = null, ?string $parameter = null, array $hooks = [])
     {

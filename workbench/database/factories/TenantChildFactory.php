@@ -8,7 +8,7 @@ use Workbench\App\Models\TenantChild;
 /**
  * @template TModel of \Workbench\App\Models\TenantChild
  *
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<TModel>
+ * @extends Factory<TModel>
  */
 class TenantChildFactory extends Factory
 {

@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Sprout\Overrides;
 
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\Arr;
 use Sprout\Contracts\BootableServiceOverride;
@@ -97,7 +98,7 @@ final class StackedOverride extends BaseOverride implements BootableServiceOverr
      *
      * @return void
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws BindingResolutionException
      * @throws MisconfigurationException
      */
     public function boot(Application $app, Sprout $sprout): void
@@ -146,7 +147,7 @@ final class StackedOverride extends BaseOverride implements BootableServiceOverr
      *
      * @return void
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws BindingResolutionException
      * @throws MisconfigurationException
      */
     protected function createOverrides(Application $app, Sprout $sprout): void

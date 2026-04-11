@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Sprout;
 
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Foundation\Application;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
@@ -99,7 +100,7 @@ final class Sprout
      *
      * @return mixed
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws BindingResolutionException
      */
     public function config(string $key, mixed $default = null): mixed
     {
@@ -250,7 +251,7 @@ final class Sprout
      *
      * @return bool
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws BindingResolutionException
      */
     public function supportsHook(ResolutionHook $hook): bool
     {

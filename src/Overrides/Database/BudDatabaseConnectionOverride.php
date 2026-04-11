@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Sprout\Overrides\Database;
 
 use Closure;
+use Illuminate\Database\DatabaseManager;
 use Sprout\Bud;
 use Sprout\Overrides\BudBaseOverride;
 use Sprout\Sprout;
@@ -14,7 +15,7 @@ use Sprout\Sprout;
  * This override specifically allows for the creation of database connections
  * using Bud config store.
  *
- * @extends \Sprout\Overrides\BudBaseOverride<\Illuminate\Database\DatabaseManager>
+ * @extends BudBaseOverride<DatabaseManager>
  */
 final class BudDatabaseConnectionOverride extends BudBaseOverride
 {
@@ -36,7 +37,7 @@ final class BudDatabaseConnectionOverride extends BudBaseOverride
      * @param Sprout  $sprout
      * @param Closure $tracker
      *
-     * @phpstan-param \Illuminate\Database\DatabaseManager $service
+     * @phpstan-param DatabaseManager $service
      *
      * @return void
      */
@@ -62,7 +63,7 @@ final class BudDatabaseConnectionOverride extends BudBaseOverride
      * @param object $service
      * @param string $name
      *
-     * @phpstan-param \Illuminate\Database\DatabaseManager $service
+     * @phpstan-param DatabaseManager $service
      *
      * @return void
      */

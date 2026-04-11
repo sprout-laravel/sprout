@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Sprout\Overrides\Auth;
 
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Foundation\Application;
 use Sprout\Contracts\BootableServiceOverride;
 use Sprout\Overrides\BaseOverride;
@@ -21,7 +22,7 @@ final class BudAuthManagerOverride extends BaseOverride implements BootableServi
      *
      * @return void
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws BindingResolutionException
      */
     public function boot(Application $app, Sprout $sprout): void
     {

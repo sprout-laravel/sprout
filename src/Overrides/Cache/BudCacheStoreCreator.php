@@ -7,6 +7,10 @@ use Illuminate\Cache\CacheManager;
 use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Support\Arr;
 use Sprout\Bud;
+use Sprout\Exceptions\CyclicOverrideException;
+use Sprout\Exceptions\MisconfigurationException;
+use Sprout\Exceptions\TenancyMissingException;
+use Sprout\Exceptions\TenantMissingException;
 use Sprout\Overrides\BaseCreator;
 use Sprout\Sprout;
 
@@ -49,10 +53,10 @@ final class BudCacheStoreCreator extends BaseCreator
     /**
      * @return Repository
      *
-     * @throws \Sprout\Exceptions\CyclicOverrideException
-     * @throws \Sprout\Exceptions\MisconfigurationException
-     * @throws \Sprout\Exceptions\TenancyMissingException
-     * @throws \Sprout\Exceptions\TenantMissingException
+     * @throws CyclicOverrideException
+     * @throws MisconfigurationException
+     * @throws TenancyMissingException
+     * @throws TenantMissingException
      */
     public function __invoke(): Repository
     {

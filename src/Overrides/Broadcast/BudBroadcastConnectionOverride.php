@@ -17,7 +17,7 @@ use Sprout\Sprout;
  * This override specifically allows for the creation of broadcast connections
  * using Bud config store.
  *
- * @extends \Sprout\Overrides\BudBaseOverride<\Illuminate\Broadcasting\BroadcastManager>
+ * @extends BudBaseOverride<BroadcastManager>
  */
 final class BudBroadcastConnectionOverride extends BudBaseOverride
 {

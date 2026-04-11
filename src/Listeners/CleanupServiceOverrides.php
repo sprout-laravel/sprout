@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Sprout\Listeners;
 
 use Sprout\Events\CurrentTenantChanged;
+use Sprout\Exceptions\ServiceOverrideException;
 use Sprout\Managers\ServiceOverrideManager;
 
 /**
@@ -38,7 +39,7 @@ final class CleanupServiceOverrides
      *
      * @return void
      *
-     * @throws \Sprout\Exceptions\ServiceOverrideException
+     * @throws ServiceOverrideException
      */
     public function handle(CurrentTenantChanged $event): void
     {

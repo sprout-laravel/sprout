@@ -2,6 +2,8 @@
 
 namespace Sprout\Contracts;
 
+use Sprout\Exceptions\MisconfigurationException;
+
 /**
  * Tenant Provider Contract
  *
@@ -68,7 +70,7 @@ interface TenantProvider
      *
      * @phpstan-return (TenantClass&TenantHasResources)|null
      *
-     * @throws \Sprout\Exceptions\MisconfigurationException
+     * @throws MisconfigurationException
      *
      * @see Tenant::getTenantKeyName()
      * @see Tenant::getTenantKey()

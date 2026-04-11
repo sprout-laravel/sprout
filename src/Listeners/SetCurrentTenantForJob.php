@@ -5,6 +5,8 @@ namespace Sprout\Listeners;
 
 use Illuminate\Queue\Events\JobProcessing;
 use Illuminate\Support\Facades\Context;
+use Sprout\Contracts\Tenancy;
+use Sprout\Contracts\Tenant;
 use Sprout\Managers\TenancyManager;
 use Sprout\Sprout;
 
@@ -43,7 +45,7 @@ final class SetCurrentTenantForJob
          * @var int|string $key
          */
         foreach ($tenants as $tenancyName => $key) {
-            /** @var \Sprout\Contracts\Tenancy<\Sprout\Contracts\Tenant> $tenancy */
+            /** @var Tenancy<Tenant> $tenancy */
             $tenancy = $this->tenancies->get($tenancyName);
 
             // It's always the key, so we load instead of identifying

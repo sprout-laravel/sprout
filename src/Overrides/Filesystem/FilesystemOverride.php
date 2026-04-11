@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Sprout\Overrides\Filesystem;
 
 use Closure;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Filesystem\FilesystemManager;
@@ -41,7 +42,7 @@ final class FilesystemOverride extends BaseOverride implements BootableServiceOv
      *
      * @return void
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws BindingResolutionException
      */
     public function boot(Application $app, Sprout $sprout): void
     {

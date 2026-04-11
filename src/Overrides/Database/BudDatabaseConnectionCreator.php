@@ -6,6 +6,9 @@ namespace Sprout\Overrides\Database;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\DatabaseManager;
 use Sprout\Bud;
+use Sprout\Exceptions\MisconfigurationException;
+use Sprout\Exceptions\TenancyMissingException;
+use Sprout\Exceptions\TenantMissingException;
 use Sprout\Overrides\BaseCreator;
 use Sprout\Sprout;
 
@@ -56,9 +59,9 @@ final class BudDatabaseConnectionCreator extends BaseCreator
      *
      * @return ConnectionInterface
      *
-     * @throws \Sprout\Exceptions\MisconfigurationException
-     * @throws \Sprout\Exceptions\TenancyMissingException
-     * @throws \Sprout\Exceptions\TenantMissingException
+     * @throws MisconfigurationException
+     * @throws TenancyMissingException
+     * @throws TenantMissingException
      */
     public function __invoke(): ConnectionInterface
     {

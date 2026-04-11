@@ -5,6 +5,7 @@ namespace Sprout\Attributes;
 
 use Attribute;
 use Illuminate\Container\Container;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Container\ContextualAttribute;
 use Sprout\Contracts\ServiceOverride;
 use Sprout\Managers\ServiceOverrideManager;
@@ -45,7 +46,7 @@ final readonly class Override implements ContextualAttribute
      *
      * @return ServiceOverride|null
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws BindingResolutionException
      */
     public function resolve(self $attribute, Container $container): ?ServiceOverride
     {

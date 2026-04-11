@@ -7,6 +7,9 @@ use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Filesystem\FilesystemManager;
 use InvalidArgumentException;
 use Sprout\Bud;
+use Sprout\Exceptions\MisconfigurationException;
+use Sprout\Exceptions\TenancyMissingException;
+use Sprout\Exceptions\TenantMissingException;
 use Sprout\Overrides\BaseCreator;
 use Sprout\Sprout;
 
@@ -52,9 +55,9 @@ final class BudFilesystemDiskCreator extends BaseCreator
      *
      * @return Filesystem
      *
-     * @throws \Sprout\Exceptions\MisconfigurationException
-     * @throws \Sprout\Exceptions\TenancyMissingException
-     * @throws \Sprout\Exceptions\TenantMissingException
+     * @throws MisconfigurationException
+     * @throws TenancyMissingException
+     * @throws TenantMissingException
      */
     public function __invoke(): Filesystem
     {
