@@ -1,0 +1,8 @@
+vendor/
+build/
+.git/
+.idea/
+.vscode/
+.github/
+node_modules/
+docs/
