@@ -11,10 +11,12 @@ use Illuminate\Support\ServiceProvider;
 use Mockery;
 use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\Test;
+use Sprout\Contracts\ConfigStore;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 use Sprout\Contracts\TenantAware;
 use Sprout\Events\CurrentTenantChanged;
+use Sprout\Managers\ConfigStoreManager;
 use Sprout\Http\Middleware\SproutTenantContextMiddleware;
 use Sprout\Listeners\IdentifyTenantOnRouting;
 use Sprout\Managers\IdentityResolverManager;
@@ -23,6 +25,7 @@ use Sprout\Managers\TenancyManager;
 use Sprout\Managers\TenantProviderManager;
 use Sprout\Sprout;
 use Sprout\SproutServiceProvider;
+use Sprout\TenantConfig;
 use function Sprout\sprout;
 
 class SproutServiceProviderTest extends UnitTestCase
@@ -127,6 +130,60 @@ class SproutServiceProviderTest extends UnitTestCase
         $this->assertSame(app()->make(Sprout::class)->overrides(), app()->make(ServiceOverrideManager::class));
         $this->assertSame(sprout()->overrides(), sprout()->overrides());
         $this->assertSame(app()->make(Sprout::class)->overrides(), sprout()->overrides());
+    }
+
+    #[Test]
+    public function tenantConfigIsRegistered(): void
+    {
+        $this->assertTrue(app()->has(TenantConfig::class));
+        $this->assertTrue(app()->has('sprout.config'));
+        $this->assertTrue(app()->isShared(TenantConfig::class));
+        $this->assertFalse(app()->isShared('sprout.config'));
+
+        $this->assertSame(app()->make(TenantConfig::class), app()->make(TenantConfig::class));
+        $this->assertSame(app()->make('sprout.config'), app()->make('sprout.config'));
+        $this->assertSame(app()->make(TenantConfig::class), app()->make('sprout.config'));
+        $this->assertSame(app()->make('sprout.config'), app()->make(TenantConfig::class));
+    }
+
+    #[Test]
+    public function configStoreManagerIsRegistered(): void
+    {
+        $this->assertTrue(app()->has(ConfigStoreManager::class));
+        $this->assertTrue(app()->has('sprout.config.stores'));
+        $this->assertTrue(app()->isShared(ConfigStoreManager::class));
+        $this->assertFalse(app()->isShared('sprout.config.stores'));
+
+        $this->assertSame(app()->make(ConfigStoreManager::class), app()->make(ConfigStoreManager::class));
+        $this->assertSame(app()->make('sprout.config.stores'), app()->make('sprout.config.stores'));
+        $this->assertSame(app()->make(ConfigStoreManager::class), app()->make('sprout.config.stores'));
+        $this->assertSame(app()->make('sprout.config.stores'), app()->make(ConfigStoreManager::class));
+        $this->assertSame(app()->make(TenantConfig::class)->stores(), app()->make('sprout.config.stores'));
+        $this->assertSame(app()->make(TenantConfig::class)->stores(), app()->make(ConfigStoreManager::class));
+    }
+
+    #[Test]
+    public function hasDefaultConfigStoreBinding(): void
+    {
+        $this->assertTrue(app()->bound(ConfigStore::class));
+    }
+
+    #[Test]
+    public function publishesMigrations(): void
+    {
+        $paths = ServiceProvider::pathsToPublish(SproutServiceProvider::class, 'sprout-config-store-migrations');
+
+        $key = realpath(__DIR__ . '/../../src');
+
+        $this->assertArrayHasKey($key . '/../resources/migrations/0001_01_01_70000_create_bud_config_store_table.php', $paths);
+        $this->assertContains(database_path('migrations/0001_01_01_70000_create_bud_config_store_table.php'), $paths);
+    }
+
+    #[Test]
+    public function multitenancyStoresConfigExists(): void
+    {
+        $this->assertTrue(app()['config']->has('multitenancy.stores'));
+        $this->assertIsArray(app()['config']->get('multitenancy.stores'));
     }
 
     #[Test]
