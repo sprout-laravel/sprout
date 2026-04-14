@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Sprout\Overrides\Mailer;
 
 use Illuminate\Mail\MailManager;
-use Sprout\Bud;
+use Sprout\TenantConfig;
 use Sprout\Exceptions\MisconfigurationException;
 use Sprout\Exceptions\TenancyMissingException;
 use Sprout\Exceptions\TenantMissingException;
@@ -13,45 +13,45 @@ use Sprout\Sprout;
 use Symfony\Component\Mailer\Transport\TransportInterface;
 
 /**
- * Bud Mailer Transport Creator
+ * Tenant Config Mailer Transport Creator
  *
  * This class is an abstraction for the logic that creates a mailer
- * using a config store within Bud.
+ * using a config store within tenant config.
  */
-final class BudMailerTransportCreator extends BaseCreator
+final class TenantConfigMailerTransportCreator extends BaseCreator
 {
     private MailManager $manager;
 
-    private Bud $bud;
+    private TenantConfig $tenantConfig;
 
     private Sprout $sprout;
 
     private string $name;
 
     /**
-     * @var array<string, mixed>&array{budStore?:string|null}
+     * @var array<string, mixed>&array{configStore?:string|null}
      */
     private array $config;
 
     /**
-     * @param MailManager                                       $manager
-     * @param Bud                                               $bud
-     * @param Sprout                                            $sprout
-     * @param string                                            $name
-     * @param array<string, mixed>&array{budStore?:string|null} $config
+     * @param MailManager                                            $manager
+     * @param TenantConfig                                           $tenantConfig
+     * @param Sprout                                                 $sprout
+     * @param string                                                 $name
+     * @param array<string, mixed>&array{configStore?:string|null}   $config
      */
     public function __construct(
-        MailManager $manager,
-        Bud         $bud,
-        Sprout      $sprout,
-        string      $name,
-        array       $config = [],
+        MailManager  $manager,
+        TenantConfig $tenantConfig,
+        Sprout       $sprout,
+        string       $name,
+        array        $config = [],
     ) {
-        $this->manager = $manager;
-        $this->bud     = $bud;
-        $this->sprout  = $sprout;
-        $this->name    = $name;
-        $this->config  = $config;
+        $this->manager      = $manager;
+        $this->tenantConfig = $tenantConfig;
+        $this->sprout       = $sprout;
+        $this->name         = $name;
+        $this->config       = $config;
     }
 
     /**
@@ -64,7 +64,7 @@ final class BudMailerTransportCreator extends BaseCreator
     public function __invoke(): TransportInterface
     {
         /** @var array<string, mixed>&array{transport?:string|null} $config */
-        $config = $this->getConfig($this->sprout, $this->bud, $this->config, $this->name);
+        $config = $this->getConfig($this->sprout, $this->tenantConfig, $this->config, $this->name);
 
         // We need to make sure that this isn't going to recurse infinitely.
         $this->checkForCyclicDrivers(

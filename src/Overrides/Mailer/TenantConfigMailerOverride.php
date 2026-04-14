@@ -6,19 +6,19 @@ namespace Sprout\Overrides\Mailer;
 use Closure;
 use Illuminate\Mail\MailManager;
 use RuntimeException;
-use Sprout\Bud;
-use Sprout\Overrides\BudBaseOverride;
+use Sprout\TenantConfig;
+use Sprout\Overrides\TenantConfigBaseOverride;
 use Sprout\Sprout;
 
 /**
  * Mailer Override
  *
  * This override specifically allows for the creation of mailers
- * using Bud config stores.
+ * using tenant config stores.
  *
- * @extends BudBaseOverride<MailManager>
+ * @extends TenantConfigBaseOverride<MailManager>
  */
-final class BudMailerOverride extends BudBaseOverride
+final class TenantConfigMailerOverride extends TenantConfigBaseOverride
 {
     /**
      * Get the name of the service being overridden.
@@ -33,30 +33,30 @@ final class BudMailerOverride extends BudBaseOverride
     /**
      * Add a driver to the service.
      *
-     * @param object  $service
-     * @param Bud     $bud
-     * @param Sprout  $sprout
-     * @param Closure $tracker
+     * @param object       $service
+     * @param TenantConfig $tenantConfig
+     * @param Sprout       $sprout
+     * @param Closure      $tracker
      *
      * @phpstan-param MailManager $service
      *
      * @return void
      */
-    protected function addDriver(object $service, Bud $bud, Sprout $sprout, Closure $tracker): void
+    protected function addDriver(object $service, TenantConfig $tenantConfig, Sprout $sprout, Closure $tracker): void
     {
-        // Add a bud driver.
-        $service->extend('sprout:bud', function ($config) use ($service, $bud, $sprout, $tracker) {
+        // Add a tenant config driver.
+        $service->extend('sprout:config', function ($config) use ($service, $tenantConfig, $sprout, $tracker) {
             /**
-             * @var array<string, mixed>&array{budStore?:string|null,name?:mixed} $config
+             * @var array<string, mixed>&array{configStore?:string|null,name?:mixed} $config
              */
             if (! isset($config['name']) || ! is_string($config['name']) || $config['name'] === '') {
-                throw new RuntimeException('Cannot create a mailer using bud without a name'); // @codeCoverageIgnore
+                throw new RuntimeException('Cannot create a mailer using tenant config without a name'); // @codeCoverageIgnore
             }
 
             // Track the mailer name.
             $tracker($config['name']);
 
-            return (new BudMailerTransportCreator($service, $bud, $sprout, $config['name'], $config))();
+            return (new TenantConfigMailerTransportCreator($service, $tenantConfig, $sprout, $config['name'], $config))();
         });
     }
 
