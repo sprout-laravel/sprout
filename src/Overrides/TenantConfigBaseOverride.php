@@ -6,7 +6,7 @@ namespace Sprout\Overrides;
 use Closure;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Foundation\Application;
-use Sprout\Bud;
+use Sprout\TenantConfig;
 use Sprout\Contracts\BootableServiceOverride;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
@@ -16,7 +16,7 @@ use Sprout\Sprout;
 /**
  * @template OverrideService of object
  */
-abstract class BudBaseOverride extends SproutBaseOverride implements BootableServiceOverride
+abstract class TenantConfigBaseOverride extends SproutBaseOverride implements BootableServiceOverride
 {
     /**
      * @var array<string>
@@ -57,13 +57,13 @@ abstract class BudBaseOverride extends SproutBaseOverride implements BootableSer
         if ($app->resolved($this->serviceName())) {
             /** @var OverrideService $service */
             $service = $app->make($this->serviceName());
-            $this->addDriver($service, $app->make(Bud::class), $sprout, $tracker);
+            $this->addDriver($service, $app->make(TenantConfig::class), $sprout, $tracker);
         } else {
             $app->afterResolving(
                 $this->serviceName(),
                 function (object $service, Application $app) use ($sprout, $tracker) {
                     /** @var OverrideService $service */
-                    $this->addDriver($service, $app->make(Bud::class), $sprout, $tracker);
+                    $this->addDriver($service, $app->make(TenantConfig::class), $sprout, $tracker);
                 },
             );
         }
@@ -124,16 +124,16 @@ abstract class BudBaseOverride extends SproutBaseOverride implements BootableSer
     /**
      * Add a driver to the service.
      *
-     * @param object  $service
-     * @param Bud     $bud
-     * @param Sprout  $sprout
-     * @param Closure $tracker
+     * @param object       $service
+     * @param TenantConfig $tenantConfig
+     * @param Sprout       $sprout
+     * @param Closure      $tracker
      *
      * @phpstan-param OverrideService $service
      *
      * @return void
      */
-    abstract protected function addDriver(object $service, Bud $bud, Sprout $sprout, Closure $tracker): void;
+    abstract protected function addDriver(object $service, TenantConfig $tenantConfig, Sprout $sprout, Closure $tracker): void;
 
     /**
      * Clean-up an overridden service.

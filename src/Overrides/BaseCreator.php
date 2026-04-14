@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Sprout\Overrides;
 
 use RuntimeException;
-use Sprout\Bud;
+use Sprout\TenantConfig;
 use Sprout\Contracts\Tenant;
 use Sprout\Exceptions\CyclicOverrideException;
 use Sprout\Exceptions\MisconfigurationException;
@@ -15,10 +15,10 @@ use Sprout\Sprout;
 abstract class BaseCreator
 {
     /**
-     * @param Sprout                                            $sprout
-     * @param Bud                                               $bud
-     * @param array<string, mixed>&array{budStore?:string|null} $config
-     * @param string                                            $name
+     * @param Sprout                                              $sprout
+     * @param TenantConfig                                        $tenantConfig
+     * @param array<string, mixed>&array{configStore?:string|null} $config
+     * @param string                                              $name
      *
      * @return array<string, mixed>
      *
@@ -26,7 +26,7 @@ abstract class BaseCreator
      * @throws TenancyMissingException
      * @throws TenantMissingException
      */
-    public function getConfig(Sprout $sprout, Bud $bud, array $config, string $name): array
+    public function getConfig(Sprout $sprout, TenantConfig $tenantConfig, array $config, string $name): array
     {
         // If we're not within a multitenanted context, we need to error
         // out, as this driver shouldn't be hit without one
@@ -53,12 +53,12 @@ abstract class BaseCreator
 
         // Get the default store, or the one specified in the config, if there
         // is one.
-        $store = $bud->store($config['budStore'] ?? null);
+        $store = $tenantConfig->store($config['configStore'] ?? null);
 
         $service = $this->getService();
 
         // Get the config for the connection from the store.
-        $budConfig = $store->get(
+        $storedConfig = $store->get(
             $tenancy,
             $tenant,
             $service,
@@ -66,12 +66,12 @@ abstract class BaseCreator
         );
 
         // If there isn't any config, it's an error.
-        if ($budConfig === null) {
+        if ($storedConfig === null) {
             // TODO: Throw a better exception
             throw new RuntimeException(sprintf('Unable to find configuration for [%s] for tenant [%s] on tenancy [%s]', $service . '.' . $name, $tenant->getTenantIdentifier(), $tenancy->getName()));
         }
 
-        return array_merge($config, $budConfig);
+        return array_merge($config, $storedConfig);
     }
 
     /**
@@ -92,7 +92,7 @@ abstract class BaseCreator
      */
     protected function checkForCyclicDrivers(?string $driver, string $term, string $name): void
     {
-        if ($driver === 'sprout:bud') {
+        if ($driver === 'sprout:config') {
             throw CyclicOverrideException::make($term, $name);
         }
     }
