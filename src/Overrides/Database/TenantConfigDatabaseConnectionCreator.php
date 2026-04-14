@@ -5,7 +5,7 @@ namespace Sprout\Overrides\Database;
 
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\DatabaseManager;
-use Sprout\Bud;
+use Sprout\TenantConfig;
 use Sprout\Exceptions\MisconfigurationException;
 use Sprout\Exceptions\TenancyMissingException;
 use Sprout\Exceptions\TenantMissingException;
@@ -13,49 +13,49 @@ use Sprout\Overrides\BaseCreator;
 use Sprout\Sprout;
 
 /**
- * Bud Database Connection Creator
+ * Tenant Config Database Connection Creator
  *
  * This class is an abstraction for the logic that creates a database connection
- * using a config store within Bud.
+ * using a config store within tenant config.
  */
-final class BudDatabaseConnectionCreator extends BaseCreator
+final class TenantConfigDatabaseConnectionCreator extends BaseCreator
 {
     private DatabaseManager $manager;
 
-    private Bud $bud;
+    private TenantConfig $tenantConfig;
 
     private Sprout $sprout;
 
     private string $name;
 
     /**
-     * @var array<string, mixed>&array{budStore?:string|null}
+     * @var array<string, mixed>&array{configStore?:string|null}
      */
     private array $config;
 
     /**
-     * @param DatabaseManager                                   $manager
-     * @param Bud                                               $bud
-     * @param Sprout                                            $sprout
-     * @param string                                            $name
-     * @param array<string, mixed>&array{budStore?:string|null} $config
+     * @param DatabaseManager                                        $manager
+     * @param TenantConfig                                           $tenantConfig
+     * @param Sprout                                                 $sprout
+     * @param string                                                 $name
+     * @param array<string, mixed>&array{configStore?:string|null}   $config
      */
     public function __construct(
         DatabaseManager $manager,
-        Bud             $bud,
+        TenantConfig    $tenantConfig,
         Sprout          $sprout,
         string          $name,
         array           $config,
     ) {
-        $this->manager = $manager;
-        $this->bud     = $bud;
-        $this->sprout  = $sprout;
-        $this->name    = $name;
-        $this->config  = $config;
+        $this->manager      = $manager;
+        $this->tenantConfig = $tenantConfig;
+        $this->sprout       = $sprout;
+        $this->name         = $name;
+        $this->config       = $config;
     }
 
     /**
-     * Create the connection using Bud.
+     * Create the connection using tenant config.
      *
      * @return ConnectionInterface
      *
@@ -66,7 +66,7 @@ final class BudDatabaseConnectionCreator extends BaseCreator
     public function __invoke(): ConnectionInterface
     {
         /** @var array<string, mixed>&array{driver?:string|null} $config */
-        $config = $this->getConfig($this->sprout, $this->bud, $this->config, $this->name);
+        $config = $this->getConfig($this->sprout, $this->tenantConfig, $this->config, $this->name);
 
         // We need to make sure that this isn't going to recurse infinitely.
         $this->checkForCyclicDrivers(
