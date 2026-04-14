@@ -64,8 +64,7 @@
   "extra"            : {
     "laravel"     : {
       "providers": [
-        "Sprout\\SproutServiceProvider",
-        "Sprout\\BudServiceProvider"
+        "Sprout\\SproutServiceProvider"
       ],
       "facades"  : [
         "Sprout\\Facades\\Overrides",
