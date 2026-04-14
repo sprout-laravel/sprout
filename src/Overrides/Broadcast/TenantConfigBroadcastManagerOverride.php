@@ -11,7 +11,7 @@ use Sprout\Contracts\BootableServiceOverride;
 use Sprout\Overrides\BaseOverride;
 use Sprout\Sprout;
 
-final class BudBroadcastManagerOverride extends BaseOverride implements BootableServiceOverride
+final class TenantConfigBroadcastManagerOverride extends BaseOverride implements BootableServiceOverride
 {
     /**
      * Boot a service override
@@ -38,7 +38,7 @@ final class BudBroadcastManagerOverride extends BaseOverride implements Bootable
             $app->forgetInstance(BroadcastManager::class);
         }
 
-        // Bind a replacement broadcast manager to enable Bud features
-        $app->singleton(BroadcastManager::class, fn (Container $app) => new BudBroadcastManager($app, $original));
+        // Bind a replacement broadcast manager to enable tenant config features
+        $app->singleton(BroadcastManager::class, fn (Container $app) => new TenantConfigBroadcastManager($app, $original));
     }
 }

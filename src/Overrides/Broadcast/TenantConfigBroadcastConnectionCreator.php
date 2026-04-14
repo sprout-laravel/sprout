@@ -5,7 +5,7 @@ namespace Sprout\Overrides\Broadcast;
 
 use Illuminate\Contracts\Broadcasting\Broadcaster;
 use InvalidArgumentException;
-use Sprout\Bud;
+use Sprout\TenantConfig;
 use Sprout\Exceptions\MisconfigurationException;
 use Sprout\Exceptions\TenancyMissingException;
 use Sprout\Exceptions\TenantMissingException;
@@ -13,44 +13,44 @@ use Sprout\Overrides\BaseCreator;
 use Sprout\Sprout;
 
 /**
- * Bud Broadcast Connection Creator
+ * Tenant Config Broadcast Connection Creator
  *
  * This class is an abstraction for the logic that creates a broadcast connection
- * using a config store within Bud.
+ * using a config store within tenant config.
  */
-final class BudBroadcastConnectionCreator extends BaseCreator
+final class TenantConfigBroadcastConnectionCreator extends BaseCreator
 {
-    private BudBroadcastManager $manager;
+    private TenantConfigBroadcastManager $manager;
 
-    private Bud $bud;
+    private TenantConfig $tenantConfig;
 
     private Sprout $sprout;
 
     /**
-     * @var array<string, mixed>&array{budStore?:string|null,name?:mixed}
+     * @var array<string, mixed>&array{configStore?:string|null,name?:mixed}
      */
     private array $config;
 
     /**
-     * @param BudBroadcastManager                                           $manager
-     * @param Bud                                                           $bud
-     * @param Sprout                                                        $sprout
-     * @param array<string, mixed>&array{budStore?:string|null,name?:mixed} $config
+     * @param TenantConfigBroadcastManager                                     $manager
+     * @param TenantConfig                                                     $tenantConfig
+     * @param Sprout                                                           $sprout
+     * @param array<string, mixed>&array{configStore?:string|null,name?:mixed} $config
      */
     public function __construct(
-        BudBroadcastManager $manager,
-        Bud                 $bud,
-        Sprout              $sprout,
-        array               $config,
+        TenantConfigBroadcastManager $manager,
+        TenantConfig                 $tenantConfig,
+        Sprout                       $sprout,
+        array                        $config,
     ) {
-        $this->manager = $manager;
-        $this->bud     = $bud;
-        $this->sprout  = $sprout;
-        $this->config  = $config;
+        $this->manager      = $manager;
+        $this->tenantConfig = $tenantConfig;
+        $this->sprout       = $sprout;
+        $this->config       = $config;
     }
 
     /**
-     * Create the connection using Bud.
+     * Create the connection using tenant config.
      *
      * @return Broadcaster
      *
@@ -65,7 +65,7 @@ final class BudBroadcastConnectionCreator extends BaseCreator
         }
 
         /** @var array<string, mixed>&array{driver:string,name:string} $config */
-        $config = $this->getConfig($this->sprout, $this->bud, $this->config, $this->config['name']);
+        $config = $this->getConfig($this->sprout, $this->tenantConfig, $this->config, $this->config['name']);
 
         // We need to make sure that this isn't going to recurse infinitely.
         $this->checkForCyclicDrivers(

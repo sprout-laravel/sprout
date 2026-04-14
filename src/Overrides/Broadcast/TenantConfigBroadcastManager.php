@@ -7,7 +7,7 @@ use Illuminate\Broadcasting\BroadcastManager;
 use Illuminate\Contracts\Broadcasting\Broadcaster;
 use InvalidArgumentException;
 
-class BudBroadcastManager extends BroadcastManager
+class TenantConfigBroadcastManager extends BroadcastManager
 {
     protected bool $syncedFromOriginal = false;
 
