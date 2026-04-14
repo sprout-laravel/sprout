@@ -11,12 +11,12 @@ use Mockery;
 use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\Bud;
+use Sprout\TenantConfig;
 use Sprout\Contracts\ConfigStore;
 use Sprout\Exceptions\CyclicOverrideException;
 use Sprout\Managers\ConfigStoreManager;
-use Sprout\Overrides\Mailer\BudMailerOverride;
-use Sprout\Overrides\Mailer\BudMailerTransportCreator;
+use Sprout\Overrides\Mailer\TenantConfigMailerOverride;
+use Sprout\Overrides\Mailer\TenantConfigMailerTransportCreator;
 use Sprout\Tests\Unit\UnitTestCase;
 use Sprout\Contracts\BootableServiceOverride;
 use Sprout\Contracts\Tenancy;
@@ -26,7 +26,7 @@ use Sprout\Sprout;
 use Sprout\Support\SettingsRepository;
 use function Sprout\sprout;
 
-class BudMailerOverrideTest extends UnitTestCase
+class TenantConfigMailerOverrideTest extends UnitTestCase
 {
     protected function defineEnvironment($app): void
     {
@@ -39,7 +39,7 @@ class BudMailerOverrideTest extends UnitTestCase
     {
         return Mockery::mock(MailManager::class, static function (MockInterface $mock) {
             $mock->shouldReceive('extend')
-                 ->with('sprout:bud', Mockery::on(static function ($arg) {
+                 ->with('sprout:config', Mockery::on(static function ($arg) {
                      return is_callable($arg) && $arg instanceof Closure;
                  }))
                  ->once();
@@ -49,7 +49,7 @@ class BudMailerOverrideTest extends UnitTestCase
     #[Test]
     public function isBuiltCorrectly(): void
     {
-        $this->assertTrue(is_subclass_of(BudMailerOverride::class, BootableServiceOverride::class));
+        $this->assertTrue(is_subclass_of(TenantConfigMailerOverride::class, BootableServiceOverride::class));
     }
 
     #[Test]
@@ -59,7 +59,7 @@ class BudMailerOverrideTest extends UnitTestCase
 
         config()->set('sprout.overrides', [
             'mailer' => [
-                'driver' => BudMailerOverride::class,
+                'driver' => TenantConfigMailerOverride::class,
             ],
         ]);
 
@@ -68,7 +68,7 @@ class BudMailerOverrideTest extends UnitTestCase
         $sprout->overrides()->registerOverrides();
 
         $this->assertTrue($sprout->overrides()->hasOverride('mailer'));
-        $this->assertSame(BudMailerOverride::class, $sprout->overrides()->getOverrideClass('mailer'));
+        $this->assertSame(TenantConfigMailerOverride::class, $sprout->overrides()->getOverrideClass('mailer'));
         $this->assertTrue($sprout->overrides()->isOverrideBootable('mailer'));
         $this->assertTrue($sprout->overrides()->hasOverrideBooted('mailer'));
     }
@@ -76,7 +76,7 @@ class BudMailerOverrideTest extends UnitTestCase
     #[Test, DataProvider('mailerResolvedDataProvider')]
     public function bootsCorrectly(bool $return): void
     {
-        $override = new BudMailerOverride('mailer', []);
+        $override = new TenantConfigMailerOverride('mailer', []);
 
         /** @var \Illuminate\Foundation\Application&MockInterface $app */
         $app = Mockery::mock($this->app, function (MockInterface $mock) use ($return) {
@@ -113,9 +113,9 @@ class BudMailerOverrideTest extends UnitTestCase
     }
 
     #[Test]
-    public function errorsIfOverriddenMailerAlsoUsesBud(): void
+    public function errorsIfOverriddenMailerAlsoUsesConfig(): void
     {
-        $override = new BudMailerOverride('mailer', []);
+        $override = new TenantConfigMailerOverride('mailer', []);
 
         $tenant  = Mockery::mock(Tenant::class, TenantHasResources::class, static function (MockInterface $mock) {
         });
@@ -131,10 +131,10 @@ class BudMailerOverrideTest extends UnitTestCase
 
         $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
         $app->make('config')->set('mail.mailers.bud-mailer', [
-            'transport' => 'sprout:bud',
+            'transport' => 'sprout:config',
         ]);
 
-        $app->singleton(Bud::class, fn () => new Bud($app, Mockery::mock(ConfigStoreManager::class, function (MockInterface $mock) use ($tenancy, $tenant) {
+        $app->singleton(TenantConfig::class, fn () => new TenantConfig($app, Mockery::mock(ConfigStoreManager::class, function (MockInterface $mock) use ($tenancy, $tenant) {
             $mock->shouldReceive('get')
                  ->andReturn(Mockery::mock(ConfigStore::class, function (MockInterface $mock) use ($tenancy, $tenant) {
                      $mock->shouldReceive('get')
@@ -144,7 +144,7 @@ class BudMailerOverrideTest extends UnitTestCase
                               'mailer',
                               'bud-mailer',
                           )->andReturn([
-                             'transport' => 'sprout:bud',
+                             'transport' => 'sprout:config',
                          ]);
                  }));
         })));
@@ -167,9 +167,9 @@ class BudMailerOverrideTest extends UnitTestCase
     }
 
     #[Test]
-    public function keepsTrackOfResolvedBudDrivers(): void
+    public function keepsTrackOfResolvedConfigDrivers(): void
     {
-        $override = new BudMailerOverride('mailer', []);
+        $override = new TenantConfigMailerOverride('mailer', []);
 
         /** @var \Illuminate\Foundation\Application&MockInterface $app */
         $app = Mockery::mock($this->app, static function (MockInterface $mock) {
@@ -178,7 +178,7 @@ class BudMailerOverrideTest extends UnitTestCase
 
         $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
         $app->make('config')->set('mail.mailers.bud-mailer', [
-            'transport' => 'sprout:bud',
+            'transport' => 'sprout:config',
         ]);
 
         $tenant = Mockery::mock(Tenant::class, TenantHasResources::class, static function (MockInterface $mock) {
@@ -189,7 +189,7 @@ class BudMailerOverrideTest extends UnitTestCase
             $mock->shouldReceive('tenant')->andReturn($tenant)->once();
         });
 
-        $app->singleton(Bud::class, fn () => new Bud($app, Mockery::mock(ConfigStoreManager::class, function (MockInterface $mock) use ($tenancy, $tenant) {
+        $app->singleton(TenantConfig::class, fn () => new TenantConfig($app, Mockery::mock(ConfigStoreManager::class, function (MockInterface $mock) use ($tenancy, $tenant) {
             $mock->shouldReceive('get')
                  ->andReturn(Mockery::mock(ConfigStore::class, function (MockInterface $mock) use ($tenancy, $tenant) {
                      $mock->shouldReceive('get')
@@ -225,7 +225,7 @@ class BudMailerOverrideTest extends UnitTestCase
     #[Test]
     public function cleansUpResolvedDrivers(): void
     {
-        $override = new BudMailerOverride('mailer', []);
+        $override = new TenantConfigMailerOverride('mailer', []);
 
         $this->app->forgetInstance('mail.manager');
 
@@ -236,7 +236,7 @@ class BudMailerOverrideTest extends UnitTestCase
 
         $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
         $app->make('config')->set('mail.mailers.bud-mailer', [
-            'transport' => 'sprout:bud',
+            'transport' => 'sprout:config',
         ]);
 
         $tenant = Mockery::mock(Tenant::class, TenantHasResources::class, static function (MockInterface $mock) {
@@ -247,7 +247,7 @@ class BudMailerOverrideTest extends UnitTestCase
             $mock->shouldReceive('tenant')->andReturn($tenant)->once();
         });
 
-        $app->singleton(Bud::class, fn () => new Bud($app, Mockery::mock(ConfigStoreManager::class, function (MockInterface $mock) use ($tenancy, $tenant) {
+        $app->singleton(TenantConfig::class, fn () => new TenantConfig($app, Mockery::mock(ConfigStoreManager::class, function (MockInterface $mock) use ($tenancy, $tenant) {
             $mock->shouldReceive('get')
                  ->andReturn(Mockery::mock(ConfigStore::class, function (MockInterface $mock) use ($tenancy, $tenant) {
                      $mock->shouldReceive('get')
@@ -290,7 +290,7 @@ class BudMailerOverrideTest extends UnitTestCase
     #[Test]
     public function cleansUpNothingWithoutResolvedDrivers(): void
     {
-        $override = new BudMailerOverride('mailer', []);
+        $override = new TenantConfigMailerOverride('mailer', []);
 
         $this->app->forgetInstance('mail.manager');
 
@@ -301,7 +301,7 @@ class BudMailerOverrideTest extends UnitTestCase
 
         $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
         $app->make('config')->set('mail.mailers.bud-mailer', [
-            'transport' => 'sprout:bud',
+            'transport' => 'sprout:config',
         ]);
 
         $sprout  = new Sprout($app, new SettingsRepository());

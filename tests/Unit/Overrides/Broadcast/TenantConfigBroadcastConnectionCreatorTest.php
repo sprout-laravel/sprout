@@ -1,14 +1,14 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Tests\Unit\Overrides\Cache;
+namespace Sprout\Tests\Unit\Overrides\Broadcast;
 
-use Illuminate\Cache\CacheManager;
-use Illuminate\Contracts\Cache\Repository;
+use Illuminate\Contracts\Broadcasting\Broadcaster;
 use Illuminate\Foundation\Application;
+use InvalidArgumentException;
 use Mockery;
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\Bud;
+use Sprout\TenantConfig;
 use Sprout\Contracts\ConfigStore;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
@@ -16,12 +16,13 @@ use Sprout\Contracts\TenantHasResources;
 use Sprout\Exceptions\TenancyMissingException;
 use Sprout\Exceptions\TenantMissingException;
 use Sprout\Managers\ConfigStoreManager;
-use Sprout\Overrides\Cache\BudCacheStoreCreator;
+use Sprout\Overrides\Broadcast\TenantConfigBroadcastConnectionCreator;
+use Sprout\Overrides\Broadcast\TenantConfigBroadcastManager;
 use Sprout\Sprout;
 use Sprout\Support\SettingsRepository;
 use Sprout\Tests\Unit\UnitTestCase;
 
-class BudCacheStoreCreatorTest extends UnitTestCase
+class TenantConfigBroadcastConnectionCreatorTest extends UnitTestCase
 {
     private function mockApplication(bool $default = false): Application&Mockery\MockInterface
     {
@@ -30,15 +31,17 @@ class BudCacheStoreCreatorTest extends UnitTestCase
         });
     }
 
-    private function mockManager(bool $driver = true): CacheManager&Mockery\MockInterface
+    private function mockManager(bool $driver = true): TenantConfigBroadcastManager&Mockery\MockInterface
     {
-        return Mockery::mock(CacheManager::class, static function (Mockery\MockInterface $mock) use ($driver) {
+        return Mockery::mock(TenantConfigBroadcastManager::class, static function (Mockery\MockInterface $mock) use ($driver) {
             if ($driver) {
-                $mock->shouldReceive('build')
+                $mock->shouldReceive('connectUsing')
                      ->with(
-                         ['driver' => 'array'],
+                         'fake-connection',
+                         ['name' => 'fake-connection', 'driver' => 'null'],
+                         true
                      )
-                     ->andReturn(Mockery::mock(Repository::class))
+                     ->andReturn(Mockery::mock(Broadcaster::class))
                      ->once();
             }
         });
@@ -55,11 +58,11 @@ class BudCacheStoreCreatorTest extends UnitTestCase
                               ->with(
                                   $tenancy,
                                   $tenant,
-                                  'cache',
-                                  'fake-cache'
+                                  'broadcast',
+                                  'fake-connection'
                               )
                               ->andReturn([
-                                  'driver' => 'array',
+                                  'driver' => 'null',
                               ])
                               ->once();
                      }))
@@ -98,9 +101,9 @@ class BudCacheStoreCreatorTest extends UnitTestCase
         return $sprout;
     }
 
-    private function getBud(Application $app, ConfigStoreManager $manager): Bud
+    private function getTenantConfig(Application $app, ConfigStoreManager $manager): TenantConfig
     {
-        return new Bud($app, $manager);
+        return new TenantConfig($app, $manager);
     }
 
     #[Test]
@@ -109,19 +112,44 @@ class BudCacheStoreCreatorTest extends UnitTestCase
         $app     = $this->mockApplication();
         $manager = $this->mockManager();
         $config  = [
-            'store'  => 'fake-cache',
-            'driver' => 'fake-cache',
+            'name'   => 'fake-connection',
+            'driver' => 'fake-driver',
         ];
         $sprout  = $this->getSprout($app);
-        $bud     = $this->getBud($app, $this->mockConfigStoreManager($sprout->getCurrentTenancy(), $sprout->getCurrentTenancy()->tenant()));
+        $tenantConfig     = $this->getTenantConfig($app, $this->mockConfigStoreManager($sprout->getCurrentTenancy(), $sprout->getCurrentTenancy()->tenant()));
 
-        $creator = new BudCacheStoreCreator(
+        $creator = new TenantConfigBroadcastConnectionCreator(
             $manager,
             $bud,
             $sprout,
-            'fake-cache',
             $config,
         );
+
+        $creator();
+    }
+
+    #[Test]
+    public function throwsAnExceptionWhenConfigIsMissingName(): void
+    {
+        $app     = $this->mockApplication();
+        $manager = $this->mockManager(false);
+        $config  = [];
+        $sprout  = $this->getSprout($app, false, false);
+        $tenantConfig     = $this->getTenantConfig($app, $this->mockConfigStoreManager());
+
+        $sprout->markAsOutsideContext();
+
+        $this->assertFalse($sprout->withinContext());
+
+        $creator = new TenantConfigBroadcastConnectionCreator(
+            $manager,
+            $bud,
+            $sprout,
+            $config
+        );
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Broadcast connection name must be provided');
 
         $creator();
     }
@@ -132,21 +160,20 @@ class BudCacheStoreCreatorTest extends UnitTestCase
         $app     = $this->mockApplication();
         $manager = $this->mockManager(false);
         $config  = [
-            'store' => 'fake-cache',
+            'name' => 'fake-connection',
         ];
         $sprout  = $this->getSprout($app, false, false);
-        $bud     = $this->getBud($app, $this->mockConfigStoreManager());
+        $tenantConfig     = $this->getTenantConfig($app, $this->mockConfigStoreManager());
 
         $sprout->markAsOutsideContext();
 
         $this->assertFalse($sprout->withinContext());
 
-        $creator = new BudCacheStoreCreator(
+        $creator = new TenantConfigBroadcastConnectionCreator(
             $manager,
             $bud,
             $sprout,
-            'fake-cache',
-            $config,
+            $config
         );
 
         $this->expectException(TenancyMissingException::class);
@@ -161,21 +188,20 @@ class BudCacheStoreCreatorTest extends UnitTestCase
         $app     = $this->mockApplication();
         $manager = $this->mockManager(false);
         $config  = [
-            'store' => 'fake-cache',
+            'name' => 'fake-connection',
         ];
         $sprout  = $this->getSprout($app, false, false);
-        $bud     = $this->getBud($app, $this->mockConfigStoreManager());
+        $tenantConfig     = $this->getTenantConfig($app, $this->mockConfigStoreManager());
 
         $sprout->markAsInContext();
 
         $this->assertTrue($sprout->withinContext());
 
-        $creator = new BudCacheStoreCreator(
+        $creator = new TenantConfigBroadcastConnectionCreator(
             $manager,
             $bud,
             $sprout,
-            'fake-cache',
-            $config,
+            $config
         );
 
         $this->expectException(TenancyMissingException::class);
@@ -190,19 +216,18 @@ class BudCacheStoreCreatorTest extends UnitTestCase
         $app     = $this->mockApplication();
         $manager = $this->mockManager(false);
         $config  = [
-            'store' => 'fake-cache',
+            'name' => 'fake-connection',
         ];
         $sprout  = $this->getSprout($app, true, false);
-        $bud     = $this->getBud($app, $this->mockConfigStoreManager());
+        $tenantConfig     = $this->getTenantConfig($app, $this->mockConfigStoreManager());
 
         $this->assertTrue($sprout->withinContext());
 
-        $creator = new BudCacheStoreCreator(
+        $creator = new TenantConfigBroadcastConnectionCreator(
             $manager,
             $bud,
             $sprout,
-            'fake-cache',
-            $config,
+            $config
         );
 
         $this->expectException(TenantMissingException::class);

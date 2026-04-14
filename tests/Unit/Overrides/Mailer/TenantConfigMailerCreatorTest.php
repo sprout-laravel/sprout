@@ -1,14 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Tests\Unit\Overrides\Filesystem;
+namespace Sprout\Tests\Unit\Overrides\Mailer;
 
-use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Foundation\Application;
-use InvalidArgumentException;
+use Illuminate\Mail\MailManager;
 use Mockery;
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\Bud;
+use Sprout\TenantConfig;
 use Sprout\Contracts\ConfigStore;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
@@ -16,13 +15,13 @@ use Sprout\Contracts\TenantHasResources;
 use Sprout\Exceptions\TenancyMissingException;
 use Sprout\Exceptions\TenantMissingException;
 use Sprout\Managers\ConfigStoreManager;
-use Sprout\Overrides\Filesystem\BudFilesystemDiskCreator;
-use Sprout\Overrides\Filesystem\SproutFilesystemManager;
+use Sprout\Overrides\Mailer\TenantConfigMailerTransportCreator;
 use Sprout\Sprout;
 use Sprout\Support\SettingsRepository;
 use Sprout\Tests\Unit\UnitTestCase;
+use Symfony\Component\Mailer\Transport\TransportInterface;
 
-class BudFilesystemDiskCreatorTest extends UnitTestCase
+class TenantConfigMailerCreatorTest extends UnitTestCase
 {
     private function mockApplication(bool $default = false): Application&Mockery\MockInterface
     {
@@ -31,15 +30,15 @@ class BudFilesystemDiskCreatorTest extends UnitTestCase
         });
     }
 
-    private function mockManager(bool $driver = true): SproutFilesystemManager&Mockery\MockInterface
+    private function mockManager(bool $driver = true): MailManager&Mockery\MockInterface
     {
-        return Mockery::mock(SproutFilesystemManager::class, static function (Mockery\MockInterface $mock) use ($driver) {
+        return Mockery::mock(MailManager::class, static function (Mockery\MockInterface $mock) use ($driver) {
             if ($driver) {
-                $mock->shouldReceive('build')
+                $mock->shouldReceive('createSymfonyTransport')
                      ->with(
-                         ['name' => 'fake-disk', 'driver' => 'null'],
+                         ['name' => 'fake-mailer', 'driver' => 'fake-mailer', 'transport' => 'null'],
                      )
-                     ->andReturn(Mockery::mock(Filesystem::class))
+                     ->andReturn(Mockery::mock(TransportInterface::class))
                      ->once();
             }
         });
@@ -56,11 +55,11 @@ class BudFilesystemDiskCreatorTest extends UnitTestCase
                               ->with(
                                   $tenancy,
                                   $tenant,
-                                  'filesystem',
-                                  'fake-disk'
+                                  'mailer',
+                                  'fake-mailer'
                               )
                               ->andReturn([
-                                  'driver' => 'null',
+                                  'transport' => 'null',
                               ])
                               ->once();
                      }))
@@ -99,9 +98,9 @@ class BudFilesystemDiskCreatorTest extends UnitTestCase
         return $sprout;
     }
 
-    private function getBud(Application $app, ConfigStoreManager $manager): Bud
+    private function getTenantConfig(Application $app, ConfigStoreManager $manager): TenantConfig
     {
-        return new Bud($app, $manager);
+        return new TenantConfig($app, $manager);
     }
 
     #[Test]
@@ -110,44 +109,19 @@ class BudFilesystemDiskCreatorTest extends UnitTestCase
         $app     = $this->mockApplication();
         $manager = $this->mockManager();
         $config  = [
-            'name'   => 'fake-disk',
-            'driver' => 'fake-driver',
+            'name'   => 'fake-mailer',
+            'driver' => 'fake-mailer',
         ];
         $sprout  = $this->getSprout($app);
-        $bud     = $this->getBud($app, $this->mockConfigStoreManager($sprout->getCurrentTenancy(), $sprout->getCurrentTenancy()->tenant()));
+        $tenantConfig     = $this->getTenantConfig($app, $this->mockConfigStoreManager($sprout->getCurrentTenancy(), $sprout->getCurrentTenancy()->tenant()));
 
-        $creator = new BudFilesystemDiskCreator(
+        $creator = new TenantConfigMailerTransportCreator(
             $manager,
             $bud,
             $sprout,
+            'fake-mailer',
             $config,
         );
-
-        $creator();
-    }
-
-    #[Test]
-    public function throwsAnExceptionWhenConfigIsMissingName(): void
-    {
-        $app     = $this->mockApplication();
-        $manager = $this->mockManager(false);
-        $config  = [];
-        $sprout  = $this->getSprout($app, false, false);
-        $bud     = $this->getBud($app, $this->mockConfigStoreManager());
-
-        $sprout->markAsOutsideContext();
-
-        $this->assertFalse($sprout->withinContext());
-
-        $creator = new BudFilesystemDiskCreator(
-            $manager,
-            $bud,
-            $sprout,
-            $config,
-        );
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Filesystem disk name must be provided');
 
         $creator();
     }
@@ -158,19 +132,20 @@ class BudFilesystemDiskCreatorTest extends UnitTestCase
         $app     = $this->mockApplication();
         $manager = $this->mockManager(false);
         $config  = [
-            'name' => 'fake-disk',
+            'name' => 'fake-mailer',
         ];
         $sprout  = $this->getSprout($app, false, false);
-        $bud     = $this->getBud($app, $this->mockConfigStoreManager());
+        $tenantConfig     = $this->getTenantConfig($app, $this->mockConfigStoreManager());
 
         $sprout->markAsOutsideContext();
 
         $this->assertFalse($sprout->withinContext());
 
-        $creator = new BudFilesystemDiskCreator(
+        $creator = new TenantConfigMailerTransportCreator(
             $manager,
             $bud,
             $sprout,
+            'fake-mailer',
             $config,
         );
 
@@ -186,19 +161,20 @@ class BudFilesystemDiskCreatorTest extends UnitTestCase
         $app     = $this->mockApplication();
         $manager = $this->mockManager(false);
         $config  = [
-            'name' => 'fake-disk',
+            'name' => 'fake-mailer',
         ];
         $sprout  = $this->getSprout($app, false, false);
-        $bud     = $this->getBud($app, $this->mockConfigStoreManager());
+        $tenantConfig     = $this->getTenantConfig($app, $this->mockConfigStoreManager());
 
         $sprout->markAsInContext();
 
         $this->assertTrue($sprout->withinContext());
 
-        $creator = new BudFilesystemDiskCreator(
+        $creator = new TenantConfigMailerTransportCreator(
             $manager,
             $bud,
             $sprout,
+            'fake-mailer',
             $config,
         );
 
@@ -214,17 +190,18 @@ class BudFilesystemDiskCreatorTest extends UnitTestCase
         $app     = $this->mockApplication();
         $manager = $this->mockManager(false);
         $config  = [
-            'name' => 'fake-disk',
+            'name' => 'fake-mailer',
         ];
         $sprout  = $this->getSprout($app, true, false);
-        $bud     = $this->getBud($app, $this->mockConfigStoreManager());
+        $tenantConfig     = $this->getTenantConfig($app, $this->mockConfigStoreManager());
 
         $this->assertTrue($sprout->withinContext());
 
-        $creator = new BudFilesystemDiskCreator(
+        $creator = new TenantConfigMailerTransportCreator(
             $manager,
             $bud,
             $sprout,
+            'fake-mailer',
             $config,
         );
 

@@ -1,14 +1,14 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Tests\Unit\Overrides\Database;
+namespace Sprout\Tests\Unit\Overrides\Filesystem;
 
-use Illuminate\Database\ConnectionInterface;
-use Illuminate\Database\DatabaseManager;
+use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Foundation\Application;
+use InvalidArgumentException;
 use Mockery;
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\Bud;
+use Sprout\TenantConfig;
 use Sprout\Contracts\ConfigStore;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
@@ -16,12 +16,13 @@ use Sprout\Contracts\TenantHasResources;
 use Sprout\Exceptions\TenancyMissingException;
 use Sprout\Exceptions\TenantMissingException;
 use Sprout\Managers\ConfigStoreManager;
-use Sprout\Overrides\Database\BudDatabaseConnectionCreator;
+use Sprout\Overrides\Filesystem\TenantConfigFilesystemDiskCreator;
+use Sprout\Overrides\Filesystem\SproutFilesystemManager;
 use Sprout\Sprout;
 use Sprout\Support\SettingsRepository;
 use Sprout\Tests\Unit\UnitTestCase;
 
-class BudDatabaseConnectionCreatorTest extends UnitTestCase
+class TenantConfigFilesystemDiskCreatorTest extends UnitTestCase
 {
     private function mockApplication(bool $default = false): Application&Mockery\MockInterface
     {
@@ -30,17 +31,15 @@ class BudDatabaseConnectionCreatorTest extends UnitTestCase
         });
     }
 
-    private function mockManager(bool $driver = true): DatabaseManager&Mockery\MockInterface
+    private function mockManager(bool $driver = true): SproutFilesystemManager&Mockery\MockInterface
     {
-        return Mockery::mock(DatabaseManager::class, static function (Mockery\MockInterface $mock) use ($driver) {
+        return Mockery::mock(SproutFilesystemManager::class, static function (Mockery\MockInterface $mock) use ($driver) {
             if ($driver) {
-                $mock->shouldReceive('connectUsing')
+                $mock->shouldReceive('build')
                      ->with(
-                         'fake-connection',
-                         ['name' => 'fake-connection', 'driver' => 'null'],
-                         true
+                         ['name' => 'fake-disk', 'driver' => 'null'],
                      )
-                     ->andReturn(Mockery::mock(ConnectionInterface::class))
+                     ->andReturn(Mockery::mock(Filesystem::class))
                      ->once();
             }
         });
@@ -57,8 +56,8 @@ class BudDatabaseConnectionCreatorTest extends UnitTestCase
                               ->with(
                                   $tenancy,
                                   $tenant,
-                                  'database',
-                                  'fake-connection'
+                                  'filesystem',
+                                  'fake-disk'
                               )
                               ->andReturn([
                                   'driver' => 'null',
@@ -100,9 +99,9 @@ class BudDatabaseConnectionCreatorTest extends UnitTestCase
         return $sprout;
     }
 
-    private function getBud(Application $app, ConfigStoreManager $manager): Bud
+    private function getTenantConfig(Application $app, ConfigStoreManager $manager): TenantConfig
     {
-        return new Bud($app, $manager);
+        return new TenantConfig($app, $manager);
     }
 
     #[Test]
@@ -111,19 +110,44 @@ class BudDatabaseConnectionCreatorTest extends UnitTestCase
         $app     = $this->mockApplication();
         $manager = $this->mockManager();
         $config  = [
-            'name'   => 'fake-connection',
+            'name'   => 'fake-disk',
             'driver' => 'fake-driver',
         ];
         $sprout  = $this->getSprout($app);
-        $bud     = $this->getBud($app, $this->mockConfigStoreManager($sprout->getCurrentTenancy(), $sprout->getCurrentTenancy()->tenant()));
+        $tenantConfig     = $this->getTenantConfig($app, $this->mockConfigStoreManager($sprout->getCurrentTenancy(), $sprout->getCurrentTenancy()->tenant()));
 
-        $creator = new BudDatabaseConnectionCreator(
+        $creator = new TenantConfigFilesystemDiskCreator(
             $manager,
             $bud,
             $sprout,
-            'fake-connection',
             $config,
         );
+
+        $creator();
+    }
+
+    #[Test]
+    public function throwsAnExceptionWhenConfigIsMissingName(): void
+    {
+        $app     = $this->mockApplication();
+        $manager = $this->mockManager(false);
+        $config  = [];
+        $sprout  = $this->getSprout($app, false, false);
+        $tenantConfig     = $this->getTenantConfig($app, $this->mockConfigStoreManager());
+
+        $sprout->markAsOutsideContext();
+
+        $this->assertFalse($sprout->withinContext());
+
+        $creator = new TenantConfigFilesystemDiskCreator(
+            $manager,
+            $bud,
+            $sprout,
+            $config,
+        );
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Filesystem disk name must be provided');
 
         $creator();
     }
@@ -134,20 +158,19 @@ class BudDatabaseConnectionCreatorTest extends UnitTestCase
         $app     = $this->mockApplication();
         $manager = $this->mockManager(false);
         $config  = [
-            'name' => 'fake-connection',
+            'name' => 'fake-disk',
         ];
         $sprout  = $this->getSprout($app, false, false);
-        $bud     = $this->getBud($app, $this->mockConfigStoreManager());
+        $tenantConfig     = $this->getTenantConfig($app, $this->mockConfigStoreManager());
 
         $sprout->markAsOutsideContext();
 
         $this->assertFalse($sprout->withinContext());
 
-        $creator = new BudDatabaseConnectionCreator(
+        $creator = new TenantConfigFilesystemDiskCreator(
             $manager,
             $bud,
             $sprout,
-            'fake-connection',
             $config,
         );
 
@@ -163,20 +186,19 @@ class BudDatabaseConnectionCreatorTest extends UnitTestCase
         $app     = $this->mockApplication();
         $manager = $this->mockManager(false);
         $config  = [
-            'name' => 'fake-connection',
+            'name' => 'fake-disk',
         ];
         $sprout  = $this->getSprout($app, false, false);
-        $bud     = $this->getBud($app, $this->mockConfigStoreManager());
+        $tenantConfig     = $this->getTenantConfig($app, $this->mockConfigStoreManager());
 
         $sprout->markAsInContext();
 
         $this->assertTrue($sprout->withinContext());
 
-        $creator = new BudDatabaseConnectionCreator(
+        $creator = new TenantConfigFilesystemDiskCreator(
             $manager,
             $bud,
             $sprout,
-            'fake-connection',
             $config,
         );
 
@@ -192,18 +214,17 @@ class BudDatabaseConnectionCreatorTest extends UnitTestCase
         $app     = $this->mockApplication();
         $manager = $this->mockManager(false);
         $config  = [
-            'name' => 'fake-connection',
+            'name' => 'fake-disk',
         ];
         $sprout  = $this->getSprout($app, true, false);
-        $bud     = $this->getBud($app, $this->mockConfigStoreManager());
+        $tenantConfig     = $this->getTenantConfig($app, $this->mockConfigStoreManager());
 
         $this->assertTrue($sprout->withinContext());
 
-        $creator = new BudDatabaseConnectionCreator(
+        $creator = new TenantConfigFilesystemDiskCreator(
             $manager,
             $bud,
             $sprout,
-            'fake-connection',
             $config,
         );
 

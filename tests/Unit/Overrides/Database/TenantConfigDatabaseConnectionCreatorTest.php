@@ -1,13 +1,14 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Tests\Unit\Overrides\Auth;
+namespace Sprout\Tests\Unit\Overrides\Database;
 
-use Illuminate\Contracts\Auth\UserProvider;
+use Illuminate\Database\ConnectionInterface;
+use Illuminate\Database\DatabaseManager;
 use Illuminate\Foundation\Application;
 use Mockery;
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\Bud;
+use Sprout\TenantConfig;
 use Sprout\Contracts\ConfigStore;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
@@ -15,13 +16,12 @@ use Sprout\Contracts\TenantHasResources;
 use Sprout\Exceptions\TenancyMissingException;
 use Sprout\Exceptions\TenantMissingException;
 use Sprout\Managers\ConfigStoreManager;
-use Sprout\Overrides\Auth\BudAuthManager;
-use Sprout\Overrides\Auth\BudAuthProviderCreator;
+use Sprout\Overrides\Database\TenantConfigDatabaseConnectionCreator;
 use Sprout\Sprout;
 use Sprout\Support\SettingsRepository;
 use Sprout\Tests\Unit\UnitTestCase;
 
-class BudAuthManagerCreatorTest extends UnitTestCase
+class TenantConfigDatabaseConnectionCreatorTest extends UnitTestCase
 {
     private function mockApplication(bool $default = false): Application&Mockery\MockInterface
     {
@@ -30,15 +30,17 @@ class BudAuthManagerCreatorTest extends UnitTestCase
         });
     }
 
-    private function mockManager(bool $driver = true): BudAuthManager&Mockery\MockInterface
+    private function mockManager(bool $driver = true): DatabaseManager&Mockery\MockInterface
     {
-        return Mockery::mock(BudAuthManager::class, static function (Mockery\MockInterface $mock) use ($driver) {
+        return Mockery::mock(DatabaseManager::class, static function (Mockery\MockInterface $mock) use ($driver) {
             if ($driver) {
-                $mock->shouldReceive('createUserProviderFromConfig')
+                $mock->shouldReceive('connectUsing')
                      ->with(
-                         ['provider' => 'fake-provider', 'driver' => 'null'],
+                         'fake-connection',
+                         ['name' => 'fake-connection', 'driver' => 'null'],
+                         true
                      )
-                     ->andReturn(Mockery::mock(UserProvider::class))
+                     ->andReturn(Mockery::mock(ConnectionInterface::class))
                      ->once();
             }
         });
@@ -55,8 +57,8 @@ class BudAuthManagerCreatorTest extends UnitTestCase
                               ->with(
                                   $tenancy,
                                   $tenant,
-                                  'auth',
-                                  'fake-provider'
+                                  'database',
+                                  'fake-connection'
                               )
                               ->andReturn([
                                   'driver' => 'null',
@@ -98,9 +100,9 @@ class BudAuthManagerCreatorTest extends UnitTestCase
         return $sprout;
     }
 
-    private function getBud(Application $app, ConfigStoreManager $manager): Bud
+    private function getTenantConfig(Application $app, ConfigStoreManager $manager): TenantConfig
     {
-        return new Bud($app, $manager);
+        return new TenantConfig($app, $manager);
     }
 
     #[Test]
@@ -109,17 +111,17 @@ class BudAuthManagerCreatorTest extends UnitTestCase
         $app     = $this->mockApplication();
         $manager = $this->mockManager();
         $config  = [
-            'provider' => 'fake-provider',
-            'driver'   => 'fake-driver',
+            'name'   => 'fake-connection',
+            'driver' => 'fake-driver',
         ];
         $sprout  = $this->getSprout($app);
-        $bud     = $this->getBud($app, $this->mockConfigStoreManager($sprout->getCurrentTenancy(), $sprout->getCurrentTenancy()->tenant()));
+        $tenantConfig     = $this->getTenantConfig($app, $this->mockConfigStoreManager($sprout->getCurrentTenancy(), $sprout->getCurrentTenancy()->tenant()));
 
-        $creator = new BudAuthProviderCreator(
+        $creator = new TenantConfigDatabaseConnectionCreator(
             $manager,
             $bud,
             $sprout,
-            'fake-provider',
+            'fake-connection',
             $config,
         );
 
@@ -132,21 +134,21 @@ class BudAuthManagerCreatorTest extends UnitTestCase
         $app     = $this->mockApplication();
         $manager = $this->mockManager(false);
         $config  = [
-            'provider' => 'fake-provider',
+            'name' => 'fake-connection',
         ];
         $sprout  = $this->getSprout($app, false, false);
-        $bud     = $this->getBud($app, $this->mockConfigStoreManager());
+        $tenantConfig     = $this->getTenantConfig($app, $this->mockConfigStoreManager());
 
         $sprout->markAsOutsideContext();
 
         $this->assertFalse($sprout->withinContext());
 
-        $creator = new BudAuthProviderCreator(
+        $creator = new TenantConfigDatabaseConnectionCreator(
             $manager,
             $bud,
             $sprout,
-            'fake-provider',
-            $config
+            'fake-connection',
+            $config,
         );
 
         $this->expectException(TenancyMissingException::class);
@@ -161,21 +163,21 @@ class BudAuthManagerCreatorTest extends UnitTestCase
         $app     = $this->mockApplication();
         $manager = $this->mockManager(false);
         $config  = [
-            'provider' => 'fake-provider',
+            'name' => 'fake-connection',
         ];
         $sprout  = $this->getSprout($app, false, false);
-        $bud     = $this->getBud($app, $this->mockConfigStoreManager());
+        $tenantConfig     = $this->getTenantConfig($app, $this->mockConfigStoreManager());
 
         $sprout->markAsInContext();
 
         $this->assertTrue($sprout->withinContext());
 
-        $creator = new BudAuthProviderCreator(
+        $creator = new TenantConfigDatabaseConnectionCreator(
             $manager,
             $bud,
             $sprout,
-            'fake-provider',
-            $config
+            'fake-connection',
+            $config,
         );
 
         $this->expectException(TenancyMissingException::class);
@@ -190,19 +192,19 @@ class BudAuthManagerCreatorTest extends UnitTestCase
         $app     = $this->mockApplication();
         $manager = $this->mockManager(false);
         $config  = [
-            'provider' => 'fake-provider',
+            'name' => 'fake-connection',
         ];
         $sprout  = $this->getSprout($app, true, false);
-        $bud     = $this->getBud($app, $this->mockConfigStoreManager());
+        $tenantConfig     = $this->getTenantConfig($app, $this->mockConfigStoreManager());
 
         $this->assertTrue($sprout->withinContext());
 
-        $creator = new BudAuthProviderCreator(
+        $creator = new TenantConfigDatabaseConnectionCreator(
             $manager,
             $bud,
             $sprout,
-            'fake-provider',
-            $config
+            'fake-connection',
+            $config,
         );
 
         $this->expectException(TenantMissingException::class);

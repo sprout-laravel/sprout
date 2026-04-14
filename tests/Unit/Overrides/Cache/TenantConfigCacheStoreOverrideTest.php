@@ -11,7 +11,7 @@ use Mockery;
 use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\Bud;
+use Sprout\TenantConfig;
 use Sprout\Contracts\BootableServiceOverride;
 use Sprout\Contracts\ConfigStore;
 use Sprout\Contracts\Tenancy;
@@ -19,13 +19,13 @@ use Sprout\Contracts\Tenant;
 use Sprout\Contracts\TenantHasResources;
 use Sprout\Exceptions\CyclicOverrideException;
 use Sprout\Managers\ConfigStoreManager;
-use Sprout\Overrides\Cache\BudCacheStoreOverride;
+use Sprout\Overrides\Cache\TenantConfigCacheStoreOverride;
 use Sprout\Sprout;
 use Sprout\Support\SettingsRepository;
 use Sprout\Tests\Unit\UnitTestCase;
 use function Sprout\sprout;
 
-class BudCacheStoreOverrideTest extends UnitTestCase
+class TenantConfigCacheStoreOverrideTest extends UnitTestCase
 {
     protected function defineEnvironment($app): void
     {
@@ -38,7 +38,7 @@ class BudCacheStoreOverrideTest extends UnitTestCase
     {
         return Mockery::mock(CacheManager::class, static function (MockInterface $mock) {
             $mock->shouldReceive('extend')
-                 ->with('sprout:bud', Mockery::on(static function ($arg) {
+                 ->with('sprout:config', Mockery::on(static function ($arg) {
                      return is_callable($arg) && $arg instanceof Closure;
                  }))
                  ->once();
@@ -48,7 +48,7 @@ class BudCacheStoreOverrideTest extends UnitTestCase
     #[Test]
     public function isBuiltCorrectly(): void
     {
-        $this->assertTrue(is_subclass_of(BudCacheStoreOverride::class, BootableServiceOverride::class));
+        $this->assertTrue(is_subclass_of(TenantConfigCacheStoreOverride::class, BootableServiceOverride::class));
     }
 
     #[Test]
@@ -58,7 +58,7 @@ class BudCacheStoreOverrideTest extends UnitTestCase
 
         config()->set('sprout.overrides', [
             'cache' => [
-                'driver' => BudCacheStoreOverride::class,
+                'driver' => TenantConfigCacheStoreOverride::class,
             ],
         ]);
 
@@ -67,7 +67,7 @@ class BudCacheStoreOverrideTest extends UnitTestCase
         $sprout->overrides()->registerOverrides();
 
         $this->assertTrue($sprout->overrides()->hasOverride('cache'));
-        $this->assertSame(BudCacheStoreOverride::class, $sprout->overrides()->getOverrideClass('cache'));
+        $this->assertSame(TenantConfigCacheStoreOverride::class, $sprout->overrides()->getOverrideClass('cache'));
         $this->assertTrue($sprout->overrides()->isOverrideBootable('cache'));
         $this->assertTrue($sprout->overrides()->hasOverrideBooted('cache'));
     }
@@ -75,7 +75,7 @@ class BudCacheStoreOverrideTest extends UnitTestCase
     #[Test, DataProvider('cacheResolvedDataProvider')]
     public function bootsCorrectly(bool $return): void
     {
-        $override = new BudCacheStoreOverride('cache', []);
+        $override = new TenantConfigCacheStoreOverride('cache', []);
 
         /** @var \Illuminate\Foundation\Application&MockInterface $app */
         $app = Mockery::mock($this->app, function (MockInterface $mock) use ($return) {
@@ -112,9 +112,9 @@ class BudCacheStoreOverrideTest extends UnitTestCase
     }
 
     #[Test]
-    public function errorsIfOverriddenCacheStoreAlsoUsesBud(): void
+    public function errorsIfOverriddenCacheStoreAlsoUsesConfig(): void
     {
-        $override = new BudCacheStoreOverride('cache', []);
+        $override = new TenantConfigCacheStoreOverride('cache', []);
 
         $tenant  = Mockery::mock(Tenant::class, TenantHasResources::class, static function (MockInterface $mock) {
         });
@@ -130,10 +130,10 @@ class BudCacheStoreOverrideTest extends UnitTestCase
 
         $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
         $app->make('config')->set('cache.stores.bud-cache', [
-            'driver' => 'sprout:bud',
+            'driver' => 'sprout:config',
         ]);
 
-        $app->singleton(Bud::class, fn () => new Bud($app, Mockery::mock(ConfigStoreManager::class, function (MockInterface $mock) use ($tenancy, $tenant) {
+        $app->singleton(TenantConfig::class, fn () => new TenantConfig($app, Mockery::mock(ConfigStoreManager::class, function (MockInterface $mock) use ($tenancy, $tenant) {
             $mock->shouldReceive('get')
                  ->andReturn(Mockery::mock(ConfigStore::class, static function (MockInterface $mock) use ($tenancy, $tenant) {
                      $mock->shouldReceive('get')
@@ -143,7 +143,7 @@ class BudCacheStoreOverrideTest extends UnitTestCase
                               'cache',
                               'bud-cache',
                           )->andReturn([
-                             'driver' => 'sprout:bud',
+                             'driver' => 'sprout:config',
                          ]);
                  }));
         })));
@@ -166,9 +166,9 @@ class BudCacheStoreOverrideTest extends UnitTestCase
     }
 
     #[Test]
-    public function keepsTrackOfResolvedBudDrivers(): void
+    public function keepsTrackOfResolvedConfigDrivers(): void
     {
-        $override = new BudCacheStoreOverride('cache', []);
+        $override = new TenantConfigCacheStoreOverride('cache', []);
 
         /** @var \Illuminate\Foundation\Application&MockInterface $app */
         $app = Mockery::mock($this->app, static function (MockInterface $mock) {
@@ -177,7 +177,7 @@ class BudCacheStoreOverrideTest extends UnitTestCase
 
         $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
         $app->make('config')->set('cache.stores.bud-cache', [
-            'driver' => 'sprout:bud',
+            'driver' => 'sprout:config',
         ]);
 
         $tenant = Mockery::mock(Tenant::class, TenantHasResources::class, static function (MockInterface $mock) {
@@ -188,7 +188,7 @@ class BudCacheStoreOverrideTest extends UnitTestCase
             $mock->shouldReceive('tenant')->andReturn($tenant)->once();
         });
 
-        $app->singleton(Bud::class, fn () => new Bud($app, Mockery::mock(ConfigStoreManager::class, function (MockInterface $mock) use ($tenancy, $tenant) {
+        $app->singleton(TenantConfig::class, fn () => new TenantConfig($app, Mockery::mock(ConfigStoreManager::class, function (MockInterface $mock) use ($tenancy, $tenant) {
             $mock->shouldReceive('get')
                  ->andReturn(Mockery::mock(ConfigStore::class, function (MockInterface $mock) use ($tenancy, $tenant) {
                      $mock->shouldReceive('get')
@@ -223,7 +223,7 @@ class BudCacheStoreOverrideTest extends UnitTestCase
     #[Test]
     public function cleansUpResolvedDrivers(): void
     {
-        $override = new BudCacheStoreOverride('cache', []);
+        $override = new TenantConfigCacheStoreOverride('cache', []);
 
         $this->app->forgetInstance('cache');
 
@@ -234,7 +234,7 @@ class BudCacheStoreOverrideTest extends UnitTestCase
 
         $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
         $app->make('config')->set('cache.stores.bud-cache', [
-            'driver' => 'sprout:bud',
+            'driver' => 'sprout:config',
         ]);
 
         $tenant = Mockery::mock(Tenant::class, TenantHasResources::class, static function (MockInterface $mock) {
@@ -245,7 +245,7 @@ class BudCacheStoreOverrideTest extends UnitTestCase
             $mock->shouldReceive('tenant')->andReturn($tenant)->once();
         });
 
-        $app->singleton(Bud::class, fn () => new Bud($app, Mockery::mock(ConfigStoreManager::class, function (MockInterface $mock) use ($tenancy, $tenant) {
+        $app->singleton(TenantConfig::class, fn () => new TenantConfig($app, Mockery::mock(ConfigStoreManager::class, function (MockInterface $mock) use ($tenancy, $tenant) {
             $mock->shouldReceive('get')
                  ->andReturn(Mockery::mock(ConfigStore::class, function (MockInterface $mock) use ($tenancy, $tenant) {
                      $mock->shouldReceive('get')
@@ -287,7 +287,7 @@ class BudCacheStoreOverrideTest extends UnitTestCase
     #[Test]
     public function cleansUpNothingWithoutResolvedDrivers(): void
     {
-        $override = new BudCacheStoreOverride('cache', []);
+        $override = new TenantConfigCacheStoreOverride('cache', []);
 
         $this->app->forgetInstance('cache');
 
@@ -298,7 +298,7 @@ class BudCacheStoreOverrideTest extends UnitTestCase
 
         $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
         $app->make('config')->set('cache.stores.bud-cache', [
-            'driver' => 'sprout:bud',
+            'driver' => 'sprout:config',
         ]);
 
         $sprout  = new Sprout($app, new SettingsRepository());

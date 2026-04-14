@@ -1,13 +1,14 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Tests\Unit\Overrides\Mailer;
+namespace Sprout\Tests\Unit\Overrides\Cache;
 
+use Illuminate\Cache\CacheManager;
+use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Foundation\Application;
-use Illuminate\Mail\MailManager;
 use Mockery;
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\Bud;
+use Sprout\TenantConfig;
 use Sprout\Contracts\ConfigStore;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
@@ -15,13 +16,12 @@ use Sprout\Contracts\TenantHasResources;
 use Sprout\Exceptions\TenancyMissingException;
 use Sprout\Exceptions\TenantMissingException;
 use Sprout\Managers\ConfigStoreManager;
-use Sprout\Overrides\Mailer\BudMailerTransportCreator;
+use Sprout\Overrides\Cache\TenantConfigCacheStoreCreator;
 use Sprout\Sprout;
 use Sprout\Support\SettingsRepository;
 use Sprout\Tests\Unit\UnitTestCase;
-use Symfony\Component\Mailer\Transport\TransportInterface;
 
-class BudMailerCreatorTest extends UnitTestCase
+class TenantConfigCacheStoreCreatorTest extends UnitTestCase
 {
     private function mockApplication(bool $default = false): Application&Mockery\MockInterface
     {
@@ -30,15 +30,15 @@ class BudMailerCreatorTest extends UnitTestCase
         });
     }
 
-    private function mockManager(bool $driver = true): MailManager&Mockery\MockInterface
+    private function mockManager(bool $driver = true): CacheManager&Mockery\MockInterface
     {
-        return Mockery::mock(MailManager::class, static function (Mockery\MockInterface $mock) use ($driver) {
+        return Mockery::mock(CacheManager::class, static function (Mockery\MockInterface $mock) use ($driver) {
             if ($driver) {
-                $mock->shouldReceive('createSymfonyTransport')
+                $mock->shouldReceive('build')
                      ->with(
-                         ['name' => 'fake-mailer', 'driver' => 'fake-mailer', 'transport' => 'null'],
+                         ['driver' => 'array'],
                      )
-                     ->andReturn(Mockery::mock(TransportInterface::class))
+                     ->andReturn(Mockery::mock(Repository::class))
                      ->once();
             }
         });
@@ -55,11 +55,11 @@ class BudMailerCreatorTest extends UnitTestCase
                               ->with(
                                   $tenancy,
                                   $tenant,
-                                  'mailer',
-                                  'fake-mailer'
+                                  'cache',
+                                  'fake-cache'
                               )
                               ->andReturn([
-                                  'transport' => 'null',
+                                  'driver' => 'array',
                               ])
                               ->once();
                      }))
@@ -98,9 +98,9 @@ class BudMailerCreatorTest extends UnitTestCase
         return $sprout;
     }
 
-    private function getBud(Application $app, ConfigStoreManager $manager): Bud
+    private function getTenantConfig(Application $app, ConfigStoreManager $manager): TenantConfig
     {
-        return new Bud($app, $manager);
+        return new TenantConfig($app, $manager);
     }
 
     #[Test]
@@ -109,17 +109,17 @@ class BudMailerCreatorTest extends UnitTestCase
         $app     = $this->mockApplication();
         $manager = $this->mockManager();
         $config  = [
-            'name'   => 'fake-mailer',
-            'driver' => 'fake-mailer',
+            'store'  => 'fake-cache',
+            'driver' => 'fake-cache',
         ];
         $sprout  = $this->getSprout($app);
-        $bud     = $this->getBud($app, $this->mockConfigStoreManager($sprout->getCurrentTenancy(), $sprout->getCurrentTenancy()->tenant()));
+        $tenantConfig     = $this->getTenantConfig($app, $this->mockConfigStoreManager($sprout->getCurrentTenancy(), $sprout->getCurrentTenancy()->tenant()));
 
-        $creator = new BudMailerTransportCreator(
+        $creator = new TenantConfigCacheStoreCreator(
             $manager,
             $bud,
             $sprout,
-            'fake-mailer',
+            'fake-cache',
             $config,
         );
 
@@ -132,20 +132,20 @@ class BudMailerCreatorTest extends UnitTestCase
         $app     = $this->mockApplication();
         $manager = $this->mockManager(false);
         $config  = [
-            'name' => 'fake-mailer',
+            'store' => 'fake-cache',
         ];
         $sprout  = $this->getSprout($app, false, false);
-        $bud     = $this->getBud($app, $this->mockConfigStoreManager());
+        $tenantConfig     = $this->getTenantConfig($app, $this->mockConfigStoreManager());
 
         $sprout->markAsOutsideContext();
 
         $this->assertFalse($sprout->withinContext());
 
-        $creator = new BudMailerTransportCreator(
+        $creator = new TenantConfigCacheStoreCreator(
             $manager,
             $bud,
             $sprout,
-            'fake-mailer',
+            'fake-cache',
             $config,
         );
 
@@ -161,20 +161,20 @@ class BudMailerCreatorTest extends UnitTestCase
         $app     = $this->mockApplication();
         $manager = $this->mockManager(false);
         $config  = [
-            'name' => 'fake-mailer',
+            'store' => 'fake-cache',
         ];
         $sprout  = $this->getSprout($app, false, false);
-        $bud     = $this->getBud($app, $this->mockConfigStoreManager());
+        $tenantConfig     = $this->getTenantConfig($app, $this->mockConfigStoreManager());
 
         $sprout->markAsInContext();
 
         $this->assertTrue($sprout->withinContext());
 
-        $creator = new BudMailerTransportCreator(
+        $creator = new TenantConfigCacheStoreCreator(
             $manager,
             $bud,
             $sprout,
-            'fake-mailer',
+            'fake-cache',
             $config,
         );
 
@@ -190,18 +190,18 @@ class BudMailerCreatorTest extends UnitTestCase
         $app     = $this->mockApplication();
         $manager = $this->mockManager(false);
         $config  = [
-            'name' => 'fake-mailer',
+            'store' => 'fake-cache',
         ];
         $sprout  = $this->getSprout($app, true, false);
-        $bud     = $this->getBud($app, $this->mockConfigStoreManager());
+        $tenantConfig     = $this->getTenantConfig($app, $this->mockConfigStoreManager());
 
         $this->assertTrue($sprout->withinContext());
 
-        $creator = new BudMailerTransportCreator(
+        $creator = new TenantConfigCacheStoreCreator(
             $manager,
             $bud,
             $sprout,
-            'fake-mailer',
+            'fake-cache',
             $config,
         );
 

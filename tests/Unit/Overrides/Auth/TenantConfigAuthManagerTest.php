@@ -1,29 +1,29 @@
 <?php
 declare(strict_types=1);
 
-namespace Sprout\Tests\Unit\Overrides\Broadcast;
+namespace Sprout\Tests\Unit\Overrides\Auth;
 
-use Illuminate\Broadcasting\Broadcasters\NullBroadcaster;
-use Illuminate\Broadcasting\BroadcastManager;
+use Illuminate\Auth\AuthManager;
+use Illuminate\Auth\EloquentUserProvider;
 use Illuminate\Config\Repository;
-use Illuminate\Contracts\Broadcasting\Broadcaster;
+use Illuminate\Contracts\Auth\UserProvider;
 use Illuminate\Foundation\Application;
 use InvalidArgumentException;
 use Mockery;
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\Overrides\Broadcast\BudBroadcastManager;
+use Sprout\Overrides\Auth\TenantConfigAuthManager;
 use Sprout\Tests\Unit\UnitTestCase;
 
-class BudBroadcastManagerTest extends UnitTestCase
+class TenantConfigAuthManagerTest extends UnitTestCase
 {
     #[Test]
     public function canBeSyncedFromOriginal(): void
     {
-        $original = Mockery::mock(BroadcastManager::class);
+        $original = Mockery::mock(AuthManager::class);
 
         $app = Mockery::mock(Application::class);
 
-        $sprout = new BudBroadcastManager($app, $original);
+        $sprout = new TenantConfigAuthManager($app, $original);
 
         $this->assertTrue($sprout->wasSyncedFromOriginal());
     }
@@ -37,7 +37,7 @@ class BudBroadcastManagerTest extends UnitTestCase
                  ->andReturn(
                      Mockery::mock(Repository::class, static function (Mockery\MockInterface $mock) {
                          $mock->shouldReceive('offsetGet')
-                              ->with('broadcasting.connections.fake-connection')
+                              ->with('auth.providers.fake-provider')
                               ->andReturn([
                                   'driver' => 'fake',
                               ])
@@ -47,17 +47,16 @@ class BudBroadcastManagerTest extends UnitTestCase
                  ->once();
         });
 
-        $sprout = new BudBroadcastManager($app);
+        $sprout = new TenantConfigAuthManager($app);
 
-        $test = $this;
-        $sprout->extend('fake', static function (Application $app, array $config) use ($test) {
-            $test->assertArrayHasKey('name', $config);
-            $test->assertSame('fake-connection', $config['name']);
+        $sprout->provider('fake', function (Application $app, array $config) {
+            $this->assertArrayHasKey('provider', $config);
+            $this->assertSame('fake-provider', $config['provider']);
 
-            return Mockery::mock(Broadcaster::class);
+            return Mockery::mock(UserProvider::class);
         });
 
-        $sprout->connection('fake-connection');
+        $sprout->createUserProvider('fake-provider');
     }
 
     #[Test]
@@ -69,7 +68,7 @@ class BudBroadcastManagerTest extends UnitTestCase
                  ->andReturn(
                      Mockery::mock(Repository::class, static function (Mockery\MockInterface $mock) {
                          $mock->shouldReceive('offsetGet')
-                              ->with('broadcasting.connections.fake-connection')
+                              ->with('auth.providers.fake-provider')
                               ->andReturn([
                                   'name' => 'hi',
                               ])
@@ -79,16 +78,16 @@ class BudBroadcastManagerTest extends UnitTestCase
                  ->once();
         });
 
-        $sprout = new BudBroadcastManager($app);
+        $sprout = new TenantConfigAuthManager($app);
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Broadcast connection [fake-connection] does not have a configured driver.');
+        $this->expectExceptionMessage('Authentication user provider driver must be provided.');
 
-        $sprout->connection('fake-connection');
+        $sprout->createUserProvider('fake-provider');
     }
 
     #[Test]
-    public function throwsAnExceptionWhenTheresNoConfig(): void
+    public function returnsNullWhenTheresNoConfig(): void
     {
         $app = Mockery::mock(Application::class, static function (Mockery\MockInterface $mock) {
             $mock->shouldReceive('offsetGet')
@@ -96,7 +95,7 @@ class BudBroadcastManagerTest extends UnitTestCase
                  ->andReturn(
                      Mockery::mock(Repository::class, static function (Mockery\MockInterface $mock) {
                          $mock->shouldReceive('offsetGet')
-                              ->with('broadcasting.connections.fake-connection')
+                              ->with('auth.providers.fake-provider')
                               ->andReturn(null)
                               ->once();
                      })
@@ -104,24 +103,21 @@ class BudBroadcastManagerTest extends UnitTestCase
                  ->once();
         });
 
-        $sprout = new BudBroadcastManager($app);
+        $sprout = new TenantConfigAuthManager($app);
 
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Broadcast connection [fake-connection] is not defined.');
-
-        $sprout->connection('fake-connection');
+        $this->assertNull($sprout->createUserProvider('fake-provider'));
     }
 
     #[Test]
-    public function canCreateConnectionsNormally(): void
+    public function canCreateProvidersNormally(): void
     {
         $app = Mockery::mock($this->app, static function (Mockery\MockInterface $mock) {
             $mock->makePartial();
         });
 
-        $sprout = new BudBroadcastManager($app);
+        $sprout = new TenantConfigAuthManager($app);
 
-        $this->assertInstanceOf(NullBroadcaster::class, $sprout->connection('null'));
+        $this->assertInstanceOf(EloquentUserProvider::class, $sprout->createUserProvider('users'));
     }
 
     #[Test]
@@ -131,13 +127,13 @@ class BudBroadcastManagerTest extends UnitTestCase
             $mock->makePartial();
         });
 
-        $app['config']['broadcasting.connections.fake.driver'] = 'fake';
+        $app['config']['auth.providers.fake.driver'] = 'fake';
 
-        $sprout = new BudBroadcastManager($app);
+        $sprout = new TenantConfigAuthManager($app);
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Driver [fake] is not supported.');
+        $this->expectExceptionMessage('Authentication user provider [fake] is not defined.');
 
-        $sprout->connection('fake');
+        $sprout->createUserProvider('fake');
     }
 }

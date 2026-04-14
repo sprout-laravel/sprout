@@ -13,13 +13,13 @@ use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use RuntimeException;
-use Sprout\Bud;
+use Sprout\TenantConfig;
 use Sprout\Contracts\ConfigStore;
 use Sprout\Exceptions\CyclicOverrideException;
 use Sprout\Managers\ConfigStoreManager;
-use Sprout\Overrides\Broadcast\BudBroadcastManager;
-use Sprout\Overrides\Broadcast\BudBroadcastManagerOverride;
-use Sprout\Overrides\Broadcast\BudBroadcastConnectionOverride;
+use Sprout\Overrides\Broadcast\TenantConfigBroadcastManager;
+use Sprout\Overrides\Broadcast\TenantConfigBroadcastManagerOverride;
+use Sprout\Overrides\Broadcast\TenantConfigBroadcastConnectionOverride;
 use Sprout\Tests\Unit\UnitTestCase;
 use Sprout\Contracts\BootableServiceOverride;
 use Sprout\Contracts\Tenancy;
@@ -30,7 +30,7 @@ use Sprout\Sprout;
 use Sprout\Support\SettingsRepository;
 use function Sprout\sprout;
 
-class BudBroadcastOverrideTest extends UnitTestCase
+class TenantConfigBroadcastOverrideTest extends UnitTestCase
 {
     protected function defineEnvironment($app): void
     {
@@ -39,12 +39,12 @@ class BudBroadcastOverrideTest extends UnitTestCase
         });
     }
 
-    private function mockBudBroadcastManager(bool $extends = true, ?Closure $callback = null): BudBroadcastManager&MockInterface
+    private function mockTenantConfigBroadcastManager(bool $extends = true, ?Closure $callback = null): TenantConfigBroadcastManager&MockInterface
     {
-        return Mockery::mock(BudBroadcastManager::class, static function (MockInterface $mock) use ($extends, $callback) {
+        return Mockery::mock(TenantConfigBroadcastManager::class, static function (MockInterface $mock) use ($extends, $callback) {
             if ($extends) {
                 $mock->shouldReceive('extend')
-                     ->with('sprout:bud', Mockery::on(static function ($arg) {
+                     ->with('sprout:config', Mockery::on(static function ($arg) {
                          return is_callable($arg) && $arg instanceof Closure;
                      }))
                      ->once();
@@ -59,8 +59,8 @@ class BudBroadcastOverrideTest extends UnitTestCase
     #[Test]
     public function isBuiltCorrectly(): void
     {
-        $this->assertTrue(is_subclass_of(BudBroadcastManagerOverride::class, BootableServiceOverride::class));
-        $this->assertTrue(is_subclass_of(BudBroadcastConnectionOverride::class, BootableServiceOverride::class));
+        $this->assertTrue(is_subclass_of(TenantConfigBroadcastManagerOverride::class, BootableServiceOverride::class));
+        $this->assertTrue(is_subclass_of(TenantConfigBroadcastConnectionOverride::class, BootableServiceOverride::class));
     }
 
     #[Test]
@@ -72,8 +72,8 @@ class BudBroadcastOverrideTest extends UnitTestCase
             'broadcast' => [
                 'driver'    => StackedOverride::class,
                 'overrides' => [
-                    BudBroadcastManagerOverride::class,
-                    BudBroadcastConnectionOverride::class,
+                    TenantConfigBroadcastManagerOverride::class,
+                    TenantConfigBroadcastConnectionOverride::class,
                 ],
             ],
         ]);
@@ -93,8 +93,8 @@ class BudBroadcastOverrideTest extends UnitTestCase
     {
         $override = new StackedOverride('broadcast', [
             'overrides' => [
-                BudBroadcastManagerOverride::class,
-                BudBroadcastConnectionOverride::class,
+                TenantConfigBroadcastManagerOverride::class,
+                TenantConfigBroadcastConnectionOverride::class,
             ],
         ]);
 
@@ -120,7 +120,7 @@ class BudBroadcastOverrideTest extends UnitTestCase
             if ($return) {
                 $mock->shouldReceive('make')
                      ->with(BroadcastManager::class)
-                     ->andReturn($this->mockBudBroadcastManager())
+                     ->andReturn($this->mockTenantConfigBroadcastManager())
                      ->times(2);
             } else {
                 $mock->shouldReceive('afterResolving')
@@ -151,7 +151,7 @@ class BudBroadcastOverrideTest extends UnitTestCase
     {
         $override = new StackedOverride('broadcast', [
             'overrides' => [
-                BudBroadcastConnectionOverride::class,
+                TenantConfigBroadcastConnectionOverride::class,
             ],
         ]);
 
@@ -168,7 +168,7 @@ class BudBroadcastOverrideTest extends UnitTestCase
         $override->setApp($app)->setSprout($sprout);
 
         $this->expectException(LogicException::class);
-        $this->expectExceptionMessage('Cannot override broadcast connections without the Bud broadcast manager override');
+        $this->expectExceptionMessage('Cannot override broadcast connections without the tenant config broadcast manager override');
 
         // This is important, otherwise it doesn't behave nicely with the
         // afterResolving method.
@@ -182,8 +182,8 @@ class BudBroadcastOverrideTest extends UnitTestCase
     {
         $override = new StackedOverride('broadcast', [
             'overrides' => [
-                BudBroadcastManagerOverride::class,
-                BudBroadcastConnectionOverride::class,
+                TenantConfigBroadcastManagerOverride::class,
+                TenantConfigBroadcastConnectionOverride::class,
             ],
         ]);
 
@@ -204,7 +204,7 @@ class BudBroadcastOverrideTest extends UnitTestCase
 
         $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
 
-        $app->singleton(Bud::class, fn () => new Bud($app, Mockery::mock(ConfigStoreManager::class, function (MockInterface $mock) use ($tenancy, $tenant) {
+        $app->singleton(TenantConfig::class, fn () => new TenantConfig($app, Mockery::mock(ConfigStoreManager::class, function (MockInterface $mock) use ($tenancy, $tenant) {
             $mock->shouldReceive('get')
                  ->andReturn(Mockery::mock(ConfigStore::class, function (MockInterface $mock) use ($tenancy, $tenant) {
                      $mock->shouldReceive('get')
@@ -225,24 +225,24 @@ class BudBroadcastOverrideTest extends UnitTestCase
 
         $override->boot($app, $sprout);
 
-        /** @var \Sprout\Overrides\Broadcast\BudBroadcastManager $manager */
+        /** @var \Sprout\Overrides\Broadcast\TenantConfigBroadcastManager $manager */
         $manager = $app->make(BroadcastManager::class);
 
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Unable to find configuration for [broadcast.bud-connection] for tenant [my-tenant] on tenancy [my-tenancy]');
 
         $manager->connectUsing('bud-connection', [
-            'driver' => 'sprout:bud',
+            'driver' => 'sprout:config',
         ]);
     }
 
     #[Test]
-    public function errorsIfOverriddenConnectionAlsoUsesBud(): void
+    public function errorsIfOverriddenConnectionAlsoUsesConfig(): void
     {
         $override = new StackedOverride('broadcast', [
             'overrides' => [
-                BudBroadcastManagerOverride::class,
-                BudBroadcastConnectionOverride::class,
+                TenantConfigBroadcastManagerOverride::class,
+                TenantConfigBroadcastConnectionOverride::class,
             ],
         ]);
 
@@ -260,7 +260,7 @@ class BudBroadcastOverrideTest extends UnitTestCase
 
         $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
 
-        $app->singleton(Bud::class, fn () => new Bud($app, Mockery::mock(ConfigStoreManager::class, function (MockInterface $mock) use ($tenancy, $tenant) {
+        $app->singleton(TenantConfig::class, fn () => new TenantConfig($app, Mockery::mock(ConfigStoreManager::class, function (MockInterface $mock) use ($tenancy, $tenant) {
             $mock->shouldReceive('get')
                  ->andReturn(Mockery::mock(ConfigStore::class, function (MockInterface $mock) use ($tenancy, $tenant) {
                      $mock->shouldReceive('get')
@@ -270,7 +270,7 @@ class BudBroadcastOverrideTest extends UnitTestCase
                               'broadcast',
                               'bud-connection',
                           )->andReturn([
-                             'driver' => 'sprout:bud',
+                             'driver' => 'sprout:config',
                          ]);
                  }));
         })));
@@ -283,24 +283,24 @@ class BudBroadcastOverrideTest extends UnitTestCase
 
         $override->boot($app, $sprout);
 
-        /** @var \Sprout\Overrides\Broadcast\BudBroadcastManager $manager */
+        /** @var \Sprout\Overrides\Broadcast\TenantConfigBroadcastManager $manager */
         $manager = $app->make(BroadcastManager::class);
 
         $this->expectException(CyclicOverrideException::class);
         $this->expectExceptionMessage('Attempt to create cyclic config broadcast connection [bud-connection] detected');
 
         $manager->connectUsing('bud-connection', [
-            'driver' => 'sprout:bud',
+            'driver' => 'sprout:config',
         ]);
     }
 
     #[Test]
-    public function keepsTrackOfResolvedBudDrivers(): void
+    public function keepsTrackOfResolvedConfigDrivers(): void
     {
         $override = new StackedOverride('broadcast', [
             'overrides' => [
-                BudBroadcastManagerOverride::class,
-                BudBroadcastConnectionOverride::class,
+                TenantConfigBroadcastManagerOverride::class,
+                TenantConfigBroadcastConnectionOverride::class,
             ],
         ]);
 
@@ -318,7 +318,7 @@ class BudBroadcastOverrideTest extends UnitTestCase
 
         $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
 
-        $app->singleton(Bud::class, fn () => new Bud($app, Mockery::mock(ConfigStoreManager::class, function (MockInterface $mock) use ($tenancy, $tenant) {
+        $app->singleton(TenantConfig::class, fn () => new TenantConfig($app, Mockery::mock(ConfigStoreManager::class, function (MockInterface $mock) use ($tenancy, $tenant) {
             $mock->shouldReceive('get')
                  ->andReturn(Mockery::mock(ConfigStore::class, function (MockInterface $mock) use ($tenancy, $tenant) {
                      $mock->shouldReceive('get')
@@ -341,15 +341,15 @@ class BudBroadcastOverrideTest extends UnitTestCase
 
         $override->boot($app, $sprout);
 
-        /** @var \Sprout\Overrides\Broadcast\BudBroadcastManager $manager */
+        /** @var \Sprout\Overrides\Broadcast\TenantConfigBroadcastManager $manager */
         $manager = $app->make(BroadcastManager::class);
 
         $manager->connectUsing('bud-connection', [
-            'driver' => 'sprout:bud',
+            'driver' => 'sprout:config',
         ]);
 
-        $this->assertNotEmpty($override->getOverrides()[BudBroadcastConnectionOverride::class]->getOverrides());
-        $this->assertContains('bud-connection', $override->getOverrides()[BudBroadcastConnectionOverride::class]->getOverrides());
+        $this->assertNotEmpty($override->getOverrides()[TenantConfigBroadcastConnectionOverride::class]->getOverrides());
+        $this->assertContains('bud-connection', $override->getOverrides()[TenantConfigBroadcastConnectionOverride::class]->getOverrides());
     }
 
     #[Test]
@@ -357,8 +357,8 @@ class BudBroadcastOverrideTest extends UnitTestCase
     {
         $override = new StackedOverride('broadcast', [
             'overrides' => [
-                BudBroadcastManagerOverride::class,
-                BudBroadcastConnectionOverride::class,
+                TenantConfigBroadcastManagerOverride::class,
+                TenantConfigBroadcastConnectionOverride::class,
             ],
         ]);
 
@@ -381,7 +381,7 @@ class BudBroadcastOverrideTest extends UnitTestCase
             $mock->shouldReceive('tenant')->andReturn($tenant)->once();
         });
 
-        $app->singleton(Bud::class, fn () => new Bud($app, Mockery::mock(ConfigStoreManager::class, function (MockInterface $mock) use ($tenancy, $tenant) {
+        $app->singleton(TenantConfig::class, fn () => new TenantConfig($app, Mockery::mock(ConfigStoreManager::class, function (MockInterface $mock) use ($tenancy, $tenant) {
             $mock->shouldReceive('get')
                  ->andReturn(Mockery::mock(ConfigStore::class, function (MockInterface $mock) use ($tenancy, $tenant) {
                      $mock->shouldReceive('get')
@@ -402,14 +402,14 @@ class BudBroadcastOverrideTest extends UnitTestCase
 
         $override->boot($app, $sprout);
 
-        $broadcastOverride = $override->getOverride(BudBroadcastConnectionOverride::class);
+        $broadcastOverride = $override->getOverride(TenantConfigBroadcastConnectionOverride::class);
 
         $this->assertEmpty($broadcastOverride->getOverrides());
 
         $manager = $app->make(BroadcastManager::class);
 
         $manager->connectUsing('bud-connection', [
-            'driver' => 'sprout:bud',
+            'driver' => 'sprout:config',
         ]);
 
         $this->assertNotEmpty($broadcastOverride->getOverrides());
@@ -425,8 +425,8 @@ class BudBroadcastOverrideTest extends UnitTestCase
     {
         $override = new StackedOverride('broadcast', [
             'overrides' => [
-                BudBroadcastManagerOverride::class,
-                BudBroadcastConnectionOverride::class,
+                TenantConfigBroadcastManagerOverride::class,
+                TenantConfigBroadcastConnectionOverride::class,
             ],
         ]);
 
@@ -440,7 +440,7 @@ class BudBroadcastOverrideTest extends UnitTestCase
         $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
 
         $app->make('config')->set('broadcasting.connections.bud-connection', [
-            'driver' => 'sprout:bud',
+            'driver' => 'sprout:config',
         ]);
 
         $sprout = new Sprout($app, new SettingsRepository());
@@ -453,7 +453,7 @@ class BudBroadcastOverrideTest extends UnitTestCase
             $mock->shouldReceive('tenant')->andReturn($tenant)->once();
         });
 
-        $app->singleton(Bud::class, fn () => new Bud($app, Mockery::mock(ConfigStoreManager::class, function (MockInterface $mock) use ($tenancy, $tenant) {
+        $app->singleton(TenantConfig::class, fn () => new TenantConfig($app, Mockery::mock(ConfigStoreManager::class, function (MockInterface $mock) use ($tenancy, $tenant) {
             $mock->shouldReceive('get')
                  ->andReturn(Mockery::mock(ConfigStore::class, function (MockInterface $mock) use ($tenancy, $tenant) {
                      $mock->shouldReceive('get')
@@ -474,7 +474,7 @@ class BudBroadcastOverrideTest extends UnitTestCase
 
         $override->boot($app, $sprout);
 
-        $broadcastOverride = $override->getOverride(BudBroadcastConnectionOverride::class);
+        $broadcastOverride = $override->getOverride(TenantConfigBroadcastConnectionOverride::class);
 
         $this->assertEmpty($broadcastOverride->getOverrides());
 
@@ -495,8 +495,8 @@ class BudBroadcastOverrideTest extends UnitTestCase
     {
         $override = new StackedOverride('broadcast', [
             'overrides' => [
-                BudBroadcastManagerOverride::class,
-                BudBroadcastConnectionOverride::class,
+                TenantConfigBroadcastManagerOverride::class,
+                TenantConfigBroadcastConnectionOverride::class,
             ],
         ]);
 
@@ -510,7 +510,7 @@ class BudBroadcastOverrideTest extends UnitTestCase
         $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
 
         $app->make('config')->set('broadcasting.connections.bud-connection', [
-            'driver' => 'sprout:bud',
+            'driver' => 'sprout:config',
         ]);
 
         $sprout = new Sprout($app, new SettingsRepository());
@@ -527,7 +527,7 @@ class BudBroadcastOverrideTest extends UnitTestCase
 
         $override->boot($app, $sprout);
 
-        $broadcastOverride = $override->getOverride(BudBroadcastConnectionOverride::class);
+        $broadcastOverride = $override->getOverride(TenantConfigBroadcastConnectionOverride::class);
 
         $this->assertEmpty($broadcastOverride->getOverrides());
 
