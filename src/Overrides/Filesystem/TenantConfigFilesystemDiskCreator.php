@@ -6,7 +6,7 @@ namespace Sprout\Overrides\Filesystem;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Filesystem\FilesystemManager;
 use InvalidArgumentException;
-use Sprout\Bud;
+use Sprout\TenantConfig;
 use Sprout\Exceptions\MisconfigurationException;
 use Sprout\Exceptions\TenancyMissingException;
 use Sprout\Exceptions\TenantMissingException;
@@ -14,44 +14,44 @@ use Sprout\Overrides\BaseCreator;
 use Sprout\Sprout;
 
 /**
- * Bud Filesystem Disk Creator
+ * Tenant Config Filesystem Disk Creator
  *
  * This class is an abstraction for the logic that creates a filesystem disk
- * using a config store within Bud.
+ * using a config store within tenant config.
  */
-final class BudFilesystemDiskCreator extends BaseCreator
+final class TenantConfigFilesystemDiskCreator extends BaseCreator
 {
     private FilesystemManager $manager;
 
-    private Bud $bud;
+    private TenantConfig $tenantConfig;
 
     private Sprout $sprout;
 
     /**
-     * @var array<string, mixed>&array{budStore?:string|null,name?:mixed}
+     * @var array<string, mixed>&array{configStore?:string|null,name?:mixed}
      */
     private array $config;
 
     /**
-     * @param FilesystemManager                                             $manager
-     * @param Bud                                                           $bud
-     * @param Sprout                                                        $sprout
-     * @param array<string, mixed>&array{budStore?:string|null,name?:mixed} $config
+     * @param FilesystemManager                                                $manager
+     * @param TenantConfig                                                     $tenantConfig
+     * @param Sprout                                                           $sprout
+     * @param array<string, mixed>&array{configStore?:string|null,name?:mixed} $config
      */
     public function __construct(
         FilesystemManager $manager,
-        Bud               $bud,
+        TenantConfig      $tenantConfig,
         Sprout            $sprout,
         array             $config,
     ) {
-        $this->manager = $manager;
-        $this->bud     = $bud;
-        $this->sprout  = $sprout;
-        $this->config  = $config;
+        $this->manager      = $manager;
+        $this->tenantConfig = $tenantConfig;
+        $this->sprout       = $sprout;
+        $this->config       = $config;
     }
 
     /**
-     * Create the connection using Bud.
+     * Create the connection using tenant config.
      *
      * @return Filesystem
      *
@@ -66,7 +66,7 @@ final class BudFilesystemDiskCreator extends BaseCreator
         }
 
         /** @var array<string, mixed>&array{driver?:string|null,name:string} $config */
-        $config = $this->getConfig($this->sprout, $this->bud, $this->config, $this->config['name']);
+        $config = $this->getConfig($this->sprout, $this->tenantConfig, $this->config, $this->config['name']);
 
         // We need to make sure that this isn't going to recurse infinitely.
         $this->checkForCyclicDrivers(

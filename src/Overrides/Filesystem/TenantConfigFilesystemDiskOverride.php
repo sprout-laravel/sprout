@@ -7,19 +7,19 @@ use Closure;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Filesystem\FilesystemManager;
 use LogicException;
-use Sprout\Bud;
-use Sprout\Overrides\BudBaseOverride;
+use Sprout\TenantConfig;
+use Sprout\Overrides\TenantConfigBaseOverride;
 use Sprout\Sprout;
 
 /**
  * Filesystem Disk Override
  *
  * This override specifically allows for the creation of filesystem disks
- * using the Bud config store.
+ * using a tenant config store.
  *
- * @extends BudBaseOverride<FilesystemManager>
+ * @extends TenantConfigBaseOverride<FilesystemManager>
  */
-final class BudFilesystemDiskOverride extends BudBaseOverride
+final class TenantConfigFilesystemDiskOverride extends TenantConfigBaseOverride
 {
     /**
      * Get the name of the service being overridden.
@@ -34,32 +34,32 @@ final class BudFilesystemDiskOverride extends BudBaseOverride
     /**
      * Add a driver to the service.
      *
-     * @param object  $service
-     * @param Bud     $bud
-     * @param Sprout  $sprout
-     * @param Closure $tracker
+     * @param object       $service
+     * @param TenantConfig $tenantConfig
+     * @param Sprout       $sprout
+     * @param Closure      $tracker
      *
      * @phpstan-param FilesystemManager $service
      *
      * @return void
      */
-    protected function addDriver(object $service, Bud $bud, Sprout $sprout, Closure $tracker): void
+    protected function addDriver(object $service, TenantConfig $tenantConfig, Sprout $sprout, Closure $tracker): void
     {
         if (! $service instanceof SproutFilesystemManager) {
             throw new LogicException('Cannot override filesystem disks without the Sprout filesystem manager override');
         }
 
-        // Add a bud driver.
-        $service->extend('sprout:bud', function (Application $app, array $config) use ($service, $bud, $sprout, $tracker) {
+        // Add a tenant config driver.
+        $service->extend('sprout:config', function (Application $app, array $config) use ($service, $tenantConfig, $sprout, $tracker) {
             // Track the connection name.
-            /** @var array<string, mixed>&array{budStore?:string|null,name?:string|null} $config */
+            /** @var array<string, mixed>&array{configStore?:string|null,name?:string|null} $config */
             // If the config contains the disk name
             if (isset($config['name'])) {
                 // Track it
                 $tracker($config['name']);
             }
 
-            return (new BudFilesystemDiskCreator($service, $bud, $sprout, $config))();
+            return (new TenantConfigFilesystemDiskCreator($service, $tenantConfig, $sprout, $config))();
         });
     }
 
