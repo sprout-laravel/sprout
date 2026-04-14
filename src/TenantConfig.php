@@ -11,7 +11,7 @@ use Sprout\Exceptions\TenancyMissingException;
 use Sprout\Exceptions\TenantMissingException;
 use Sprout\Managers\ConfigStoreManager;
 
-final class Bud implements TenantAware
+final class TenantConfig implements TenantAware
 {
     use AwareOfTenant;
 
@@ -62,9 +62,9 @@ final class Bud implements TenantAware
 
             // If there's a tenancy, we will use their locked store, the store
             // that was provided, or the default store.
-            $name = BudOptions::getLockedStore($tenancy)
+            $name = TenancyOptions::getLockedStore($tenancy)
                        ?? $name
-                       ?? BudOptions::getDefaultStore($tenancy);
+                       ?? TenancyOptions::getDefaultStore($tenancy);
         }
 
         return $this->stores->get($name);
