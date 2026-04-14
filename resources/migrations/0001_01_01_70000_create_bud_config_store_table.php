@@ -9,7 +9,7 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('bud_config_store', static function (Blueprint $table) {
+        Schema::create('tenant_config_store', static function (Blueprint $table) {
             $table->id();
 
             $table->string('tenancy');
@@ -29,6 +29,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('bud_config_store');
+        Schema::dropIfExists('tenant_config_store');
     }
 };
