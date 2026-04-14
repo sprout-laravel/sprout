@@ -117,7 +117,7 @@ class TenantConfigMailerCreatorTest extends UnitTestCase
 
         $creator = new TenantConfigMailerTransportCreator(
             $manager,
-            $bud,
+            $tenantConfig,
             $sprout,
             'fake-mailer',
             $config,
@@ -143,7 +143,7 @@ class TenantConfigMailerCreatorTest extends UnitTestCase
 
         $creator = new TenantConfigMailerTransportCreator(
             $manager,
-            $bud,
+            $tenantConfig,
             $sprout,
             'fake-mailer',
             $config,
@@ -172,7 +172,7 @@ class TenantConfigMailerCreatorTest extends UnitTestCase
 
         $creator = new TenantConfigMailerTransportCreator(
             $manager,
-            $bud,
+            $tenantConfig,
             $sprout,
             'fake-mailer',
             $config,
@@ -199,7 +199,7 @@ class TenantConfigMailerCreatorTest extends UnitTestCase
 
         $creator = new TenantConfigMailerTransportCreator(
             $manager,
-            $bud,
+            $tenantConfig,
             $sprout,
             'fake-mailer',
             $config,

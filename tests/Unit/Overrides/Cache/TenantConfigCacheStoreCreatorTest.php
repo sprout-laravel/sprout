@@ -117,7 +117,7 @@ class TenantConfigCacheStoreCreatorTest extends UnitTestCase
 
         $creator = new TenantConfigCacheStoreCreator(
             $manager,
-            $bud,
+            $tenantConfig,
             $sprout,
             'fake-cache',
             $config,
@@ -143,7 +143,7 @@ class TenantConfigCacheStoreCreatorTest extends UnitTestCase
 
         $creator = new TenantConfigCacheStoreCreator(
             $manager,
-            $bud,
+            $tenantConfig,
             $sprout,
             'fake-cache',
             $config,
@@ -172,7 +172,7 @@ class TenantConfigCacheStoreCreatorTest extends UnitTestCase
 
         $creator = new TenantConfigCacheStoreCreator(
             $manager,
-            $bud,
+            $tenantConfig,
             $sprout,
             'fake-cache',
             $config,
@@ -199,7 +199,7 @@ class TenantConfigCacheStoreCreatorTest extends UnitTestCase
 
         $creator = new TenantConfigCacheStoreCreator(
             $manager,
-            $bud,
+            $tenantConfig,
             $sprout,
             'fake-cache',
             $config,

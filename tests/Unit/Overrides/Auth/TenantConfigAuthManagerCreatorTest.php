@@ -117,7 +117,7 @@ class TenantConfigAuthManagerCreatorTest extends UnitTestCase
 
         $creator = new TenantConfigAuthProviderCreator(
             $manager,
-            $bud,
+            $tenantConfig,
             $sprout,
             'fake-provider',
             $config,
@@ -143,7 +143,7 @@ class TenantConfigAuthManagerCreatorTest extends UnitTestCase
 
         $creator = new TenantConfigAuthProviderCreator(
             $manager,
-            $bud,
+            $tenantConfig,
             $sprout,
             'fake-provider',
             $config
@@ -172,7 +172,7 @@ class TenantConfigAuthManagerCreatorTest extends UnitTestCase
 
         $creator = new TenantConfigAuthProviderCreator(
             $manager,
-            $bud,
+            $tenantConfig,
             $sprout,
             'fake-provider',
             $config
@@ -199,7 +199,7 @@ class TenantConfigAuthManagerCreatorTest extends UnitTestCase
 
         $creator = new TenantConfigAuthProviderCreator(
             $manager,
-            $bud,
+            $tenantConfig,
             $sprout,
             'fake-provider',
             $config

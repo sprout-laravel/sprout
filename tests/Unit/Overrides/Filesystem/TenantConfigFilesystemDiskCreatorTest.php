@@ -118,7 +118,7 @@ class TenantConfigFilesystemDiskCreatorTest extends UnitTestCase
 
         $creator = new TenantConfigFilesystemDiskCreator(
             $manager,
-            $bud,
+            $tenantConfig,
             $sprout,
             $config,
         );
@@ -141,7 +141,7 @@ class TenantConfigFilesystemDiskCreatorTest extends UnitTestCase
 
         $creator = new TenantConfigFilesystemDiskCreator(
             $manager,
-            $bud,
+            $tenantConfig,
             $sprout,
             $config,
         );
@@ -169,7 +169,7 @@ class TenantConfigFilesystemDiskCreatorTest extends UnitTestCase
 
         $creator = new TenantConfigFilesystemDiskCreator(
             $manager,
-            $bud,
+            $tenantConfig,
             $sprout,
             $config,
         );
@@ -197,7 +197,7 @@ class TenantConfigFilesystemDiskCreatorTest extends UnitTestCase
 
         $creator = new TenantConfigFilesystemDiskCreator(
             $manager,
-            $bud,
+            $tenantConfig,
             $sprout,
             $config,
         );
@@ -223,7 +223,7 @@ class TenantConfigFilesystemDiskCreatorTest extends UnitTestCase
 
         $creator = new TenantConfigFilesystemDiskCreator(
             $manager,
-            $bud,
+            $tenantConfig,
             $sprout,
             $config,
         );

@@ -120,7 +120,7 @@ class TenantConfigBroadcastConnectionCreatorTest extends UnitTestCase
 
         $creator = new TenantConfigBroadcastConnectionCreator(
             $manager,
-            $bud,
+            $tenantConfig,
             $sprout,
             $config,
         );
@@ -143,7 +143,7 @@ class TenantConfigBroadcastConnectionCreatorTest extends UnitTestCase
 
         $creator = new TenantConfigBroadcastConnectionCreator(
             $manager,
-            $bud,
+            $tenantConfig,
             $sprout,
             $config
         );
@@ -171,7 +171,7 @@ class TenantConfigBroadcastConnectionCreatorTest extends UnitTestCase
 
         $creator = new TenantConfigBroadcastConnectionCreator(
             $manager,
-            $bud,
+            $tenantConfig,
             $sprout,
             $config
         );
@@ -199,7 +199,7 @@ class TenantConfigBroadcastConnectionCreatorTest extends UnitTestCase
 
         $creator = new TenantConfigBroadcastConnectionCreator(
             $manager,
-            $bud,
+            $tenantConfig,
             $sprout,
             $config
         );
@@ -225,7 +225,7 @@ class TenantConfigBroadcastConnectionCreatorTest extends UnitTestCase
 
         $creator = new TenantConfigBroadcastConnectionCreator(
             $manager,
-            $bud,
+            $tenantConfig,
             $sprout,
             $config
         );

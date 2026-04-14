@@ -119,7 +119,7 @@ class TenantConfigDatabaseConnectionCreatorTest extends UnitTestCase
 
         $creator = new TenantConfigDatabaseConnectionCreator(
             $manager,
-            $bud,
+            $tenantConfig,
             $sprout,
             'fake-connection',
             $config,
@@ -145,7 +145,7 @@ class TenantConfigDatabaseConnectionCreatorTest extends UnitTestCase
 
         $creator = new TenantConfigDatabaseConnectionCreator(
             $manager,
-            $bud,
+            $tenantConfig,
             $sprout,
             'fake-connection',
             $config,
@@ -174,7 +174,7 @@ class TenantConfigDatabaseConnectionCreatorTest extends UnitTestCase
 
         $creator = new TenantConfigDatabaseConnectionCreator(
             $manager,
-            $bud,
+            $tenantConfig,
             $sprout,
             'fake-connection',
             $config,
@@ -201,7 +201,7 @@ class TenantConfigDatabaseConnectionCreatorTest extends UnitTestCase
 
         $creator = new TenantConfigDatabaseConnectionCreator(
             $manager,
-            $bud,
+            $tenantConfig,
             $sprout,
             'fake-connection',
             $config,

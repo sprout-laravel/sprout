@@ -91,10 +91,10 @@ class ConfigStoreManagerTest extends UnitTestCase
     {
         $manager = $this->getConfigStoreManager($this->mockApplication());
 
-        $this->assertSame('sprout.bud.stores.test1', $manager->getConfigKey('test1'));
-        $this->assertSame('sprout.bud.stores.test2', $manager->getConfigKey('test2'));
-        $this->assertSame('sprout.bud.stores.test3', $manager->getConfigKey('test3'));
-        $this->assertSame('sprout.bud.stores.test4', $manager->getConfigKey('test4'));
+        $this->assertSame('multitenancy.stores.test1', $manager->getConfigKey('test1'));
+        $this->assertSame('multitenancy.stores.test2', $manager->getConfigKey('test2'));
+        $this->assertSame('multitenancy.stores.test3', $manager->getConfigKey('test3'));
+        $this->assertSame('multitenancy.stores.test4', $manager->getConfigKey('test4'));
     }
 
     #[Test]
@@ -115,7 +115,7 @@ class ConfigStoreManagerTest extends UnitTestCase
                  ->once()
                  ->andReturn($this->mockConfig(function (MockInterface $mock) {
                      $mock->shouldReceive('get')
-                          ->with('sprout.bud.stores.filesystem')
+                          ->with('multitenancy.stores.filesystem')
                           ->once()
                           ->andReturn([
                               'driver' => 'filesystem',
@@ -154,7 +154,7 @@ class ConfigStoreManagerTest extends UnitTestCase
                  ->once()
                  ->andReturn($this->mockConfig(function (MockInterface $mock) {
                      $mock->shouldReceive('get')
-                          ->with('sprout.bud.stores.filesystem')
+                          ->with('multitenancy.stores.filesystem')
                           ->once()
                           ->andReturn([
                               'driver'    => 'filesystem',
@@ -198,7 +198,7 @@ class ConfigStoreManagerTest extends UnitTestCase
                  ->twice()
                  ->andReturn($this->mockConfig(function (MockInterface $mock) use ($key) {
                      $mock->shouldReceive('get')
-                          ->with('sprout.bud.stores.filesystem')
+                          ->with('multitenancy.stores.filesystem')
                           ->once()
                           ->andReturn([
                               'driver' => 'filesystem',
@@ -246,7 +246,7 @@ class ConfigStoreManagerTest extends UnitTestCase
                  ->once()
                  ->andReturn($this->mockConfig(function (MockInterface $mock) {
                      $mock->shouldReceive('get')
-                          ->with('sprout.bud.stores.filesystem')
+                          ->with('multitenancy.stores.filesystem')
                           ->once()
                           ->andReturn([
                               'driver' => 'filesystem',
@@ -269,7 +269,7 @@ class ConfigStoreManagerTest extends UnitTestCase
                  ->once()
                  ->andReturn($this->mockConfig(function (MockInterface $mock) {
                      $mock->shouldReceive('get')
-                          ->with('sprout.bud.stores.database')
+                          ->with('multitenancy.stores.database')
                           ->once()
                           ->andReturn([
                               'driver' => 'database',
@@ -308,7 +308,7 @@ class ConfigStoreManagerTest extends UnitTestCase
                  ->once()
                  ->andReturn($this->mockConfig(function (MockInterface $mock) {
                      $mock->shouldReceive('get')
-                          ->with('sprout.bud.stores.database')
+                          ->with('multitenancy.stores.database')
                           ->once()
                           ->andReturn([
                               'driver'     => 'database',
@@ -350,7 +350,7 @@ class ConfigStoreManagerTest extends UnitTestCase
                  ->twice()
                  ->andReturn($this->mockConfig(function (MockInterface $mock) use ($key) {
                      $mock->shouldReceive('get')
-                          ->with('sprout.bud.stores.database')
+                          ->with('multitenancy.stores.database')
                           ->once()
                           ->andReturn([
                               'driver' => 'database',
@@ -398,7 +398,7 @@ class ConfigStoreManagerTest extends UnitTestCase
                  ->once()
                  ->andReturn($this->mockConfig(function (MockInterface $mock) {
                      $mock->shouldReceive('get')
-                          ->with('sprout.bud.stores.database')
+                          ->with('multitenancy.stores.database')
                           ->once()
                           ->andReturn([
                               'driver' => 'database',
