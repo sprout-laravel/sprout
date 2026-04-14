@@ -156,7 +156,7 @@ class SproutServiceProvider extends ServiceProvider
     {
         $this->publishes([
             __DIR__ . '/../resources/migrations/0001_01_01_70000_create_bud_config_store_table.php' => database_path('migrations/0001_01_01_70000_create_bud_config_store_table.php'),
-        ], ['migrations', 'sprout-migrations', 'sprout-config-store-migrations']);
+        ], ['sprout-config-store-migrations']);
     }
 
     private function registerServiceOverrides(): void
