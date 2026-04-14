@@ -9,7 +9,7 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\Arr;
 use InvalidArgumentException;
 
-class BudAuthManager extends AuthManager
+class TenantConfigAuthManager extends AuthManager
 {
     protected bool $syncedFromOriginal = false;
 

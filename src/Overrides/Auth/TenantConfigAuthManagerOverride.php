@@ -9,7 +9,7 @@ use Sprout\Contracts\BootableServiceOverride;
 use Sprout\Overrides\BaseOverride;
 use Sprout\Sprout;
 
-final class BudAuthManagerOverride extends BaseOverride implements BootableServiceOverride
+final class TenantConfigAuthManagerOverride extends BaseOverride implements BootableServiceOverride
 {
     /**
      * Boot a service override
@@ -36,7 +36,7 @@ final class BudAuthManagerOverride extends BaseOverride implements BootableServi
             $app->forgetInstance('auth');
         }
 
-        // Bind a replacement auth manager to enable Bud features
-        $app->singleton('auth', fn (Application $app) => new BudAuthManager($app, $original));
+        // Bind a replacement auth manager to enable tenant config features
+        $app->singleton('auth', fn (Application $app) => new TenantConfigAuthManager($app, $original));
     }
 }

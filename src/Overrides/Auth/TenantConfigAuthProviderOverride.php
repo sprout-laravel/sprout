@@ -9,16 +9,16 @@ use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Application;
 use LogicException;
 use RuntimeException;
-use Sprout\Bud;
+use Sprout\TenantConfig;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
-use Sprout\Overrides\BudBaseOverride;
+use Sprout\Overrides\TenantConfigBaseOverride;
 use Sprout\Sprout;
 
 /**
- * @extends BudBaseOverride<AuthManager>
+ * @extends TenantConfigBaseOverride<AuthManager>
  */
-final class BudAuthProviderOverride extends BudBaseOverride
+final class TenantConfigAuthProviderOverride extends TenantConfigBaseOverride
 {
     /**
      * Clean up the service override
@@ -70,32 +70,32 @@ final class BudAuthProviderOverride extends BudBaseOverride
     /**
      * Add a driver to the service.
      *
-     * @param object  $service
-     * @param Bud     $bud
-     * @param Sprout  $sprout
-     * @param Closure $tracker
+     * @param object       $service
+     * @param TenantConfig $tenantConfig
+     * @param Sprout       $sprout
+     * @param Closure      $tracker
      *
      * @phpstan-param AuthManager $service
      *
      * @return void
      */
-    protected function addDriver(object $service, Bud $bud, Sprout $sprout, Closure $tracker): void
+    protected function addDriver(object $service, TenantConfig $tenantConfig, Sprout $sprout, Closure $tracker): void
     {
-        if (! $service instanceof BudAuthManager) {
-            throw new LogicException('Cannot override auth providers without the Bud auth manager override');
+        if (! $service instanceof TenantConfigAuthManager) {
+            throw new LogicException('Cannot override auth providers without the tenant config auth manager override');
         }
 
-        $service->provider('sprout:bud', function (Application $app, array $config) use ($service, $bud, $sprout, $tracker) {
+        $service->provider('sprout:config', function (Application $app, array $config) use ($service, $tenantConfig, $sprout, $tracker) {
             /**
-             * @var array<string, mixed>&array{budStore?:string|null,driver:string,provider?:mixed} $config
+             * @var array<string, mixed>&array{configStore?:string|null,driver:string,provider?:mixed} $config
              */
             if (! isset($config['provider']) || ! is_string($config['provider']) || $config['provider'] === '') {
-                throw new RuntimeException('Cannot create an auth provider using bud without a name'); // @codeCoverageIgnore
+                throw new RuntimeException('Cannot create an auth provider using tenant config without a name'); // @codeCoverageIgnore
             }
 
             $tracker($config['provider']);
 
-            return (new BudAuthProviderCreator($service, $bud, $sprout, $config['provider'], $config))();
+            return (new TenantConfigAuthProviderCreator($service, $tenantConfig, $sprout, $config['provider'], $config))();
         });
     }
 
