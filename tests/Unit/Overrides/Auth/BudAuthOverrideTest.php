@@ -285,7 +285,7 @@ class BudAuthOverrideTest extends UnitTestCase
         $manager = $app->make('auth');
 
         $this->expectException(CyclicOverrideException::class);
-        $this->expectExceptionMessage('Attempt to create cyclic bud auth provider [bud-provider] detected');
+        $this->expectExceptionMessage('Attempt to create cyclic config auth provider [bud-provider] detected');
 
         $manager->createUserProviderFromConfig([
             'driver' => 'sprout:bud',

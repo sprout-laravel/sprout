@@ -161,7 +161,7 @@ class BudMailerOverrideTest extends UnitTestCase
         $manager = $app->make('mail.manager');
 
         $this->expectException(CyclicOverrideException::class);
-        $this->expectExceptionMessage('Attempt to create cyclic bud mailer [bud-mailer] detected');
+        $this->expectExceptionMessage('Attempt to create cyclic config mailer [bud-mailer] detected');
 
         $manager->mailer('bud-mailer');
     }

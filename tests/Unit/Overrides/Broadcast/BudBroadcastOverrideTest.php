@@ -287,7 +287,7 @@ class BudBroadcastOverrideTest extends UnitTestCase
         $manager = $app->make(BroadcastManager::class);
 
         $this->expectException(CyclicOverrideException::class);
-        $this->expectExceptionMessage('Attempt to create cyclic bud broadcast connection [bud-connection] detected');
+        $this->expectExceptionMessage('Attempt to create cyclic config broadcast connection [bud-connection] detected');
 
         $manager->connectUsing('bud-connection', [
             'driver' => 'sprout:bud',

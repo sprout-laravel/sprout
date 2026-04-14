@@ -282,7 +282,7 @@ class BudFilesystemDiskOverrideTest extends UnitTestCase
         $manager = $app->make('filesystem');
 
         $this->expectException(CyclicOverrideException::class);
-        $this->expectExceptionMessage('Attempt to create cyclic bud filesystem disk [bud-disk] detected');
+        $this->expectExceptionMessage('Attempt to create cyclic config filesystem disk [bud-disk] detected');
 
         $manager->disk('bud-disk');
     }

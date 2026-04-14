@@ -172,7 +172,7 @@ class BudDatabaseConnectionOverrideTest extends UnitTestCase
         $manager = $app->make('db');
 
         $this->expectException(CyclicOverrideException::class);
-        $this->expectExceptionMessage('Attempt to create cyclic bud database connection [bud-connection] detected');
+        $this->expectExceptionMessage('Attempt to create cyclic config database connection [bud-connection] detected');
 
         $manager->connection('bud-connection');
     }

@@ -160,7 +160,7 @@ class BudCacheStoreOverrideTest extends UnitTestCase
         $manager = $app->make('cache');
 
         $this->expectException(CyclicOverrideException::class);
-        $this->expectExceptionMessage('Attempt to create cyclic bud cache store [bud-cache] detected');
+        $this->expectExceptionMessage('Attempt to create cyclic config cache store [bud-cache] detected');
 
         $manager->store('bud-cache');
     }
