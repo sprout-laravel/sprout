@@ -7,7 +7,7 @@ use Attribute;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Contracts\Container\ContextualAttribute;
-use Sprout\Bud;
+use Sprout\TenantConfig as TenantConfigService;
 use Sprout\Exceptions\MisconfigurationException;
 
 /**
@@ -47,7 +47,7 @@ final readonly class TenantConfig implements ContextualAttribute
      */
     public function resolve(self $attribute, Container $container): ?array
     {
-        return $container->make(Bud::class)->config(
+        return $container->make(TenantConfigService::class)->config(
             $attribute->service,
             $attribute->name,
             store: $attribute->store,
