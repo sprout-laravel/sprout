@@ -6,9 +6,9 @@ namespace Sprout\Overrides\Mailer;
 use Closure;
 use Illuminate\Mail\MailManager;
 use RuntimeException;
-use Sprout\TenantConfig;
 use Sprout\Overrides\TenantConfigBaseOverride;
 use Sprout\Sprout;
+use Sprout\TenantConfig;
 
 /**
  * Mailer Override

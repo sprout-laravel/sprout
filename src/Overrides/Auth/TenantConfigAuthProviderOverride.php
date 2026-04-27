@@ -9,11 +9,11 @@ use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Application;
 use LogicException;
 use RuntimeException;
-use Sprout\TenantConfig;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 use Sprout\Overrides\TenantConfigBaseOverride;
 use Sprout\Sprout;
+use Sprout\TenantConfig;
 
 /**
  * @extends TenantConfigBaseOverride<AuthManager>

@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace Sprout\Overrides;
 
 use RuntimeException;
-use Sprout\TenantConfig;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 use Sprout\Exceptions\CyclicOverrideException;
@@ -12,14 +11,15 @@ use Sprout\Exceptions\MisconfigurationException;
 use Sprout\Exceptions\TenancyMissingException;
 use Sprout\Exceptions\TenantMissingException;
 use Sprout\Sprout;
+use Sprout\TenantConfig;
 
 abstract class BaseCreator
 {
     /**
-     * @param Sprout                                              $sprout
-     * @param TenantConfig                                        $tenantConfig
+     * @param Sprout                                               $sprout
+     * @param TenantConfig                                         $tenantConfig
      * @param array<string, mixed>&array{configStore?:string|null} $config
-     * @param string                                              $name
+     * @param string                                               $name
      *
      * @return array<string, mixed>
      *

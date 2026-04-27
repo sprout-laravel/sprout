@@ -5,12 +5,12 @@ namespace Sprout\Overrides\Broadcast;
 
 use Illuminate\Contracts\Broadcasting\Broadcaster;
 use InvalidArgumentException;
-use Sprout\TenantConfig;
 use Sprout\Exceptions\MisconfigurationException;
 use Sprout\Exceptions\TenancyMissingException;
 use Sprout\Exceptions\TenantMissingException;
 use Sprout\Overrides\BaseCreator;
 use Sprout\Sprout;
+use Sprout\TenantConfig;
 
 /**
  * Tenant Config Broadcast Connection Creator

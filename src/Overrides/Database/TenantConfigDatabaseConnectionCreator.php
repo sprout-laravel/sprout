@@ -5,12 +5,12 @@ namespace Sprout\Overrides\Database;
 
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\DatabaseManager;
-use Sprout\TenantConfig;
 use Sprout\Exceptions\MisconfigurationException;
 use Sprout\Exceptions\TenancyMissingException;
 use Sprout\Exceptions\TenantMissingException;
 use Sprout\Overrides\BaseCreator;
 use Sprout\Sprout;
+use Sprout\TenantConfig;
 
 /**
  * Tenant Config Database Connection Creator
@@ -34,11 +34,11 @@ final class TenantConfigDatabaseConnectionCreator extends BaseCreator
     private array $config;
 
     /**
-     * @param DatabaseManager                                        $manager
-     * @param TenantConfig                                           $tenantConfig
-     * @param Sprout                                                 $sprout
-     * @param string                                                 $name
-     * @param array<string, mixed>&array{configStore?:string|null}   $config
+     * @param DatabaseManager                                      $manager
+     * @param TenantConfig                                         $tenantConfig
+     * @param Sprout                                               $sprout
+     * @param string                                               $name
+     * @param array<string, mixed>&array{configStore?:string|null} $config
      */
     public function __construct(
         DatabaseManager $manager,

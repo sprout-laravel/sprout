@@ -4,9 +4,9 @@ declare(strict_types=1);
 namespace Sprout\Overrides\Auth;
 
 use Illuminate\Contracts\Auth\UserProvider;
-use Sprout\TenantConfig;
 use Sprout\Overrides\BaseCreator;
 use Sprout\Sprout;
+use Sprout\TenantConfig;
 
 final class TenantConfigAuthProviderCreator extends BaseCreator
 {
@@ -24,11 +24,11 @@ final class TenantConfigAuthProviderCreator extends BaseCreator
     private array $config;
 
     /**
-     * @param TenantConfigAuthManager                                $manager
-     * @param TenantConfig                                           $tenantConfig
-     * @param Sprout                                                 $sprout
-     * @param string                                                 $name
-     * @param array<string, mixed>&array{configStore?:string|null}   $config
+     * @param TenantConfigAuthManager                              $manager
+     * @param TenantConfig                                         $tenantConfig
+     * @param Sprout                                               $sprout
+     * @param string                                               $name
+     * @param array<string, mixed>&array{configStore?:string|null} $config
      */
     public function __construct(
         TenantConfigAuthManager $manager,

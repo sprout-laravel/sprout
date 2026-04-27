@@ -5,9 +5,9 @@ namespace Sprout\Overrides\Database;
 
 use Closure;
 use Illuminate\Database\DatabaseManager;
-use Sprout\TenantConfig;
 use Sprout\Overrides\TenantConfigBaseOverride;
 use Sprout\Sprout;
+use Sprout\TenantConfig;
 
 /**
  * Database Connection Override

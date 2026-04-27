@@ -6,12 +6,12 @@ namespace Sprout\Overrides;
 use Closure;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Foundation\Application;
-use Sprout\TenantConfig;
 use Sprout\Contracts\BootableServiceOverride;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 use Sprout\Overrides\BaseOverride as SproutBaseOverride;
 use Sprout\Sprout;
+use Sprout\TenantConfig;
 
 /**
  * @template OverrideService of object

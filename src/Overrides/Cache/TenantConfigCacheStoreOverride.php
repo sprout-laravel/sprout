@@ -6,9 +6,9 @@ namespace Sprout\Overrides\Cache;
 use Closure;
 use Illuminate\Cache\CacheManager;
 use Illuminate\Foundation\Application;
-use Sprout\TenantConfig;
 use Sprout\Overrides\TenantConfigBaseOverride;
 use Sprout\Sprout;
+use Sprout\TenantConfig;
 
 /**
  * @extends TenantConfigBaseOverride<CacheManager>

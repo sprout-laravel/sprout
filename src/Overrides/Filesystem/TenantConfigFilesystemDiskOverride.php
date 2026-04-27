@@ -7,9 +7,9 @@ use Closure;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Filesystem\FilesystemManager;
 use LogicException;
-use Sprout\TenantConfig;
 use Sprout\Overrides\TenantConfigBaseOverride;
 use Sprout\Sprout;
+use Sprout\TenantConfig;
 
 /**
  * Filesystem Disk Override

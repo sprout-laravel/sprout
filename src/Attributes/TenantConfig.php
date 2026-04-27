@@ -7,8 +7,8 @@ use Attribute;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Contracts\Container\ContextualAttribute;
-use Sprout\TenantConfig as TenantConfigService;
 use Sprout\Exceptions\MisconfigurationException;
+use Sprout\TenantConfig as TenantConfigService;
 
 /**
  * Config Store Attribute

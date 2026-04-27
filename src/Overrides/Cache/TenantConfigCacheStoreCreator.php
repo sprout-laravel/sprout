@@ -6,13 +6,13 @@ namespace Sprout\Overrides\Cache;
 use Illuminate\Cache\CacheManager;
 use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Support\Arr;
-use Sprout\TenantConfig;
 use Sprout\Exceptions\CyclicOverrideException;
 use Sprout\Exceptions\MisconfigurationException;
 use Sprout\Exceptions\TenancyMissingException;
 use Sprout\Exceptions\TenantMissingException;
 use Sprout\Overrides\BaseCreator;
 use Sprout\Sprout;
+use Sprout\TenantConfig;
 
 final class TenantConfigCacheStoreCreator extends BaseCreator
 {
@@ -30,11 +30,11 @@ final class TenantConfigCacheStoreCreator extends BaseCreator
     private array $config;
 
     /**
-     * @param CacheManager                                           $manager
-     * @param TenantConfig                                           $tenantConfig
-     * @param Sprout                                                 $sprout
-     * @param string                                                 $name
-     * @param array<string, mixed>&array{configStore?:string|null}   $config
+     * @param CacheManager                                         $manager
+     * @param TenantConfig                                         $tenantConfig
+     * @param Sprout                                               $sprout
+     * @param string                                               $name
+     * @param array<string, mixed>&array{configStore?:string|null} $config
      */
     public function __construct(
         CacheManager $manager,

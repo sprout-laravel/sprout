@@ -7,9 +7,9 @@ use Closure;
 use Illuminate\Broadcasting\BroadcastManager;
 use Illuminate\Contracts\Foundation\Application;
 use LogicException;
-use Sprout\TenantConfig;
 use Sprout\Overrides\TenantConfigBaseOverride;
 use Sprout\Sprout;
+use Sprout\TenantConfig;
 
 /**
  * Broadcast Connection Override

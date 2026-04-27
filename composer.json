@@ -60,6 +60,9 @@
       "@prepare",
       "@build",
       "@php vendor/bin/paratest"
+    ],
+    "tidy"              : [
+      "@php vendor/bin/pint --ansi"
     ]
   },
   "extra"            : {

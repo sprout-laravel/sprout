@@ -4,12 +4,12 @@ declare(strict_types=1);
 namespace Sprout\Overrides\Mailer;
 
 use Illuminate\Mail\MailManager;
-use Sprout\TenantConfig;
 use Sprout\Exceptions\MisconfigurationException;
 use Sprout\Exceptions\TenancyMissingException;
 use Sprout\Exceptions\TenantMissingException;
 use Sprout\Overrides\BaseCreator;
 use Sprout\Sprout;
+use Sprout\TenantConfig;
 use Symfony\Component\Mailer\Transport\TransportInterface;
 
 /**
@@ -34,11 +34,11 @@ final class TenantConfigMailerTransportCreator extends BaseCreator
     private array $config;
 
     /**
-     * @param MailManager                                            $manager
-     * @param TenantConfig                                           $tenantConfig
-     * @param Sprout                                                 $sprout
-     * @param string                                                 $name
-     * @param array<string, mixed>&array{configStore?:string|null}   $config
+     * @param MailManager                                          $manager
+     * @param TenantConfig                                         $tenantConfig
+     * @param Sprout                                               $sprout
+     * @param string                                               $name
+     * @param array<string, mixed>&array{configStore?:string|null} $config
      */
     public function __construct(
         MailManager  $manager,
