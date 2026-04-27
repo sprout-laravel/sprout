@@ -3,5 +3,6 @@ composer.lock
 /wiki/
 /build/
 .phpunit.result.cache
+.phpunit.cache
 /tests/_Original
 repositories.json
