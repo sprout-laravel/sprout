@@ -21,7 +21,7 @@ return [
         'tenancy'  => 'tenants',
         'provider' => 'tenants',
         'resolver' => 'subdomain',
-        'store'    => 'database',
+        'config'   => 'database',
 
     ],
 
