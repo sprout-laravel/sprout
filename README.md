@@ -48,22 +48,21 @@ Sprout comes out of the box with the following features:
   If you're following a model where users belong to a single tenant, you'll also want to
   make sure that password resets are scoped to the tenant.
   Sprout can do this for you.
+- **Tenant-Specific Configuration**:
+  Tenants can carry their own configuration for Laravel's core driver-based services —
+  database connections, cache stores, filesystem disks, mailers, broadcast channels and
+  auth providers — applied automatically when the tenant is active.
 - **Automatic Scoping**:
   As well as all the automated scoping of storage disks, cache stores, jobs, password resets
   and so on, Sprout also comes with a set of functionality for automatically scoping models, during creation and
   querying.
 
-There are also three upcoming first-party addons for Sprout:
+There are also two upcoming first-party addons for Sprout:
 
-- [**Sprout Bud**](https://github.com/sprout-laravel/bud):
-  Bud allows you to manage tenant-specific
-  configuration, with built-in support for
-  dynamically configuring a whole of Laravels core connections and driver-based services.
 - [**Sprout Seedling**](https://github.com/sprout-laravel/seedling):
-  Seedling builds on-top of the functionality
-  provided by Sprout Bud, to bring multi-tenant-specific database support to your Laravel application.
-  As well as enabling the dynamic configuration of connections, it comes with a batch of supporting functionality to
-  make managing tenant-specific databases easier.
+  Seedling brings multi-tenant database support to your Laravel application,
+  building on Sprout's tenant-specific configuration to provide per-tenant connections
+  along with a batch of supporting functionality for managing tenant databases.
 - [**Sprout Terra**](https://github.com/sprout-laravel/terra):
   Terra brings _domain_-based identification to
   Sprout, allowing you to identify tenants based on the domain they are accessing your application from.
