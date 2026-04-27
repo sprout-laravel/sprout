@@ -26,6 +26,9 @@
         <include>
             <directory>./src</directory>
         </include>
+        <exclude>
+            <file>./src/Attributes/TenantRelation.php</file>
+        </exclude>
     </source>
     <coverage>
         <report>
