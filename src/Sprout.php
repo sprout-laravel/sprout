@@ -27,7 +27,7 @@ final class Sprout
     private Application $app;
 
     /**
-     * @var array<int, Tenancy<Tenant>>
+     * @var array<int, Tenancy<*>>
      */
     private array $currentTenancies = [];
 
@@ -165,7 +165,7 @@ final class Sprout
     /**
      * Get the current tenancy
      *
-     * @return Tenancy<Tenant>|null
+     * @return Tenancy<*>|null
      */
     public function getCurrentTenancy(): ?Tenancy
     {
@@ -179,7 +179,7 @@ final class Sprout
     /**
      * Get all the current tenancies
      *
-     * @return Tenancy<Tenant>[]
+     * @return Tenancy<*>[]
      */
     public function getAllCurrentTenancies(): array
     {

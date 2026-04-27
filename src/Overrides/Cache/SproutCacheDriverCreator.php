@@ -70,6 +70,7 @@ final class SproutCacheDriverCreator
         }
 
         // Get the current active tenancy
+        /** @var Tenancy<Tenant>|null $tenancy */
         $tenancy = $this->sprout->getCurrentTenancy();
 
         // If there isn't one, that's an issue as we need a tenancy

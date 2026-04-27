@@ -23,13 +23,15 @@ use function Sprout\sprout;
  * leaking between tenants in a "Shared Database, Shared Schema" setup.
  *
  * @see     BelongsToManyTenants
+ *
+ * @template ModelClass of \Illuminate\Database\Eloquent\Model
+ *
+ * @extends TenantChildScope<ModelClass>
  */
 final class BelongsToManyTenantsScope extends TenantChildScope
 {
     /**
      * Apply the scope to a given Eloquent query builder.
-     *
-     * @template ModelClass of \Illuminate\Database\Eloquent\Model
      *
      * @param Builder<ModelClass>   $builder
      * @param Model&BelongsToTenant $model
@@ -97,8 +99,6 @@ final class BelongsToManyTenantsScope extends TenantChildScope
      * Add the actual tenant clause to the query
      *
      * This is abstracted out to avoid duplication in the above apply method.
-     *
-     * @template ModelClass of \Illuminate\Database\Eloquent\Model
      *
      * @param Builder<ModelClass>   $builder
      * @param Model&BelongsToTenant $model

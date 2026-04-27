@@ -5,6 +5,7 @@ namespace Sprout\Overrides;
 
 use RuntimeException;
 use Sprout\TenantConfig;
+use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 use Sprout\Exceptions\CyclicOverrideException;
 use Sprout\Exceptions\MisconfigurationException;
@@ -35,6 +36,7 @@ abstract class BaseCreator
         }
 
         // Get the current active tenancy
+        /** @var Tenancy<Tenant>|null $tenancy */
         $tenancy = $sprout->getCurrentTenancy();
 
         // If there isn't one, that's an issue as we need a tenancy
