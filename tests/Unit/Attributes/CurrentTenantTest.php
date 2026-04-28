@@ -4,9 +4,17 @@ declare(strict_types=1);
 namespace Sprout\Tests\Unit\Attributes;
 
 use Illuminate\Config\Repository;
+use Illuminate\Container\Container;
+use Illuminate\Contracts\Foundation\Application;
+use Mockery;
+use Mockery\MockInterface;
 use Orchestra\Testbench\Attributes\DefineEnvironment;
 use PHPUnit\Framework\Attributes\Test;
 use Sprout\Attributes\CurrentTenant;
+use Sprout\Contracts\Tenancy;
+use Sprout\Contracts\Tenant;
+use Sprout\Managers\TenancyManager;
+use Sprout\Managers\TenantProviderManager;
 use Sprout\Support\GenericTenant;
 use Sprout\Tests\Unit\UnitTestCase;
 use Workbench\App\Models\TenantModel;
@@ -78,5 +86,31 @@ class CurrentTenantTest extends UnitTestCase
 
         $this->assertSame($tenant, $currentTenant);
         $this->assertSame($tenancy->tenant(), $currentTenant);
+    }
+
+    #[Test]
+    public function resolveDelegatesToTheTenancyManagerAndReturnsTheTenant(): void
+    {
+        $expected = Mockery::mock(Tenant::class);
+
+        $tenancy = Mockery::mock(Tenancy::class, function (MockInterface $mock) use ($expected) {
+            $mock->shouldReceive('tenant')->andReturn($expected)->once();
+        });
+
+        // TenancyManager is `final`; partial-mock a real instance. The
+        // TenantProviderManager dependency is passed as a real instance
+        // because TenancyManager's constructor type-hints the concrete
+        // (final) class which Mockery cannot subclass.
+        $app     = Mockery::mock(Application::class);
+        $manager = Mockery::mock(new TenancyManager($app, new TenantProviderManager($app)));
+        $manager->shouldReceive('get')->with('backup')->andReturn($tenancy)->once();
+
+        $container = Mockery::mock(Container::class, function (MockInterface $mock) use ($manager) {
+            $mock->shouldReceive('make')->with(TenancyManager::class)->andReturn($manager)->once();
+        });
+
+        $attribute = new CurrentTenant('backup');
+
+        $this->assertSame($expected, $attribute->resolve($attribute, $container));
     }
 }
