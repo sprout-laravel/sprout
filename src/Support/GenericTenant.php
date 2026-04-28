@@ -15,8 +15,6 @@ use Sprout\Providers\DatabaseTenantProvider;
  * as the tenant entity.
  *
  * @pacakge Core
- *
- * @codeCoverageIgnore
  */
 class GenericTenant implements Tenant
 {
