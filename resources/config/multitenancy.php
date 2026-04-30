@@ -21,6 +21,7 @@ return [
         'tenancy'  => 'tenants',
         'provider' => 'tenants',
         'resolver' => 'subdomain',
+        'config'   => 'database',
 
     ],
 
@@ -135,6 +136,36 @@ return [
         'session' => [
             'driver'  => 'session',
             'session' => 'multitenancy.{tenancy}',
+        ],
+
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Config Stores
+    |--------------------------------------------------------------------------
+    |
+    | This option defines the different config stores, mechanisms that Sprout
+    | will use to store tenant-specific config.
+    | A default implementation for both the 'database' and 'filesystem'
+    | drivers are provided.
+    | You may change these values as required, but they're a perfect start
+    | for most applications.
+    |
+    */
+
+    'stores' => [
+
+        'database' => [
+            'driver'     => 'database',
+            'connection' => env('DB_CONNECTION', 'sqlite'),
+            'table'      => 'tenant_config_store',
+        ],
+
+        'filesystem' => [
+            'driver'    => 'filesystem',
+            'disk'      => env('FILESYSTEM_DISK', 'local'),
+            'directory' => 'sprout/config',
         ],
 
     ],

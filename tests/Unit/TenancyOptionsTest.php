@@ -4,8 +4,11 @@ declare(strict_types=1);
 namespace Sprout\Tests\Unit;
 
 use Illuminate\Config\Repository;
+use Mockery;
+use Mockery\MockInterface;
 use Orchestra\Testbench\Attributes\DefineEnvironment;
 use PHPUnit\Framework\Attributes\Test;
+use Sprout\Contracts\Tenancy;
 use Sprout\TenancyOptions;
 use function Sprout\tenancy;
 
@@ -81,5 +84,75 @@ class TenancyOptionsTest extends UnitTestCase
         $tenancy = tenancy('backup');
 
         $this->assertFalse(TenancyOptions::shouldThrowIfNotRelated($tenancy));
+    }
+
+    #[Test]
+    public function useDefaultStoreReturnsTheCorrectOptionShape(): void
+    {
+        $this->assertSame(
+            ['config:store.default' => 'foo'],
+            TenancyOptions::useDefaultStore('foo'),
+        );
+    }
+
+    #[Test]
+    public function alwaysUseStoreReturnsTheCorrectOptionShape(): void
+    {
+        $this->assertSame(
+            ['config:store.fixed' => 'foo'],
+            TenancyOptions::alwaysUseStore('foo'),
+        );
+    }
+
+    #[Test]
+    public function hasDefaultStoreReportsThePresenceOfTheOption(): void
+    {
+        $tenancy = Mockery::mock(Tenancy::class, function (MockInterface $mock) {
+            $mock->shouldReceive('hasOption')->with('config:store.default')->andReturn(true)->once();
+            $mock->shouldReceive('hasOption')->with('config:store.default')->andReturn(false)->once();
+        });
+
+        $this->assertTrue(TenancyOptions::hasDefaultStore($tenancy));
+        $this->assertFalse(TenancyOptions::hasDefaultStore($tenancy));
+    }
+
+    #[Test]
+    public function getDefaultStoreReturnsTheConfiguredStringOrNull(): void
+    {
+        $tenancy = Mockery::mock(Tenancy::class, function (MockInterface $mock) {
+            $mock->shouldReceive('optionConfig')->with('config:store.default')->andReturn('foo')->once();
+            $mock->shouldReceive('optionConfig')->with('config:store.default')->andReturnNull()->once();
+            $mock->shouldReceive('optionConfig')->with('config:store.default')->andReturn(['not-a-string'])->once();
+        });
+
+        $this->assertSame('foo', TenancyOptions::getDefaultStore($tenancy));
+        $this->assertNull(TenancyOptions::getDefaultStore($tenancy));
+        $this->assertNull(TenancyOptions::getDefaultStore($tenancy));
+    }
+
+    #[Test]
+    public function isLockedToStoreReportsThePresenceOfTheOption(): void
+    {
+        $tenancy = Mockery::mock(Tenancy::class, function (MockInterface $mock) {
+            $mock->shouldReceive('hasOption')->with('config:store.fixed')->andReturn(true)->once();
+            $mock->shouldReceive('hasOption')->with('config:store.fixed')->andReturn(false)->once();
+        });
+
+        $this->assertTrue(TenancyOptions::isLockedToStore($tenancy));
+        $this->assertFalse(TenancyOptions::isLockedToStore($tenancy));
+    }
+
+    #[Test]
+    public function getLockedStoreReturnsTheConfiguredStringOrNull(): void
+    {
+        $tenancy = Mockery::mock(Tenancy::class, function (MockInterface $mock) {
+            $mock->shouldReceive('optionConfig')->with('config:store.fixed')->andReturn('foo')->once();
+            $mock->shouldReceive('optionConfig')->with('config:store.fixed')->andReturnNull()->once();
+            $mock->shouldReceive('optionConfig')->with('config:store.fixed')->andReturn(['not-a-string'])->once();
+        });
+
+        $this->assertSame('foo', TenancyOptions::getLockedStore($tenancy));
+        $this->assertNull(TenancyOptions::getLockedStore($tenancy));
+        $this->assertNull(TenancyOptions::getLockedStore($tenancy));
     }
 }

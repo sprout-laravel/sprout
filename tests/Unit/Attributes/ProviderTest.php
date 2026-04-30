@@ -3,6 +3,10 @@ declare(strict_types=1);
 
 namespace Sprout\Tests\Unit\Attributes;
 
+use Illuminate\Container\Container;
+use Illuminate\Contracts\Foundation\Application;
+use Mockery;
+use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\Test;
 use Sprout\Attributes\Provider;
 use Sprout\Contracts\TenantProvider;
@@ -39,5 +43,24 @@ class ProviderTest extends UnitTestCase
 
         $this->assertSame($manager->get(), $this->app->call($callback1));
         $this->assertSame($manager->get('backup'), $this->app->call($callback2));
+    }
+
+    #[Test]
+    public function resolveDelegatesToTheTenantProviderManager(): void
+    {
+        $expected = Mockery::mock(TenantProvider::class);
+
+        // TenantProviderManager is `final`; partial-mock a real instance.
+        $app     = Mockery::mock(Application::class);
+        $manager = Mockery::mock(new TenantProviderManager($app));
+        $manager->shouldReceive('get')->with('backup')->andReturn($expected)->once();
+
+        $container = Mockery::mock(Container::class, function (MockInterface $mock) use ($manager) {
+            $mock->shouldReceive('make')->with(TenantProviderManager::class)->andReturn($manager)->once();
+        });
+
+        $attribute = new Provider('backup');
+
+        $this->assertSame($expected, $attribute->resolve($attribute, $container));
     }
 }

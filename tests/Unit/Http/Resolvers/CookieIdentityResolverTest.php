@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Sprout\Tests\Unit\Http\Resolvers;
 
+use Illuminate\Contracts\Encryption\Encrypter;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Cookie\CookieJar;
 use Illuminate\Http\Request;
@@ -124,6 +125,32 @@ class CookieIdentityResolverTest extends UnitTestCase
     }
 
     #[Test]
+    public function performsSetUpExpiresCookieWhenTenantIsNull(): void
+    {
+        $resolver = new CookieIdentityResolver('cookie');
+
+        /** @var \Sprout\Contracts\Tenancy&MockInterface $tenancy */
+        $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) {
+            $mock->shouldReceive('getName')->andReturn('my-tenancy')->once();
+        });
+
+        $app = $this->mockApp();
+
+        $app->shouldReceive('make')
+            ->with(CookieJar::class)
+            ->andReturn(
+                Mockery::mock(CookieJar::class, static function (MockInterface $mock) {
+                    $mock->shouldReceive('expire')->with('My-tenancy-Identifier')->once();
+                })
+            )
+            ->once();
+
+        $resolver->setApp($app);
+
+        $resolver->setup($tenancy, null);
+    }
+
+    #[Test]
     public function canResolveFromRequest(): void
     {
         $resolver = new CookieIdentityResolver('cookie');
@@ -224,5 +251,52 @@ class CookieIdentityResolverTest extends UnitTestCase
         $this->assertSame('/test-route', $resolver->route('test-route', $tenancy, $tenant1, absolute: false));
         $this->assertSame('/test-route', $resolver->route('test-route', $tenancy, $tenant2, absolute: false));
         $this->assertSame('/test-route', $resolver->route('test-route', $tenancy, $tenant3, absolute: false));
+    }
+
+    #[Test]
+    public function resolveFromRequestReturnsNullWhenDecryptedCookieIsNotAString(): void
+    {
+        $resolver = new CookieIdentityResolver('cookie', hooks: [ResolutionHook::Routing]);
+
+        // The cookie value must base64-decode to something json_validate() accepts so
+        // that decryptCookie() proceeds to the encrypter step instead of short-circuiting
+        // back to the raw cookie value.
+        $cookieValue = base64_encode('{"iv":"x","value":"y","mac":"z","tag":""}');
+
+        /** @var \Sprout\Contracts\Tenancy&MockInterface $tenancy */
+        $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) {
+            $mock->shouldReceive('hasOption')->with('overrides.all')->andReturn(false)->atLeast()->once();
+            $mock->shouldReceive('optionConfig')->with('overrides')->andReturn([])->atLeast()->once();
+            $mock->shouldReceive('getName')->andReturn('my-tenancy')->atLeast()->once();
+        });
+
+        $request = Mockery::mock(Request::class, static function (MockInterface $mock) use ($cookieValue) {
+            $mock->shouldReceive('cookie')
+                 ->with('My-tenancy-Identifier')
+                 ->andReturn($cookieValue)
+                 ->once();
+        });
+
+        // Mock the encrypter to return a non-string from decrypt() — this is the
+        // defensive branch we're targeting at decryptCookie() line 246-248.
+        $encrypter = Mockery::mock(Encrypter::class, static function (MockInterface $mock) use ($cookieValue) {
+            $mock->shouldReceive('decrypt')
+                 ->with($cookieValue, false)
+                 ->andReturn(['not', 'a', 'string'])
+                 ->once();
+        });
+
+        $app = $this->mockApp();
+        $app->shouldReceive('make')
+            ->with(Encrypter::class)
+            ->andReturn($encrypter)
+            ->once();
+
+        $sprout = $this->getSprout($app);
+        $sprout->setCurrentHook(ResolutionHook::Routing);
+
+        $resolver->setApp($app)->setSprout($sprout);
+
+        $this->assertNull($resolver->resolveFromRequest($request, $tenancy));
     }
 }

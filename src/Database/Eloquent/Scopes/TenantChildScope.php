@@ -14,6 +14,10 @@ use Illuminate\Database\Eloquent\Scope;
  *
  * @see     BelongsToManyTenantsScope
  * @see     BelongsToTenantScope
+ *
+ * @template ModelClass of \Illuminate\Database\Eloquent\Model
+ *
+ * @implements Scope<ModelClass>
  */
 abstract class TenantChildScope implements Scope
 {
@@ -24,8 +28,6 @@ abstract class TenantChildScope implements Scope
 
     /**
      * Extend the query builder with the necessary macros
-     *
-     * @template ModelClass of \Illuminate\Database\Eloquent\Model
      *
      * @param Builder<ModelClass> $builder
      *

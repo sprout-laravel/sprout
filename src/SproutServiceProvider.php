@@ -7,6 +7,7 @@ use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Routing\Router;
 use Illuminate\Support\ServiceProvider;
+use Sprout\Contracts\ConfigStore;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 use Sprout\Contracts\TenantAware;
@@ -15,6 +16,7 @@ use Sprout\Http\Middleware\SproutOptionalTenantContextMiddleware;
 use Sprout\Http\Middleware\SproutTenantContextMiddleware;
 use Sprout\Http\RouterMethods;
 use Sprout\Listeners\IdentifyTenantOnRouting;
+use Sprout\Managers\ConfigStoreManager;
 use Sprout\Managers\IdentityResolverManager;
 use Sprout\Managers\ServiceOverrideManager;
 use Sprout\Managers\TenancyManager;
@@ -29,9 +31,12 @@ class SproutServiceProvider extends ServiceProvider
 {
     private Sprout $sprout;
 
+    private TenantConfig $tenantConfig;
+
     public function register(): void
     {
         $this->registerSprout();
+        $this->registerTenantConfig();
         $this->registerDefaultBindings();
         $this->registerManagers();
         $this->registerMiddleware();
@@ -43,6 +48,7 @@ class SproutServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->publishConfig();
+        $this->publishMigrations();
         $this->registerServiceOverrides();
         $this->registerEventListeners();
         $this->registerTenancyBootstrappers();
@@ -122,6 +128,21 @@ class SproutServiceProvider extends ServiceProvider
         $router->aliasMiddleware(SproutOptionalTenantContextMiddleware::ALIAS, SproutOptionalTenantContextMiddleware::class);
     }
 
+    private function registerTenantConfig(): void
+    {
+        $this->tenantConfig = new TenantConfig($this->app);
+
+        $this->app->singleton(TenantConfig::class, fn () => $this->tenantConfig);
+        $this->app->alias(TenantConfig::class, 'sprout.config');
+
+        // Register the config store manager
+        $this->app->singleton(ConfigStoreManager::class, fn () => $this->tenantConfig->stores());
+        $this->app->alias(ConfigStoreManager::class, 'sprout.config.stores');
+
+        // Bind the config store to the default implementation
+        $this->app->bind(ConfigStore::class, fn () => $this->tenantConfig->store());
+    }
+
     private function publishConfig(): void
     {
         $this->publishes([
@@ -129,6 +150,13 @@ class SproutServiceProvider extends ServiceProvider
             __DIR__ . '/../resources/config/multitenancy.php' => config_path('multitenancy.php'),
             __DIR__ . '/../resources/config/overrides.php'    => config_path('sprout/overrides.php'),
         ], ['config', 'sprout-config']);
+    }
+
+    private function publishMigrations(): void
+    {
+        $this->publishes([
+            __DIR__ . '/../resources/migrations/0001_01_01_70000_create_bud_config_store_table.php' => database_path('migrations/0001_01_01_70000_create_bud_config_store_table.php'),
+        ], ['sprout-config-store-migrations']);
     }
 
     private function registerServiceOverrides(): void

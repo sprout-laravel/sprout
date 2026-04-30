@@ -4,6 +4,7 @@
         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
         backupGlobals="false"
         bootstrap="vendor/autoload.php"
+        cacheDirectory=".phpunit.cache"
         colors="true"
         processIsolation="false"
         stopOnFailure="false"
@@ -25,6 +26,9 @@
         <include>
             <directory>./src</directory>
         </include>
+        <exclude>
+            <file>./src/Attributes/TenantRelation.php</file>
+        </exclude>
     </source>
     <coverage>
         <report>
@@ -38,5 +42,7 @@
     </logging>
     <php>
         <server name="APP_KEY" value="AckfSECXIvnK5r28GVIWUAxmbBSjTsmF"/>
+        <env name="DB_CONNECTION" value="sqlite"/>
+        <env name="DB_DATABASE" value=":memory:"/>
     </php>
 </phpunit>

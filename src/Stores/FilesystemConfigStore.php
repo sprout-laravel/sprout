@@ -68,11 +68,9 @@ final class FilesystemConfigStore extends BaseConfigStore
      * @template TenantClass of \Sprout\Contracts\Tenant
      *
      * @param Tenancy<TenantClass> $tenancy
-     * @param Tenant               $tenant
+     * @param TenantClass          $tenant
      * @param string               $service
      * @param string               $name
-     *
-     * @phpstan-param TenantClass                         $tenant
      *
      * @return bool
      *
@@ -93,12 +91,10 @@ final class FilesystemConfigStore extends BaseConfigStore
      * @template TenantClass of \Sprout\Contracts\Tenant
      *
      * @param Tenancy<TenantClass> $tenancy
-     * @param Tenant               $tenant
+     * @param TenantClass          $tenant
      * @param string               $service
      * @param string               $name
      * @param array<string, mixed> $config
-     *
-     * @phpstan-param TenantClass                         $tenant
      *
      * @return bool
      *
@@ -123,7 +119,7 @@ final class FilesystemConfigStore extends BaseConfigStore
      * @template TenantClass of \Sprout\Contracts\Tenant
      *
      * @param Tenancy<TenantClass> $tenancy
-     * @param Tenant               $tenant
+     * @param TenantClass          $tenant
      * @param string               $service
      * @param string               $name
      * @param array<string, mixed> $config

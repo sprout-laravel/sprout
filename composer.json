@@ -11,7 +11,8 @@
     "phpunit/phpunit"    : "^11.0",
     "orchestra/testbench": "^11.0",
     "larastan/larastan"  : "^3.0",
-    "laravel/pint"       : "^1.29"
+    "laravel/pint"       : "^1.29",
+    "brianium/paratest"  : "^7.4"
   },
   "license"          : "MIT",
   "autoload"         : {
@@ -58,14 +59,16 @@
       "@clear",
       "@prepare",
       "@build",
-      "@php vendor/bin/phpunit"
+      "@php vendor/bin/paratest"
+    ],
+    "tidy"              : [
+      "@php vendor/bin/pint --ansi"
     ]
   },
   "extra"            : {
     "laravel"     : {
       "providers": [
-        "Sprout\\SproutServiceProvider",
-        "Sprout\\BudServiceProvider"
+        "Sprout\\SproutServiceProvider"
       ],
       "facades"  : [
         "Sprout\\Facades\\Overrides",

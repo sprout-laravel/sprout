@@ -119,7 +119,9 @@ trait FindsIdentityInRouteParameter
      * {@see self::getRouteParameterName()}, but wrapped with curly braces for
      * use in route definitions.
      *
-     * @param Tenancy<Tenant> $tenancy
+     * @template TenantClass of \Sprout\Contracts\Tenant
+     *
+     * @param Tenancy<TenantClass> $tenancy
      *
      * @return string
      */

@@ -1,0 +1,143 @@
+<?php
+declare(strict_types=1);
+
+namespace Sprout\Tests\Unit\Overrides\Broadcast;
+
+use Illuminate\Broadcasting\Broadcasters\NullBroadcaster;
+use Illuminate\Broadcasting\BroadcastManager;
+use Illuminate\Config\Repository;
+use Illuminate\Contracts\Broadcasting\Broadcaster;
+use Illuminate\Foundation\Application;
+use InvalidArgumentException;
+use Mockery;
+use PHPUnit\Framework\Attributes\Test;
+use Sprout\Overrides\Broadcast\TenantConfigBroadcastManager;
+use Sprout\Tests\Unit\UnitTestCase;
+
+class TenantConfigBroadcastManagerTest extends UnitTestCase
+{
+    #[Test]
+    public function canBeSyncedFromOriginal(): void
+    {
+        $original = Mockery::mock(BroadcastManager::class);
+
+        $app = Mockery::mock(Application::class);
+
+        $sprout = new TenantConfigBroadcastManager($app, $original);
+
+        $this->assertTrue($sprout->wasSyncedFromOriginal());
+    }
+
+    #[Test]
+    public function addsNameWhenResolvingDriver(): void
+    {
+        $app = Mockery::mock(Application::class, static function (Mockery\MockInterface $mock) {
+            $mock->shouldReceive('offsetGet')
+                 ->with('config')
+                 ->andReturn(
+                     Mockery::mock(Repository::class, static function (Mockery\MockInterface $mock) {
+                         $mock->shouldReceive('offsetGet')
+                              ->with('broadcasting.connections.fake-connection')
+                              ->andReturn([
+                                  'driver' => 'fake',
+                              ])
+                              ->once();
+                     })
+                 )
+                 ->once();
+        });
+
+        $sprout = new TenantConfigBroadcastManager($app);
+
+        $test = $this;
+        $sprout->extend('fake', static function (Application $app, array $config) use ($test) {
+            $test->assertArrayHasKey('name', $config);
+            $test->assertSame('fake-connection', $config['name']);
+
+            return Mockery::mock(Broadcaster::class);
+        });
+
+        $sprout->connection('fake-connection');
+    }
+
+    #[Test]
+    public function throwsAnExceptionWhenTheresNoDriverInTheConfig(): void
+    {
+        $app = Mockery::mock(Application::class, static function (Mockery\MockInterface $mock) {
+            $mock->shouldReceive('offsetGet')
+                 ->with('config')
+                 ->andReturn(
+                     Mockery::mock(Repository::class, static function (Mockery\MockInterface $mock) {
+                         $mock->shouldReceive('offsetGet')
+                              ->with('broadcasting.connections.fake-connection')
+                              ->andReturn([
+                                  'name' => 'hi',
+                              ])
+                              ->once();
+                     })
+                 )
+                 ->once();
+        });
+
+        $sprout = new TenantConfigBroadcastManager($app);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Broadcast connection [fake-connection] does not have a configured driver.');
+
+        $sprout->connection('fake-connection');
+    }
+
+    #[Test]
+    public function throwsAnExceptionWhenTheresNoConfig(): void
+    {
+        $app = Mockery::mock(Application::class, static function (Mockery\MockInterface $mock) {
+            $mock->shouldReceive('offsetGet')
+                 ->with('config')
+                 ->andReturn(
+                     Mockery::mock(Repository::class, static function (Mockery\MockInterface $mock) {
+                         $mock->shouldReceive('offsetGet')
+                              ->with('broadcasting.connections.fake-connection')
+                              ->andReturn(null)
+                              ->once();
+                     })
+                 )
+                 ->once();
+        });
+
+        $sprout = new TenantConfigBroadcastManager($app);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Broadcast connection [fake-connection] is not defined.');
+
+        $sprout->connection('fake-connection');
+    }
+
+    #[Test]
+    public function canCreateConnectionsNormally(): void
+    {
+        $app = Mockery::mock($this->app, static function (Mockery\MockInterface $mock) {
+            $mock->makePartial();
+        });
+
+        $sprout = new TenantConfigBroadcastManager($app);
+
+        $this->assertInstanceOf(NullBroadcaster::class, $sprout->connection('null'));
+    }
+
+    #[Test]
+    public function throwsAnExceptionForDriversThatDoNotExist(): void
+    {
+        $app = Mockery::mock($this->app, static function (Mockery\MockInterface $mock) {
+            $mock->makePartial();
+        });
+
+        $app['config']['broadcasting.connections.fake.driver'] = 'fake';
+
+        $sprout = new TenantConfigBroadcastManager($app);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Driver [fake] is not supported.');
+
+        $sprout->connection('fake');
+    }
+}

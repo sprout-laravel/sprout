@@ -5,6 +5,8 @@ namespace Sprout\Overrides\Session;
 
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Foundation\Application;
+use Sprout\Contracts\Tenancy;
+use Sprout\Contracts\Tenant;
 use Sprout\Sprout;
 
 final class SproutDatabaseSessionHandlerCreator
@@ -56,6 +58,7 @@ final class SproutDatabaseSessionHandlerCreator
         );
 
         if ($this->sprout->withinContext()) {
+            /** @var Tenancy<Tenant>|null $tenancy */
             $tenancy = $this->sprout->getCurrentTenancy();
 
             $handler->setTenancy($tenancy)

@@ -46,12 +46,10 @@ final class DatabaseConfigStore extends BaseConfigStore
      * @template TenantClass of \Sprout\Contracts\Tenant
      *
      * @param Tenancy<TenantClass>      $tenancy
-     * @param Tenant                    $tenant
+     * @param TenantClass               $tenant
      * @param string                    $service
      * @param string                    $name
      * @param array<string, mixed>|null $default
-     *
-     * @phpstan-param Tenant                         $tenant
      *
      * @return array<string, mixed>|null
      */
@@ -74,11 +72,9 @@ final class DatabaseConfigStore extends BaseConfigStore
      * @template TenantClass of \Sprout\Contracts\Tenant
      *
      * @param Tenancy<TenantClass> $tenancy
-     * @param Tenant               $tenant
+     * @param TenantClass          $tenant
      * @param string               $service
      * @param string               $name
-     *
-     * @phpstan-param Tenant                         $tenant
      *
      * @return bool
      */
@@ -99,12 +95,10 @@ final class DatabaseConfigStore extends BaseConfigStore
      * @template TenantClass of \Sprout\Contracts\Tenant
      *
      * @param Tenancy<TenantClass> $tenancy
-     * @param Tenant               $tenant
+     * @param TenantClass          $tenant
      * @param string               $service
      * @param string               $name
      * @param array<string, mixed> $config
-     *
-     * @phpstan-param Tenant                         $tenant
      *
      * @return bool
      *
@@ -137,12 +131,10 @@ final class DatabaseConfigStore extends BaseConfigStore
      * @template TenantClass of \Sprout\Contracts\Tenant
      *
      * @param Tenancy<TenantClass> $tenancy
-     * @param Tenant               $tenant
+     * @param TenantClass          $tenant
      * @param string               $service
      * @param string               $name
      * @param array<string, mixed> $config
-     *
-     * @phpstan-param Tenant                         $tenant
      *
      * @return bool
      *
@@ -175,11 +167,9 @@ final class DatabaseConfigStore extends BaseConfigStore
      * @template TenantClass of \Sprout\Contracts\Tenant
      *
      * @param Tenancy<TenantClass> $tenancy
-     * @param Tenant               $tenant
+     * @param TenantClass          $tenant
      * @param string               $service
      * @param string               $name
-     *
-     * @phpstan-param TenantClass                    $tenant
      *
      * @return Builder
      */
