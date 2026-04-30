@@ -3,10 +3,9 @@ declare(strict_types=1);
 
 namespace Sprout\Exceptions;
 
-use RuntimeException;
 use Sprout\Contracts\TenantConfigException;
 
-final class CyclicOverrideException extends RuntimeException implements TenantConfigException
+final class CyclicOverrideException extends SproutException implements TenantConfigException
 {
     public static function make(string $term, string $name): self
     {
