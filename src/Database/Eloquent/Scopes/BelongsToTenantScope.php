@@ -32,8 +32,8 @@ final class BelongsToTenantScope extends TenantChildScope
     /**
      * Apply the scope to a given Eloquent query builder.
      *
-     * @param Builder<ModelClass>   $builder
-     * @param Model&BelongsToTenant $model
+     * @param Builder<covariant ModelClass> $builder
+     * @param Model&BelongsToTenant         $model
      *
      * @phpstan-param ModelClass                                                                          $model
      *
@@ -95,8 +95,8 @@ final class BelongsToTenantScope extends TenantChildScope
      *
      * This is abstracted out to avoid duplication in the above apply method.
      *
-     * @param Builder<ModelClass>   $builder
-     * @param Model&BelongsToTenant $model
+     * @param Builder<covariant ModelClass> $builder
+     * @param Model&BelongsToTenant         $model
      * @param \Sprout\Contracts\Tenancy<*>                                                           $tenancy
      *
      * @phpstan-param ModelClass                                                                          $model
