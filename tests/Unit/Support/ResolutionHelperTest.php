@@ -360,4 +360,36 @@ class ResolutionHelperTest extends UnitTestCase
         $this->assertNull($tenancy->resolver());
         $this->assertNull($tenancy->hook());
     }
+
+    #[Test]
+    public function returnsFalseEarlyWhenIdentityIsNullInOptionalMode(): void
+    {
+        /** @var \Sprout\Contracts\Tenancy<TenantModel> $tenancy */
+        $tenancy = tenancy();
+
+        /** @var \Sprout\Contracts\IdentityResolver&\Sprout\Contracts\IdentityResolverUsesParameters $resolver */
+        $resolver = resolver('path');
+
+        /** @var \Illuminate\Http\Request $fakeRequest */
+        $fakeRequest = $this->mock(Request::class, function (MockInterface $mock) {
+            $mock->shouldReceive('route')->andReturnNull();
+            $mock->shouldReceive('segment')->with(1)->andReturnNull();
+        });
+
+        // optional=true, throw=true — but optional should short-circuit before any throw.
+        $this->assertFalse(
+            ResolutionHelper::handleResolution(
+                $fakeRequest,
+                ResolutionHook::Routing,
+                sprout(),
+                $resolver->getName(),
+                $tenancy->getName(),
+                throw: true,
+                optional: true,
+            )
+        );
+
+        $this->assertFalse($tenancy->check());
+        $this->assertFalse($tenancy->wasResolved());
+    }
 }

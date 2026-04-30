@@ -85,6 +85,63 @@ class SessionIdentityResolverTest extends UnitTestCase
     }
 
     #[Test]
+    public function performsSetUpStoresIdentifierInSessionWhenTenantPresent(): void
+    {
+        $resolver = new SessionIdentityResolver('session');
+
+        $tenant = Mockery::mock(Tenant::class, static function (MockInterface $mock) {
+            $mock->shouldReceive('getTenantIdentifier')->andReturn('my-identifier')->once();
+        });
+
+        /** @var \Sprout\Contracts\Tenancy&MockInterface $tenancy */
+        $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) {
+            $mock->shouldReceive('getName')->andReturn('my-tenancy')->once();
+            $mock->shouldReceive('check')->andReturn(true)->once();
+        });
+
+        $app = $this->mockApp();
+
+        $app->shouldReceive('make')
+            ->with(\Illuminate\Session\SessionManager::class)
+            ->andReturn(
+                Mockery::mock(\Illuminate\Session\SessionManager::class, static function (MockInterface $mock) {
+                    $mock->shouldReceive('put')->with('multitenancy.my-tenancy', 'my-identifier')->once();
+                })
+            )
+            ->once();
+
+        $resolver->setApp($app);
+
+        $resolver->setup($tenancy, $tenant);
+    }
+
+    #[Test]
+    public function performsSetUpForgetsSessionEntryWhenTenantNull(): void
+    {
+        $resolver = new SessionIdentityResolver('session');
+
+        /** @var \Sprout\Contracts\Tenancy&MockInterface $tenancy */
+        $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) {
+            $mock->shouldReceive('getName')->andReturn('my-tenancy')->once();
+        });
+
+        $app = $this->mockApp();
+
+        $app->shouldReceive('make')
+            ->with(\Illuminate\Session\SessionManager::class)
+            ->andReturn(
+                Mockery::mock(\Illuminate\Session\SessionManager::class, static function (MockInterface $mock) {
+                    $mock->shouldReceive('forget')->with('multitenancy.my-tenancy')->once();
+                })
+            )
+            ->once();
+
+        $resolver->setApp($app);
+
+        $resolver->setup($tenancy, null);
+    }
+
+    #[Test]
     public function canResolveFromRequest(): void
     {
         $resolver = new SessionIdentityResolver('session');
