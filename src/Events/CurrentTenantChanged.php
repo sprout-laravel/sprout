@@ -20,9 +20,9 @@ use Sprout\Contracts\Tenant;
  *
  * @template TenantClass of Tenant
  *
- * @method static void dispatch(Tenancy $tenancy, Tenant|null $previous, Tenant|null $current)
- * @method static void dispatchIf(bool $condition, Tenancy $tenancy, Tenant|null $previous, Tenant|null $current)
- * @method static void dispatchUnless(bool $condition, Tenancy $tenancy, Tenant|null $previous, Tenant|null $current)
+ * @method static void dispatch(Tenancy<TenantClass> $tenancy, Tenant|null $previous, Tenant|null $current)
+ * @method static void dispatchIf(bool $condition, Tenancy<TenantClass> $tenancy, Tenant|null $previous, Tenant|null $current)
+ * @method static void dispatchUnless(bool $condition, Tenancy<TenantClass> $tenancy, Tenant|null $previous, Tenant|null $current)
  *
  * @package Core
  *

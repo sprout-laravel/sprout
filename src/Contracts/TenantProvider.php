@@ -9,7 +9,7 @@ namespace Sprout\Contracts;
  * retrieving instances of {@see \Sprout\Contracts\Tenant} for given
  * identifiers or keys.
  *
- * @template TenantClass of \Sprout\Contracts\Tenant
+ * @template-covariant TenantClass of \Sprout\Contracts\Tenant
  *
  * @package Core
  */

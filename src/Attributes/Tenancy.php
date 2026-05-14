@@ -43,18 +43,13 @@ final readonly class Tenancy implements ContextualAttribute
      * @param \Sprout\Attributes\Tenancy      $attribute
      * @param \Illuminate\Container\Container $container
      *
-     * @return \Sprout\Contracts\Tenancy<*>|null
+     * @return \Sprout\Contracts\Tenancy<*>
      *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
      * @throws \Sprout\Exceptions\MisconfigurationException
      */
-    public function resolve(Tenancy $attribute, Container $container): ?TenancyContract
+    public function resolve(Tenancy $attribute, Container $container): TenancyContract
     {
-        /**
-         * It's not nullable, it'll be an exception
-         *
-         * @noinspection NullPointerExceptionInspection
-         */
         return $container->make(TenancyManager::class)->get($this->name);
     }
 }

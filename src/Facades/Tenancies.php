@@ -6,6 +6,7 @@ namespace Sprout\Facades;
 use Closure;
 use Illuminate\Support\Facades\Facade;
 use Sprout\Contracts\Tenancy;
+use Sprout\Contracts\Tenant;
 use Sprout\Managers\TenancyManager;
 
 /**
@@ -14,7 +15,7 @@ use Sprout\Managers\TenancyManager;
  * This is the facade for the {@see \Sprout\Managers\TenancyManager} class.
  *
  * @method static TenancyManager flushResolved()
- * @method static Tenancy get(string|null $name = null)
+ * @method static Tenancy<Tenant> get(string|null $name = null)
  * @method static string getConfigKey(string $name)
  * @method static string getDefaultName()
  * @method static string getFactoryName()

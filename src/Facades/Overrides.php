@@ -15,18 +15,18 @@ use Sprout\Managers\ServiceOverrideManager;
  * This is the facade for the {@see \Sprout\Managers\ServiceOverrideManager} class.
  *
  * @method static void bootOverrides()
- * @method static void cleanupOverrides(Tenancy $tenancy, Tenant $tenant)
+ * @method static void cleanupOverrides(Tenancy<Tenant> $tenancy, Tenant $tenant)
  * @method static ServiceOverride|null get(string $service)
  * @method static string|null getOverrideClass(string $service)
- * @method static array getSetupOverrides(Tenancy $tenancy)
+ * @method static array<class-string<ServiceOverride>, string> getSetupOverrides(Tenancy<Tenant> $tenancy)
  * @method static bool hasOverride(string $service)
- * @method static bool hasOverrideBeenSetUp(string $service, ?Tenancy $tenancy = null)
+ * @method static bool hasOverrideBeenSetUp(string $service, ?Tenancy<Tenant> $tenancy = null)
  * @method static bool hasOverrideBooted(string $service)
- * @method static bool hasTenancyBeenSetup(?Tenancy $tenancy = null)
+ * @method static bool hasTenancyBeenSetup(?Tenancy<Tenant> $tenancy = null)
  * @method static bool haveOverridesBooted()
  * @method static bool isOverrideBootable(string $service)
  * @method static void registerOverrides()
- * @method static void setupOverrides(Tenancy $tenancy, Tenant $tenant)
+ * @method static void setupOverrides(Tenancy<Tenant> $tenancy, Tenant $tenant)
  */
 final class Overrides extends Facade
 {

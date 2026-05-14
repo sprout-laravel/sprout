@@ -35,7 +35,7 @@ final readonly class SproutFilesystemDriverCreator
     private FilesystemManager $manager;
 
     /**
-     * @var array<string, mixed>
+     * @var array<array-key, mixed>
      */
     private array $config;
 
@@ -49,7 +49,7 @@ final readonly class SproutFilesystemDriverCreator
      *
      * @param \Illuminate\Contracts\Foundation\Application $app
      * @param \Illuminate\Filesystem\FilesystemManager     $manager
-     * @param array<string, mixed>                         $config
+     * @param array<array-key, mixed>                      $config
      * @param \Sprout\Sprout                               $sprout
      */
     public function __construct(Application $app, FilesystemManager $manager, array $config, Sprout $sprout)

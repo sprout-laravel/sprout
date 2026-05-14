@@ -19,9 +19,9 @@ use Sprout\Support\SettingsRepository;
  * This is the facade for the {@see \Sprout\Sprout} class.
  *
  * @method static mixed config(string $key, mixed $default = null)
- * @method static array<Tenancy> getAllCurrentTenancies()
+ * @method static array<int, Tenancy<Tenant>> getAllCurrentTenancies()
  * @method static ResolutionHook|null getCurrentHook()
- * @method static Tenancy|null getCurrentTenancy()
+ * @method static Tenancy<Tenant>|null getCurrentTenancy()
  * @method static bool hasCurrentTenancy()
  * @method static bool isCurrentHook(ResolutionHook|null $hook)
  * @method static \Sprout\Sprout markAsInContext()
@@ -30,9 +30,9 @@ use Sprout\Support\SettingsRepository;
  * @method static TenantProviderManager providers()
  * @method static \Sprout\Sprout resetTenancies()
  * @method static IdentityResolverManager resolvers()
- * @method static string route(string $name, Tenant $tenant, string|null $resolver = null, string|null $tenancy = null, array $parameters = [], bool $absolute = true)
+ * @method static string route(string $name, Tenant $tenant, string|null $resolver = null, string|null $tenancy = null, array<string, mixed> $parameters = [], bool $absolute = true)
  * @method static \Sprout\Sprout setCurrentHook(ResolutionHook|null $hook)
- * @method static void setCurrentTenancy(Tenancy $tenancy)
+ * @method static void setCurrentTenancy(Tenancy<Tenant> $tenancy)
  * @method static mixed setting(string $key, mixed $default = null)
  * @method static SettingsRepository settings()
  * @method static bool supportsHook(ResolutionHook $hook)

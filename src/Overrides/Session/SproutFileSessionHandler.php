@@ -40,12 +40,12 @@ final class SproutFileSessionHandler extends FileSessionHandler implements Tenan
      *
      * @param $sessionId
      *
-     * @return string|false
+     * @return string
      *
      * @throws \Sprout\Exceptions\TenancyMissingException
      * @throws \Sprout\Exceptions\TenantMissingException
      */
-    public function read($sessionId): string|false
+    public function read($sessionId): string
     {
         if ($this->files->isFile($path = $this->getPath() . '/' . $sessionId) &&
             $this->files->lastModified($path) >= Carbon::now()->subMinutes($this->minutes)->getTimestamp()) {

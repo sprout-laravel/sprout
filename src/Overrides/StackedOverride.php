@@ -58,6 +58,7 @@ final class StackedOverride extends BaseOverride implements BootableServiceOverr
             return; // @codeCoverageIgnore
         }
 
+        /** @var mixed $value */
         foreach ($this->overridesClasses as $value) {
             $override = $overrideClass = null;
 
@@ -101,7 +102,10 @@ final class StackedOverride extends BaseOverride implements BootableServiceOverr
                 throw MisconfigurationException::invalidConfig('overrides', 'service override', $this->service);
             }
 
-            /** @var OverrideClass $override */
+            /**
+             * @var OverrideClass $override
+             * @var class-string<OverrideClass> $overrideClass
+             */
 
             if (method_exists($override, 'setApp')) {
                 $override->setApp($app);

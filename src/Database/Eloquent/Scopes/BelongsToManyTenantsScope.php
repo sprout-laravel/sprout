@@ -29,10 +29,10 @@ final class BelongsToManyTenantsScope extends TenantChildScope
      *
      * @template ModelClass of \Illuminate\Database\Eloquent\Model
      *
-     * @param \Illuminate\Database\Eloquent\Builder<ModelClass>                                      $builder
-     * @param \Illuminate\Database\Eloquent\Model&\Sprout\Database\Eloquent\Concerns\BelongsToTenant $model
+     * @param \Illuminate\Database\Eloquent\Builder<ModelClass>                                    $builder
+     * @param \Illuminate\Database\Eloquent\Model&\Sprout\Database\Eloquent\Concerns\IsTenantChild $model
      *
-     * @phpstan-param ModelClass                                                                     $model
+     * @phpstan-param ModelClass&\Sprout\Database\Eloquent\Concerns\IsTenantChild                  $model
      *
      * @return void
      *
@@ -41,21 +41,6 @@ final class BelongsToManyTenantsScope extends TenantChildScope
      */
     public function apply(Builder $builder, Model $model): void
     {
-        /**
-         * This has to be here otherwise the 'BelongsToTenant'
-         * trait referenced in the below docblock causes PHPStan to error.
-         * HILARIOUSLY, if I remove that trait from the docblock, PHPStan
-         * will add a bunch more errors because a lot of the following code
-         * relies on methods added by that trait.
-         *
-         * @phpstan-ignore-next-line
-         */
-        /**
-         * This has to be here because it errors if it's in the method docblock,
-         * though I've no idea why.
-         *
-         * @var ModelClass&\Sprout\Database\Eloquent\Concerns\BelongsToTenant $model
-         */
         if ($model::shouldIgnoreTenantRestrictions() || ! sprout()->withinContext()) {
             return;
         }
@@ -95,25 +80,17 @@ final class BelongsToManyTenantsScope extends TenantChildScope
      *
      * @template ModelClass of \Illuminate\Database\Eloquent\Model
      *
-     * @param \Illuminate\Database\Eloquent\Builder<ModelClass>                                      $builder
-     * @param \Illuminate\Database\Eloquent\Model&\Sprout\Database\Eloquent\Concerns\BelongsToTenant $model
-     * @param \Sprout\Contracts\Tenancy<*>                                                           $tenancy
+     * @param \Illuminate\Database\Eloquent\Builder<ModelClass>                                    $builder
+     * @param \Illuminate\Database\Eloquent\Model&\Sprout\Database\Eloquent\Concerns\IsTenantChild $model
+     * @param \Sprout\Contracts\Tenancy<*>                                                         $tenancy
      *
-     * @phpstan-param ModelClass                                                                     $model
+     * @phpstan-param ModelClass&\Sprout\Database\Eloquent\Concerns\IsTenantChild                  $model
      *
      * @return void
      * @throws \Sprout\Exceptions\TenantRelationException
      */
     protected function applyTenantClause(Builder $builder, Model $model, Tenancy $tenancy): void
     {
-        /** @phpstan-ignore-next-line */
-        /**
-         * This has to be here because it errors if it's in the method docblock,
-         * though I've no idea why.
-         *
-         * @var ModelClass&\Sprout\Database\Eloquent\Concerns\BelongsToTenant $model
-         */
-
         $builder->whereHas(
             $model->getTenantRelationName(),
             function (Builder $builder) use ($tenancy) {

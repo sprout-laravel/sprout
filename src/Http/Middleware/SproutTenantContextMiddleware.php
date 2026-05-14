@@ -45,9 +45,9 @@ final class SproutTenantContextMiddleware
     /**
      * Handle the request
      *
-     * @param \Illuminate\Http\Request $request
-     * @param \Closure                 $next
-     * @param string                   ...$options
+     * @param \Illuminate\Http\Request                                                                 $request
+     * @param \Closure(\Illuminate\Http\Request): \Symfony\Component\HttpFoundation\Response $next
+     * @param string                                                                                   ...$options
      *
      * @return \Symfony\Component\HttpFoundation\Response
      *

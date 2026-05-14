@@ -29,10 +29,10 @@ final class BelongsToTenantScope extends TenantChildScope
      *
      * @template ModelClass of \Illuminate\Database\Eloquent\Model
      *
-     * @param \Illuminate\Database\Eloquent\Builder<ModelClass>                                      $builder
-     * @param \Illuminate\Database\Eloquent\Model&\Sprout\Database\Eloquent\Concerns\BelongsToTenant $model
+     * @param \Illuminate\Database\Eloquent\Builder<ModelClass>                                    $builder
+     * @param \Illuminate\Database\Eloquent\Model&\Sprout\Database\Eloquent\Concerns\IsTenantChild $model
      *
-     * @phpstan-param ModelClass                                                                     $model
+     * @phpstan-param ModelClass                                                                   $model
      *
      * @return void
      *
@@ -40,17 +40,6 @@ final class BelongsToTenantScope extends TenantChildScope
      */
     public function apply(Builder $builder, Model $model): void
     {
-        /**
-         * This has to be here because it errors if it's in the method docblock,
-         * though I've no idea why.
-         *
-         * @var ModelClass&\Sprout\Database\Eloquent\Concerns\BelongsToTenant $model
-         */
-
-        /**
-         * If the model has opted to ignore tenant restrictions, or we're outside
-         * multitenanted context, we can exit early.
-         */
         if ($model::shouldIgnoreTenantRestrictions() || ! sprout()->withinContext()) {
             return;
         }
@@ -90,24 +79,16 @@ final class BelongsToTenantScope extends TenantChildScope
      *
      * @template ModelClass of \Illuminate\Database\Eloquent\Model
      *
-     * @param \Illuminate\Database\Eloquent\Builder<ModelClass>                                      $builder
-     * @param \Illuminate\Database\Eloquent\Model&\Sprout\Database\Eloquent\Concerns\BelongsToTenant $model
-     * @param \Sprout\Contracts\Tenancy<*>                                                  $tenancy
+     * @param \Illuminate\Database\Eloquent\Builder<ModelClass>                                    $builder
+     * @param \Illuminate\Database\Eloquent\Model&\Sprout\Database\Eloquent\Concerns\IsTenantChild $model
+     * @param \Sprout\Contracts\Tenancy<*>                                                         $tenancy
      *
-     * @phpstan-param ModelClass                                                                     $model
+     * @phpstan-param ModelClass&\Sprout\Database\Eloquent\Concerns\IsTenantChild                  $model
      *
      * @return void
      */
     protected function applyTenantClause(Builder $builder, Model $model, Tenancy $tenancy): void
     {
-        /** @phpstan-ignore-next-line */
-        /**
-         * This has to be here because it errors if it's in the method docblock,
-         * though I've no idea why.
-         *
-         * @var ModelClass&\Sprout\Database\Eloquent\Concerns\BelongsToTenant $model
-         */
-
         $builder->where(
             $model->getTenantRelation()->getForeignKeyName(),
             '=',

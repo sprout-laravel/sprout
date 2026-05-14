@@ -15,9 +15,9 @@ use Sprout\Contracts\ServiceOverride;
  *
  * @package Overrides
  *
- * @method static self dispatch(string $service, ServiceOverride $override)
- * @method static self dispatchIf(bool $boolean, string $service, ServiceOverride $override)
- * @method static self dispatchUnless(bool $boolean, string $service, ServiceOverride $override)
+ * @method static self<OverrideClass> dispatch(string $service, ServiceOverride $override)
+ * @method static self<OverrideClass> dispatchIf(bool $boolean, string $service, ServiceOverride $override)
+ * @method static self<OverrideClass> dispatchUnless(bool $boolean, string $service, ServiceOverride $override)
  *
  * @package Overrides
  *

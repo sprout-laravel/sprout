@@ -36,13 +36,13 @@ class SproutAuthDatabaseTokenRepository extends DatabaseTokenRepository
         Sprout              $sprout,
         ConnectionInterface $connection,
         HasherContract      $hasher,
-                            $table,
-                            $hashKey,
-                            $expires = 60,
-                            $throttle = 60
+        string              $table,
+        string              $hashKey,
+        ?int                $expires = 60,
+        int                 $throttle = 60
     )
     {
-        parent::__construct($connection, $hasher, $table, $hashKey, $expires, $throttle);
+        parent::__construct($connection, $hasher, $table, $hashKey, $expires ?? 0, $throttle);
         $this->sprout = $sprout;
     }
 
@@ -91,7 +91,10 @@ class SproutAuthDatabaseTokenRepository extends DatabaseTokenRepository
     protected function getPayload($email, #[SensitiveParameter] $token): array
     {
         if (! $this->sprout->withinContext()) {
-            return parent::getPayload($email, $token);
+            /** @var array<string, mixed> $payload */
+            $payload = parent::getPayload($email, $token);
+
+            return $payload;
         }
 
         $tenancy = $this->getTenancy();
@@ -174,8 +177,11 @@ class SproutAuthDatabaseTokenRepository extends DatabaseTokenRepository
     {
         $record = (array)$this->getExistingTenantedRecord($user);
 
-        return $record &&
-               ! $this->tokenExpired($record['created_at']) &&
+        if ($record === [] || ! is_string($record['created_at'] ?? null) || ! is_string($record['token'] ?? null)) {
+            return false;
+        }
+
+        return ! $this->tokenExpired($record['created_at']) &&
                $this->hasher->check($token, $record['token']);
     }
 
@@ -193,6 +199,10 @@ class SproutAuthDatabaseTokenRepository extends DatabaseTokenRepository
     {
         $record = (array)$this->getExistingTenantedRecord($user);
 
-        return $record && $this->tokenRecentlyCreated($record['created_at']);
+        if ($record === [] || ! is_string($record['created_at'] ?? null)) {
+            return false;
+        }
+
+        return $this->tokenRecentlyCreated($record['created_at']);
     }
 }

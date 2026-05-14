@@ -6,3 +6,42 @@ parameters:
   paths:
     - src
   ignoreErrors:
+    # Public-API traits — no concrete users live in src/, so Larastan v3
+    # reports them as unused and refuses to resolve intersections involving
+    # them. The traits are exercised through workbench and downstream apps.
+    - identifier: trait.unused
+      paths:
+        - src/Database/Eloquent/Concerns/BelongsToTenant.php
+        - src/Database/Eloquent/Concerns/BelongsToManyTenants.php
+        - src/Database/Eloquent/Concerns/HasTenantResources.php
+        - src/Database/Eloquent/Concerns/IsTenantChild.php
+
+    # Scope intersection types (Model & IsTenantChild) — same root cause as
+    # the trait.unused warnings above. PHPStan can't resolve the trait so
+    # everything inside the scope method cascades through these identifiers.
+    - identifier: parameter.unresolvableType
+      paths:
+        - src/Database/Eloquent/Scopes/BelongsToTenantScope.php
+        - src/Database/Eloquent/Scopes/BelongsToManyTenantsScope.php
+    - identifier: method.notFound
+      paths:
+        - src/Database/Eloquent/Scopes/BelongsToTenantScope.php
+        - src/Database/Eloquent/Scopes/BelongsToManyTenantsScope.php
+    - identifier: staticMethod.notFound
+      paths:
+        - src/Database/Eloquent/Scopes/BelongsToTenantScope.php
+        - src/Database/Eloquent/Scopes/BelongsToManyTenantsScope.php
+    - identifier: method.nonObject
+      paths:
+        - src/Database/Eloquent/Scopes/BelongsToTenantScope.php
+        - src/Database/Eloquent/Scopes/BelongsToManyTenantsScope.php
+    - identifier: argument.type
+      paths:
+        - src/Database/Eloquent/Scopes/BelongsToTenantScope.php
+        - src/Database/Eloquent/Scopes/BelongsToManyTenantsScope.php
+
+    # Dynamic method dispatch — driver creator methods on each BaseFactory
+    # subclass are contracted to return FactoryClass, but PHPStan can't
+    # infer the generic through a variable method name.
+    - identifier: argument.type
+      path: src/Support/BaseFactory.php

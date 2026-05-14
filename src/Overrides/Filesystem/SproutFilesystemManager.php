@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Sprout\Overrides\Filesystem;
 
 use Illuminate\Contracts\Filesystem\Filesystem;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Filesystem\FilesystemManager;
 use InvalidArgumentException;
 
@@ -11,7 +12,7 @@ class SproutFilesystemManager extends FilesystemManager
 {
     protected bool $syncedFromOriginal = false;
 
-    public function __construct($app, ?FilesystemManager $original = null)
+    public function __construct(Application $app, ?FilesystemManager $original = null)
     {
         parent::__construct($app);
 
@@ -58,13 +59,13 @@ class SproutFilesystemManager extends FilesystemManager
     {
         $config ??= $this->getConfig($name);
 
-        if (empty($config['driver'])) {
+        $driver = $config['driver'] ?? null;
+
+        if (! is_string($driver) || $driver === '') {
             throw new InvalidArgumentException("Disk [{$name}] does not have a configured driver.");
         }
 
         $config['name'] = $name;
-
-        $driver = $config['driver'];
 
         if (isset($this->customCreators[$driver])) {
             return $this->callCustomCreator($config);
@@ -76,6 +77,12 @@ class SproutFilesystemManager extends FilesystemManager
             throw new InvalidArgumentException("Driver [{$driver}] is not supported.");
         }
 
-        return $this->{$driverMethod}($config, $name);
+        $result = $this->{$driverMethod}($config, $name);
+
+        if (! $result instanceof Filesystem) {
+            throw new InvalidArgumentException("Driver [{$driver}] did not return a Filesystem instance.");
+        }
+
+        return $result;
     }
 }

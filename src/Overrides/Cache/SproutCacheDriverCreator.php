@@ -27,7 +27,7 @@ final class SproutCacheDriverCreator
     private CacheManager $manager;
 
     /**
-     * @var array<string, mixed>
+     * @var array<array-key, mixed>
      */
     private array $config;
 
@@ -41,7 +41,7 @@ final class SproutCacheDriverCreator
      *
      * @param \Illuminate\Contracts\Foundation\Application $app
      * @param \Illuminate\Cache\CacheManager               $manager
-     * @param array<string, mixed>                         $config
+     * @param array<array-key, mixed>                      $config
      * @param \Sprout\Sprout                               $sprout
      */
     public function __construct(Application $app, CacheManager $manager, array $config, Sprout $sprout)
@@ -88,16 +88,18 @@ final class SproutCacheDriverCreator
         $tenant = $tenancy->tenant();
 
         // We need to know which store we're overriding to make tenanted
-        if (! isset($this->config['override'])) {
+        if (! isset($this->config['override']) || ! is_string($this->config['override'])) {
             throw MisconfigurationException::missingConfig('override', 'service override', 'cache');
         }
 
+        $override = $this->config['override'];
+
         // We need to get the config for that store
         /** @var array<string, mixed> $storeConfig */
-        $storeConfig = $this->app->make('config')->get('cache.stores.' . $this->config['override']);
+        $storeConfig = $this->app->make('config')->get('cache.stores.' . $override);
 
         if (empty($storeConfig)) {
-            throw new InvalidArgumentException('Cache store [' . $this->config['override'] . '] is not defined');
+            throw new InvalidArgumentException('Cache store [' . $override . '] is not defined');
         }
 
         // Get the prefix for the tenanted store based on the store config,
@@ -122,7 +124,11 @@ final class SproutCacheDriverCreator
      */
     protected function getStorePrefix(array $config, Tenancy $tenancy, Tenant $tenant): string
     {
-        return (isset($config['prefix']) ? $config['prefix'] . '_' : '')
+        $prefix = isset($config['prefix']) && is_string($config['prefix'])
+            ? $config['prefix'] . '_'
+            : '';
+
+        return $prefix
                . $tenancy->getName()
                . '_'
                . $tenant->getTenantKey();

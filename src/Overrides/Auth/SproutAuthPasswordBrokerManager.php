@@ -5,8 +5,10 @@ namespace Sprout\Overrides\Auth;
 
 use Illuminate\Auth\Passwords\PasswordBrokerManager;
 use Illuminate\Auth\Passwords\TokenRepositoryInterface;
-use Illuminate\Foundation\Application;
+use Illuminate\Cache\Repository as CacheRepository;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\Str;
+use RuntimeException;
 use Sprout\Sprout;
 
 /**
@@ -39,6 +41,17 @@ class SproutAuthPasswordBrokerManager extends PasswordBrokerManager
      *
      * @param array<string, mixed> $config
      *
+     * @phpstan-param array{
+     *     driver?: string|null,
+     *     provider?: string|null,
+     *     connection?: string|null,
+     *     table?: string,
+     *     store?: string|null,
+     *     prefix?: string,
+     *     expire?: int|null,
+     *     throttle?: int|null,
+     * } $config
+     *
      * @return \Illuminate\Auth\Passwords\TokenRepositoryInterface
      *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
@@ -55,27 +68,31 @@ class SproutAuthPasswordBrokerManager extends PasswordBrokerManager
         // @codeCoverageIgnoreEnd
 
         if (isset($config['driver']) && $config['driver'] === 'cache') {
+            $cache = $this->app->make('cache')->store($config['store'] ?? null);
+
+            if (! ($cache instanceof CacheRepository)) {
+                throw new RuntimeException('Expected an instance of ' . CacheRepository::class);
+            }
+
             return new SproutAuthCacheTokenRepository(
                 $this->sprout,
-                $this->app->make('cache')->store($config['store'] ?? null), // @phpstan-ignore-line
+                $cache,
                 $this->app->make('hash'),
                 $key,
                 ($config['expire'] ?? 60) * 60,
-                $config['throttle'] ?? 0, // @phpstan-ignore-line
-                $config['prefix'] ?? '', // @phpstan-ignore-line
+                $config['throttle'] ?? 0,
+                $config['prefix'] ?? '',
             );
         }
 
-        $connection = $config['connection'] ?? null;
-
         return new SproutAuthDatabaseTokenRepository(
             $this->sprout,
-            $this->app->make('db')->connection($connection), // @phpstan-ignore-line
+            $this->app->make('db')->connection($config['connection'] ?? null),
             $this->app->make('hash'),
-            $config['table'],                                // @phpstan-ignore-line
+            $config['table'] ?? '',
             $key,
-            $this->laravelVersionedExpiry($config['expire']),// @phpstan-ignore-line
-            $config['throttle'] ?? 0// @phpstan-ignore-line
+            $this->laravelVersionedExpiry($config['expire'] ?? null),
+            $config['throttle'] ?? 0
         );
     }
 
@@ -88,8 +105,12 @@ class SproutAuthPasswordBrokerManager extends PasswordBrokerManager
      */
     private function laravelVersionedExpiry(?int $expiry): ?int
     {
+        if ($expiry === null) {
+            return null;
+        }
+
         if (! Str::startsWith($this->app->version(), '11.')) {
-            return ($expiry ?? 60) * 60;
+            return $expiry * 60;
         }
 
         return $expiry;

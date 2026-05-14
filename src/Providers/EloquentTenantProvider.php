@@ -106,9 +106,11 @@ final class EloquentTenantProvider extends BaseTenantProvider
     {
         $model = $this->getModel();
 
-        return $model->newModelQuery()
-                     ->where($model->getTenantIdentifierName(), $identifier)
-                     ->first();
+        $result = $model->newModelQuery()
+                        ->where($model->getTenantIdentifierName(), $identifier)
+                        ->first();
+
+        return $result instanceof $this->modelClass ? $result : null;
     }
 
     /**
@@ -130,9 +132,11 @@ final class EloquentTenantProvider extends BaseTenantProvider
     {
         $model = $this->getModel();
 
-        return $model->newModelQuery()
-                     ->where($model->getTenantKeyName(), $key)
-                     ->first();
+        $result = $model->newModelQuery()
+                        ->where($model->getTenantKeyName(), $key)
+                        ->first();
+
+        return $result instanceof $this->modelClass ? $result : null;
     }
 
     /**
@@ -162,8 +166,12 @@ final class EloquentTenantProvider extends BaseTenantProvider
             throw MisconfigurationException::misconfigured('tenant', $model::class, 'resources');
         }
 
-        return $model->newModelQuery()
-                     ->where($model->getTenantResourceKeyName(), $resourceKey)
-                     ->first();
+        $result = $model->newModelQuery()
+                        ->where($model->getTenantResourceKeyName(), $resourceKey)
+                        ->first();
+
+        return ($result instanceof $this->modelClass && $result instanceof TenantHasResources)
+            ? $result
+            : null;
     }
 }

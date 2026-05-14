@@ -22,6 +22,13 @@ class SproutAuthCacheTokenRepository extends CacheTokenRepository
      */
     private Sprout $sprout;
 
+    /**
+     * Laravel's CacheTokenRepository removed the constructor-promoted $prefix
+     * field in Laravel 12, so Sprout tracks it locally to keep
+     * {@see self::getPrefix()} working unchanged.
+     */
+    private string $prefix;
+
     /** @infection-ignore-all */
     public function __construct(
         Sprout         $sprout,
@@ -33,8 +40,9 @@ class SproutAuthCacheTokenRepository extends CacheTokenRepository
         string         $prefix = ''
     )
     {
-        parent::__construct($cache, $hasher, $hashKey, $expires, $throttle, $prefix);
+        parent::__construct($cache, $hasher, $hashKey, $expires, $throttle);
         $this->sprout = $sprout;
+        $this->prefix = $prefix;
     }
 
     public function getExpires(): int

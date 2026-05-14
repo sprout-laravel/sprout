@@ -78,7 +78,7 @@ final class DefaultTenancy implements Tenancy
                 $option                      = array_keys($value)[0];
                 $this->options[]             = $option;
                 $this->optionConfig[$option] = $value[$option];
-            } else if (is_string($value)) {
+            } else {
                 $this->options[] = $value;
             }
         }
@@ -340,7 +340,15 @@ final class DefaultTenancy implements Tenancy
     public function removeOption(string $option): static
     {
         if ($this->hasOption($option)) {
-            unset($this->options[array_search($option, $this->options(), true)]);
+            $remaining = [];
+
+            foreach ($this->options as $existing) {
+                if ($existing !== $option) {
+                    $remaining[] = $existing;
+                }
+            }
+
+            $this->options = $remaining;
         }
 
         return $this;

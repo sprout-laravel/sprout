@@ -43,18 +43,13 @@ final readonly class Provider implements ContextualAttribute
      * @param \Sprout\Attributes\Provider     $attribute
      * @param \Illuminate\Container\Container $container
      *
-     * @return \Sprout\Contracts\TenantProvider<*>|null
+     * @return \Sprout\Contracts\TenantProvider<*>
      *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
      * @throws \Sprout\Exceptions\MisconfigurationException
      */
-    public function resolve(Provider $attribute, Container $container): ?TenantProvider
+    public function resolve(Provider $attribute, Container $container): TenantProvider
     {
-        /**
-         * It's not nullable, it'll be an exception
-         *
-         * @noinspection NullPointerExceptionInspection
-         */
         return $container->make(TenantProviderManager::class)->get($this->name);
     }
 }

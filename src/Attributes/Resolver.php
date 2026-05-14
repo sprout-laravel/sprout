@@ -43,18 +43,13 @@ final readonly class Resolver implements ContextualAttribute
      * @param \Sprout\Attributes\Resolver     $attribute
      * @param \Illuminate\Container\Container $container
      *
-     * @return \Sprout\Contracts\IdentityResolver|null
+     * @return \Sprout\Contracts\IdentityResolver
      *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
      * @throws \Sprout\Exceptions\MisconfigurationException
      */
-    public function resolve(Resolver $attribute, Container $container): ?IdentityResolver
+    public function resolve(Resolver $attribute, Container $container): IdentityResolver
     {
-        /**
-         * It's not nullable, it'll be an exception
-         *
-         * @noinspection NullPointerExceptionInspection
-         */
         return $container->make(IdentityResolverManager::class)->get($this->name);
     }
 }

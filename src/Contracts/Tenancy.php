@@ -10,7 +10,7 @@ use Sprout\Support\ResolutionHook;
  * This contract represents a tenancy, an object responsible for managing the
  * state of the current tenancy, i.e. the current {@see \Sprout\Contracts\Tenant}.
  *
- * @template TenantClass of \Sprout\Contracts\Tenant
+ * @template-covariant TenantClass of \Sprout\Contracts\Tenant
  *
  * @package Core
  */
@@ -154,8 +154,6 @@ interface Tenancy
      * Set the current tenant
      *
      * @param \Sprout\Contracts\Tenant|null $tenant
-     *
-     * @phpstan-param TenantClass|null      $tenant
      *
      * @return static
      */
