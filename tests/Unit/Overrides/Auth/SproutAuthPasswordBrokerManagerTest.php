@@ -49,6 +49,13 @@ class SproutAuthPasswordBrokerManagerTest extends UnitTestCase
                      ->andReturn('base64:' . base64_encode('fake-key'))
                      ->once();
 
+                // Laravel's PasswordBrokerManager::resolve() reads this to
+                // populate the PasswordBroker $timeboxDuration constructor arg.
+                $mock->shouldReceive('get')
+                     ->withArgs(['auth.timebox_duration', 200000])
+                     ->andReturn(200000)
+                     ->once();
+
                 $mock->shouldReceive('offsetGet')
                      ->withArgs(['auth.defaults.passwords'])
                      ->andReturn('users')

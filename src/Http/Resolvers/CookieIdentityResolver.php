@@ -278,6 +278,8 @@ final class CookieIdentityResolver extends BaseIdentityResolver
         // Decrypt the actual cookie value
         $value = $encrypter->decrypt($cookie, false);
 
+        /** @var string $value */
+
         // And then "validate it"? This actually strips the value, so I'm not
         // sure validate is the correct name, but I didn't name it..
         return CookieValuePrefix::validate($key, $value, $encrypter->getAllKeys());
