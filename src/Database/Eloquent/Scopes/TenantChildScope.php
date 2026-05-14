@@ -15,6 +15,8 @@ use Illuminate\Database\Eloquent\Scope;
  * @see     \Sprout\Database\Eloquent\Scopes\BelongsToManyTenantsScope
  * @see     \Sprout\Database\Eloquent\Scopes\BelongsToTenantScope
  *
+ * @implements \Illuminate\Database\Eloquent\Scope<\Illuminate\Database\Eloquent\Model>
+ *
  * @package Database\Eloquent
  */
 abstract class TenantChildScope implements Scope

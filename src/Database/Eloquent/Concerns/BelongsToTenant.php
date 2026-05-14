@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Sprout\Database\Eloquent\Concerns;
 
+use Illuminate\Foundation\Application;
 use Sprout\Database\Eloquent\Observers\BelongsToTenantObserver;
 use Sprout\Database\Eloquent\Scopes\BelongsToTenantScope;
 
@@ -26,10 +27,18 @@ trait BelongsToTenant
      */
     public static function bootBelongsToTenant(): void
     {
-        // Automatically scope queries
-        static::addGlobalScope(new BelongsToTenantScope());
+        $run = static function () {
+            // Automatically scope queries
+            static::addGlobalScope(new BelongsToTenantScope());
 
-        // Add the observer
-        static::observe(new BelongsToTenantObserver());
+            // Add the observer
+            static::observe(new BelongsToTenantObserver());
+        };
+        
+        if (version_compare(Application::VERSION, '13.0.0', '>=')) {
+            static::whenBooted($run);
+        } else {
+            $run();
+        }
     }
 }
