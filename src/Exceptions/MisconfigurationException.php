@@ -43,7 +43,13 @@ final class MisconfigurationException extends SproutException
      */
     public static function invalidConfig(string $value, string $type, string $name, mixed $realValue = null): self
     {
-        return new self('The provided value for \'' . $value . '\' ' . ($realValue ? '[' . $realValue . '] ' : '') . 'is not valid for ' . $type . ' [' . $name . ']');
+        $valueDisplay = '';
+
+        if ($realValue !== null && $realValue !== false && $realValue !== '') {
+            $valueDisplay = '[' . (is_scalar($realValue) ? (string) $realValue : get_debug_type($realValue)) . '] ';
+        }
+
+        return new self('The provided value for \'' . $value . '\' ' . $valueDisplay . 'is not valid for ' . $type . ' [' . $name . ']');
     }
 
     /**

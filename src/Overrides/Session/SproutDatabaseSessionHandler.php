@@ -6,7 +6,6 @@ namespace Sprout\Overrides\Session;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Database\QueryException;
 use Illuminate\Session\DatabaseSessionHandler;
-use Illuminate\Support\Arr;
 use Sprout\Concerns\AwareOfTenant;
 use Sprout\Contracts\Tenant;
 use Sprout\Contracts\TenantAware;
@@ -77,8 +76,10 @@ class SproutDatabaseSessionHandler extends DatabaseSessionHandler implements Ten
             $payload['tenant_id'] = $tenant->getTenantKey();
         }
 
+        $payload['id'] = $sessionId;
+
         try {
-            return $this->getQuery(true)->insert(Arr::set($payload, 'id', $sessionId));
+            return $this->getQuery(true)->insert($payload);
         } catch (QueryException) {                                 // @codeCoverageIgnore
             /** @var array<string, mixed> $payload */
             return $this->performUpdate($sessionId, $payload) > 0; // @codeCoverageIgnore
