@@ -46,7 +46,7 @@ final class MisconfigurationException extends SproutException
         $valueDisplay = '';
 
         if ($realValue !== null && $realValue !== false && $realValue !== '') {
-            $valueDisplay = '[' . (is_scalar($realValue) ? (string) $realValue : get_debug_type($realValue)) . '] ';
+            $valueDisplay = '[' . (string) $realValue . '] ';
         }
 
         return new self('The provided value for \'' . $value . '\' ' . $valueDisplay . 'is not valid for ' . $type . ' [' . $name . ']');

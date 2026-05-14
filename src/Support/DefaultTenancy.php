@@ -79,7 +79,7 @@ final class DefaultTenancy implements Tenancy
                 $option                      = array_keys($value)[0];
                 $this->options[]             = $option;
                 $this->optionConfig[$option] = $value[$option];
-            } else {
+            } else if (is_string($value)) {
                 $this->options[] = $value;
             }
         }

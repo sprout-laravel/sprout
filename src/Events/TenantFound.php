@@ -25,8 +25,6 @@ use Sprout\Contracts\Tenant;
  * @method static void dispatchUnless(bool $condition, Tenant $tenant, Tenancy<TenantClass> $tenancy)
  *
  * @codeCoverageIgnore
- *
- * @phpstan-ignore missingType.generics, missingType.generics, missingType.generics
  */
 abstract readonly class TenantFound
 {
