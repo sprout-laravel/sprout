@@ -66,11 +66,6 @@ class SproutAuthPasswordBrokerManagerTest extends UnitTestCase
                      ->withArgs(['auth.passwords.my-passwords'])
                      ->once()
                      ->andReturn($config);
-
-                $mock->shouldReceive('get')
-                     ->withArgs(['auth.timebox_duration', 200000])
-                     ->andReturn(200000)
-                     ->once();
             });
 
             $mock->shouldReceive('offsetGet')
