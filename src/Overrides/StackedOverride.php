@@ -10,6 +10,7 @@ use Sprout\Contracts\BootableServiceOverride;
 use Sprout\Contracts\ServiceOverride;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
+use Sprout\Events\ServiceOverrideBooted;
 use Sprout\Exceptions\MisconfigurationException;
 use Sprout\Sprout;
 
@@ -52,7 +53,7 @@ final class StackedOverride extends BaseOverride implements BootableServiceOverr
      * @param Tenancy<TenantClass> $tenancy
      * @param Tenant               $tenant
      *
-     * @phpstan-param TenantClass                         $tenant
+     * @phpstan-param TenantClass  $tenant
      *
      * @return void
      */
@@ -108,6 +109,8 @@ final class StackedOverride extends BaseOverride implements BootableServiceOverr
         foreach ($this->overrides as $override) {
             if ($override instanceof BootableServiceOverride) {
                 $override->boot($app, $sprout);
+
+                ServiceOverrideBooted::dispatch($this->service, $override);
             }
         }
     }
@@ -128,7 +131,7 @@ final class StackedOverride extends BaseOverride implements BootableServiceOverr
      * @param Tenancy<TenantClass> $tenancy
      * @param Tenant               $tenant
      *
-     * @phpstan-param TenantClass                         $tenant
+     * @phpstan-param TenantClass  $tenant
      *
      * @return void
      */
