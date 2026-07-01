@@ -12,7 +12,8 @@
     "orchestra/testbench": "^11.0",
     "larastan/larastan"  : "^3.0",
     "laravel/pint"       : "^1.29",
-    "brianium/paratest"  : "^7.4"
+    "brianium/paratest"  : "^7.4",
+    "infection/infection": "^0.34.0"
   },
   "license"          : "MIT",
   "autoload"         : {
@@ -61,6 +62,12 @@
       "@build",
       "@php vendor/bin/paratest"
     ],
+    "infection"         : [
+      "@clear",
+      "@prepare",
+      "@build",
+      "@php vendor/bin/infection --ansi"
+    ],
     "tidy"              : [
       "@php vendor/bin/pint --ansi"
     ]
@@ -83,6 +90,8 @@
     }
   },
   "config"           : {
-    "allow-plugins": {}
+    "allow-plugins": {
+      "infection/extension-installer": true
+    }
   }
 }

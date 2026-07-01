@@ -1,4 +1,4 @@
-.PHONY: test phpunit analyse install shell build
+.PHONY: test phpunit infection analyse tidy install shell build
 
 .DEFAULT_GOAL := test
 
@@ -8,8 +8,14 @@ test:
 phpunit:
 	docker compose run --rm -T php vendor/bin/phpunit $(ARGS)
 
+infection:
+	docker compose run --rm -T php composer infection
+
 analyse:
 	docker compose run --rm -T php composer analyse
+
+tidy:
+	docker compose run --rm -T php composer tidy
 
 install:
 	docker compose run --rm -T php composer install

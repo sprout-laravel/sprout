@@ -1,0 +1,18 @@
+{
+  "$schema"                  : "vendor/infection/infection/resources/schema.json",
+  "source"                   : {
+    "directories": [
+      "src"
+    ]
+  },
+  "threads"                  : "max",
+  "staticAnalysisTool"       : "phpstan",
+  "staticAnalysisToolOptions": "--memory-limit=2G",
+  "logs"                     : {
+    "text": "build/infection.txt",
+    "html": "build/infection.html"
+  },
+  "mutators"                 : {
+    "@default": true
+  }
+}
