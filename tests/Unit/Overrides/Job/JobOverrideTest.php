@@ -12,17 +12,11 @@ use Sprout\Listeners\SetCurrentTenantForJob;
 use Sprout\Overrides\Job\JobOverride;
 use Sprout\Overrides\Session\SessionOverride;
 use Sprout\Tests\Unit\UnitTestCase;
+
 use function Sprout\sprout;
 
 class JobOverrideTest extends UnitTestCase
 {
-    protected function defineEnvironment($app): void
-    {
-        tap($app['config'], static function (Repository $config) {
-            $config->set('sprout.overrides', []);
-        });
-    }
-
     #[Test]
     public function isBuiltCorrectly(): void
     {
@@ -64,5 +58,12 @@ class JobOverrideTest extends UnitTestCase
         $sprout->overrides()->registerOverrides();
 
         Event::assertListening(JobProcessing::class, SetCurrentTenantForJob::class);
+    }
+
+    protected function defineEnvironment($app): void
+    {
+        tap($app['config'], static function (Repository $config) {
+            $config->set('sprout.overrides', []);
+        });
     }
 }

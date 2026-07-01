@@ -18,32 +18,17 @@ use Sprout\Overrides\Cache\CacheOverride;
 use Sprout\Sprout;
 use Sprout\Support\SettingsRepository;
 use Sprout\Tests\Unit\UnitTestCase;
+
 use function Sprout\sprout;
 
 class CacheOverrideTest extends UnitTestCase
 {
-    protected function defineEnvironment($app): void
+    public static function cacheResolvedDataProvider(): array
     {
-        tap($app['config'], static function (Repository $config) {
-            $config->set('sprout.overrides', []);
-        });
-    }
-
-    private function mockCacheManager(): CacheManager&MockInterface
-    {
-        /** @var CacheManager&MockInterface $app */
-        $app = Mockery::mock(CacheManager::class, static function (MockInterface $mock) {
-            $mock->shouldReceive('extend')
-                 ->withArgs([
-                     'sprout',
-                     Mockery::on(static function ($arg) {
-                         return is_callable($arg) && $arg instanceof Closure;
-                     }),
-                 ])
-                 ->once();
-        });
-
-        return $app;
+        return [
+            'cache resolved'     => [true],
+            'cache not resolved' => [false],
+        ];
     }
 
     #[Test]
@@ -78,7 +63,7 @@ class CacheOverrideTest extends UnitTestCase
     {
         $override = new CacheOverride('cache', []);
 
-        /** @var \Illuminate\Foundation\Application&MockInterface $app */
+        /** @var Application&MockInterface $app */
         $app = Mockery::mock($this->app, function (MockInterface $mock) use ($return) {
             $mock->makePartial();
             $mock->shouldReceive('resolved')->withArgs(['cache'])->andReturn($return)->once();
@@ -135,13 +120,13 @@ class CacheOverrideTest extends UnitTestCase
     {
         $override = new CacheOverride('cache', []);
 
-        /** @var \Illuminate\Foundation\Application&MockInterface $app */
+        /** @var Application&MockInterface $app */
         $app = Mockery::mock($this->app, static function (MockInterface $mock) {
             $mock->makePartial();
         });
 
-        $sprout  = new Sprout($app, new SettingsRepository());
-        $tenant  = Mockery::mock(Tenant::class, static function (MockInterface $mock) {
+        $sprout = new Sprout($app, new SettingsRepository());
+        $tenant = Mockery::mock(Tenant::class, static function (MockInterface $mock) {
             $mock->shouldReceive('getTenantKey')->andReturn(7777)->once();
         });
         $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) use ($tenant) {
@@ -169,13 +154,13 @@ class CacheOverrideTest extends UnitTestCase
     public function cleansUpResolvedDrivers(): void
     {
         $override = new CacheOverride('cache', []);
-        $cache = Mockery::mock($this->app->make('cache'), static function (MockInterface $mock) {
+        $cache    = Mockery::mock($this->app->make('cache'), static function (MockInterface $mock) {
             $mock->makePartial();
             $mock->shouldReceive('forgetDriver')->once();
         });
         $this->app->forgetInstance('cache');
 
-        /** @var \Illuminate\Foundation\Application&MockInterface $app */
+        /** @var Application&MockInterface $app */
         $app = Mockery::mock($this->app, static function (MockInterface $mock) use ($cache) {
             $mock->makePartial();
 
@@ -184,8 +169,8 @@ class CacheOverrideTest extends UnitTestCase
                  ->andReturn($cache);
         });
 
-        $sprout  = new Sprout($app, new SettingsRepository());
-        $tenant  = Mockery::mock(Tenant::class, static function (MockInterface $mock) {
+        $sprout = new Sprout($app, new SettingsRepository());
+        $tenant = Mockery::mock(Tenant::class, static function (MockInterface $mock) {
             $mock->shouldReceive('getTenantKey')->andReturn(7777)->once();
         });
         $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) use ($tenant) {
@@ -215,13 +200,13 @@ class CacheOverrideTest extends UnitTestCase
     public function cleansUpNothingWithoutResolvedDrivers(): void
     {
         $override = new CacheOverride('cache', []);
-        $cache = Mockery::mock($this->app->make('cache'), static function (MockInterface $mock) {
+        $cache    = Mockery::mock($this->app->make('cache'), static function (MockInterface $mock) {
             $mock->makePartial();
             $mock->shouldNotReceive('forgetDriver');
         });
         $this->app->forgetInstance('cache');
 
-        /** @var \Illuminate\Foundation\Application&MockInterface $app */
+        /** @var Application&MockInterface $app */
         $app = Mockery::mock($this->app, static function (MockInterface $mock) use ($cache) {
             $mock->makePartial();
 
@@ -243,11 +228,27 @@ class CacheOverrideTest extends UnitTestCase
         $override->cleanup($tenancy, $tenant);
     }
 
-    public static function cacheResolvedDataProvider(): array
+    protected function defineEnvironment($app): void
     {
-        return [
-            'cache resolved'     => [true],
-            'cache not resolved' => [false],
-        ];
+        tap($app['config'], static function (Repository $config) {
+            $config->set('sprout.overrides', []);
+        });
+    }
+
+    private function mockCacheManager(): CacheManager&MockInterface
+    {
+        /** @var CacheManager&MockInterface $app */
+        $app = Mockery::mock(CacheManager::class, static function (MockInterface $mock) {
+            $mock->shouldReceive('extend')
+                 ->withArgs([
+                     'sprout',
+                     Mockery::on(static function ($arg) {
+                         return is_callable($arg) && $arg instanceof Closure;
+                     }),
+                 ])
+                 ->once();
+        });
+
+        return $app;
     }
 }

@@ -11,7 +11,6 @@ use Mockery;
 use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\TenantConfig;
 use Sprout\Contracts\BootableServiceOverride;
 use Sprout\Contracts\ConfigStore;
 use Sprout\Contracts\Tenancy;
@@ -22,33 +21,19 @@ use Sprout\Managers\ConfigStoreManager;
 use Sprout\Overrides\Database\TenantConfigDatabaseConnectionOverride;
 use Sprout\Sprout;
 use Sprout\Support\SettingsRepository;
+use Sprout\TenantConfig;
 use Sprout\Tests\Unit\UnitTestCase;
+
 use function Sprout\sprout;
 
 class TenantConfigDatabaseConnectionOverrideTest extends UnitTestCase
 {
-    protected function defineEnvironment($app): void
+    public static function managerResolvedDataProvider(): array
     {
-        tap($app['config'], static function (Repository $config) {
-            $config->set('sprout.overrides', []);
-        });
-    }
-
-    private function mockDatabaseManager(bool $extends = true, ?Closure $callback = null): DatabaseManager&MockInterface
-    {
-        return Mockery::mock(DatabaseManager::class, static function (MockInterface $mock) use ($extends, $callback) {
-            if ($extends) {
-                $mock->shouldReceive('extend')
-                     ->with('sprout:config', Mockery::on(static function ($arg) {
-                         return is_callable($arg) && $arg instanceof Closure;
-                     }))
-                     ->once();
-            }
-
-            if ($callback) {
-                $callback($mock);
-            }
-        });
+        return [
+            'database manager resolved'     => [true],
+            'database manager not resolved' => [false],
+        ];
     }
 
     #[Test]
@@ -126,7 +111,7 @@ class TenantConfigDatabaseConnectionOverrideTest extends UnitTestCase
     {
         $override = new TenantConfigDatabaseConnectionOverride('database', []);
 
-        $tenant  = Mockery::mock(Tenant::class, TenantHasResources::class, static function (MockInterface $mock) {
+        $tenant = Mockery::mock(Tenant::class, TenantHasResources::class, static function (MockInterface $mock) {
         });
         $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) use ($tenant) {
             $mock->shouldReceive('check')->andReturnTrue()->once();
@@ -134,13 +119,13 @@ class TenantConfigDatabaseConnectionOverrideTest extends UnitTestCase
         });
 
         /** @var \Illuminate\Foundation\Application&MockInterface $app */
-        $app = Mockery::mock($this->app, static function (MockInterface $mock) use ($tenancy, $tenant) {
+        $app = Mockery::mock($this->app, static function (MockInterface $mock) {
             $mock->makePartial();
         });
 
         $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
         $app->make('config')->set('database.connections.bud-connection', [
-            'driver' => 'sprout:config',
+            'driver'   => 'sprout:config',
             'database' => 'bud-database',
         ]);
 
@@ -154,9 +139,9 @@ class TenantConfigDatabaseConnectionOverrideTest extends UnitTestCase
                               'database',
                               'bud-connection',
                           )->andReturn([
-                             'driver' => 'sprout:config',
-                             'database' => 'bud-database',
-                         ]);
+                              'driver'   => 'sprout:config',
+                              'database' => 'bud-database',
+                          ]);
                  }));
         })));
 
@@ -182,7 +167,7 @@ class TenantConfigDatabaseConnectionOverrideTest extends UnitTestCase
     {
         $override = new TenantConfigDatabaseConnectionOverride('database', []);
 
-        $tenant  = Mockery::mock(Tenant::class, TenantHasResources::class, static function (MockInterface $mock) {
+        $tenant = Mockery::mock(Tenant::class, TenantHasResources::class, static function (MockInterface $mock) {
         });
         $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) use ($tenant) {
             $mock->shouldReceive('check')->andReturnTrue()->once();
@@ -190,13 +175,13 @@ class TenantConfigDatabaseConnectionOverrideTest extends UnitTestCase
         });
 
         /** @var \Illuminate\Foundation\Application&MockInterface $app */
-        $app = Mockery::mock($this->app, static function (MockInterface $mock) use ($tenancy, $tenant) {
+        $app = Mockery::mock($this->app, static function (MockInterface $mock) {
             $mock->makePartial();
         });
 
         $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
         $app->make('config')->set('database.connections.bud-connection', [
-            'driver' => 'sprout:config',
+            'driver'   => 'sprout:config',
             'database' => 'bud-database',
         ]);
 
@@ -210,8 +195,8 @@ class TenantConfigDatabaseConnectionOverrideTest extends UnitTestCase
                               'database',
                               'bud-connection',
                           )->andReturn([
-                             'driver' => 'mysql',
-                         ]);
+                              'driver' => 'mysql',
+                          ]);
                  }));
         })));
 
@@ -223,7 +208,7 @@ class TenantConfigDatabaseConnectionOverrideTest extends UnitTestCase
 
         $override->boot($app, $sprout);
 
-        /** @var \Illuminate\Database\DatabaseManager $manager */
+        /** @var DatabaseManager $manager */
         $manager = $app->make('db');
 
         $manager->connection('bud-connection');
@@ -246,7 +231,7 @@ class TenantConfigDatabaseConnectionOverrideTest extends UnitTestCase
 
         $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
         $app->make('config')->set('database.connections.bud-connection', [
-            'driver' => 'sprout:config',
+            'driver'   => 'sprout:config',
             'database' => 'bud-database',
         ]);
 
@@ -270,8 +255,8 @@ class TenantConfigDatabaseConnectionOverrideTest extends UnitTestCase
                               'database',
                               'bud-connection',
                           )->andReturn([
-                             'driver' => 'mysql',
-                         ]);
+                              'driver' => 'mysql',
+                          ]);
                  }));
         })));
 
@@ -309,7 +294,7 @@ class TenantConfigDatabaseConnectionOverrideTest extends UnitTestCase
 
         $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
         $app->make('config')->set('database.connections.bud-connection', [
-            'driver' => 'sprout:config',
+            'driver'   => 'sprout:config',
             'database' => 'bud-database',
         ]);
 
@@ -318,7 +303,7 @@ class TenantConfigDatabaseConnectionOverrideTest extends UnitTestCase
         $tenant = Mockery::mock(Tenant::class, TenantHasResources::class, static function (MockInterface $mock) {
         });
 
-        $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) use ($tenant) {
+        $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) {
         });
 
         $sprout->setCurrentTenancy($tenancy);
@@ -334,11 +319,27 @@ class TenantConfigDatabaseConnectionOverrideTest extends UnitTestCase
         $this->assertEmpty($override->getOverrides());
     }
 
-    public static function managerResolvedDataProvider(): array
+    protected function defineEnvironment($app): void
     {
-        return [
-            'database manager resolved'     => [true],
-            'database manager not resolved' => [false],
-        ];
+        tap($app['config'], static function (Repository $config) {
+            $config->set('sprout.overrides', []);
+        });
+    }
+
+    private function mockDatabaseManager(bool $extends = true, ?Closure $callback = null): DatabaseManager&MockInterface
+    {
+        return Mockery::mock(DatabaseManager::class, static function (MockInterface $mock) use ($extends, $callback) {
+            if ($extends) {
+                $mock->shouldReceive('extend')
+                     ->with('sprout:config', Mockery::on(static function ($arg) {
+                         return is_callable($arg) && $arg instanceof Closure;
+                     }))
+                     ->once();
+            }
+
+            if ($callback) {
+                $callback($mock);
+            }
+        });
     }
 }

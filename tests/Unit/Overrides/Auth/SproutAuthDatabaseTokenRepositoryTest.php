@@ -24,77 +24,23 @@ use Sprout\Tests\Unit\UnitTestCase;
 
 class SproutAuthDatabaseTokenRepositoryTest extends UnitTestCase
 {
-    private function getSprout(Application $app, ?Tenancy $tenancy, ?Tenant $tenant, int $callCount = 1): Sprout
+    public static function multitenancyContextDataProvider(): array
     {
-        $sprout = new Sprout($app, new SettingsRepository());
-
-        if ($tenancy !== null && $tenant !== null) {
-            $sprout->setCurrentTenancy($tenancy);
-
-            /**
-             * @var \Sprout\Contracts\Tenancy&\Mockery\MockInterface $tenancy
-             * @var \Sprout\Contracts\Tenancy&\Mockery\MockInterface $tenant
-             */
-
-            $tenancy->shouldReceive('check')->andReturn(true)->times($callCount);
-            $tenancy->shouldReceive('key')->andReturn(7)->times($callCount);
-            $tenancy->shouldReceive('getName')->andReturn('my-tenancy')->times($callCount);
-        }
-
-        return $sprout;
+        return [
+            'not in context' => [false],
+            'in context'     => [true],
+        ];
     }
 
-    private function mockUser(int $callCount = 1): CanResetPassword&MockInterface
+    public static function tenantContextDataProvider(): array
     {
-        return Mockery::mock(CanResetPassword::class, static function (MockInterface $mock) use ($callCount) {
-            $mock->shouldReceive('getEmailForPasswordReset')->andReturn('test@email.com')->times($callCount);
-        });
-    }
+        $tenancy = Mockery::mock(Tenancy::class);
+        $tenant  = Mockery::mock(Tenant::class);
 
-    private function mockConnectionGet(?Tenancy $tenancy, string $token, $hasher, bool $return = true, ?\Closure $expiryAdjuster = null): Connection&MockInterface
-    {
-        $storedToken = $return ? $hasher->make($token) : null;
-
-        return Mockery::mock(Connection::class, static function (MockInterface $mock) use ($expiryAdjuster, $storedToken, $tenancy) {
-            $builder = Mockery::mock(Builder::class, static function (MockInterface $mock) use ($storedToken, $expiryAdjuster, $tenancy) {
-                $mock->shouldReceive('where')
-                     ->withArgs([
-                         'email',
-                         'test@email.com',
-                     ])
-                     ->andReturnSelf()
-                     ->once();
-
-                if ($tenancy !== null) {
-                    $mock->shouldReceive('where')
-                         ->withArgs([
-                             'tenancy',
-                             'my-tenancy',
-                         ])
-                         ->andReturnSelf()
-                         ->once();
-                    $mock->shouldReceive('where')
-                         ->withArgs([
-                             'tenant_id',
-                             '7',
-                         ])
-                         ->andReturnSelf()
-                         ->once();
-                }
-
-                $mock->shouldReceive('first')
-                     ->andReturn($storedToken ? (object)[
-                         'token'      => $storedToken,
-                         'created_at' => ($expiryAdjuster ? $expiryAdjuster(Carbon::now()) : Carbon::now()->subMinute())->format('Y-m-d H:i:s'),
-                     ] : null)
-                     ->once();
-            });
-
-            $mock->shouldReceive('table')
-                 ->withArgs(['my_passwords'])
-                 ->andReturn($builder)
-                 ->once();
-        });
+        return [
+            'no tenant context' => [null, null],
+            'tenant context'    => [$tenancy, $tenant],
+        ];
     }
 
     #[Test]
@@ -102,7 +48,7 @@ class SproutAuthDatabaseTokenRepositoryTest extends UnitTestCase
     {
         $connection = Mockery::mock(Connection::class);
 
-        /** @var \Illuminate\Foundation\Application&MockInterface $app */
+        /** @var Application&MockInterface $app */
         $app = Mockery::mock($this->app, static function (MockInterface $mock) {
             $mock->makePartial();
         });
@@ -121,7 +67,7 @@ class SproutAuthDatabaseTokenRepositoryTest extends UnitTestCase
             'my_passwords',
             'hash-key',
             3600,
-            60
+            60,
         );
 
         $repository->create($this->mockUser(2));
@@ -132,7 +78,7 @@ class SproutAuthDatabaseTokenRepositoryTest extends UnitTestCase
     {
         $connection = Mockery::mock(Connection::class);
 
-        /** @var \Illuminate\Foundation\Application&MockInterface $app */
+        /** @var Application&MockInterface $app */
         $app = Mockery::mock($this->app, static function (MockInterface $mock) {
             $mock->makePartial();
         });
@@ -158,7 +104,7 @@ class SproutAuthDatabaseTokenRepositoryTest extends UnitTestCase
             'my_passwords',
             'hash-key',
             3600,
-            60
+            60,
         );
 
         $repository->create($this->mockUser(2));
@@ -167,7 +113,7 @@ class SproutAuthDatabaseTokenRepositoryTest extends UnitTestCase
     #[Test, DataProvider('tenantContextDataProvider')]
     public function canCreateTokens(?Tenancy $tenancy, ?Tenant $tenant): void
     {
-        /** @var \Illuminate\Foundation\Application&MockInterface $app */
+        /** @var Application&MockInterface $app */
         $app = Mockery::mock($this->app, static function (MockInterface $mock) {
             $mock->makePartial();
         });
@@ -239,7 +185,7 @@ class SproutAuthDatabaseTokenRepositoryTest extends UnitTestCase
             'my_passwords',
             'hash-key',
             3600,
-            60
+            60,
         );
 
         $repository->create($user);
@@ -248,7 +194,7 @@ class SproutAuthDatabaseTokenRepositoryTest extends UnitTestCase
     #[Test, DataProvider('tenantContextDataProvider')]
     public function canCheckIfExistingTokensExist(?Tenancy $tenancy, ?Tenant $tenant): void
     {
-        /** @var \Illuminate\Foundation\Application&MockInterface $app */
+        /** @var Application&MockInterface $app */
         $app = Mockery::mock($this->app, static function (MockInterface $mock) {
             $mock->makePartial();
         });
@@ -266,7 +212,7 @@ class SproutAuthDatabaseTokenRepositoryTest extends UnitTestCase
             'my_passwords',
             'hash-key',
             3600,
-            60
+            60,
         );
 
         $this->assertTrue($repository->exists($user, $token));
@@ -275,7 +221,7 @@ class SproutAuthDatabaseTokenRepositoryTest extends UnitTestCase
     #[Test, DataProvider('tenantContextDataProvider')]
     public function canCheckIfExpiredExistingTokensExist(?Tenancy $tenancy, ?Tenant $tenant): void
     {
-        /** @var \Illuminate\Foundation\Application&MockInterface $app */
+        /** @var Application&MockInterface $app */
         $app = Mockery::mock($this->app, static function (MockInterface $mock) {
             $mock->makePartial();
         });
@@ -289,7 +235,7 @@ class SproutAuthDatabaseTokenRepositoryTest extends UnitTestCase
             $token,
             $hasher,
             true,
-            fn (Carbon $carbon) => $carbon->subMinutes(3700)
+            fn (Carbon $carbon) => $carbon->subMinutes(3700),
         );
 
         $repository = new SproutAuthDatabaseTokenRepository(
@@ -299,7 +245,7 @@ class SproutAuthDatabaseTokenRepositoryTest extends UnitTestCase
             'my_passwords',
             'hash-key',
             3600,
-            60
+            60,
         );
 
         $this->assertFalse($repository->exists($user, $token));
@@ -308,7 +254,7 @@ class SproutAuthDatabaseTokenRepositoryTest extends UnitTestCase
     #[Test, DataProvider('tenantContextDataProvider')]
     public function canCheckIfNonExistingTokensExist(?Tenancy $tenancy, ?Tenant $tenant): void
     {
-        /** @var \Illuminate\Foundation\Application&MockInterface $app */
+        /** @var Application&MockInterface $app */
         $app = Mockery::mock($this->app, static function (MockInterface $mock) {
             $mock->makePartial();
         });
@@ -321,7 +267,7 @@ class SproutAuthDatabaseTokenRepositoryTest extends UnitTestCase
             $tenancy,
             $token,
             $hasher,
-            false
+            false,
         );
 
         $repository = new SproutAuthDatabaseTokenRepository(
@@ -331,7 +277,7 @@ class SproutAuthDatabaseTokenRepositoryTest extends UnitTestCase
             'my_passwords',
             'hash-key',
             3600,
-            60
+            60,
         );
 
         $this->assertFalse($repository->exists($user, $token));
@@ -340,7 +286,7 @@ class SproutAuthDatabaseTokenRepositoryTest extends UnitTestCase
     #[Test, DataProvider('tenantContextDataProvider')]
     public function canCheckIfExistingTokensWereRecentlyCreated(?Tenancy $tenancy, ?Tenant $tenant): void
     {
-        /** @var \Illuminate\Foundation\Application&MockInterface $app */
+        /** @var Application&MockInterface $app */
         $app = Mockery::mock($this->app, static function (MockInterface $mock) {
             $mock->makePartial();
         });
@@ -354,7 +300,7 @@ class SproutAuthDatabaseTokenRepositoryTest extends UnitTestCase
             $token,
             $hasher,
             true,
-            fn (Carbon $carbon) => $carbon->subSeconds(10)
+            fn (Carbon $carbon) => $carbon->subSeconds(10),
         );
 
         $repository = new SproutAuthDatabaseTokenRepository(
@@ -364,7 +310,7 @@ class SproutAuthDatabaseTokenRepositoryTest extends UnitTestCase
             'my_passwords',
             'hash-key',
             3600,
-            60
+            60,
         );
 
         $this->assertTrue($repository->recentlyCreatedToken($user));
@@ -373,7 +319,7 @@ class SproutAuthDatabaseTokenRepositoryTest extends UnitTestCase
     #[Test, DataProvider('tenantContextDataProvider')]
     public function canCheckIfExistingOldTokensWereRecentlyCreated(?Tenancy $tenancy, ?Tenant $tenant): void
     {
-        /** @var \Illuminate\Foundation\Application&MockInterface $app */
+        /** @var Application&MockInterface $app */
         $app = Mockery::mock($this->app, static function (MockInterface $mock) {
             $mock->makePartial();
         });
@@ -387,7 +333,7 @@ class SproutAuthDatabaseTokenRepositoryTest extends UnitTestCase
             $token,
             $hasher,
             true,
-            fn (Carbon $carbon) => $carbon->subMinute()
+            fn (Carbon $carbon) => $carbon->subMinute(),
         );
 
         $repository = new SproutAuthDatabaseTokenRepository(
@@ -397,7 +343,7 @@ class SproutAuthDatabaseTokenRepositoryTest extends UnitTestCase
             'my_passwords',
             'hash-key',
             3600,
-            60
+            60,
         );
 
         $this->assertFalse($repository->recentlyCreatedToken($user));
@@ -406,7 +352,7 @@ class SproutAuthDatabaseTokenRepositoryTest extends UnitTestCase
     #[Test, DataProvider('tenantContextDataProvider')]
     public function canCheckIfExpiredExistingTokensWereRecentlyCreated(?Tenancy $tenancy, ?Tenant $tenant): void
     {
-        /** @var \Illuminate\Foundation\Application&MockInterface $app */
+        /** @var Application&MockInterface $app */
         $app = Mockery::mock($this->app, static function (MockInterface $mock) {
             $mock->makePartial();
         });
@@ -420,7 +366,7 @@ class SproutAuthDatabaseTokenRepositoryTest extends UnitTestCase
             $token,
             $hasher,
             true,
-            fn (Carbon $carbon) => $carbon->subMinutes(3700)
+            fn (Carbon $carbon) => $carbon->subMinutes(3700),
         );
 
         $repository = new SproutAuthDatabaseTokenRepository(
@@ -430,7 +376,7 @@ class SproutAuthDatabaseTokenRepositoryTest extends UnitTestCase
             'my_passwords',
             'hash-key',
             3600,
-            60
+            60,
         );
 
         $this->assertFalse($repository->recentlyCreatedToken($user));
@@ -439,7 +385,7 @@ class SproutAuthDatabaseTokenRepositoryTest extends UnitTestCase
     #[Test, DataProvider('tenantContextDataProvider')]
     public function canCheckIfNonExistingTokensWereRecentlyCreated(?Tenancy $tenancy, ?Tenant $tenant): void
     {
-        /** @var \Illuminate\Foundation\Application&MockInterface $app */
+        /** @var Application&MockInterface $app */
         $app = Mockery::mock($this->app, static function (MockInterface $mock) {
             $mock->makePartial();
         });
@@ -452,7 +398,7 @@ class SproutAuthDatabaseTokenRepositoryTest extends UnitTestCase
             $tenancy,
             $token,
             $hasher,
-            false
+            false,
         );
 
         $repository = new SproutAuthDatabaseTokenRepository(
@@ -462,7 +408,7 @@ class SproutAuthDatabaseTokenRepositoryTest extends UnitTestCase
             'my_passwords',
             'hash-key',
             3600,
-            60
+            60,
         );
 
         $this->assertFalse($repository->recentlyCreatedToken($user));
@@ -471,7 +417,7 @@ class SproutAuthDatabaseTokenRepositoryTest extends UnitTestCase
     #[Test, DataProvider('tenantContextDataProvider')]
     public function canDeleteTokens(?Tenancy $tenancy, ?Tenant $tenant): void
     {
-        /** @var \Illuminate\Foundation\Application&MockInterface $app */
+        /** @var Application&MockInterface $app */
         $app = Mockery::mock($this->app, static function (MockInterface $mock) {
             $mock->makePartial();
         });
@@ -520,28 +466,81 @@ class SproutAuthDatabaseTokenRepositoryTest extends UnitTestCase
             'my_passwords',
             'hash-key',
             3600,
-            60
+            60,
         );
 
         $repository->delete($user);
     }
 
-    public static function multitenancyContextDataProvider(): array
+    private function getSprout(Application $app, ?Tenancy $tenancy, ?Tenant $tenant, int $callCount = 1): Sprout
     {
-        return [
-            'not in context' => [false],
-            'in context'     => [true],
-        ];
+        $sprout = new Sprout($app, new SettingsRepository());
+
+        if ($tenancy !== null && $tenant !== null) {
+            $sprout->setCurrentTenancy($tenancy);
+
+            /**
+             * @var Tenancy&MockInterface $tenancy
+             * @var Tenancy&MockInterface $tenant
+             */
+            $tenancy->shouldReceive('check')->andReturn(true)->times($callCount);
+            $tenancy->shouldReceive('key')->andReturn(7)->times($callCount);
+            $tenancy->shouldReceive('getName')->andReturn('my-tenancy')->times($callCount);
+        }
+
+        return $sprout;
     }
 
-    public static function tenantContextDataProvider(): array
+    private function mockUser(int $callCount = 1): CanResetPassword&MockInterface
     {
-        $tenancy = Mockery::mock(Tenancy::class);
-        $tenant  = Mockery::mock(Tenant::class);
+        return Mockery::mock(CanResetPassword::class, static function (MockInterface $mock) use ($callCount) {
+            $mock->shouldReceive('getEmailForPasswordReset')->andReturn('test@email.com')->times($callCount);
+        });
+    }
 
-        return [
-            'no tenant context' => [null, null],
-            'tenant context'    => [$tenancy, $tenant],
-        ];
+    private function mockConnectionGet(?Tenancy $tenancy, string $token, $hasher, bool $return = true, ?\Closure $expiryAdjuster = null): Connection&MockInterface
+    {
+        $storedToken = $return ? $hasher->make($token) : null;
+
+        return Mockery::mock(Connection::class, static function (MockInterface $mock) use ($expiryAdjuster, $storedToken, $tenancy) {
+            $builder = Mockery::mock(Builder::class, static function (MockInterface $mock) use ($storedToken, $expiryAdjuster, $tenancy) {
+                $mock->shouldReceive('where')
+                     ->withArgs([
+                         'email',
+                         'test@email.com',
+                     ])
+                     ->andReturnSelf()
+                     ->once();
+
+                if ($tenancy !== null) {
+                    $mock->shouldReceive('where')
+                         ->withArgs([
+                             'tenancy',
+                             'my-tenancy',
+                         ])
+                         ->andReturnSelf()
+                         ->once();
+                    $mock->shouldReceive('where')
+                         ->withArgs([
+                             'tenant_id',
+                             '7',
+                         ])
+                         ->andReturnSelf()
+                         ->once();
+                }
+
+                $mock->shouldReceive('first')
+                     ->andReturn($storedToken ? (object) [
+                         'token'      => $storedToken,
+                         'created_at' => ($expiryAdjuster ? $expiryAdjuster(Carbon::now()) : Carbon::now()->subMinute())->format('Y-m-d H:i:s'),
+                     ] : null)
+                     ->once();
+            });
+
+            $mock->shouldReceive('table')
+                 ->withArgs(['my_passwords'])
+                 ->andReturn($builder)
+                 ->once();
+        });
     }
 }

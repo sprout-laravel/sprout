@@ -20,18 +20,11 @@ use Sprout\Tests\Unit\UnitTestCase;
 
 class SproutDatabaseSessionHandlerCreatorTest extends UnitTestCase
 {
-    protected function defineEnvironment($app): void
-    {
-        tap($app['config'], static function (Repository $config) {
-            $config->set('sprout.overrides', []);
-        });
-    }
-
     #[Test]
     public function canCreateTheDatabaseHandler(): void
     {
         $connection = Mockery::mock(Connection::class);
-        $this->swap('db', Mockery::mock(DatabaseManager::class, static function (Mockery\MockInterface $mock) use ($connection) {
+        $this->swap('db', Mockery::mock(DatabaseManager::class, static function (MockInterface $mock) use ($connection) {
             $mock->shouldReceive('connection')->with(null)->andReturn($connection)->once();
         }));
 
@@ -44,7 +37,7 @@ class SproutDatabaseSessionHandlerCreatorTest extends UnitTestCase
 
         $creator = new SproutDatabaseSessionHandlerCreator(
             $this->app,
-            $sprout
+            $sprout,
         );
 
         $handler = $creator();
@@ -72,13 +65,13 @@ class SproutDatabaseSessionHandlerCreatorTest extends UnitTestCase
         $sprout->setCurrentTenancy($tenancy);
 
         $connection = Mockery::mock(Connection::class);
-        $this->swap('db', Mockery::mock(DatabaseManager::class, static function (Mockery\MockInterface $mock) use ($connection) {
+        $this->swap('db', Mockery::mock(DatabaseManager::class, static function (MockInterface $mock) use ($connection) {
             $mock->shouldReceive('connection')->with(null)->andReturn($connection)->once();
         }));
 
         $creator = new SproutDatabaseSessionHandlerCreator(
             $this->app,
-            $sprout
+            $sprout,
         );
 
         $handler = $creator();
@@ -94,7 +87,7 @@ class SproutDatabaseSessionHandlerCreatorTest extends UnitTestCase
     public function canCreateTheDatabaseHandlerWithTenantContextButNoTenancy(): void
     {
         $connection = Mockery::mock(Connection::class);
-        $this->swap('db', Mockery::mock(DatabaseManager::class, static function (Mockery\MockInterface $mock) use ($connection) {
+        $this->swap('db', Mockery::mock(DatabaseManager::class, static function (MockInterface $mock) use ($connection) {
             $mock->shouldReceive('connection')->with(null)->andReturn($connection)->once();
         }));
 
@@ -111,7 +104,7 @@ class SproutDatabaseSessionHandlerCreatorTest extends UnitTestCase
 
         $creator = new SproutDatabaseSessionHandlerCreator(
             $this->app,
-            $sprout
+            $sprout,
         );
 
         $handler = $creator();
@@ -119,5 +112,12 @@ class SproutDatabaseSessionHandlerCreatorTest extends UnitTestCase
         $this->assertInstanceOf(SproutDatabaseSessionHandler::class, $handler);
         $this->assertFalse($handler->hasTenancy());
         $this->assertFalse($handler->hasTenant());
+    }
+
+    protected function defineEnvironment($app): void
+    {
+        tap($app['config'], static function (Repository $config) {
+            $config->set('sprout.overrides', []);
+        });
     }
 }

@@ -22,15 +22,27 @@ use Sprout\Overrides\StackedOverride;
 use Sprout\Sprout;
 use Sprout\Support\SettingsRepository;
 use Sprout\Tests\Unit\UnitTestCase;
+
 use function Sprout\sprout;
 
 class AuthOverrideTest extends UnitTestCase
 {
-    protected function defineEnvironment($app): void
+    public static function authPasswordResolvedDataProvider(): array
     {
-        tap($app['config'], static function (Repository $config) {
-            $config->set('sprout.overrides', []);
-        });
+        return [
+            'auth.password resolved'     => [true],
+            'auth.password not resolved' => [false],
+        ];
+    }
+
+    public static function authResolvedDataProvider(): array
+    {
+        return [
+            'auth resolved auth.password not resolved'     => [true, false],
+            'auth resolved auth.password resolved'         => [true, true],
+            'auth not resolved auth.password not resolved' => [false, false],
+            'auth not resolved auth.password resolved'     => [false, true],
+        ];
     }
 
     #[Test]
@@ -193,7 +205,7 @@ class AuthOverrideTest extends UnitTestCase
 
         $override->setup(
             Mockery::mock(Tenancy::class),
-            Mockery::mock(Tenant::class)
+            Mockery::mock(Tenant::class),
         );
     }
 
@@ -254,7 +266,7 @@ class AuthOverrideTest extends UnitTestCase
 
         $override->cleanup(
             Mockery::mock(Tenancy::class),
-            Mockery::mock(Tenant::class)
+            Mockery::mock(Tenant::class),
         );
     }
 
@@ -315,25 +327,14 @@ class AuthOverrideTest extends UnitTestCase
 
         $override->cleanup(
             Mockery::mock(Tenancy::class),
-            Mockery::mock(Tenant::class)
+            Mockery::mock(Tenant::class),
         );
     }
 
-    public static function authPasswordResolvedDataProvider(): array
+    protected function defineEnvironment($app): void
     {
-        return [
-            'auth.password resolved'     => [true],
-            'auth.password not resolved' => [false],
-        ];
-    }
-
-    public static function authResolvedDataProvider(): array
-    {
-        return [
-            'auth resolved auth.password not resolved'     => [true, false],
-            'auth resolved auth.password resolved'         => [true, true],
-            'auth not resolved auth.password not resolved' => [false, false],
-            'auth not resolved auth.password resolved'     => [false, true],
-        ];
+        tap($app['config'], static function (Repository $config) {
+            $config->set('sprout.overrides', []);
+        });
     }
 }

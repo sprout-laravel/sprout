@@ -42,7 +42,7 @@ class TenantConfigAuthManagerTest extends UnitTestCase
                                   'driver' => 'fake',
                               ])
                               ->once();
-                     })
+                     }),
                  )
                  ->once();
         });
@@ -73,7 +73,7 @@ class TenantConfigAuthManagerTest extends UnitTestCase
                                   'name' => 'hi',
                               ])
                               ->once();
-                     })
+                     }),
                  )
                  ->once();
         });
@@ -98,7 +98,7 @@ class TenantConfigAuthManagerTest extends UnitTestCase
                               ->with('auth.providers.fake-provider')
                               ->andReturn(null)
                               ->once();
-                     })
+                     }),
                  )
                  ->once();
         });

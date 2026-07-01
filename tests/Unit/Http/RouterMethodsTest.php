@@ -11,6 +11,19 @@ use Sprout\Tests\Unit\UnitTestCase;
 
 class RouterMethodsTest extends UnitTestCase
 {
+    #[Test]
+    public function possiblyTenantedRegistersTheOptionalMiddleware(): void
+    {
+        $route = Route::getRoutes()->getByName('possibly-tenanted-test');
+
+        $this->assertNotNull($route);
+
+        $this->assertContains(
+            SproutOptionalTenantContextMiddleware::ALIAS . ':header,tenants',
+            $route->middleware(),
+        );
+    }
+
     protected function defineEnvironment($app): void
     {
         tap($app['config'], static function ($config) {
@@ -24,18 +37,5 @@ class RouterMethodsTest extends UnitTestCase
             $router->get('/possibly-tenanted-test', static fn () => 'ok')
                    ->name('possibly-tenanted-test');
         }, 'header');
-    }
-
-    #[Test]
-    public function possiblyTenantedRegistersTheOptionalMiddleware(): void
-    {
-        $route = Route::getRoutes()->getByName('possibly-tenanted-test');
-
-        $this->assertNotNull($route);
-
-        $this->assertContains(
-            SproutOptionalTenantContextMiddleware::ALIAS . ':header,tenants',
-            $route->middleware(),
-        );
     }
 }

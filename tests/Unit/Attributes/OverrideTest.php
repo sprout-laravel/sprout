@@ -12,8 +12,6 @@ use Sprout\Attributes\Override;
 use Sprout\Contracts\ServiceOverride;
 use Sprout\Managers\ServiceOverrideManager;
 use Sprout\Tests\Unit\UnitTestCase;
-use function Sprout\sprout;
-use function Sprout\tenancy;
 
 class OverrideTest extends UnitTestCase
 {

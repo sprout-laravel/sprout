@@ -13,42 +13,32 @@ use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use RuntimeException;
-use Sprout\TenantConfig;
-use Sprout\Contracts\ConfigStore;
-use Sprout\Exceptions\CyclicOverrideException;
-use Sprout\Managers\ConfigStoreManager;
-use Sprout\Overrides\Filesystem\TenantConfigFilesystemDiskOverride;
-use Sprout\Overrides\Filesystem\TenantConfigFilesystemDiskCreator;
-use Sprout\Tests\Unit\UnitTestCase;
 use Sprout\Contracts\BootableServiceOverride;
+use Sprout\Contracts\ConfigStore;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 use Sprout\Contracts\TenantHasResources;
-use Sprout\Overrides\Filesystem\SproutFilesystemManager;
+use Sprout\Exceptions\CyclicOverrideException;
+use Sprout\Managers\ConfigStoreManager;
 use Sprout\Overrides\Filesystem\FilesystemManagerOverride;
+use Sprout\Overrides\Filesystem\SproutFilesystemManager;
+use Sprout\Overrides\Filesystem\TenantConfigFilesystemDiskOverride;
 use Sprout\Overrides\StackedOverride;
 use Sprout\Sprout;
 use Sprout\Support\SettingsRepository;
+use Sprout\TenantConfig;
+use Sprout\Tests\Unit\UnitTestCase;
+
 use function Sprout\sprout;
 
 class TenantConfigFilesystemDiskOverrideTest extends UnitTestCase
 {
-    protected function defineEnvironment($app): void
+    public static function filesystemResolvedDataProvider(): array
     {
-        tap($app['config'], static function (Repository $config) {
-            $config->set('sprout.overrides', []);
-        });
-    }
-
-    private function mockFilesystemManager(): FilesystemManager&MockInterface
-    {
-        return Mockery::mock(SproutFilesystemManager::class, static function (MockInterface $mock) {
-            $mock->shouldReceive('extend')
-                 ->with('sprout:config', Mockery::on(static function ($arg) {
-                     return is_callable($arg) && $arg instanceof Closure;
-                 }))
-                 ->once();
-        });
+        return [
+            'filesystem resolved'     => [true],
+            'filesystem not resolved' => [false],
+        ];
     }
 
     #[Test]
@@ -189,7 +179,7 @@ class TenantConfigFilesystemDiskOverrideTest extends UnitTestCase
         });
 
         /** @var \Illuminate\Foundation\Application&MockInterface $app */
-        $app = Mockery::mock($this->app, static function (MockInterface $mock) use ($tenancy, $tenant) {
+        $app = Mockery::mock($this->app, static function (MockInterface $mock) {
             $mock->makePartial();
         });
 
@@ -219,7 +209,7 @@ class TenantConfigFilesystemDiskOverrideTest extends UnitTestCase
 
         $override->boot($app, $sprout);
 
-        /** @var \Sprout\Overrides\Filesystem\SproutFilesystemManager $manager */
+        /** @var SproutFilesystemManager $manager */
         $manager = $app->make('filesystem');
 
         $this->expectException(RuntimeException::class);
@@ -238,7 +228,7 @@ class TenantConfigFilesystemDiskOverrideTest extends UnitTestCase
             ],
         ]);
 
-        $tenant  = Mockery::mock(Tenant::class, TenantHasResources::class, static function (MockInterface $mock) {
+        $tenant = Mockery::mock(Tenant::class, TenantHasResources::class, static function (MockInterface $mock) {
         });
         $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) use ($tenant) {
             $mock->shouldReceive('check')->andReturnTrue()->once();
@@ -246,7 +236,7 @@ class TenantConfigFilesystemDiskOverrideTest extends UnitTestCase
         });
 
         /** @var \Illuminate\Foundation\Application&MockInterface $app */
-        $app = Mockery::mock($this->app, static function (MockInterface $mock) use ($tenancy, $tenant) {
+        $app = Mockery::mock($this->app, static function (MockInterface $mock) {
             $mock->makePartial();
         });
 
@@ -265,8 +255,8 @@ class TenantConfigFilesystemDiskOverrideTest extends UnitTestCase
                               'filesystem',
                               'bud-disk',
                           )->andReturn([
-                             'driver' => 'sprout:config',
-                         ]);
+                              'driver' => 'sprout:config',
+                          ]);
                  }));
         })));
 
@@ -278,7 +268,7 @@ class TenantConfigFilesystemDiskOverrideTest extends UnitTestCase
 
         $override->boot($app, $sprout);
 
-        /** @var \Sprout\Overrides\Filesystem\SproutFilesystemManager $manager */
+        /** @var SproutFilesystemManager $manager */
         $manager = $app->make('filesystem');
 
         $this->expectException(CyclicOverrideException::class);
@@ -325,10 +315,10 @@ class TenantConfigFilesystemDiskOverrideTest extends UnitTestCase
                               'filesystem',
                               'bud-disk',
                           )->andReturn([
-                             'driver' => 'local',
-                             'root'   => storage_path('app'),
-                             'throw'  => false,
-                         ]);
+                              'driver' => 'local',
+                              'root'   => storage_path('app'),
+                              'throw'  => false,
+                          ]);
                  }));
         })));
 
@@ -340,7 +330,7 @@ class TenantConfigFilesystemDiskOverrideTest extends UnitTestCase
 
         $override->boot($app, $sprout);
 
-        /** @var \Sprout\Overrides\Filesystem\SproutFilesystemManager $filesystem */
+        /** @var SproutFilesystemManager $filesystem */
         $filesystem = $app->make('filesystem');
 
         $filesystem->disk('bud-disk');
@@ -389,14 +379,14 @@ class TenantConfigFilesystemDiskOverrideTest extends UnitTestCase
                               'filesystem',
                               'bud-disk',
                           )->andReturn([
-                             'driver' => 'local',
-                             'root'   => storage_path('app'),
-                             'throw'  => false,
-                         ]);
+                              'driver' => 'local',
+                              'root'   => storage_path('app'),
+                              'throw'  => false,
+                          ]);
                  }));
         })));
 
-        $sprout  = new Sprout($app, new SettingsRepository());
+        $sprout = new Sprout($app, new SettingsRepository());
 
         $sprout->setCurrentTenancy($tenancy);
 
@@ -460,11 +450,21 @@ class TenantConfigFilesystemDiskOverrideTest extends UnitTestCase
         $this->assertEmpty($filesystemOverride->getOverrides());
     }
 
-    public static function filesystemResolvedDataProvider(): array
+    protected function defineEnvironment($app): void
     {
-        return [
-            'filesystem resolved'     => [true],
-            'filesystem not resolved' => [false],
-        ];
+        tap($app['config'], static function (Repository $config) {
+            $config->set('sprout.overrides', []);
+        });
+    }
+
+    private function mockFilesystemManager(): FilesystemManager&MockInterface
+    {
+        return Mockery::mock(SproutFilesystemManager::class, static function (MockInterface $mock) {
+            $mock->shouldReceive('extend')
+                 ->with('sprout:config', Mockery::on(static function ($arg) {
+                     return is_callable($arg) && $arg instanceof Closure;
+                 }))
+                 ->once();
+        });
     }
 }

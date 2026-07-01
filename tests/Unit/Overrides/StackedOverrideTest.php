@@ -144,7 +144,7 @@ class StackedOverrideTest extends UnitTestCase
                      [
                          'service' => 'test',
                          'config'  => [],
-                     ]
+                     ],
                  )
                  ->atLeast()
                  ->once()
@@ -176,7 +176,7 @@ class StackedOverrideTest extends UnitTestCase
                      [
                          'service' => 'test',
                          'config'  => ['test1' => 'value1'],
-                     ]
+                     ],
                  )
                  ->atLeast()
                  ->once()
@@ -188,7 +188,7 @@ class StackedOverrideTest extends UnitTestCase
                      [
                          'service' => 'test',
                          'config'  => ['test2' => 'value2'],
-                     ]
+                     ],
                  )
                  ->atLeast()
                  ->once()
@@ -262,19 +262,19 @@ class StackedOverrideTest extends UnitTestCase
         Event::assertDispatched(
             ServiceOverrideBooted::class,
             static fn (ServiceOverrideBooted $event): bool => $event->service === 'test'
-                && $event->override === $password
+                && $event->override                                           === $password,
         );
 
         Event::assertDispatched(
             ServiceOverrideBooted::class,
             static fn (ServiceOverrideBooted $event): bool => $event->service === 'test'
-                && $event->override === $authManager
+                && $event->override                                           === $authManager,
         );
 
         // ...but never for the child that isn't bootable
         Event::assertNotDispatched(
             ServiceOverrideBooted::class,
-            static fn (ServiceOverrideBooted $event): bool => $event->override === $guard
+            static fn (ServiceOverrideBooted $event): bool => $event->override === $guard,
         );
     }
 }

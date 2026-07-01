@@ -10,17 +10,11 @@ use PHPUnit\Framework\Attributes\Test;
 use Sprout\Listeners\SetCurrentTenantForJob;
 use Sprout\Tests\Unit\UnitTestCase;
 use Workbench\App\Models\TenantModel;
+
 use function Sprout\sprout;
 
 class SetCurrentTenantForJobTest extends UnitTestCase
 {
-    protected function defineEnvironment($app): void
-    {
-        tap($app['config'], static function ($config) {
-            $config->set('multitenancy.providers.tenants.model', TenantModel::class);
-        });
-    }
-
     #[Test]
     public function setsTenantsForJobs(): void
     {
@@ -41,5 +35,12 @@ class SetCurrentTenantForJobTest extends UnitTestCase
         $this->assertTrue($sprout->hasCurrentTenancy());
         $this->assertSame('tenants', sprout()->getCurrentTenancy()->getName());
         $this->assertTrue(sprout()->getCurrentTenancy()->check());
+    }
+
+    protected function defineEnvironment($app): void
+    {
+        tap($app['config'], static function ($config) {
+            $config->set('multitenancy.providers.tenants.model', TenantModel::class);
+        });
     }
 }

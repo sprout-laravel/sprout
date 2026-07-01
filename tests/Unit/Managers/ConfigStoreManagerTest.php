@@ -15,69 +15,14 @@ use Illuminate\Support\Str;
 use Mockery;
 use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\Test;
+use Sprout\Exceptions\MisconfigurationException;
 use Sprout\Managers\ConfigStoreManager;
 use Sprout\Stores\DatabaseConfigStore;
 use Sprout\Stores\FilesystemConfigStore;
 use Sprout\Tests\Unit\UnitTestCase;
-use Sprout\Exceptions\MisconfigurationException;
 
 class ConfigStoreManagerTest extends UnitTestCase
 {
-    /**
-     * Mocks an application instance and allows optional customisation via a callback function.
-     *
-     * @param Closure|null $callback An optional callback to customise the mocks behaviour.
-     *
-     * @return \Illuminate\Foundation\Application&\Mockery\MockInterface The mocked application instance.
-     */
-    protected function mockApplication(?Closure $callback = null): Application&MockInterface
-    {
-        /** @var \Illuminate\Foundation\Application&\Mockery\MockInterface $application */
-        $application = Mockery::mock(Application::class, static function (MockInterface $mock) use ($callback) {
-            if ($callback !== null) {
-                $callback($mock);
-            }
-        });
-
-        return $application;
-    }
-
-    /**
-     * Mocks a configuration repository instance and allows optional customisation via a callback function.
-     *
-     * @param Closure|null $callback An optional callback to customise the mocks behaviour.
-     *
-     * @return \Illuminate\Config\Repository&\Mockery\MockInterface The mocked configuration repository instance.
-     */
-    protected function mockConfig(?Closure $callback = null): Repository&MockInterface
-    {
-        /** @var \Illuminate\Config\Repository&\Mockery\MockInterface $config */
-        $config = Mockery::mock(Repository::class, static function (MockInterface $mock) use ($callback) {
-            if ($callback !== null) {
-                $callback($mock);
-            }
-        });
-
-        return $config;
-    }
-
-    protected function mockFilesystem(?Closure $callback = null): FilesystemManager&MockInterface
-    {
-        /** @var \Illuminate\Filesystem\FilesystemManager&\Mockery\MockInterface $filesystem */
-        $filesystem = Mockery::mock(FilesystemManager::class, static function (MockInterface $mock) use ($callback) {
-            if ($callback !== null) {
-                $callback($mock);
-            }
-        });
-
-        return $filesystem;
-    }
-
-    protected function getConfigStoreManager(Application $app): ConfigStoreManager
-    {
-        return new ConfigStoreManager($app);
-    }
-
     #[Test]
     public function hasTheCorrectName(): void
     {
@@ -410,5 +355,60 @@ class ConfigStoreManagerTest extends UnitTestCase
         $this->expectExceptionMessage('The config store [database] is missing a required value for \'table\'');
 
         $manager->get('database');
+    }
+
+    /**
+     * Mocks an application instance and allows optional customisation via a callback function.
+     *
+     * @param Closure|null $callback an optional callback to customise the mocks behaviour
+     *
+     * @return Application&MockInterface The mocked application instance
+     */
+    protected function mockApplication(?Closure $callback = null): Application&MockInterface
+    {
+        /** @var Application&MockInterface $application */
+        $application = Mockery::mock(Application::class, static function (MockInterface $mock) use ($callback) {
+            if ($callback !== null) {
+                $callback($mock);
+            }
+        });
+
+        return $application;
+    }
+
+    /**
+     * Mocks a configuration repository instance and allows optional customisation via a callback function.
+     *
+     * @param Closure|null $callback an optional callback to customise the mocks behaviour
+     *
+     * @return Repository&MockInterface The mocked configuration repository instance
+     */
+    protected function mockConfig(?Closure $callback = null): Repository&MockInterface
+    {
+        /** @var Repository&MockInterface $config */
+        $config = Mockery::mock(Repository::class, static function (MockInterface $mock) use ($callback) {
+            if ($callback !== null) {
+                $callback($mock);
+            }
+        });
+
+        return $config;
+    }
+
+    protected function mockFilesystem(?Closure $callback = null): FilesystemManager&MockInterface
+    {
+        /** @var FilesystemManager&MockInterface $filesystem */
+        $filesystem = Mockery::mock(FilesystemManager::class, static function (MockInterface $mock) use ($callback) {
+            if ($callback !== null) {
+                $callback($mock);
+            }
+        });
+
+        return $filesystem;
+    }
+
+    protected function getConfigStoreManager(Application $app): ConfigStoreManager
+    {
+        return new ConfigStoreManager($app);
     }
 }

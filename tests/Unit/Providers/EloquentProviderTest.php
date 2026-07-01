@@ -11,19 +11,12 @@ use Sprout\Providers\EloquentTenantProvider;
 use Sprout\Tests\Unit\UnitTestCase;
 use Workbench\App\Models\NoResourcesTenantModel;
 use Workbench\App\Models\TenantModel;
+
 use function Sprout\provider;
-use function Sprout\sprout;
 
 class EloquentProviderTest extends UnitTestCase
 {
     use RefreshDatabase;
-
-    protected function defineEnvironment($app): void
-    {
-        tap($app['config'], static function ($config) {
-            $config->set('multitenancy.providers.tenants.model', TenantModel::class);
-        });
-    }
 
     #[Test]
     public function hasARegisteredName(): void
@@ -102,5 +95,12 @@ class EloquentProviderTest extends UnitTestCase
         $this->expectExceptionMessage('The current tenant [' . NoResourcesTenantModel::class . '] is not configured correctly for resources');
 
         $provider->retrieveByResourceKey(Str::uuid()->toString());
+    }
+
+    protected function defineEnvironment($app): void
+    {
+        tap($app['config'], static function ($config) {
+            $config->set('multitenancy.providers.tenants.model', TenantModel::class);
+        });
     }
 }

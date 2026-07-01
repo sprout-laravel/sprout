@@ -9,6 +9,7 @@ use Illuminate\Config\Repository;
 use Illuminate\Foundation\Application;
 use InvalidArgumentException;
 use Mockery;
+use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\Test;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
@@ -22,37 +23,16 @@ use Sprout\Tests\Unit\UnitTestCase;
 
 class SproutCacheDriverCreatorTest extends UnitTestCase
 {
-    private function mockTenancy(bool $withTenant = true, bool $getsKey = true): Tenancy&Mockery\MockInterface
-    {
-        $tenant = Mockery::mock(Tenant::class, static function (Mockery\MockInterface $mock) use ($getsKey, $withTenant) {
-            if ($withTenant && $getsKey) {
-                $mock->shouldReceive('getTenantKey')->andReturn(7777777)->once();
-            }
-        });
-
-        return Mockery::mock(Tenancy::class, static function (Mockery\MockInterface $mock) use ($getsKey, $withTenant, $tenant) {
-            $mock->shouldReceive('check')->andReturn($withTenant)->once();
-
-            if ($getsKey) {
-                $mock->shouldReceive('getName')->andReturn('my-tenancy')->once();
-            }
-
-            if ($withTenant) {
-                $mock->shouldReceive('tenant')->andReturn($tenant)->once();
-            }
-        });
-    }
-
     #[Test]
     public function canCreateTheDriver(): void
     {
-        /** @var \Illuminate\Foundation\Application&\Mockery\MockInterface $app */
-        $app     = Mockery::mock($this->app, static function (Mockery\MockInterface $mock) {
+        /** @var Application&MockInterface $app */
+        $app = Mockery::mock($this->app, static function (MockInterface $mock) {
             $mock->makePartial();
 
             $mock->shouldReceive('make')
                  ->with('config')
-                 ->andReturn(Mockery::mock(Repository::class, static function (Mockery\MockInterface $mock) {
+                 ->andReturn(Mockery::mock(Repository::class, static function (MockInterface $mock) {
                      $mock->shouldReceive('get')
                           ->with('cache.stores.my-fake-store')
                           ->andReturn([
@@ -62,7 +42,7 @@ class SproutCacheDriverCreatorTest extends UnitTestCase
                           ->once();
                  }));
         });
-        $cache   = Mockery::mock(CacheManager::class, static function (Mockery\MockInterface $mock) {
+        $cache = Mockery::mock(CacheManager::class, static function (MockInterface $mock) {
             $mock->shouldReceive('build')
                  ->andReturn(Mockery::mock(CacheRepository::class))
                  ->with(Mockery::on(static function ($arg) {
@@ -78,8 +58,8 @@ class SproutCacheDriverCreatorTest extends UnitTestCase
         $creator = new SproutCacheDriverCreator(
             $app,
             $cache,
-            ['override' => 'my-fake-store',],
-            $sprout
+            ['override' => 'my-fake-store'],
+            $sprout,
         );
 
         $tenancy = $this->mockTenancy();
@@ -94,15 +74,15 @@ class SproutCacheDriverCreatorTest extends UnitTestCase
     #[Test]
     public function throwsAnExceptionWhenOutsideMultitenantedContext(): void
     {
-        /** @var \Illuminate\Foundation\Application&\Mockery\MockInterface $app */
+        /** @var Application&MockInterface $app */
         $app     = Mockery::mock(Application::class);
         $cache   = Mockery::mock(CacheManager::class);
         $sprout  = new Sprout($app, new SettingsRepository());
         $creator = new SproutCacheDriverCreator(
             $app,
             $cache,
-            ['override' => 'my-fake-store',],
-            $sprout
+            ['override' => 'my-fake-store'],
+            $sprout,
         );
 
         $this->expectException(TenancyMissingException::class);
@@ -114,15 +94,15 @@ class SproutCacheDriverCreatorTest extends UnitTestCase
     #[Test]
     public function throwsAnExceptionWhenThereIsNoTenancy(): void
     {
-        /** @var \Illuminate\Foundation\Application&\Mockery\MockInterface $app */
+        /** @var Application&MockInterface $app */
         $app     = Mockery::mock(Application::class);
         $cache   = Mockery::mock(CacheManager::class);
         $sprout  = new Sprout($app, new SettingsRepository());
         $creator = new SproutCacheDriverCreator(
             $app,
             $cache,
-            ['override' => 'my-fake-store',],
-            $sprout
+            ['override' => 'my-fake-store'],
+            $sprout,
         );
 
         $sprout->markAsInContext();
@@ -136,8 +116,8 @@ class SproutCacheDriverCreatorTest extends UnitTestCase
     #[Test]
     public function throwsAnExceptionWhenThereIsNoTenant(): void
     {
-        /** @var \Illuminate\Foundation\Application&\Mockery\MockInterface $app */
-        $app     = Mockery::mock(Application::class, static function (Mockery\MockInterface $mock) {
+        /** @var Application&MockInterface $app */
+        $app = Mockery::mock(Application::class, static function (MockInterface $mock) {
             $mock->shouldIgnoreMissing();
         });
         $cache   = Mockery::mock(CacheManager::class);
@@ -145,8 +125,8 @@ class SproutCacheDriverCreatorTest extends UnitTestCase
         $creator = new SproutCacheDriverCreator(
             $app,
             $cache,
-            ['override' => 'my-fake-store',],
-            $sprout
+            ['override' => 'my-fake-store'],
+            $sprout,
         );
 
         $sprout->setCurrentTenancy($this->mockTenancy(false));
@@ -160,8 +140,8 @@ class SproutCacheDriverCreatorTest extends UnitTestCase
     #[Test]
     public function throwsAnExceptionWhenThereIsNoOverride(): void
     {
-        /** @var \Illuminate\Foundation\Application&\Mockery\MockInterface $app */
-        $app     = Mockery::mock(Application::class, static function (Mockery\MockInterface $mock) {
+        /** @var Application&MockInterface $app */
+        $app = Mockery::mock(Application::class, static function (MockInterface $mock) {
             $mock->shouldIgnoreMissing();
         });
         $cache   = Mockery::mock(CacheManager::class);
@@ -170,7 +150,7 @@ class SproutCacheDriverCreatorTest extends UnitTestCase
             $app,
             $cache,
             [],
-            $sprout
+            $sprout,
         );
 
         $sprout->setCurrentTenancy($this->mockTenancy(true, false));
@@ -184,13 +164,13 @@ class SproutCacheDriverCreatorTest extends UnitTestCase
     #[Test]
     public function throwsAnExceptionWhenTheOverrideIsNotConfigured(): void
     {
-        /** @var \Illuminate\Foundation\Application&\Mockery\MockInterface $app */
-        $app     = Mockery::mock(Application::class, static function (Mockery\MockInterface $mock) {
+        /** @var Application&MockInterface $app */
+        $app = Mockery::mock(Application::class, static function (MockInterface $mock) {
             $mock->shouldIgnoreMissing();
 
             $mock->shouldReceive('make')
                  ->with('config')
-                 ->andReturn(Mockery::mock(Repository::class, static function (Mockery\MockInterface $mock) {
+                 ->andReturn(Mockery::mock(Repository::class, static function (MockInterface $mock) {
                      $mock->shouldReceive('get')
                           ->with('cache.stores.my-fake-store')
                           ->andReturnNull()
@@ -203,7 +183,7 @@ class SproutCacheDriverCreatorTest extends UnitTestCase
             $app,
             $cache,
             ['override' => 'my-fake-store'],
-            $sprout
+            $sprout,
         );
 
         $sprout->setCurrentTenancy($this->mockTenancy(true, false));
@@ -212,5 +192,26 @@ class SproutCacheDriverCreatorTest extends UnitTestCase
         $this->expectExceptionMessage('Cache store [my-fake-store] is not defined');
 
         $creator();
+    }
+
+    private function mockTenancy(bool $withTenant = true, bool $getsKey = true): Tenancy&MockInterface
+    {
+        $tenant = Mockery::mock(Tenant::class, static function (MockInterface $mock) use ($getsKey, $withTenant) {
+            if ($withTenant && $getsKey) {
+                $mock->shouldReceive('getTenantKey')->andReturn(7777777)->once();
+            }
+        });
+
+        return Mockery::mock(Tenancy::class, static function (MockInterface $mock) use ($getsKey, $withTenant, $tenant) {
+            $mock->shouldReceive('check')->andReturn($withTenant)->once();
+
+            if ($getsKey) {
+                $mock->shouldReceive('getName')->andReturn('my-tenancy')->once();
+            }
+
+            if ($withTenant) {
+                $mock->shouldReceive('tenant')->andReturn($tenant)->once();
+            }
+        });
     }
 }

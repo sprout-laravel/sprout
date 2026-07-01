@@ -11,7 +11,6 @@ use Mockery;
 use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\TenantConfig;
 use Sprout\Contracts\BootableServiceOverride;
 use Sprout\Contracts\ConfigStore;
 use Sprout\Contracts\Tenancy;
@@ -22,27 +21,19 @@ use Sprout\Managers\ConfigStoreManager;
 use Sprout\Overrides\Cache\TenantConfigCacheStoreOverride;
 use Sprout\Sprout;
 use Sprout\Support\SettingsRepository;
+use Sprout\TenantConfig;
 use Sprout\Tests\Unit\UnitTestCase;
+
 use function Sprout\sprout;
 
 class TenantConfigCacheStoreOverrideTest extends UnitTestCase
 {
-    protected function defineEnvironment($app): void
+    public static function cacheResolvedDataProvider(): array
     {
-        tap($app['config'], static function (Repository $config) {
-            $config->set('sprout.overrides', []);
-        });
-    }
-
-    private function mockCacheManager(): CacheManager&MockInterface
-    {
-        return Mockery::mock(CacheManager::class, static function (MockInterface $mock) {
-            $mock->shouldReceive('extend')
-                 ->with('sprout:config', Mockery::on(static function ($arg) {
-                     return is_callable($arg) && $arg instanceof Closure;
-                 }))
-                 ->once();
-        });
+        return [
+            'cache resolved'     => [true],
+            'cache not resolved' => [false],
+        ];
     }
 
     #[Test]
@@ -116,7 +107,7 @@ class TenantConfigCacheStoreOverrideTest extends UnitTestCase
     {
         $override = new TenantConfigCacheStoreOverride('cache', []);
 
-        $tenant  = Mockery::mock(Tenant::class, TenantHasResources::class, static function (MockInterface $mock) {
+        $tenant = Mockery::mock(Tenant::class, TenantHasResources::class, static function (MockInterface $mock) {
         });
         $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) use ($tenant) {
             $mock->shouldReceive('check')->andReturnTrue()->once();
@@ -124,7 +115,7 @@ class TenantConfigCacheStoreOverrideTest extends UnitTestCase
         });
 
         /** @var \Illuminate\Foundation\Application&MockInterface $app */
-        $app = Mockery::mock($this->app, static function (MockInterface $mock) use ($tenancy, $tenant) {
+        $app = Mockery::mock($this->app, static function (MockInterface $mock) {
             $mock->makePartial();
         });
 
@@ -143,8 +134,8 @@ class TenantConfigCacheStoreOverrideTest extends UnitTestCase
                               'cache',
                               'bud-cache',
                           )->andReturn([
-                             'driver' => 'sprout:config',
-                         ]);
+                              'driver' => 'sprout:config',
+                          ]);
                  }));
         })));
 
@@ -156,7 +147,7 @@ class TenantConfigCacheStoreOverrideTest extends UnitTestCase
 
         $override->boot($app, $sprout);
 
-        /** @var \Illuminate\Cache\CacheManager $manager */
+        /** @var CacheManager $manager */
         $manager = $app->make('cache');
 
         $this->expectException(CyclicOverrideException::class);
@@ -198,9 +189,9 @@ class TenantConfigCacheStoreOverrideTest extends UnitTestCase
                               'cache',
                               'bud-cache',
                           )->andReturn([
-                             'driver'    => 'array',
-                             'serialize' => false,
-                         ]);
+                              'driver'    => 'array',
+                              'serialize' => false,
+                          ]);
                  }));
         })));
 
@@ -212,7 +203,7 @@ class TenantConfigCacheStoreOverrideTest extends UnitTestCase
 
         $override->boot($app, $sprout);
 
-        /** @var \Illuminate\Cache\CacheManager $manager */
+        /** @var CacheManager $manager */
         $manager = $app->make('cache');
 
         $manager->store('bud-cache');
@@ -255,9 +246,9 @@ class TenantConfigCacheStoreOverrideTest extends UnitTestCase
                               'cache',
                               'bud-cache',
                           )->andReturn([
-                             'driver'    => 'array',
-                             'serialize' => false,
-                         ]);
+                              'driver'    => 'array',
+                              'serialize' => false,
+                          ]);
                  }));
         })));
 
@@ -271,7 +262,7 @@ class TenantConfigCacheStoreOverrideTest extends UnitTestCase
 
         $this->assertEmpty($override->getOverrides());
 
-        /** @var \Illuminate\Cache\CacheManager $manager */
+        /** @var CacheManager $manager */
         $manager = $app->make('cache');
 
         $manager->store('bud-cache');
@@ -322,11 +313,21 @@ class TenantConfigCacheStoreOverrideTest extends UnitTestCase
         $this->assertEmpty($override->getOverrides());
     }
 
-    public static function cacheResolvedDataProvider(): array
+    protected function defineEnvironment($app): void
     {
-        return [
-            'cache resolved'     => [true],
-            'cache not resolved' => [false],
-        ];
+        tap($app['config'], static function (Repository $config) {
+            $config->set('sprout.overrides', []);
+        });
+    }
+
+    private function mockCacheManager(): CacheManager&MockInterface
+    {
+        return Mockery::mock(CacheManager::class, static function (MockInterface $mock) {
+            $mock->shouldReceive('extend')
+                 ->with('sprout:config', Mockery::on(static function ($arg) {
+                     return is_callable($arg) && $arg instanceof Closure;
+                 }))
+                 ->once();
+        });
     }
 }

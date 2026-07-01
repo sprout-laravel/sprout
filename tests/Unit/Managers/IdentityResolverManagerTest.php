@@ -13,32 +13,11 @@ use Sprout\Http\Resolvers\SessionIdentityResolver;
 use Sprout\Http\Resolvers\SubdomainIdentityResolver;
 use Sprout\Managers\IdentityResolverManager;
 use Sprout\Tests\Unit\UnitTestCase;
-use function Sprout\resolver;
+
 use function Sprout\sprout;
 
 class IdentityResolverManagerTest extends UnitTestCase
 {
-    protected function defineEnvironment($app): void
-    {
-        tap($app['config'], static function ($config) {
-            $config->set('multitenancy.resolvers.subdomain.domain', 'localhost');
-        });
-    }
-
-    protected function withoutDefault($app): void
-    {
-        tap($app['config'], static function ($config) {
-            $config->set('multitenancy.defaults.resolver', null);
-        });
-    }
-
-    protected function withoutConfig($app): void
-    {
-        tap($app['config'], static function ($config) {
-            $config->set('multitenancy.resolvers.path', null);
-        });
-    }
-
     #[Test]
     public function isNamedCorrectly(): void
     {
@@ -215,5 +194,26 @@ class IdentityResolverManagerTest extends UnitTestCase
         $this->assertSame('somedomain.local', $resolver->getDomain());
         $this->assertTrue($manager->hasResolved('path'));
         $this->assertFalse($manager->hasResolved('subdomain'));
+    }
+
+    protected function defineEnvironment($app): void
+    {
+        tap($app['config'], static function ($config) {
+            $config->set('multitenancy.resolvers.subdomain.domain', 'localhost');
+        });
+    }
+
+    protected function withoutDefault($app): void
+    {
+        tap($app['config'], static function ($config) {
+            $config->set('multitenancy.defaults.resolver', null);
+        });
+    }
+
+    protected function withoutConfig($app): void
+    {
+        tap($app['config'], static function ($config) {
+            $config->set('multitenancy.resolvers.path', null);
+        });
     }
 }

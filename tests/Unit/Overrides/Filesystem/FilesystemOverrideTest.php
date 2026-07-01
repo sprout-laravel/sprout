@@ -21,26 +21,19 @@ use Sprout\Overrides\StackedOverride;
 use Sprout\Sprout;
 use Sprout\Support\SettingsRepository;
 use Sprout\Tests\Unit\UnitTestCase;
+
 use function Sprout\sprout;
 
 class FilesystemOverrideTest extends UnitTestCase
 {
-    protected function defineEnvironment($app): void
+    public static function filesystemResolvedDataProvider(): array
     {
-        tap($app['config'], static function (Repository $config) {
-            $config->set('sprout.overrides', []);
-        });
-    }
-
-    private function mockFilesystemManager(): FilesystemManager&MockInterface
-    {
-        return Mockery::mock(FilesystemManager::class, static function (MockInterface $mock) {
-            $mock->shouldReceive('extend')
-                 ->with('sprout', Mockery::on(static function ($arg) {
-                     return is_callable($arg) && $arg instanceof Closure;
-                 }))
-                 ->once();
-        });
+        return [
+            'filesystem resolved no manager override'     => [true, false],
+            'filesystem not resolved no manager override' => [false, false],
+            'filesystem resolved manager override'        => [true, true],
+            'filesystem not resolved  manager override'   => [false, true],
+        ];
     }
 
     #[Test]
@@ -153,8 +146,8 @@ class FilesystemOverrideTest extends UnitTestCase
             $mock->makePartial();
         });
 
-        $sprout  = new Sprout($app, new SettingsRepository());
-        $tenant  = Mockery::mock(Tenant::class, TenantHasResources::class, static function (MockInterface $mock) {
+        $sprout = new Sprout($app, new SettingsRepository());
+        $tenant = Mockery::mock(Tenant::class, TenantHasResources::class, static function (MockInterface $mock) {
             $mock->shouldReceive('getTenantResourceKey')->andReturn('my-resource-key')->once();
         });
         $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) use ($tenant) {
@@ -197,8 +190,8 @@ class FilesystemOverrideTest extends UnitTestCase
             $mock->makePartial();
         });
 
-        $sprout  = new Sprout($app, new SettingsRepository());
-        $tenant  = Mockery::mock(Tenant::class, TenantHasResources::class, static function (MockInterface $mock) {
+        $sprout = new Sprout($app, new SettingsRepository());
+        $tenant = Mockery::mock(Tenant::class, TenantHasResources::class, static function (MockInterface $mock) {
             $mock->shouldReceive('getTenantResourceKey')->andReturn('my-resource-key')->once();
         });
         $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) use ($tenant) {
@@ -254,8 +247,8 @@ class FilesystemOverrideTest extends UnitTestCase
             'disk'   => 'local',
         ]);
 
-        $sprout  = new Sprout($app, new SettingsRepository());
-        $tenant  = Mockery::mock(Tenant::class, TenantHasResources::class, static function (MockInterface $mock) {
+        $sprout = new Sprout($app, new SettingsRepository());
+        $tenant = Mockery::mock(Tenant::class, TenantHasResources::class, static function (MockInterface $mock) {
             $mock->shouldReceive('getTenantResourceKey')->andReturn('my-resource-key')->once();
         });
         $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) use ($tenant) {
@@ -326,13 +319,21 @@ class FilesystemOverrideTest extends UnitTestCase
         $this->assertEmpty($filesystemOverride->getDrivers());
     }
 
-    public static function filesystemResolvedDataProvider(): array
+    protected function defineEnvironment($app): void
     {
-        return [
-            'filesystem resolved no manager override'     => [true, false],
-            'filesystem not resolved no manager override' => [false, false],
-            'filesystem resolved manager override'        => [true, true],
-            'filesystem not resolved  manager override'   => [false, true],
-        ];
+        tap($app['config'], static function (Repository $config) {
+            $config->set('sprout.overrides', []);
+        });
+    }
+
+    private function mockFilesystemManager(): FilesystemManager&MockInterface
+    {
+        return Mockery::mock(FilesystemManager::class, static function (MockInterface $mock) {
+            $mock->shouldReceive('extend')
+                 ->with('sprout', Mockery::on(static function ($arg) {
+                     return is_callable($arg) && $arg instanceof Closure;
+                 }))
+                 ->once();
+        });
     }
 }

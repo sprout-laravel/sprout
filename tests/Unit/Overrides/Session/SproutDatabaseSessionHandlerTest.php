@@ -8,6 +8,7 @@ use Illuminate\Config\Repository;
 use Illuminate\Database\Connection;
 use Illuminate\Database\Query\Builder;
 use Mockery;
+use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use Sprout\Contracts\Tenancy;
@@ -17,61 +18,15 @@ use Sprout\Tests\Unit\UnitTestCase;
 
 class SproutDatabaseSessionHandlerTest extends UnitTestCase
 {
-    protected function defineEnvironment($app): void
+    public static function databaseSessionDataProvider(): array
     {
-        tap($app['config'], static function (Repository $config) {
-            $config->set('sprout.overrides', []);
-        });
-    }
+        $tenancy = Mockery::mock(Tenancy::class);
+        $tenant  = Mockery::mock(Tenant::class)->makePartial();
 
-    protected function createHandler(?Tenancy $tenancy = null, ?Tenant $tenant = null, ?Builder $builder = null): SproutDatabaseSessionHandler
-    {
-        $lifetime   = config('session.lifetime');
-        $connection = Mockery::mock(Connection::class, static function (Mockery\MockInterface $mock) use ($builder) {
-            if ($builder !== null) {
-                $mock->shouldReceive('table')->withArgs(['my_tenant_table'])->andReturn($builder)->atLeast()->once();
-            }
-        });
-
-        $handler = new SproutDatabaseSessionHandler(
-            $connection,
-            'my_tenant_table',
-            $lifetime
-        );
-
-        if ($tenancy && $tenant) {
-            $handler->setTenancy($tenancy)->setTenant($tenant);
-        }
-
-        return $handler;
-    }
-
-    protected function mockTenancyAndTenant(?Tenancy $tenancy = null, ?Tenant $tenant = null): void
-    {
-        if ($tenancy !== null && $tenant !== null) {
-            /**
-             * @var \Mockery\MockInterface|Tenancy $tenancy
-             * @var \Mockery\MockInterface|Tenant  $tenant
-             */
-            $tenancy->shouldReceive('getName')->atLeast()->once()->andReturn('my-tenancy');
-            $tenant->shouldReceive('getTenantKey')->atLeast()->once()->andReturn(777);
-        }
-    }
-
-    private function mockQuery($sessionId, ?Tenancy $tenancy, ?Tenant $tenant, $returnValue, bool $find = true): Mockery\MockInterface&Builder
-    {
-        return Mockery::mock(Builder::class, static function (Mockery\MockInterface $mock) use ($sessionId, $tenancy, $tenant, $returnValue, $find) {
-            if ($tenancy !== null) {
-                $mock->shouldReceive('where')->withArgs(['tenancy', '=', $tenancy->getName()])->andReturnSelf()->once();
-                $mock->shouldReceive('where')->withArgs(['tenant_id', '=', $tenant->getTenantKey()])->andReturnSelf()->once();
-            }
-
-            if ($find) {
-                $mock->shouldReceive('find')->withArgs([$sessionId])->andReturn($returnValue)->once();
-            }
-
-            $mock->shouldReceive('useWritePdo')->andReturnSelf();
-        });
+        return [
+            'outside of tenant context' => [null, null],
+            'inside of tenant context'  => [$tenancy, $tenant],
+        ];
     }
 
     #[Test]
@@ -109,7 +64,7 @@ class SproutDatabaseSessionHandlerTest extends UnitTestCase
         $handler = $this->createHandler(
             $tenancy,
             $tenant,
-            $this->mockQuery($sessionId, $tenancy, $tenant, (object)['payload' => base64_encode('my-session-data')])
+            $this->mockQuery($sessionId, $tenancy, $tenant, (object) ['payload' => base64_encode('my-session-data')]),
         )->setTenancy($tenancy)->setTenant($tenant);
 
         $this->assertSame('my-session-data', $handler->read($sessionId));
@@ -125,7 +80,7 @@ class SproutDatabaseSessionHandlerTest extends UnitTestCase
         $handler = $this->createHandler(
             $tenancy,
             $tenant,
-            $this->mockQuery($sessionId, $tenancy, $tenant, null)
+            $this->mockQuery($sessionId, $tenancy, $tenant, null),
         )->setTenancy($tenancy)->setTenant($tenant);
 
         $this->assertEmpty($handler->read($sessionId));
@@ -141,10 +96,10 @@ class SproutDatabaseSessionHandlerTest extends UnitTestCase
         $handler = $this->createHandler(
             $tenancy,
             $tenant,
-            $this->mockQuery($sessionId, $tenancy, $tenant, (object)[
+            $this->mockQuery($sessionId, $tenancy, $tenant, (object) [
                 'payload'       => base64_encode('my-session-data'),
                 'last_activity' => Carbon::now()->subHours(10)->getTimestamp(),
-            ])
+            ]),
         )->setTenancy($tenancy)->setTenant($tenant);
 
         $this->assertEmpty($handler->read($sessionId));
@@ -182,7 +137,7 @@ class SproutDatabaseSessionHandlerTest extends UnitTestCase
         $handler = $this->createHandler(
             $tenancy,
             $tenant,
-            $query
+            $query,
         )->setTenancy($tenancy)->setTenant($tenant);
 
         $handler->write($sessionId, 'my-session-data');
@@ -195,7 +150,7 @@ class SproutDatabaseSessionHandlerTest extends UnitTestCase
 
         $this->mockTenancyAndTenant($tenancy, $tenant);
 
-        $query = $this->mockQuery($sessionId, $tenancy, $tenant, (object)['payload' => base64_encode('my-session-data')]);
+        $query = $this->mockQuery($sessionId, $tenancy, $tenant, (object) ['payload' => base64_encode('my-session-data')]);
 
         $query->shouldReceive('where')->withArgs(['id', $sessionId])->andReturnSelf()->once();
 
@@ -218,7 +173,7 @@ class SproutDatabaseSessionHandlerTest extends UnitTestCase
         $handler = $this->createHandler(
             $tenancy,
             $tenant,
-            $query
+            $query,
         )->setTenancy($tenancy)->setTenant($tenant);
 
         $handler->write($sessionId, 'my-session-data');
@@ -231,7 +186,7 @@ class SproutDatabaseSessionHandlerTest extends UnitTestCase
 
         $this->mockTenancyAndTenant($tenancy, $tenant);
 
-        $query = $this->mockQuery($sessionId, $tenancy, $tenant, (object)['payload' => base64_encode('my-session-data')], false);
+        $query = $this->mockQuery($sessionId, $tenancy, $tenant, (object) ['payload' => base64_encode('my-session-data')], false);
 
         $query->shouldNotReceive('find');
         $query->shouldReceive('where')->withArgs(['id', $sessionId])->andReturnSelf()->once();
@@ -245,20 +200,66 @@ class SproutDatabaseSessionHandlerTest extends UnitTestCase
         $handler = $this->createHandler(
             $tenancy,
             $tenant,
-            $query
+            $query,
         )->setTenancy($tenancy)->setTenant($tenant);
 
         $handler->destroy($sessionId);
     }
 
-    public static function databaseSessionDataProvider(): array
+    protected function defineEnvironment($app): void
     {
-        $tenancy = Mockery::mock(Tenancy::class);
-        $tenant  = Mockery::mock(Tenant::class)->makePartial();
+        tap($app['config'], static function (Repository $config) {
+            $config->set('sprout.overrides', []);
+        });
+    }
 
-        return [
-            'outside of tenant context' => [null, null],
-            'inside of tenant context' => [$tenancy, $tenant],
-        ];
+    protected function createHandler(?Tenancy $tenancy = null, ?Tenant $tenant = null, ?Builder $builder = null): SproutDatabaseSessionHandler
+    {
+        $lifetime   = config('session.lifetime');
+        $connection = Mockery::mock(Connection::class, static function (MockInterface $mock) use ($builder) {
+            if ($builder !== null) {
+                $mock->shouldReceive('table')->withArgs(['my_tenant_table'])->andReturn($builder)->atLeast()->once();
+            }
+        });
+
+        $handler = new SproutDatabaseSessionHandler(
+            $connection,
+            'my_tenant_table',
+            $lifetime,
+        );
+
+        if ($tenancy && $tenant) {
+            $handler->setTenancy($tenancy)->setTenant($tenant);
+        }
+
+        return $handler;
+    }
+
+    protected function mockTenancyAndTenant(?Tenancy $tenancy = null, ?Tenant $tenant = null): void
+    {
+        if ($tenancy !== null && $tenant !== null) {
+            /**
+             * @var MockInterface|Tenancy $tenancy
+             * @var MockInterface|Tenant  $tenant
+             */
+            $tenancy->shouldReceive('getName')->atLeast()->once()->andReturn('my-tenancy');
+            $tenant->shouldReceive('getTenantKey')->atLeast()->once()->andReturn(777);
+        }
+    }
+
+    private function mockQuery($sessionId, ?Tenancy $tenancy, ?Tenant $tenant, $returnValue, bool $find = true): MockInterface&Builder
+    {
+        return Mockery::mock(Builder::class, static function (MockInterface $mock) use ($sessionId, $tenancy, $tenant, $returnValue, $find) {
+            if ($tenancy !== null) {
+                $mock->shouldReceive('where')->withArgs(['tenancy', '=', $tenancy->getName()])->andReturnSelf()->once();
+                $mock->shouldReceive('where')->withArgs(['tenant_id', '=', $tenant->getTenantKey()])->andReturnSelf()->once();
+            }
+
+            if ($find) {
+                $mock->shouldReceive('find')->withArgs([$sessionId])->andReturn($returnValue)->once();
+            }
+
+            $mock->shouldReceive('useWritePdo')->andReturnSelf();
+        });
     }
 }

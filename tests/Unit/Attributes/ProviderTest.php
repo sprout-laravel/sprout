@@ -16,18 +16,6 @@ use Workbench\App\Models\TenantModel;
 
 class ProviderTest extends UnitTestCase
 {
-    protected function defineEnvironment($app)
-    {
-        tap($app['config'], function ($config) {
-            $config->set('multitenancy.providers.tenants.model', TenantModel::class);
-
-            $config->set('multitenancy.providers.backup', [
-                'driver' => 'database',
-                'table'  => 'tenants',
-            ]);
-        });
-    }
-
     #[Test]
     public function resolvesTenantProvider(): void
     {
@@ -62,5 +50,17 @@ class ProviderTest extends UnitTestCase
         $attribute = new Provider('backup');
 
         $this->assertSame($expected, $attribute->resolve($attribute, $container));
+    }
+
+    protected function defineEnvironment($app)
+    {
+        tap($app['config'], function ($config) {
+            $config->set('multitenancy.providers.tenants.model', TenantModel::class);
+
+            $config->set('multitenancy.providers.backup', [
+                'driver' => 'database',
+                'table'  => 'tenants',
+            ]);
+        });
     }
 }

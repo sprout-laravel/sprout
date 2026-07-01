@@ -42,7 +42,7 @@ class SproutFilesystemManagerTest extends UnitTestCase
                                   'driver' => 'fake',
                               ])
                               ->once();
-                     })
+                     }),
                  )
                  ->once();
         });
@@ -74,7 +74,7 @@ class SproutFilesystemManagerTest extends UnitTestCase
                                   'name' => 'hi',
                               ])
                               ->once();
-                     })
+                     }),
                  )
                  ->once();
         });
@@ -99,7 +99,7 @@ class SproutFilesystemManagerTest extends UnitTestCase
                               ->with('filesystems.disks.fake-disk')
                               ->andReturn(null)
                               ->once();
-                     })
+                     }),
                  )
                  ->once();
         });

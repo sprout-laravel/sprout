@@ -42,7 +42,7 @@ class TenantConfigBroadcastManagerTest extends UnitTestCase
                                   'driver' => 'fake',
                               ])
                               ->once();
-                     })
+                     }),
                  )
                  ->once();
         });
@@ -74,7 +74,7 @@ class TenantConfigBroadcastManagerTest extends UnitTestCase
                                   'name' => 'hi',
                               ])
                               ->once();
-                     })
+                     }),
                  )
                  ->once();
         });
@@ -99,7 +99,7 @@ class TenantConfigBroadcastManagerTest extends UnitTestCase
                               ->with('broadcasting.connections.fake-connection')
                               ->andReturn(null)
                               ->once();
-                     })
+                     }),
                  )
                  ->once();
         });

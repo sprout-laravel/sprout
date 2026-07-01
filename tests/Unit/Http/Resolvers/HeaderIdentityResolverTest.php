@@ -21,41 +21,13 @@ use Sprout\Tests\Unit\UnitTestCase;
 
 class HeaderIdentityResolverTest extends UnitTestCase
 {
-    protected function defineEnvironment($app): void
-    {
-        tap($app['config'], static function ($config) {
-            $config->set('multitenancy.defaults.resolver', 'header');
-        });
-    }
-
-    protected function defineRoutes($router)
-    {
-        $router->tenanted(function (Router $router) {
-            $router->get('/test-route', static function () {
-                return 'test';
-            })->name('test-route');
-        });
-    }
-
-    protected function mockApp(): Application&MockInterface
-    {
-        return Mockery::mock(Application::class, static function ($mock) {
-
-        });
-    }
-
-    protected function getSprout(Application $app): Sprout
-    {
-        return new Sprout($app, new SettingsRepository());
-    }
-
     #[Test]
     public function providesAccessToExpectedValues(): void
     {
         $resolver = new HeaderIdentityResolver(
             'header',
             '{Tenancy}-Header-Identifier',
-            [ResolutionHook::Middleware]
+            [ResolutionHook::Middleware],
         );
 
         $this->assertSame('header', $resolver->getName());
@@ -94,7 +66,7 @@ class HeaderIdentityResolverTest extends UnitTestCase
             $mock->shouldReceive('getName')->andReturn('my-tenancy')->once();
         });
 
-        /** @var \Illuminate\Routing\RouteRegistrar&\Mockery\MockInterface $route */
+        /** @var RouteRegistrar&MockInterface $route */
         $route = Mockery::mock(RouteRegistrar::class, static function (MockInterface $mock) {
             $mock->shouldReceive('middleware')
                  ->with([AddTenantHeaderToResponse::class . ':header,my-tenancy'])
@@ -110,7 +82,7 @@ class HeaderIdentityResolverTest extends UnitTestCase
     {
         $resolver = new HeaderIdentityResolver('header');
 
-        /** @var \Sprout\Contracts\Tenancy&MockInterface $tenancy */
+        /** @var Tenancy&MockInterface $tenancy */
         $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) {
             $mock->shouldReceive('getName')->andReturn('my-tenancy')->once();
         });
@@ -165,5 +137,32 @@ class HeaderIdentityResolverTest extends UnitTestCase
         $this->assertSame('/test-route', $resolver->route('test-route', $tenancy, $tenant1, absolute: false));
         $this->assertSame('/test-route', $resolver->route('test-route', $tenancy, $tenant2, absolute: false));
         $this->assertSame('/test-route', $resolver->route('test-route', $tenancy, $tenant3, absolute: false));
+    }
+
+    protected function defineEnvironment($app): void
+    {
+        tap($app['config'], static function ($config) {
+            $config->set('multitenancy.defaults.resolver', 'header');
+        });
+    }
+
+    protected function defineRoutes($router)
+    {
+        $router->tenanted(function (Router $router) {
+            $router->get('/test-route', static function () {
+                return 'test';
+            })->name('test-route');
+        });
+    }
+
+    protected function mockApp(): Application&MockInterface
+    {
+        return Mockery::mock(Application::class, static function ($mock) {
+        });
+    }
+
+    protected function getSprout(Application $app): Sprout
+    {
+        return new Sprout($app, new SettingsRepository());
     }
 }

@@ -11,39 +11,29 @@ use Mockery;
 use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\TenantConfig;
-use Sprout\Contracts\ConfigStore;
-use Sprout\Exceptions\CyclicOverrideException;
-use Sprout\Managers\ConfigStoreManager;
-use Sprout\Overrides\Mailer\TenantConfigMailerOverride;
-use Sprout\Overrides\Mailer\TenantConfigMailerTransportCreator;
-use Sprout\Tests\Unit\UnitTestCase;
 use Sprout\Contracts\BootableServiceOverride;
+use Sprout\Contracts\ConfigStore;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 use Sprout\Contracts\TenantHasResources;
+use Sprout\Exceptions\CyclicOverrideException;
+use Sprout\Managers\ConfigStoreManager;
+use Sprout\Overrides\Mailer\TenantConfigMailerOverride;
 use Sprout\Sprout;
 use Sprout\Support\SettingsRepository;
+use Sprout\TenantConfig;
+use Sprout\Tests\Unit\UnitTestCase;
+
 use function Sprout\sprout;
 
 class TenantConfigMailerOverrideTest extends UnitTestCase
 {
-    protected function defineEnvironment($app): void
+    public static function mailerResolvedDataProvider(): array
     {
-        tap($app['config'], static function (Repository $config) {
-            $config->set('sprout.overrides', []);
-        });
-    }
-
-    private function mockMailManager(): MailManager&MockInterface
-    {
-        return Mockery::mock(MailManager::class, static function (MockInterface $mock) {
-            $mock->shouldReceive('extend')
-                 ->with('sprout:config', Mockery::on(static function ($arg) {
-                     return is_callable($arg) && $arg instanceof Closure;
-                 }))
-                 ->once();
-        });
+        return [
+            'mailer resolved'     => [true],
+            'mailer not resolved' => [false],
+        ];
     }
 
     #[Test]
@@ -117,7 +107,7 @@ class TenantConfigMailerOverrideTest extends UnitTestCase
     {
         $override = new TenantConfigMailerOverride('mailer', []);
 
-        $tenant  = Mockery::mock(Tenant::class, TenantHasResources::class, static function (MockInterface $mock) {
+        $tenant = Mockery::mock(Tenant::class, TenantHasResources::class, static function (MockInterface $mock) {
         });
         $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) use ($tenant) {
             $mock->shouldReceive('check')->andReturnTrue()->once();
@@ -125,7 +115,7 @@ class TenantConfigMailerOverrideTest extends UnitTestCase
         });
 
         /** @var \Illuminate\Foundation\Application&MockInterface $app */
-        $app = Mockery::mock($this->app, static function (MockInterface $mock) use ($tenancy, $tenant) {
+        $app = Mockery::mock($this->app, static function (MockInterface $mock) {
             $mock->makePartial();
         });
 
@@ -144,8 +134,8 @@ class TenantConfigMailerOverrideTest extends UnitTestCase
                               'mailer',
                               'bud-mailer',
                           )->andReturn([
-                             'transport' => 'sprout:config',
-                         ]);
+                              'transport' => 'sprout:config',
+                          ]);
                  }));
         })));
 
@@ -157,7 +147,7 @@ class TenantConfigMailerOverrideTest extends UnitTestCase
 
         $override->boot($app, $sprout);
 
-        /** @var \Illuminate\Mail\MailManager $manager */
+        /** @var MailManager $manager */
         $manager = $app->make('mail.manager');
 
         $this->expectException(CyclicOverrideException::class);
@@ -199,10 +189,10 @@ class TenantConfigMailerOverrideTest extends UnitTestCase
                               'mailer',
                               'bud-mailer',
                           )->andReturn([
-                             'transport' => 'smtp',
-                             'port' => 25,
-                             'host' => 'localhost'
-                         ]);
+                              'transport' => 'smtp',
+                              'port'      => 25,
+                              'host'      => 'localhost',
+                          ]);
                  }));
         })));
 
@@ -214,7 +204,7 @@ class TenantConfigMailerOverrideTest extends UnitTestCase
 
         $override->boot($app, $sprout);
 
-        /** @var \Illuminate\Mail\MailManager $manager */
+        /** @var MailManager $manager */
         $manager = $app->make('mail.manager');
 
         $manager->mailer('bud-mailer');
@@ -257,10 +247,10 @@ class TenantConfigMailerOverrideTest extends UnitTestCase
                               'mailer',
                               'bud-mailer',
                           )->andReturn([
-                             'transport' => 'smtp',
-                             'port' => 25,
-                             'host' => 'localhost'
-                         ]);
+                              'transport' => 'smtp',
+                              'port'      => 25,
+                              'host'      => 'localhost',
+                          ]);
                  }));
         })));
 
@@ -274,7 +264,7 @@ class TenantConfigMailerOverrideTest extends UnitTestCase
 
         $this->assertEmpty($override->getOverrides());
 
-        /** @var \Illuminate\Mail\MailManager $manager */
+        /** @var MailManager $manager */
         $manager = $app->make('mail.manager');
 
         $manager->mailer('bud-mailer');
@@ -325,11 +315,21 @@ class TenantConfigMailerOverrideTest extends UnitTestCase
         $this->assertEmpty($override->getOverrides());
     }
 
-    public static function mailerResolvedDataProvider(): array
+    protected function defineEnvironment($app): void
     {
-        return [
-            'mailer resolved'     => [true],
-            'mailer not resolved' => [false],
-        ];
+        tap($app['config'], static function (Repository $config) {
+            $config->set('sprout.overrides', []);
+        });
+    }
+
+    private function mockMailManager(): MailManager&MockInterface
+    {
+        return Mockery::mock(MailManager::class, static function (MockInterface $mock) {
+            $mock->shouldReceive('extend')
+                 ->with('sprout:config', Mockery::on(static function ($arg) {
+                     return is_callable($arg) && $arg instanceof Closure;
+                 }))
+                 ->once();
+        });
     }
 }

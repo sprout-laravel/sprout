@@ -16,17 +16,11 @@ use Sprout\Overrides\Cookie\CookieOverride;
 use Sprout\Sprout;
 use Sprout\Support\SettingsRepository;
 use Sprout\Tests\Unit\UnitTestCase;
+
 use function Sprout\sprout;
 
 class CookieOverrideTest extends UnitTestCase
 {
-    protected function defineEnvironment($app): void
-    {
-        tap($app['config'], static function (Repository $config) {
-            $config->set('sprout.overrides', []);
-        });
-    }
-
     #[Test]
     public function isBuiltCorrectly(): void
     {
@@ -65,7 +59,7 @@ class CookieOverrideTest extends UnitTestCase
                          $mock->shouldReceive('setDefaultPathAndDomain')
                               ->with('test-path', 'domain.com', true, 'strict')
                               ->once();
-                     })
+                     }),
                  )
                  ->once();
         });
@@ -87,5 +81,12 @@ class CookieOverrideTest extends UnitTestCase
         $tenancy = Mockery::mock(Tenancy::class);
 
         $override->setup($tenancy, $tenant);
+    }
+
+    protected function defineEnvironment($app): void
+    {
+        tap($app['config'], static function (Repository $config) {
+            $config->set('sprout.overrides', []);
+        });
     }
 }

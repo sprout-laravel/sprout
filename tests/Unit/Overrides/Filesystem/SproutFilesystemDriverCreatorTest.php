@@ -22,6 +22,156 @@ use Sprout\Tests\Unit\UnitTestCase;
 
 class SproutFilesystemDriverCreatorTest extends UnitTestCase
 {
+    #[Test]
+    public function canCreateTheDriver(): void
+    {
+        $app     = $this->mockApplication('filesystems.disks.fake-disk', ['driver' => 'fake-driver']);
+        $manager = $this->mockManager('fake-driver');
+        $config  = ['disk' => 'fake-disk'];
+        $sprout  = $this->getSprout($app);
+
+        $creator = new SproutFilesystemDriverCreator(
+            $app,
+            $manager,
+            $config,
+            $sprout,
+        );
+
+        $creator();
+    }
+
+    #[Test]
+    public function fallsBackToDefaultDiskWhenCreatingDriver(): void
+    {
+        $app     = $this->mockApplication('filesystems.disks.local', ['driver' => 'local'], true);
+        $manager = $this->mockManager('local');
+        $config  = [];
+        $sprout  = $this->getSprout($app);
+
+        $creator = new SproutFilesystemDriverCreator(
+            $app,
+            $manager,
+            $config,
+            $sprout,
+        );
+
+        $creator();
+    }
+
+    #[Test]
+    public function canUseOnDemandDiskConfig(): void
+    {
+        $app     = $this->mockApplication();
+        $manager = $this->mockManager('fake-driver');
+        $config  = ['disk' => ['driver' => 'fake-driver']];
+        $sprout  = $this->getSprout($app);
+
+        $creator = new SproutFilesystemDriverCreator(
+            $app,
+            $manager,
+            $config,
+            $sprout,
+        );
+
+        $creator();
+    }
+
+    #[Test]
+    public function throwsAnExceptionWhenOutsideOfContext(): void
+    {
+        $app     = $this->mockApplication();
+        $manager = $this->mockManager();
+        $config  = [];
+        $sprout  = $this->getSprout($app, false, false);
+
+        $sprout->markAsOutsideContext();
+
+        $this->assertFalse($sprout->withinContext());
+
+        $creator = new SproutFilesystemDriverCreator(
+            $app,
+            $manager,
+            $config,
+            $sprout,
+        );
+
+        $this->expectException(TenancyMissingException::class);
+        $this->expectExceptionMessage('There is no current tenancy');
+
+        $creator();
+    }
+
+    #[Test]
+    public function throwsAnExceptionWhenThereIsNoTenancy(): void
+    {
+        $app     = $this->mockApplication();
+        $manager = $this->mockManager();
+        $config  = [];
+        $sprout  = $this->getSprout($app, false, false);
+
+        $sprout->markAsInContext();
+
+        $this->assertTrue($sprout->withinContext());
+
+        $creator = new SproutFilesystemDriverCreator(
+            $app,
+            $manager,
+            $config,
+            $sprout,
+        );
+
+        $this->expectException(TenancyMissingException::class);
+        $this->expectExceptionMessage('There is no current tenancy');
+
+        $creator();
+    }
+
+    #[Test]
+    public function throwsAnExceptionWhenThereIsNoTenant(): void
+    {
+        $app     = $this->mockApplication();
+        $manager = $this->mockManager();
+        $config  = [];
+        $sprout  = $this->getSprout($app, true, false);
+
+        $this->assertTrue($sprout->withinContext());
+
+        $creator = new SproutFilesystemDriverCreator(
+            $app,
+            $manager,
+            $config,
+            $sprout,
+        );
+
+        $this->expectException(TenantMissingException::class);
+        $this->expectExceptionMessage('There is no current tenant for tenancy [my-tenancy]');
+
+        $creator();
+    }
+
+    #[Test]
+    public function throwsAnExceptionWhenTheTenantIsNotConfiguredForResources(): void
+    {
+        $app     = $this->mockApplication();
+        $manager = $this->mockManager();
+        $config  = [];
+        $sprout  = $this->getSprout($app, true, true, false);
+
+        $this->assertTrue($sprout->withinContext());
+
+        $creator = new SproutFilesystemDriverCreator(
+            $app,
+            $manager,
+            $config,
+            $sprout,
+        );
+
+        $this->expectException(MisconfigurationException::class);
+        $this->expectExceptionMessage('The current tenant [my-tenancy] is not configured correctly for resources');
+
+        $creator();
+    }
+
     private function mockApplication(?string $configKey = null, ?array $config = null, bool $default = false): Application&Mockery\MockInterface
     {
         return Mockery::mock(Application::class, static function (Mockery\MockInterface $mock) use ($config, $configKey, $default) {
@@ -33,7 +183,7 @@ class SproutFilesystemDriverCreatorTest extends UnitTestCase
                         }
 
                         $mock->shouldReceive('get')->with($configKey)->andReturn($config)->once();
-                    })
+                    }),
                 )->once();
             }
 
@@ -70,8 +220,6 @@ class SproutFilesystemDriverCreatorTest extends UnitTestCase
             } else {
                 $tenant = Mockery::mock(Tenant::class);
             }
-
-
         } else {
             $tenant = null;
         }
@@ -89,155 +237,5 @@ class SproutFilesystemDriverCreatorTest extends UnitTestCase
         }
 
         return $sprout;
-    }
-
-    #[Test]
-    public function canCreateTheDriver(): void
-    {
-        $app     = $this->mockApplication('filesystems.disks.fake-disk', ['driver' => 'fake-driver']);
-        $manager = $this->mockManager('fake-driver');
-        $config  = ['disk' => 'fake-disk'];
-        $sprout  = $this->getSprout($app);
-
-        $creator = new SproutFilesystemDriverCreator(
-            $app,
-            $manager,
-            $config,
-            $sprout
-        );
-
-        $creator();
-    }
-
-    #[Test]
-    public function fallsBackToDefaultDiskWhenCreatingDriver(): void
-    {
-        $app     = $this->mockApplication('filesystems.disks.local', ['driver' => 'local'], true);
-        $manager = $this->mockManager('local');
-        $config  = [];
-        $sprout  = $this->getSprout($app);
-
-        $creator = new SproutFilesystemDriverCreator(
-            $app,
-            $manager,
-            $config,
-            $sprout
-        );
-
-        $creator();
-    }
-
-    #[Test]
-    public function canUseOnDemandDiskConfig(): void
-    {
-        $app     = $this->mockApplication();
-        $manager = $this->mockManager('fake-driver');
-        $config  = ['disk' => ['driver' => 'fake-driver']];
-        $sprout  = $this->getSprout($app);
-
-        $creator = new SproutFilesystemDriverCreator(
-            $app,
-            $manager,
-            $config,
-            $sprout
-        );
-
-        $creator();
-    }
-
-    #[Test]
-    public function throwsAnExceptionWhenOutsideOfContext(): void
-    {
-        $app     = $this->mockApplication();
-        $manager = $this->mockManager();
-        $config  = [];
-        $sprout  = $this->getSprout($app, false, false);
-
-        $sprout->markAsOutsideContext();
-
-        $this->assertFalse($sprout->withinContext());
-
-        $creator = new SproutFilesystemDriverCreator(
-            $app,
-            $manager,
-            $config,
-            $sprout
-        );
-
-        $this->expectException(TenancyMissingException::class);
-        $this->expectExceptionMessage('There is no current tenancy');
-
-        $creator();
-    }
-
-    #[Test]
-    public function throwsAnExceptionWhenThereIsNoTenancy(): void
-    {
-        $app     = $this->mockApplication();
-        $manager = $this->mockManager();
-        $config  = [];
-        $sprout  = $this->getSprout($app, false, false);
-
-        $sprout->markAsInContext();
-
-        $this->assertTrue($sprout->withinContext());
-
-        $creator = new SproutFilesystemDriverCreator(
-            $app,
-            $manager,
-            $config,
-            $sprout
-        );
-
-        $this->expectException(TenancyMissingException::class);
-        $this->expectExceptionMessage('There is no current tenancy');
-
-        $creator();
-    }
-
-    #[Test]
-    public function throwsAnExceptionWhenThereIsNoTenant(): void
-    {
-        $app     = $this->mockApplication();
-        $manager = $this->mockManager();
-        $config  = [];
-        $sprout  = $this->getSprout($app, true, false);
-
-        $this->assertTrue($sprout->withinContext());
-
-        $creator = new SproutFilesystemDriverCreator(
-            $app,
-            $manager,
-            $config,
-            $sprout
-        );
-
-        $this->expectException(TenantMissingException::class);
-        $this->expectExceptionMessage('There is no current tenant for tenancy [my-tenancy]');
-
-        $creator();
-    }
-
-    #[Test]
-    public function throwsAnExceptionWhenTheTenantIsNotConfiguredForResources(): void
-    {
-        $app     = $this->mockApplication();
-        $manager = $this->mockManager();
-        $config  = [];
-        $sprout  = $this->getSprout($app, true, true, false);
-
-        $this->assertTrue($sprout->withinContext());
-
-        $creator = new SproutFilesystemDriverCreator(
-            $app,
-            $manager,
-            $config,
-            $sprout
-        );
-
-        $this->expectException(MisconfigurationException::class);
-        $this->expectExceptionMessage('The current tenant [my-tenancy] is not configured correctly for resources');
-
-        $creator();
     }
 }

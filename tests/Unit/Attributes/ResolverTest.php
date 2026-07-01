@@ -15,13 +15,6 @@ use Sprout\Tests\Unit\UnitTestCase;
 
 class ResolverTest extends UnitTestCase
 {
-    protected function defineEnvironment($app)
-    {
-        tap($app['config'], static function ($config) {
-            $config->set('multitenancy.resolvers.subdomain.domain', 'localhost');
-        });
-    }
-
     #[Test]
     public function resolvesIdentityResolver(): void
     {
@@ -56,5 +49,12 @@ class ResolverTest extends UnitTestCase
         $attribute = new Resolver('subdomain');
 
         $this->assertSame($expected, $attribute->resolve($attribute, $container));
+    }
+
+    protected function defineEnvironment($app)
+    {
+        tap($app['config'], static function ($config) {
+            $config->set('multitenancy.resolvers.subdomain.domain', 'localhost');
+        });
     }
 }

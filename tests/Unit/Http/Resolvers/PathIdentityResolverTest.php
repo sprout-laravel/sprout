@@ -22,34 +22,6 @@ use Sprout\Tests\Unit\UnitTestCase;
 
 class PathIdentityResolverTest extends UnitTestCase
 {
-    protected function defineEnvironment($app): void
-    {
-        tap($app['config'], static function ($config) {
-            $config->set('multitenancy.defaults.resolver', 'path');
-        });
-    }
-
-    protected function defineRoutes($router)
-    {
-        $router->tenanted(function (Router $router) {
-            $router->get('/test-route', static function () {
-                return 'test';
-            })->name('test-route');
-        });
-    }
-
-    protected function mockApp(): Application&MockInterface
-    {
-        return Mockery::mock(Application::class, static function ($mock) {
-
-        });
-    }
-
-    protected function getSprout(Application $app): Sprout
-    {
-        return new Sprout($app, new SettingsRepository());
-    }
-
     #[Test]
     public function providesAccessToExpectedValues(): void
     {
@@ -58,7 +30,7 @@ class PathIdentityResolverTest extends UnitTestCase
             6,
             '.*',
             'yeah-boi-{tenancy}',
-            [ResolutionHook::Middleware]
+            [ResolutionHook::Middleware],
         );
 
         $this->assertSame('path', $resolver->getName());
@@ -106,7 +78,7 @@ class PathIdentityResolverTest extends UnitTestCase
             $mock->shouldReceive('getName')->andReturn('my-tenancy')->once();
         });
 
-        /** @var \Illuminate\Routing\RouteRegistrar&\Mockery\MockInterface $route */
+        /** @var RouteRegistrar&MockInterface $route */
         $route = Mockery::mock(RouteRegistrar::class, static function (MockInterface $mock) {
             $mock->shouldReceive('prefix')
                  ->with('{my_tenancy_path}')
@@ -128,7 +100,7 @@ class PathIdentityResolverTest extends UnitTestCase
             $mock->shouldReceive('getName')->andReturn('my-tenancy')->twice();
         });
 
-        /** @var \Illuminate\Routing\RouteRegistrar&\Mockery\MockInterface $route */
+        /** @var RouteRegistrar&MockInterface $route */
         $route = Mockery::mock(RouteRegistrar::class, static function (MockInterface $mock) {
             $mock->shouldReceive('prefix')
                  ->with('{my_tenancy_path}')
@@ -153,7 +125,7 @@ class PathIdentityResolverTest extends UnitTestCase
             $mock->shouldReceive('getTenantIdentifier')->andReturn('my-identifier')->once();
         });
 
-        /** @var \Sprout\Contracts\Tenancy&MockInterface $tenancy */
+        /** @var Tenancy&MockInterface $tenancy */
         $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) {
             $mock->shouldReceive('getName')->andReturn('my-tenancy')->times(3);
             $mock->shouldReceive('check')->andReturn(true)->once();
@@ -180,7 +152,7 @@ class PathIdentityResolverTest extends UnitTestCase
     {
         $resolver = new PathIdentityResolver('path');
 
-        /** @var \Sprout\Contracts\Tenancy&MockInterface $tenancy */
+        /** @var Tenancy&MockInterface $tenancy */
         $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) {
             $mock->shouldReceive('getName')->andReturn('my-tenancy')->once();
         });
@@ -205,7 +177,7 @@ class PathIdentityResolverTest extends UnitTestCase
     {
         $resolver = new PathIdentityResolver('path', 11);
 
-        /** @var \Sprout\Contracts\Tenancy&MockInterface $tenancy */
+        /** @var Tenancy&MockInterface $tenancy */
         $tenancy = Mockery::mock(Tenancy::class);
 
         $request = Mockery::mock(Request::class, static function (MockInterface $mock) {
@@ -223,7 +195,7 @@ class PathIdentityResolverTest extends UnitTestCase
     {
         $resolver = new PathIdentityResolver('path', 11);
 
-        /** @var \Sprout\Contracts\Tenancy&MockInterface $tenancy */
+        /** @var Tenancy&MockInterface $tenancy */
         $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) {
             $mock->shouldReceive('getName')->andReturn('my-tenancy')->once();
         });
@@ -285,5 +257,32 @@ class PathIdentityResolverTest extends UnitTestCase
         $this->assertSame('/my-identifier-1/test-route', $resolver->route('test-route', $tenancy, $tenant1, absolute: false));
         $this->assertSame('/my-identifier-2/test-route', $resolver->route('test-route', $tenancy, $tenant2, absolute: false));
         $this->assertSame('/my-identifier-3/test-route', $resolver->route('test-route', $tenancy, $tenant3, absolute: false));
+    }
+
+    protected function defineEnvironment($app): void
+    {
+        tap($app['config'], static function ($config) {
+            $config->set('multitenancy.defaults.resolver', 'path');
+        });
+    }
+
+    protected function defineRoutes($router)
+    {
+        $router->tenanted(function (Router $router) {
+            $router->get('/test-route', static function () {
+                return 'test';
+            })->name('test-route');
+        });
+    }
+
+    protected function mockApp(): Application&MockInterface
+    {
+        return Mockery::mock(Application::class, static function ($mock) {
+        });
+    }
+
+    protected function getSprout(Application $app): Sprout
+    {
+        return new Sprout($app, new SettingsRepository());
     }
 }

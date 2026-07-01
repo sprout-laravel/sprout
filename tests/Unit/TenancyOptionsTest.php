@@ -10,24 +10,11 @@ use Orchestra\Testbench\Attributes\DefineEnvironment;
 use PHPUnit\Framework\Attributes\Test;
 use Sprout\Contracts\Tenancy;
 use Sprout\TenancyOptions;
+
 use function Sprout\tenancy;
 
 class TenancyOptionsTest extends UnitTestCase
 {
-    protected function setupSecondTenancy($app): void
-    {
-        tap($app['config'], static function (Repository $config) {
-            $config->set('multitenancy.providers.backup', [
-                'driver' => 'database',
-                'table'  => 'tenants',
-            ]);
-
-            $config->set('multitenancy.tenancies.backup', [
-                'provider' => 'backup',
-            ]);
-        });
-    }
-
     #[Test]
     public function hydrateTenantRelationOption(): void
     {
@@ -154,5 +141,19 @@ class TenancyOptionsTest extends UnitTestCase
         $this->assertSame('foo', TenancyOptions::getLockedStore($tenancy));
         $this->assertNull(TenancyOptions::getLockedStore($tenancy));
         $this->assertNull(TenancyOptions::getLockedStore($tenancy));
+    }
+
+    protected function setupSecondTenancy($app): void
+    {
+        tap($app['config'], static function (Repository $config) {
+            $config->set('multitenancy.providers.backup', [
+                'driver' => 'database',
+                'table'  => 'tenants',
+            ]);
+
+            $config->set('multitenancy.tenancies.backup', [
+                'provider' => 'backup',
+            ]);
+        });
     }
 }

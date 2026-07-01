@@ -15,55 +15,11 @@ use Sprout\Support\ResolutionHook;
 use Sprout\Support\Settings;
 use Sprout\Support\SettingsRepository;
 use Workbench\App\Models\TenantModel;
+
 use function Sprout\sprout;
 
 class SproutTest extends UnitTestCase
 {
-    protected function defineEnvironment($app): void
-    {
-        tap($app['config'], static function ($config) {
-            $config->set('multitenancy.tenancies.tenants.model', TenantModel::class);
-            $config->set('multitenancy.resolvers.subdomain.domain', 'localhost');
-        });
-    }
-
-    protected function setupSecondTenancy($app): void
-    {
-        tap($app['config'], static function (Repository $config) {
-            $config->set('multitenancy.providers.backup', [
-                'driver' => 'database',
-                'table'  => 'tenants',
-            ]);
-
-            $config->set('multitenancy.tenancies.backup', [
-                'provider' => 'backup',
-            ]);
-        });
-    }
-
-    protected function defineRoutes($router): void
-    {
-        $router->tenanted(function ($router) {
-            $router->get('cookie', fn () => 'Test')->name('test.cookie');
-        }, 'cookie');
-
-        $router->tenanted(function ($router) {
-            $router->get('header', fn () => 'Test')->name('test.header');
-        }, 'header');
-
-        $router->tenanted(function ($router) {
-            $router->get('path', fn () => 'Test')->name('test.path');
-        }, 'path');
-
-        $router->tenanted(function ($router) {
-            $router->get('session', fn () => 'Test')->name('test.session');
-        }, 'session');
-
-        $router->tenanted(function ($router) {
-            $router->get('subdomain', fn () => 'Test')->name('test.subdomain');
-        }, 'subdomain');
-    }
-
     #[Test]
     public function allowsAccessToCoreConfig(): void
     {
@@ -257,5 +213,50 @@ class SproutTest extends UnitTestCase
         $this->assertSame('http://localhost/session', $sprout->route('test.session', $tenant, 'session'));
         $this->assertSame('http://' . $tenant->getTenantIdentifier() . '.localhost/subdomain', $sprout->route('test.subdomain', $tenant, 'subdomain'));
         $this->assertSame('http://' . $tenant->getTenantIdentifier() . '.localhost/subdomain', $sprout->route('test.subdomain', $tenant));
+    }
+
+    protected function defineEnvironment($app): void
+    {
+        tap($app['config'], static function ($config) {
+            $config->set('multitenancy.tenancies.tenants.model', TenantModel::class);
+            $config->set('multitenancy.resolvers.subdomain.domain', 'localhost');
+        });
+    }
+
+    protected function setupSecondTenancy($app): void
+    {
+        tap($app['config'], static function (Repository $config) {
+            $config->set('multitenancy.providers.backup', [
+                'driver' => 'database',
+                'table'  => 'tenants',
+            ]);
+
+            $config->set('multitenancy.tenancies.backup', [
+                'provider' => 'backup',
+            ]);
+        });
+    }
+
+    protected function defineRoutes($router): void
+    {
+        $router->tenanted(function ($router) {
+            $router->get('cookie', fn () => 'Test')->name('test.cookie');
+        }, 'cookie');
+
+        $router->tenanted(function ($router) {
+            $router->get('header', fn () => 'Test')->name('test.header');
+        }, 'header');
+
+        $router->tenanted(function ($router) {
+            $router->get('path', fn () => 'Test')->name('test.path');
+        }, 'path');
+
+        $router->tenanted(function ($router) {
+            $router->get('session', fn () => 'Test')->name('test.session');
+        }, 'session');
+
+        $router->tenanted(function ($router) {
+            $router->get('subdomain', fn () => 'Test')->name('test.subdomain');
+        }, 'subdomain');
     }
 }

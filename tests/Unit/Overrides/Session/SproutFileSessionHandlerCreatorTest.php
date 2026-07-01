@@ -12,23 +12,17 @@ use Sprout\Overrides\Session\SproutFileSessionHandler;
 use Sprout\Overrides\Session\SproutFileSessionHandlerCreator;
 use Sprout\Sprout;
 use Sprout\Tests\Unit\UnitTestCase;
+
 use function Sprout\sprout;
 
 class SproutFileSessionHandlerCreatorTest extends UnitTestCase
 {
-    protected function defineEnvironment($app): void
-    {
-        tap($app['config'], static function (Repository $config) {
-            $config->set('sprout.overrides', []);
-        });
-    }
-
     #[Test]
     public function canCreateTheFileHandler(): void
     {
         $creator = new SproutFileSessionHandlerCreator(
             $this->app,
-            $this->app->make(Sprout::class)
+            $this->app->make(Sprout::class),
         );
 
         $handler = $creator();
@@ -56,7 +50,7 @@ class SproutFileSessionHandlerCreatorTest extends UnitTestCase
 
         $creator = new SproutFileSessionHandlerCreator(
             $this->app,
-            $this->app->make(Sprout::class)
+            $this->app->make(Sprout::class),
         );
 
         $handler = $creator();
@@ -73,5 +67,12 @@ class SproutFileSessionHandlerCreatorTest extends UnitTestCase
 
         $this->assertNotEquals($defaultPath, $handlerPath);
         $this->assertEquals($defaultPath . DIRECTORY_SEPARATOR . 'tenant-resource-key', $handlerPath);
+    }
+
+    protected function defineEnvironment($app): void
+    {
+        tap($app['config'], static function (Repository $config) {
+            $config->set('sprout.overrides', []);
+        });
     }
 }

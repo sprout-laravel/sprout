@@ -13,27 +13,13 @@ use Sprout\Providers\DatabaseTenantProvider;
 use Sprout\Support\GenericTenant;
 use Sprout\Tests\Unit\UnitTestCase;
 use Workbench\App\CustomTenantEntity;
+
 use function Sprout\provider;
 use function Sprout\sprout;
 
 class DatabaseProviderTest extends UnitTestCase
 {
     use RefreshDatabase;
-
-    protected function defineEnvironment($app): void
-    {
-        tap($app['config'], static function ($config) {
-            $config->set('multitenancy.providers.tenants.driver', 'database');
-            $config->set('multitenancy.providers.tenants.table', 'tenants');
-        });
-    }
-
-    protected function withCustomTenantEntity($app): void
-    {
-        tap($app['config'], static function ($config) {
-            $config->set('multitenancy.providers.tenants.entity', CustomTenantEntity::class);
-        });
-    }
 
     #[Test]
     public function hasARegisteredName(): void
@@ -165,5 +151,20 @@ class DatabaseProviderTest extends UnitTestCase
         $this->expectExceptionMessage('The current tenant [' . GenericTenant::class . '] is not configured correctly for resources');
 
         $provider->retrieveByResourceKey($resourceKey->toString());
+    }
+
+    protected function defineEnvironment($app): void
+    {
+        tap($app['config'], static function ($config) {
+            $config->set('multitenancy.providers.tenants.driver', 'database');
+            $config->set('multitenancy.providers.tenants.table', 'tenants');
+        });
+    }
+
+    protected function withCustomTenantEntity($app): void
+    {
+        tap($app['config'], static function ($config) {
+            $config->set('multitenancy.providers.tenants.entity', CustomTenantEntity::class);
+        });
     }
 }

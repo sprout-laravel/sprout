@@ -14,23 +14,16 @@ use Sprout\Tests\Unit\UnitTestCase;
 
 class ConfigStoreTest extends UnitTestCase
 {
-    protected function defineEnvironment($app)
-    {
-        tap($app['config'], function ($config) {
-            $config->set('multitenancy.defaults.config', 'database');
-        });
-    }
-
     #[Test]
     public function resolvesConfigStore(): void
     {
         $manager = $this->app->make(ConfigStoreManager::class);
 
-        $callback1 = static function (#[ConfigStore] \Sprout\Contracts\ConfigStore $store) {
+        $callback1 = static function (#[ConfigStore] ConfigStoreContract $store) {
             return $store;
         };
 
-        $callback2 = static function (#[ConfigStore('filesystem')] \Sprout\Contracts\ConfigStore $store) {
+        $callback2 = static function (#[ConfigStore('filesystem')] ConfigStoreContract $store) {
             return $store;
         };
 
@@ -54,5 +47,12 @@ class ConfigStoreTest extends UnitTestCase
         $attribute = new ConfigStore('filesystem');
 
         $this->assertSame($expected, $attribute->resolve($attribute, $container));
+    }
+
+    protected function defineEnvironment($app)
+    {
+        tap($app['config'], function ($config) {
+            $config->set('multitenancy.defaults.config', 'database');
+        });
     }
 }

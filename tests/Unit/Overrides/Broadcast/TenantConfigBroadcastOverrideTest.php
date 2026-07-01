@@ -13,47 +13,32 @@ use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use RuntimeException;
-use Sprout\TenantConfig;
-use Sprout\Contracts\ConfigStore;
-use Sprout\Exceptions\CyclicOverrideException;
-use Sprout\Managers\ConfigStoreManager;
-use Sprout\Overrides\Broadcast\TenantConfigBroadcastManager;
-use Sprout\Overrides\Broadcast\TenantConfigBroadcastManagerOverride;
-use Sprout\Overrides\Broadcast\TenantConfigBroadcastConnectionOverride;
-use Sprout\Tests\Unit\UnitTestCase;
 use Sprout\Contracts\BootableServiceOverride;
+use Sprout\Contracts\ConfigStore;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 use Sprout\Contracts\TenantHasResources;
+use Sprout\Exceptions\CyclicOverrideException;
+use Sprout\Managers\ConfigStoreManager;
+use Sprout\Overrides\Broadcast\TenantConfigBroadcastConnectionOverride;
+use Sprout\Overrides\Broadcast\TenantConfigBroadcastManager;
+use Sprout\Overrides\Broadcast\TenantConfigBroadcastManagerOverride;
 use Sprout\Overrides\StackedOverride;
 use Sprout\Sprout;
 use Sprout\Support\SettingsRepository;
+use Sprout\TenantConfig;
+use Sprout\Tests\Unit\UnitTestCase;
+
 use function Sprout\sprout;
 
 class TenantConfigBroadcastOverrideTest extends UnitTestCase
 {
-    protected function defineEnvironment($app): void
+    public static function broadcastResolvedDataProvider(): array
     {
-        tap($app['config'], static function (Repository $config) {
-            $config->set('sprout.overrides', []);
-        });
-    }
-
-    private function mockTenantConfigBroadcastManager(bool $extends = true, ?Closure $callback = null): TenantConfigBroadcastManager&MockInterface
-    {
-        return Mockery::mock(TenantConfigBroadcastManager::class, static function (MockInterface $mock) use ($extends, $callback) {
-            if ($extends) {
-                $mock->shouldReceive('extend')
-                     ->with('sprout:config', Mockery::on(static function ($arg) {
-                         return is_callable($arg) && $arg instanceof Closure;
-                     }))
-                     ->once();
-            }
-
-            if ($callback) {
-                $callback($mock);
-            }
-        });
+        return [
+            'broadcast resolved'     => [true],
+            'broadcast not resolved' => [false],
+        ];
     }
 
     #[Test]
@@ -198,7 +183,7 @@ class TenantConfigBroadcastOverrideTest extends UnitTestCase
         });
 
         /** @var \Illuminate\Foundation\Application&MockInterface $app */
-        $app = Mockery::mock($this->app, static function (MockInterface $mock) use ($tenancy, $tenant) {
+        $app = Mockery::mock($this->app, static function (MockInterface $mock) {
             $mock->makePartial();
         });
 
@@ -225,7 +210,7 @@ class TenantConfigBroadcastOverrideTest extends UnitTestCase
 
         $override->boot($app, $sprout);
 
-        /** @var \Sprout\Overrides\Broadcast\TenantConfigBroadcastManager $manager */
+        /** @var TenantConfigBroadcastManager $manager */
         $manager = $app->make(BroadcastManager::class);
 
         $this->expectException(RuntimeException::class);
@@ -246,7 +231,7 @@ class TenantConfigBroadcastOverrideTest extends UnitTestCase
             ],
         ]);
 
-        $tenant  = Mockery::mock(Tenant::class, TenantHasResources::class, static function (MockInterface $mock) {
+        $tenant = Mockery::mock(Tenant::class, TenantHasResources::class, static function (MockInterface $mock) {
         });
         $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) use ($tenant) {
             $mock->shouldReceive('check')->andReturnTrue()->once();
@@ -254,7 +239,7 @@ class TenantConfigBroadcastOverrideTest extends UnitTestCase
         });
 
         /** @var \Illuminate\Foundation\Application&MockInterface $app */
-        $app = Mockery::mock($this->app, static function (MockInterface $mock) use ($tenancy, $tenant) {
+        $app = Mockery::mock($this->app, static function (MockInterface $mock) {
             $mock->makePartial();
         });
 
@@ -270,8 +255,8 @@ class TenantConfigBroadcastOverrideTest extends UnitTestCase
                               'broadcast',
                               'bud-connection',
                           )->andReturn([
-                             'driver' => 'sprout:config',
-                         ]);
+                              'driver' => 'sprout:config',
+                          ]);
                  }));
         })));
 
@@ -283,7 +268,7 @@ class TenantConfigBroadcastOverrideTest extends UnitTestCase
 
         $override->boot($app, $sprout);
 
-        /** @var \Sprout\Overrides\Broadcast\TenantConfigBroadcastManager $manager */
+        /** @var TenantConfigBroadcastManager $manager */
         $manager = $app->make(BroadcastManager::class);
 
         $this->expectException(CyclicOverrideException::class);
@@ -304,7 +289,7 @@ class TenantConfigBroadcastOverrideTest extends UnitTestCase
             ],
         ]);
 
-        $tenant  = Mockery::mock(Tenant::class, TenantHasResources::class, static function (MockInterface $mock) {
+        $tenant = Mockery::mock(Tenant::class, TenantHasResources::class, static function (MockInterface $mock) {
         });
         $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) use ($tenant) {
             $mock->shouldReceive('check')->andReturnTrue()->once();
@@ -312,7 +297,7 @@ class TenantConfigBroadcastOverrideTest extends UnitTestCase
         });
 
         /** @var \Illuminate\Foundation\Application&MockInterface $app */
-        $app = Mockery::mock($this->app, static function (MockInterface $mock) use ($tenancy, $tenant) {
+        $app = Mockery::mock($this->app, static function (MockInterface $mock) {
             $mock->makePartial();
         });
 
@@ -328,8 +313,8 @@ class TenantConfigBroadcastOverrideTest extends UnitTestCase
                               'broadcast',
                               'bud-connection',
                           )->andReturn([
-                             'driver' => 'null',
-                         ]);
+                              'driver' => 'null',
+                          ]);
                  }));
         })));
 
@@ -341,7 +326,7 @@ class TenantConfigBroadcastOverrideTest extends UnitTestCase
 
         $override->boot($app, $sprout);
 
-        /** @var \Sprout\Overrides\Broadcast\TenantConfigBroadcastManager $manager */
+        /** @var TenantConfigBroadcastManager $manager */
         $manager = $app->make(BroadcastManager::class);
 
         $manager->connectUsing('bud-connection', [
@@ -391,8 +376,8 @@ class TenantConfigBroadcastOverrideTest extends UnitTestCase
                               'broadcast',
                               'bud-connection',
                           )->andReturn([
-                             'driver' => 'null',
-                         ]);
+                              'driver' => 'null',
+                          ]);
                  }));
         })));
 
@@ -463,8 +448,8 @@ class TenantConfigBroadcastOverrideTest extends UnitTestCase
                               'broadcast',
                               'bud-connection',
                           )->andReturn([
-                             'driver' => 'null',
-                         ]);
+                              'driver' => 'null',
+                          ]);
                  }));
         })));
 
@@ -518,7 +503,7 @@ class TenantConfigBroadcastOverrideTest extends UnitTestCase
         $tenant = Mockery::mock(Tenant::class, TenantHasResources::class, static function (MockInterface $mock) {
         });
 
-        $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) use ($tenant) {
+        $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) {
         });
 
         $sprout->setCurrentTenancy($tenancy);
@@ -536,11 +521,27 @@ class TenantConfigBroadcastOverrideTest extends UnitTestCase
         $this->assertEmpty($broadcastOverride->getOverrides());
     }
 
-    public static function broadcastResolvedDataProvider(): array
+    protected function defineEnvironment($app): void
     {
-        return [
-            'broadcast resolved'     => [true],
-            'broadcast not resolved' => [false],
-        ];
+        tap($app['config'], static function (Repository $config) {
+            $config->set('sprout.overrides', []);
+        });
+    }
+
+    private function mockTenantConfigBroadcastManager(bool $extends = true, ?Closure $callback = null): TenantConfigBroadcastManager&MockInterface
+    {
+        return Mockery::mock(TenantConfigBroadcastManager::class, static function (MockInterface $mock) use ($extends, $callback) {
+            if ($extends) {
+                $mock->shouldReceive('extend')
+                     ->with('sprout:config', Mockery::on(static function ($arg) {
+                         return is_callable($arg) && $arg instanceof Closure;
+                     }))
+                     ->once();
+            }
+
+            if ($callback) {
+                $callback($mock);
+            }
+        });
     }
 }

@@ -12,17 +12,11 @@ use Sprout\Overrides\Session\SessionOverride;
 use Sprout\TenancyOptions;
 use Sprout\Tests\Unit\UnitTestCase;
 use Workbench\App\Models\TenantModel;
+
 use function Sprout\sprout;
 
 class ServiceOverrideManagerTest extends UnitTestCase
 {
-    protected function defineEnvironment($app): void
-    {
-        tap($app['config'], static function ($config) {
-            $config->set('sprout.overrides', []);
-        });
-    }
-
     #[Test]
     public function isRegisteredWithTheContainerAsSingleton(): void
     {
@@ -333,5 +327,12 @@ class ServiceOverrideManagerTest extends UnitTestCase
         $this->expectExceptionMessage('The provided value for \'driver\' [stdClass] is not valid for service override [session]');
 
         sprout()->overrides()->registerOverrides();
+    }
+
+    protected function defineEnvironment($app): void
+    {
+        tap($app['config'], static function ($config) {
+            $config->set('sprout.overrides', []);
+        });
     }
 }

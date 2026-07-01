@@ -17,32 +17,16 @@ use Workbench\App\Models\TenantModel;
 
 class TenancyTest extends UnitTestCase
 {
-    protected function defineEnvironment($app)
-    {
-        tap($app['config'], function ($config) {
-            $config->set('multitenancy.providers.tenants.model', TenantModel::class);
-
-            $config->set('multitenancy.providers.backup', [
-                'driver' => 'database',
-                'table'  => 'tenants',
-            ]);
-
-            $config->set('multitenancy.tenancies.backup', [
-                'provider' => 'backup',
-            ]);
-        });
-    }
-
     #[Test]
     public function resolvesTenancy(): void
     {
         $manager = $this->app->make(TenancyManager::class);
 
-        $callback1 = static function (#[Tenancy] \Sprout\Contracts\Tenancy $tenancy) {
+        $callback1 = static function (#[Tenancy] TenancyContract $tenancy) {
             return $tenancy;
         };
 
-        $callback2 = static function (#[Tenancy('backup')] \Sprout\Contracts\Tenancy $tenancy) {
+        $callback2 = static function (#[Tenancy('backup')] TenancyContract $tenancy) {
             return $tenancy;
         };
 
@@ -69,5 +53,21 @@ class TenancyTest extends UnitTestCase
         $attribute = new Tenancy('backup');
 
         $this->assertSame($expected, $attribute->resolve($attribute, $container));
+    }
+
+    protected function defineEnvironment($app)
+    {
+        tap($app['config'], function ($config) {
+            $config->set('multitenancy.providers.tenants.model', TenantModel::class);
+
+            $config->set('multitenancy.providers.backup', [
+                'driver' => 'database',
+                'table'  => 'tenants',
+            ]);
+
+            $config->set('multitenancy.tenancies.backup', [
+                'provider' => 'backup',
+            ]);
+        });
     }
 }
