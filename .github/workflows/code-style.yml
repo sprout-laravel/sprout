@@ -1,4 +1,4 @@
-name: static analysis
+name: code style
 
 on:
   push:
@@ -7,8 +7,6 @@ on:
   pull_request:
     types: [ opened, synchronize, reopened, ready_for_review ]
   workflow_dispatch:
-  schedule:
-    - cron: '0 0 * * *'
 
 permissions:
   contents: read
@@ -18,13 +16,13 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  analysis:
+  pint:
     runs-on: ubuntu-22.04
 
-    # Skip draft pull requests; push, cron and ready_for_review still cover them.
+    # Skip draft pull requests; push and ready_for_review still cover them.
     if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
 
-    name: Static Analysis
+    name: Pint
 
     steps:
       - name: Checkout code
@@ -44,5 +42,7 @@ jobs:
           max_attempts: 5
           command: composer install --no-interaction --no-progress
 
-      - name: Execute type checking
-        run: composer analyse
+      # `--test` reports violations without rewriting files, so CI fails on
+      # unformatted code rather than silently fixing it.
+      - name: Check code style
+        run: vendor/bin/pint --test --ansi
