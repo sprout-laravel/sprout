@@ -1,27 +1,24 @@
-.PHONY: test phpunit infection analyse tidy install shell build
+.PHONY: test phpunit analyse tidy infection install
 
 .DEFAULT_GOAL := test
 
 test:
-	docker compose run --rm -T php composer test
+	composer test
 
 phpunit:
-	docker compose run --rm -T php vendor/bin/phpunit $(ARGS)
-
-infection:
-	docker compose run --rm -T php composer infection
+	vendor/bin/phpunit $(ARGS)
 
 analyse:
-	docker compose run --rm -T php composer analyse
+	composer analyse
 
 tidy:
-	docker compose run --rm -T php composer tidy
+	composer tidy
+
+# Infection spawns many parallel PHPStan/Larastan workers. On macOS the default
+# open-files limit (often 256) can be too low; if you hit "Too many open files",
+# raise it first: ulimit -n 65536
+infection:
+	composer infection
 
 install:
-	docker compose run --rm -T php composer install
-
-shell:
-	docker compose run --rm php bash
-
-build:
-	docker compose build
+	composer install
