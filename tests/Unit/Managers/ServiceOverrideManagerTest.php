@@ -11,6 +11,7 @@ use Sprout\Overrides\Cookie\CookieOverride;
 use Sprout\Overrides\Session\SessionOverride;
 use Sprout\TenancyOptions;
 use Sprout\Tests\Unit\UnitTestCase;
+use stdClass;
 use Workbench\App\Models\TenantModel;
 
 use function Sprout\sprout;
@@ -321,7 +322,7 @@ class ServiceOverrideManagerTest extends UnitTestCase
     #[Test]
     public function errorsWhenRegisteringOverrideWithInvalidDriver(): void
     {
-        config()->set('sprout.overrides', ['session' => ['driver' => \stdClass::class]]);
+        config()->set('sprout.overrides', ['session' => ['driver' => stdClass::class]]);
 
         $this->expectException(MisconfigurationException::class);
         $this->expectExceptionMessage('The provided value for \'driver\' [stdClass] is not valid for service override [session]');

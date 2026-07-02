@@ -367,7 +367,7 @@ class ResolutionHelperTest extends UnitTestCase
                 sprout(),
                 $resolver->getName(),
                 $tenancy->getName(),
-                throw: true,
+                throw   : true,
                 optional: true,
             ),
         );

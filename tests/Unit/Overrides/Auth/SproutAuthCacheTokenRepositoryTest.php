@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Sprout\Tests\Unit\Overrides\Auth;
 
 use Carbon\Carbon;
+use Closure;
 use Illuminate\Cache\Repository;
 use Illuminate\Contracts\Auth\CanResetPassword;
 use Illuminate\Foundation\Application;
@@ -533,7 +534,7 @@ class SproutAuthCacheTokenRepositoryTest extends UnitTestCase
         });
     }
 
-    private function mockStoreGet(?Tenancy $tenancy, string $token, $hasher, bool $return = true, ?\Closure $expiryAdjuster = null): Repository&MockInterface
+    private function mockStoreGet(?Tenancy $tenancy, string $token, $hasher, bool $return = true, ?Closure $expiryAdjuster = null): Repository&MockInterface
     {
         $storedToken = $return ? $hasher->make($token) : null;
 

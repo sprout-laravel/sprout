@@ -55,7 +55,7 @@ final class DatabaseTenantProvider extends BaseTenantProvider
      * @param string               $table
      * @param class-string<Tenant> $entityClass
      *
-     * @phpstan-param class-string<EntityClass>           $entityClass
+     * @phpstan-param class-string<EntityClass> $entityClass
      */
     public function __construct(string $name, ConnectionInterface $connection, string $table, string $entityClass = GenericTenant::class)
     {

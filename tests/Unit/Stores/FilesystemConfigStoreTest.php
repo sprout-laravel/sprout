@@ -197,8 +197,7 @@ class FilesystemConfigStoreTest extends UnitTestCase
                      . DIRECTORY_SEPARATOR
                      . Str::slug($service)
                      . DIRECTORY_SEPARATOR
-                     . Str::slug($name)
-                     ,
+                     . Str::slug($name),
                      Mockery::on(static function (string $value) use ($encryptedConfig, $encrypter) {
                          return $encrypter->decrypt($value, false) === $encrypter->decrypt($encryptedConfig, false);
                      }),
@@ -267,8 +266,7 @@ class FilesystemConfigStoreTest extends UnitTestCase
                      . DIRECTORY_SEPARATOR
                      . Str::slug($service)
                      . DIRECTORY_SEPARATOR
-                     . Str::slug($name)
-                     ,
+                     . Str::slug($name),
                      Mockery::on(static function (string $value) use ($encryptedConfig, $encrypter) {
                          return $encrypter->decryptString($value) === $encrypter->decryptString($encryptedConfig);
                      }),

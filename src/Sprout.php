@@ -316,7 +316,7 @@ final class Sprout
      * @param array<string, mixed> $parameters
      * @param bool                 $absolute
      *
-     * @phpstan-param TenantClass    $tenant
+     * @phpstan-param TenantClass  $tenant
      *
      * @return string
      *

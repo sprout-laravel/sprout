@@ -7,11 +7,13 @@ use PHPUnit\Framework\Attributes\Test;
 use Sprout\Facades\Overrides;
 use Sprout\Tests\Unit\UnitTestCase;
 
+use function Sprout\sprout;
+
 class OverridesFacadeTest extends UnitTestCase
 {
     #[Test]
     public function usesCorrectInstance(): void
     {
-        $this->assertEquals(\Sprout\sprout()->overrides(), Overrides::getFacadeRoot());
+        $this->assertEquals(sprout()->overrides(), Overrides::getFacadeRoot());
     }
 }

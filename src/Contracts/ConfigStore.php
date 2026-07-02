@@ -22,7 +22,7 @@ interface ConfigStore
      * @param string                    $name
      * @param array<string, mixed>|null $default
      *
-     * @phpstan-param TenantClass                         $tenant
+     * @phpstan-param TenantClass       $tenant
      *
      * @return array<string, mixed>|null
      */
@@ -44,7 +44,7 @@ interface ConfigStore
      * @param string               $service
      * @param string               $name
      *
-     * @phpstan-param TenantClass                         $tenant
+     * @phpstan-param TenantClass  $tenant
      *
      * @return bool
      */
@@ -70,7 +70,7 @@ interface ConfigStore
      * @param string               $name
      * @param array<string, mixed> $config
      *
-     * @phpstan-param TenantClass                         $tenant
+     * @phpstan-param TenantClass  $tenant
      *
      * @return bool
      */
@@ -97,7 +97,7 @@ interface ConfigStore
      * @param string               $name
      * @param array<string, mixed> $config
      *
-     * @phpstan-param TenantClass                         $tenant
+     * @phpstan-param TenantClass  $tenant
      *
      * @return bool
      */

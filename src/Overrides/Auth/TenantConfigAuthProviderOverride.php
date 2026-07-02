@@ -36,7 +36,7 @@ final class TenantConfigAuthProviderOverride extends TenantConfigBaseOverride
      * @param Tenancy<TenantClass> $tenancy
      * @param Tenant               $tenant
      *
-     * @phpstan-param TenantClass                         $tenant
+     * @phpstan-param TenantClass  $tenant
      *
      * @return void
      *

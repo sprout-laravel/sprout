@@ -45,7 +45,7 @@ final class FilesystemConfigStore extends BaseConfigStore
      * @param string                    $name
      * @param array<string, mixed>|null $default
      *
-     * @phpstan-param TenantClass                         $tenant
+     * @phpstan-param TenantClass       $tenant
      *
      * @return array<string, mixed>|null
      *
@@ -148,7 +148,7 @@ final class FilesystemConfigStore extends BaseConfigStore
      * @param string               $service
      * @param string               $name
      *
-     * @phpstan-param TenantClass                         $tenant
+     * @phpstan-param TenantClass  $tenant
      *
      * @return string
      *

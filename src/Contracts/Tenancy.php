@@ -155,7 +155,7 @@ interface Tenancy
      *
      * @param Tenant|null $tenant
      *
-     * @phpstan-param TenantClass|null           $tenant
+     * @phpstan-param TenantClass|null $tenant
      *
      * @return static
      */

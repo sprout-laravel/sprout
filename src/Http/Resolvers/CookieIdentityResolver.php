@@ -68,7 +68,7 @@ final class CookieIdentityResolver extends BaseIdentityResolver
      * @param Tenancy<TenantClass> $tenancy
      * @param Tenant|null          $tenant
      *
-     * @phpstan-param Tenant|null                         $tenant
+     * @phpstan-param Tenant|null  $tenant
      *
      * @return void
      *

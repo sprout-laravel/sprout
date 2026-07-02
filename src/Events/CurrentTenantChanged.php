@@ -62,8 +62,8 @@ final readonly class CurrentTenantChanged
      * @param Tenant|null          $previous
      * @param Tenant|null          $current
      *
-     * @phpstan-param TenantClass|null                    $previous
-     * @phpstan-param TenantClass|null                    $current
+     * @phpstan-param TenantClass|null $previous
+     * @phpstan-param TenantClass|null $current
      */
     public function __construct(
         Tenancy $tenancy,

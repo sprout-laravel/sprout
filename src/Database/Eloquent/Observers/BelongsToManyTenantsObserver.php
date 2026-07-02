@@ -38,7 +38,7 @@ class BelongsToManyTenantsObserver
      *
      * @param Model&BelongsToManyTenants $model
      *
-     * @phpstan-param ChildModel                                                                               $model
+     * @phpstan-param ChildModel         $model
      *
      * @return void
      *
@@ -79,7 +79,7 @@ class BelongsToManyTenantsObserver
         /**
          * @var Model&Tenant $tenant
          *
-         * @phpstan-var TenantModel                                               $tenant
+         * @phpstan-var TenantModel $tenant
          */
         $tenant = $tenancy->tenant();
 
@@ -102,7 +102,7 @@ class BelongsToManyTenantsObserver
      *
      * @param Model&BelongsToManyTenants $model
      *
-     * @phpstan-param ChildModel                                                                               $model
+     * @phpstan-param ChildModel         $model
      *
      * @return void
      *
@@ -147,7 +147,7 @@ class BelongsToManyTenantsObserver
         /**
          * @var Model&Tenant $tenant
          *
-         * @phpstan-var TenantModel                                               $tenant
+         * @phpstan-var TenantModel $tenant
          */
         $tenant = $tenancy->tenant();
 
@@ -215,7 +215,7 @@ class BelongsToManyTenantsObserver
      * @param BelongsToMany<ChildModel, TenantModel> $relation
      * @param bool                                   $succeedOnMatch
      *
-     * @phpstan-param ChildModel                                                                               $model
+     * @phpstan-param ChildModel                     $model
      *
      * @return bool
      *
@@ -250,7 +250,7 @@ class BelongsToManyTenantsObserver
         /**
          * @var Model&Tenant $tenant
          *
-         * @phpstan-var TenantModel                                               $tenant
+         * @phpstan-var TenantModel $tenant
          */
         $tenant = $tenancy->tenant();
 
@@ -288,8 +288,8 @@ class BelongsToManyTenantsObserver
      * @param BelongsToMany<ChildModel, TenantModel> $relation
      * @param Tenant                                 $tenant
      *
-     * @phpstan-param ChildModel                                                             $model
-     * @phpstan-param TenantModel                                                            $tenant
+     * @phpstan-param ChildModel                     $model
+     * @phpstan-param TenantModel                    $tenant
      *
      * @return void
      */
