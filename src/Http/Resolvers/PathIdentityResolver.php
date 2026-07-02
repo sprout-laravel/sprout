@@ -65,7 +65,7 @@ final class PathIdentityResolver extends BaseIdentityResolver implements Identit
      * @param Tenancy<TenantClass> $tenancy
      * @param Tenant|null          $tenant
      *
-     * @phpstan-param TenantClass|null                    $tenant
+     * @phpstan-param TenantClass|null $tenant
      *
      * @return void
      *
@@ -73,9 +73,6 @@ final class PathIdentityResolver extends BaseIdentityResolver implements Identit
      */
     public function setup(Tenancy $tenancy, ?Tenant $tenant): void
     {
-        // Call the parent implementation in case there's something there
-        parent::setup($tenancy, $tenant);
-
         // Call the trait setup so that parameter has a default value
         $this->parameterSetup($tenancy, $tenant);
 
