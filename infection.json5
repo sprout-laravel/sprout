@@ -6,6 +6,7 @@
     ]
   },
   "threads"                  : "max",
+  "timeout"                  : 60,
   "staticAnalysisTool"       : "phpstan",
   "staticAnalysisToolOptions": "--memory-limit=2G",
   "logs"                     : {
@@ -13,6 +14,7 @@
     "html": "build/infection.html"
   },
   "mutators"                 : {
-    "@default": true
+    "@default"           : true,
+    "ProtectedVisibility": false,
   }
 }

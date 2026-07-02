@@ -54,21 +54,25 @@
       "@php vendor/bin/testbench serve --ansi"
     ],
     "analyse"           : [
+      "Composer\\Config::disableProcessTimeout",
       "@php vendor/bin/phpstan analyse --memory-limit=2G --verbose --ansi"
     ],
     "test"              : [
+      "Composer\\Config::disableProcessTimeout",
       "@clear",
       "@prepare",
       "@build",
       "@php vendor/bin/paratest"
     ],
     "infection"         : [
+      "Composer\\Config::disableProcessTimeout",
       "@clear",
       "@prepare",
       "@build",
       "@php vendor/bin/infection --ansi"
     ],
     "tidy"              : [
+      "Composer\\Config::disableProcessTimeout",
       "@php vendor/bin/pint --ansi"
     ]
   },
