@@ -6,6 +6,7 @@ namespace Sprout\Tests\Unit\Overrides\Cache;
 use Closure;
 use Illuminate\Cache\CacheManager;
 use Illuminate\Config\Repository;
+use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Contracts\Foundation\Application;
 use Mockery;
 use Mockery\MockInterface;
@@ -120,7 +121,7 @@ class TenantConfigCacheStoreOverrideTest extends UnitTestCase
         });
 
         $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
-        $app->make('config')->set('cache.stores.bud-cache', [
+        $app->make('config')->set('cache.stores.tenant-cache', [
             'driver' => 'sprout:config',
         ]);
 
@@ -132,7 +133,7 @@ class TenantConfigCacheStoreOverrideTest extends UnitTestCase
                               $tenancy,
                               $tenant,
                               'cache',
-                              'bud-cache',
+                              'tenant-cache',
                           )->andReturn([
                               'driver' => 'sprout:config',
                           ]);
@@ -151,9 +152,9 @@ class TenantConfigCacheStoreOverrideTest extends UnitTestCase
         $manager = $app->make('cache');
 
         $this->expectException(CyclicOverrideException::class);
-        $this->expectExceptionMessage('Attempt to create cyclic config cache store [bud-cache] detected');
+        $this->expectExceptionMessage('Attempt to create cyclic config cache store [tenant-cache] detected');
 
-        $manager->store('bud-cache');
+        $manager->store('tenant-cache');
     }
 
     #[Test]
@@ -167,7 +168,7 @@ class TenantConfigCacheStoreOverrideTest extends UnitTestCase
         });
 
         $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
-        $app->make('config')->set('cache.stores.bud-cache', [
+        $app->make('config')->set('cache.stores.tenant-cache', [
             'driver' => 'sprout:config',
         ]);
 
@@ -187,7 +188,7 @@ class TenantConfigCacheStoreOverrideTest extends UnitTestCase
                               $tenancy,
                               $tenant,
                               'cache',
-                              'bud-cache',
+                              'tenant-cache',
                           )->andReturn([
                               'driver'    => 'array',
                               'serialize' => false,
@@ -206,9 +207,12 @@ class TenantConfigCacheStoreOverrideTest extends UnitTestCase
         /** @var CacheManager $manager */
         $manager = $app->make('cache');
 
-        $manager->store('bud-cache');
+        $store = $manager->store('tenant-cache');
 
-        $this->assertContains('bud-cache', $override->getOverrides());
+        // The store closure must actually return the created store
+        $this->assertInstanceOf(CacheRepository::class, $store);
+
+        $this->assertContains('tenant-cache', $override->getOverrides());
     }
 
     #[Test]
@@ -224,7 +228,7 @@ class TenantConfigCacheStoreOverrideTest extends UnitTestCase
         });
 
         $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
-        $app->make('config')->set('cache.stores.bud-cache', [
+        $app->make('config')->set('cache.stores.tenant-cache', [
             'driver' => 'sprout:config',
         ]);
 
@@ -244,7 +248,7 @@ class TenantConfigCacheStoreOverrideTest extends UnitTestCase
                               $tenancy,
                               $tenant,
                               'cache',
-                              'bud-cache',
+                              'tenant-cache',
                           )->andReturn([
                               'driver'    => 'array',
                               'serialize' => false,
@@ -262,13 +266,19 @@ class TenantConfigCacheStoreOverrideTest extends UnitTestCase
 
         $this->assertEmpty($override->getOverrides());
 
-        /** @var CacheManager $manager */
-        $manager = $app->make('cache');
+        // Wrap the real cache manager so we can assert purge() is invoked
+        // during cleanup for the resolved store.
+        $manager = Mockery::mock($app->make('cache'), static function (MockInterface $mock) {
+            $mock->makePartial();
+            $mock->shouldReceive('purge')->with('tenant-cache')->once();
+        });
 
-        $manager->store('bud-cache');
+        $app->instance('cache', $manager);
+
+        $manager->store('tenant-cache');
 
         $this->assertNotEmpty($override->getOverrides());
-        $this->assertContains('bud-cache', $override->getOverrides());
+        $this->assertContains('tenant-cache', $override->getOverrides());
 
         $override->cleanup($tenancy, $tenant);
 
@@ -288,7 +298,7 @@ class TenantConfigCacheStoreOverrideTest extends UnitTestCase
         });
 
         $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
-        $app->make('config')->set('cache.stores.bud-cache', [
+        $app->make('config')->set('cache.stores.tenant-cache', [
             'driver' => 'sprout:config',
         ]);
 

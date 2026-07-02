@@ -184,7 +184,7 @@ class TenantConfigFilesystemDiskOverrideTest extends UnitTestCase
         });
 
         $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
-        $app->make('config')->set('filesystems.disks.bud-disk', [
+        $app->make('config')->set('filesystems.disks.tenant-disk', [
             'driver' => 'sprout:config',
         ]);
 
@@ -196,7 +196,7 @@ class TenantConfigFilesystemDiskOverrideTest extends UnitTestCase
                               $tenancy,
                               $tenant,
                               'filesystem',
-                              'bud-disk',
+                              'tenant-disk',
                           )->andReturn(null);
                  }));
         })));
@@ -213,9 +213,9 @@ class TenantConfigFilesystemDiskOverrideTest extends UnitTestCase
         $manager = $app->make('filesystem');
 
         $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('Unable to find configuration for [filesystem.bud-disk] for tenant [my-tenant] on tenancy [my-tenancy]');
+        $this->expectExceptionMessage('Unable to find configuration for [filesystem.tenant-disk] for tenant [my-tenant] on tenancy [my-tenancy]');
 
-        $manager->disk('bud-disk');
+        $manager->disk('tenant-disk');
     }
 
     #[Test]
@@ -241,7 +241,7 @@ class TenantConfigFilesystemDiskOverrideTest extends UnitTestCase
         });
 
         $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
-        $app->make('config')->set('filesystems.disks.bud-disk', [
+        $app->make('config')->set('filesystems.disks.tenant-disk', [
             'driver' => 'sprout:config',
         ]);
 
@@ -253,7 +253,7 @@ class TenantConfigFilesystemDiskOverrideTest extends UnitTestCase
                               $tenancy,
                               $tenant,
                               'filesystem',
-                              'bud-disk',
+                              'tenant-disk',
                           )->andReturn([
                               'driver' => 'sprout:config',
                           ]);
@@ -272,9 +272,9 @@ class TenantConfigFilesystemDiskOverrideTest extends UnitTestCase
         $manager = $app->make('filesystem');
 
         $this->expectException(CyclicOverrideException::class);
-        $this->expectExceptionMessage('Attempt to create cyclic config filesystem disk [bud-disk] detected');
+        $this->expectExceptionMessage('Attempt to create cyclic config filesystem disk [tenant-disk] detected');
 
-        $manager->disk('bud-disk');
+        $manager->disk('tenant-disk');
     }
 
     #[Test]
@@ -293,7 +293,7 @@ class TenantConfigFilesystemDiskOverrideTest extends UnitTestCase
         });
 
         $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
-        $app->make('config')->set('filesystems.disks.bud-disk', [
+        $app->make('config')->set('filesystems.disks.tenant-disk', [
             'driver' => 'sprout:config',
         ]);
 
@@ -313,7 +313,7 @@ class TenantConfigFilesystemDiskOverrideTest extends UnitTestCase
                               $tenancy,
                               $tenant,
                               'filesystem',
-                              'bud-disk',
+                              'tenant-disk',
                           )->andReturn([
                               'driver' => 'local',
                               'root'   => storage_path('app'),
@@ -333,10 +333,10 @@ class TenantConfigFilesystemDiskOverrideTest extends UnitTestCase
         /** @var SproutFilesystemManager $filesystem */
         $filesystem = $app->make('filesystem');
 
-        $filesystem->disk('bud-disk');
+        $filesystem->disk('tenant-disk');
 
         $this->assertNotEmpty($override->getOverrides()[TenantConfigFilesystemDiskOverride::class]->getOverrides());
-        $this->assertContains('bud-disk', $override->getOverrides()[TenantConfigFilesystemDiskOverride::class]->getOverrides());
+        $this->assertContains('tenant-disk', $override->getOverrides()[TenantConfigFilesystemDiskOverride::class]->getOverrides());
     }
 
     #[Test]
@@ -357,7 +357,7 @@ class TenantConfigFilesystemDiskOverrideTest extends UnitTestCase
         });
 
         $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
-        $app->make('config')->set('filesystems.disks.bud-disk', [
+        $app->make('config')->set('filesystems.disks.tenant-disk', [
             'driver' => 'sprout:config',
         ]);
 
@@ -377,7 +377,7 @@ class TenantConfigFilesystemDiskOverrideTest extends UnitTestCase
                               $tenancy,
                               $tenant,
                               'filesystem',
-                              'bud-disk',
+                              'tenant-disk',
                           )->andReturn([
                               'driver' => 'local',
                               'root'   => storage_path('app'),
@@ -400,10 +400,10 @@ class TenantConfigFilesystemDiskOverrideTest extends UnitTestCase
 
         $filesystem = $app->make('filesystem');
 
-        $filesystem->disk('bud-disk');
+        $filesystem->disk('tenant-disk');
 
         $this->assertNotEmpty($filesystemOverride->getOverrides());
-        $this->assertContains('bud-disk', $filesystemOverride->getOverrides());
+        $this->assertContains('tenant-disk', $filesystemOverride->getOverrides());
 
         $override->cleanup($tenancy, $tenant);
 

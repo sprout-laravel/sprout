@@ -120,7 +120,7 @@ class TenantConfigMailerOverrideTest extends UnitTestCase
         });
 
         $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
-        $app->make('config')->set('mail.mailers.bud-mailer', [
+        $app->make('config')->set('mail.mailers.tenant-mailer', [
             'transport' => 'sprout:config',
         ]);
 
@@ -132,7 +132,7 @@ class TenantConfigMailerOverrideTest extends UnitTestCase
                               $tenancy,
                               $tenant,
                               'mailer',
-                              'bud-mailer',
+                              'tenant-mailer',
                           )->andReturn([
                               'transport' => 'sprout:config',
                           ]);
@@ -151,9 +151,9 @@ class TenantConfigMailerOverrideTest extends UnitTestCase
         $manager = $app->make('mail.manager');
 
         $this->expectException(CyclicOverrideException::class);
-        $this->expectExceptionMessage('Attempt to create cyclic config mailer [bud-mailer] detected');
+        $this->expectExceptionMessage('Attempt to create cyclic config mailer [tenant-mailer] detected');
 
-        $manager->mailer('bud-mailer');
+        $manager->mailer('tenant-mailer');
     }
 
     #[Test]
@@ -167,7 +167,7 @@ class TenantConfigMailerOverrideTest extends UnitTestCase
         });
 
         $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
-        $app->make('config')->set('mail.mailers.bud-mailer', [
+        $app->make('config')->set('mail.mailers.tenant-mailer', [
             'transport' => 'sprout:config',
         ]);
 
@@ -187,7 +187,7 @@ class TenantConfigMailerOverrideTest extends UnitTestCase
                               $tenancy,
                               $tenant,
                               'mailer',
-                              'bud-mailer',
+                              'tenant-mailer',
                           )->andReturn([
                               'transport' => 'smtp',
                               'port'      => 25,
@@ -207,9 +207,9 @@ class TenantConfigMailerOverrideTest extends UnitTestCase
         /** @var MailManager $manager */
         $manager = $app->make('mail.manager');
 
-        $manager->mailer('bud-mailer');
+        $manager->mailer('tenant-mailer');
 
-        $this->assertContains('bud-mailer', $override->getOverrides());
+        $this->assertContains('tenant-mailer', $override->getOverrides());
     }
 
     #[Test]
@@ -225,7 +225,7 @@ class TenantConfigMailerOverrideTest extends UnitTestCase
         });
 
         $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
-        $app->make('config')->set('mail.mailers.bud-mailer', [
+        $app->make('config')->set('mail.mailers.tenant-mailer', [
             'transport' => 'sprout:config',
         ]);
 
@@ -245,7 +245,7 @@ class TenantConfigMailerOverrideTest extends UnitTestCase
                               $tenancy,
                               $tenant,
                               'mailer',
-                              'bud-mailer',
+                              'tenant-mailer',
                           )->andReturn([
                               'transport' => 'smtp',
                               'port'      => 25,
@@ -267,10 +267,10 @@ class TenantConfigMailerOverrideTest extends UnitTestCase
         /** @var MailManager $manager */
         $manager = $app->make('mail.manager');
 
-        $manager->mailer('bud-mailer');
+        $manager->mailer('tenant-mailer');
 
         $this->assertNotEmpty($override->getOverrides());
-        $this->assertContains('bud-mailer', $override->getOverrides());
+        $this->assertContains('tenant-mailer', $override->getOverrides());
 
         $override->cleanup($tenancy, $tenant);
 
@@ -290,7 +290,7 @@ class TenantConfigMailerOverrideTest extends UnitTestCase
         });
 
         $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
-        $app->make('config')->set('mail.mailers.bud-mailer', [
+        $app->make('config')->set('mail.mailers.tenant-mailer', [
             'transport' => 'sprout:config',
         ]);
 

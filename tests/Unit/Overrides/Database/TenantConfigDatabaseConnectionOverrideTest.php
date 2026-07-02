@@ -124,9 +124,9 @@ class TenantConfigDatabaseConnectionOverrideTest extends UnitTestCase
         });
 
         $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
-        $app->make('config')->set('database.connections.bud-connection', [
+        $app->make('config')->set('database.connections.tenant-connection', [
             'driver'   => 'sprout:config',
-            'database' => 'bud-database',
+            'database' => 'tenant-database',
         ]);
 
         $app->singleton(TenantConfig::class, fn () => new TenantConfig($app, Mockery::mock(ConfigStoreManager::class, function (MockInterface $mock) use ($tenancy, $tenant) {
@@ -137,10 +137,10 @@ class TenantConfigDatabaseConnectionOverrideTest extends UnitTestCase
                               $tenancy,
                               $tenant,
                               'database',
-                              'bud-connection',
+                              'tenant-connection',
                           )->andReturn([
                               'driver'   => 'sprout:config',
-                              'database' => 'bud-database',
+                              'database' => 'tenant-database',
                           ]);
                  }));
         })));
@@ -157,9 +157,9 @@ class TenantConfigDatabaseConnectionOverrideTest extends UnitTestCase
         $manager = $app->make('db');
 
         $this->expectException(CyclicOverrideException::class);
-        $this->expectExceptionMessage('Attempt to create cyclic config database connection [bud-connection] detected');
+        $this->expectExceptionMessage('Attempt to create cyclic config database connection [tenant-connection] detected');
 
-        $manager->connection('bud-connection');
+        $manager->connection('tenant-connection');
     }
 
     #[Test]
@@ -180,9 +180,9 @@ class TenantConfigDatabaseConnectionOverrideTest extends UnitTestCase
         });
 
         $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
-        $app->make('config')->set('database.connections.bud-connection', [
+        $app->make('config')->set('database.connections.tenant-connection', [
             'driver'   => 'sprout:config',
-            'database' => 'bud-database',
+            'database' => 'tenant-database',
         ]);
 
         $app->singleton(TenantConfig::class, fn () => new TenantConfig($app, Mockery::mock(ConfigStoreManager::class, function (MockInterface $mock) use ($tenancy, $tenant) {
@@ -193,7 +193,7 @@ class TenantConfigDatabaseConnectionOverrideTest extends UnitTestCase
                               $tenancy,
                               $tenant,
                               'database',
-                              'bud-connection',
+                              'tenant-connection',
                           )->andReturn([
                               'driver' => 'mysql',
                           ]);
@@ -211,10 +211,10 @@ class TenantConfigDatabaseConnectionOverrideTest extends UnitTestCase
         /** @var DatabaseManager $manager */
         $manager = $app->make('db');
 
-        $manager->connection('bud-connection');
+        $manager->connection('tenant-connection');
 
         $this->assertNotEmpty($override->getOverrides());
-        $this->assertContains('bud-connection', $override->getOverrides());
+        $this->assertContains('tenant-connection', $override->getOverrides());
     }
 
     #[Test]
@@ -230,9 +230,9 @@ class TenantConfigDatabaseConnectionOverrideTest extends UnitTestCase
         });
 
         $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
-        $app->make('config')->set('database.connections.bud-connection', [
+        $app->make('config')->set('database.connections.tenant-connection', [
             'driver'   => 'sprout:config',
-            'database' => 'bud-database',
+            'database' => 'tenant-database',
         ]);
 
         $sprout = new Sprout($app, new SettingsRepository());
@@ -253,7 +253,7 @@ class TenantConfigDatabaseConnectionOverrideTest extends UnitTestCase
                               $tenancy,
                               $tenant,
                               'database',
-                              'bud-connection',
+                              'tenant-connection',
                           )->andReturn([
                               'driver' => 'mysql',
                           ]);
@@ -268,12 +268,19 @@ class TenantConfigDatabaseConnectionOverrideTest extends UnitTestCase
 
         $this->assertEmpty($override->getOverrides());
 
-        $manager = $app->make('db');
+        // Wrap the real database manager so we can assert purge() is invoked
+        // during cleanup for the resolved connection.
+        $manager = Mockery::mock($app->make('db'), static function (MockInterface $mock) {
+            $mock->makePartial();
+            $mock->shouldReceive('purge')->with('tenant-connection')->once();
+        });
 
-        $manager->connection('bud-connection');
+        $app->instance('db', $manager);
+
+        $manager->connection('tenant-connection');
 
         $this->assertNotEmpty($override->getOverrides());
-        $this->assertContains('bud-connection', $override->getOverrides());
+        $this->assertContains('tenant-connection', $override->getOverrides());
 
         $override->cleanup($tenancy, $tenant);
 
@@ -293,9 +300,9 @@ class TenantConfigDatabaseConnectionOverrideTest extends UnitTestCase
         });
 
         $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
-        $app->make('config')->set('database.connections.bud-connection', [
+        $app->make('config')->set('database.connections.tenant-connection', [
             'driver'   => 'sprout:config',
-            'database' => 'bud-database',
+            'database' => 'tenant-database',
         ]);
 
         $sprout = new Sprout($app, new SettingsRepository());

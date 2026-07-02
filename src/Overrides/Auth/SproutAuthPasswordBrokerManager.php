@@ -75,7 +75,11 @@ class SproutAuthPasswordBrokerManager extends PasswordBrokerManager
             $key = base64_decode(substr($key, 7)); // @infection-ignore-all
         }
         // @codeCoverageIgnoreEnd
-        $expiry = $config['expire'] !== 0 && is_numeric($config['expire']) ? (int) $config['expire'] : 60;
+        $expiry = is_numeric($config['expire']) ? (int) $config['expire'] : 60;
+
+        if ($expiry <= 0) {
+            $expiry = 60;
+        }
 
         if (isset($config['driver']) && $config['driver'] === 'cache') {
             return new SproutAuthCacheTokenRepository(

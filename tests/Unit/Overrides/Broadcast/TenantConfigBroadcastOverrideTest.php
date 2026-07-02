@@ -197,7 +197,7 @@ class TenantConfigBroadcastOverrideTest extends UnitTestCase
                               $tenancy,
                               $tenant,
                               'broadcast',
-                              'bud-connection',
+                              'tenant-connection',
                           )->andReturn(null);
                  }));
         })));
@@ -214,9 +214,9 @@ class TenantConfigBroadcastOverrideTest extends UnitTestCase
         $manager = $app->make(BroadcastManager::class);
 
         $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('Unable to find configuration for [broadcast.bud-connection] for tenant [my-tenant] on tenancy [my-tenancy]');
+        $this->expectExceptionMessage('Unable to find configuration for [broadcast.tenant-connection] for tenant [my-tenant] on tenancy [my-tenancy]');
 
-        $manager->connectUsing('bud-connection', [
+        $manager->connectUsing('tenant-connection', [
             'driver' => 'sprout:config',
         ]);
     }
@@ -253,7 +253,7 @@ class TenantConfigBroadcastOverrideTest extends UnitTestCase
                               $tenancy,
                               $tenant,
                               'broadcast',
-                              'bud-connection',
+                              'tenant-connection',
                           )->andReturn([
                               'driver' => 'sprout:config',
                           ]);
@@ -272,9 +272,9 @@ class TenantConfigBroadcastOverrideTest extends UnitTestCase
         $manager = $app->make(BroadcastManager::class);
 
         $this->expectException(CyclicOverrideException::class);
-        $this->expectExceptionMessage('Attempt to create cyclic config broadcast connection [bud-connection] detected');
+        $this->expectExceptionMessage('Attempt to create cyclic config broadcast connection [tenant-connection] detected');
 
-        $manager->connectUsing('bud-connection', [
+        $manager->connectUsing('tenant-connection', [
             'driver' => 'sprout:config',
         ]);
     }
@@ -311,7 +311,7 @@ class TenantConfigBroadcastOverrideTest extends UnitTestCase
                               $tenancy,
                               $tenant,
                               'broadcast',
-                              'bud-connection',
+                              'tenant-connection',
                           )->andReturn([
                               'driver' => 'null',
                           ]);
@@ -329,12 +329,12 @@ class TenantConfigBroadcastOverrideTest extends UnitTestCase
         /** @var TenantConfigBroadcastManager $manager */
         $manager = $app->make(BroadcastManager::class);
 
-        $manager->connectUsing('bud-connection', [
+        $manager->connectUsing('tenant-connection', [
             'driver' => 'sprout:config',
         ]);
 
         $this->assertNotEmpty($override->getOverrides()[TenantConfigBroadcastConnectionOverride::class]->getOverrides());
-        $this->assertContains('bud-connection', $override->getOverrides()[TenantConfigBroadcastConnectionOverride::class]->getOverrides());
+        $this->assertContains('tenant-connection', $override->getOverrides()[TenantConfigBroadcastConnectionOverride::class]->getOverrides());
     }
 
     #[Test]
@@ -374,7 +374,7 @@ class TenantConfigBroadcastOverrideTest extends UnitTestCase
                               $tenancy,
                               $tenant,
                               'broadcast',
-                              'bud-connection',
+                              'tenant-connection',
                           )->andReturn([
                               'driver' => 'null',
                           ]);
@@ -393,12 +393,12 @@ class TenantConfigBroadcastOverrideTest extends UnitTestCase
 
         $manager = $app->make(BroadcastManager::class);
 
-        $manager->connectUsing('bud-connection', [
+        $manager->connectUsing('tenant-connection', [
             'driver' => 'sprout:config',
         ]);
 
         $this->assertNotEmpty($broadcastOverride->getOverrides());
-        $this->assertContains('bud-connection', $broadcastOverride->getOverrides());
+        $this->assertContains('tenant-connection', $broadcastOverride->getOverrides());
 
         $override->cleanup($tenancy, $tenant);
 
@@ -424,7 +424,7 @@ class TenantConfigBroadcastOverrideTest extends UnitTestCase
 
         $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
 
-        $app->make('config')->set('broadcasting.connections.bud-connection', [
+        $app->make('config')->set('broadcasting.connections.tenant-connection', [
             'driver' => 'sprout:config',
         ]);
 
@@ -446,7 +446,7 @@ class TenantConfigBroadcastOverrideTest extends UnitTestCase
                               $tenancy,
                               $tenant,
                               'broadcast',
-                              'bud-connection',
+                              'tenant-connection',
                           )->andReturn([
                               'driver' => 'null',
                           ]);
@@ -465,10 +465,10 @@ class TenantConfigBroadcastOverrideTest extends UnitTestCase
 
         $manager = $app->make(BroadcastManager::class);
 
-        $manager->connection('bud-connection');
+        $manager->connection('tenant-connection');
 
         $this->assertNotEmpty($broadcastOverride->getOverrides());
-        $this->assertContains('bud-connection', $broadcastOverride->getOverrides());
+        $this->assertContains('tenant-connection', $broadcastOverride->getOverrides());
 
         $override->cleanup($tenancy, $tenant);
 
@@ -494,7 +494,7 @@ class TenantConfigBroadcastOverrideTest extends UnitTestCase
 
         $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
 
-        $app->make('config')->set('broadcasting.connections.bud-connection', [
+        $app->make('config')->set('broadcasting.connections.tenant-connection', [
             'driver' => 'sprout:config',
         ]);
 

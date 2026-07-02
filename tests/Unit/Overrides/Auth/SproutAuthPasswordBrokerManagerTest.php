@@ -30,6 +30,7 @@ class SproutAuthPasswordBrokerManagerTest extends UnitTestCase
             [60, 60],
             [null, 11],
             [26, null],
+            [0, null],
         ];
     }
 
@@ -57,10 +58,12 @@ class SproutAuthPasswordBrokerManagerTest extends UnitTestCase
 
         $repository = $manager->broker('my-passwords')->getRepository();
 
+        $expectedExpire = ($expire === 0 || $expire === null ? 60 : $expire) * 60; // Default to 60 minutes if expire is null or 0
+
         $this->assertInstanceOf(SproutAuthDatabaseTokenRepository::class, $repository);
         $this->assertTrue($manager->isResolved('my-passwords'));
         $this->assertFalse($manager->isResolved());
-        $this->assertSame(($expire ?? 60) * 60, $repository->getExpires());
+        $this->assertSame($expectedExpire, $repository->getExpires());
         $this->assertSame($throttle ?? 0, $repository->getThrottle());
     }
 
@@ -90,10 +93,12 @@ class SproutAuthPasswordBrokerManagerTest extends UnitTestCase
 
         $repository = $manager->broker('my-passwords')->getRepository();
 
+        $expectedExpire = ($expire === 0 || $expire === null ? 60 : $expire) * 60; // Default to 60 minutes if expire is null or 0
+
         $this->assertInstanceOf(SproutAuthCacheTokenRepository::class, $repository);
         $this->assertTrue($manager->isResolved('my-passwords'));
         $this->assertFalse($manager->isResolved());
-        $this->assertSame(($expire ?? 60) * 60, $repository->getExpires());
+        $this->assertSame($expectedExpire, $repository->getExpires());
         $this->assertSame($throttle ?? 0, $repository->getThrottle());
         $this->assertSame('my-prefix', $repository->getPrefix());
     }
