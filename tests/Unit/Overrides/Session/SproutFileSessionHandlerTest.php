@@ -72,6 +72,27 @@ class SproutFileSessionHandlerTest extends UnitTestCase
         $this->assertSame('my-session-data', $handler->read($sessionId));
     }
 
+    #[Test]
+    public function readsASessionModifiedExactlyAtTheExpiryBoundary(): void
+    {
+        $sessionId = 'my-session-id';
+
+        Carbon::setTestNow(Carbon::now());
+
+        // A file modified exactly at the cutoff is still valid: the check is inclusive.
+        $cutoff = Carbon::now()->subMinutes(config('session.lifetime'))->getTimestamp();
+
+        $handler = $this->createHandler(null, null, Mockery::mock(Filesystem::class, function (Mockery\MockInterface $mock) use ($cutoff) {
+            $mock->shouldReceive('isFile')->andReturn(true)->once();
+            $mock->shouldReceive('lastModified')->andReturn($cutoff)->once();
+            $mock->shouldReceive('sharedGet')->andReturn('my-session-data')->once();
+        }));
+
+        $this->assertSame('my-session-data', $handler->read($sessionId));
+
+        Carbon::setTestNow();
+    }
+
     #[Test, DataProvider('fileSessionDataProvider')]
     public function doesNotReadFromFilesystemWhenSessionIsInvalidOrTooOld(?Tenancy $tenancy, ?Tenant $tenant, string $expectedPath): void
     {
