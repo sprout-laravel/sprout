@@ -37,6 +37,14 @@
     // real, already-killed guards in the same methods stay covered.
     "FalseValue"         : {
       "ignore": [
+        // The `$loadedRelation = false` resets in created()/retrieved(). Laravel
+        // registers observers by class name (resolveObserverClassName), so a fresh
+        // observer is resolved per event and $loadedRelation never outlives a single
+        // event. The flag is not read again after any of these resets, so `= true`
+        // vs `= false` is unobservable. Equivalent.
+        "Sprout\\Database\\Eloquent\\Observers\\BelongsToManyTenantsObserver::created::76",
+        "Sprout\\Database\\Eloquent\\Observers\\BelongsToManyTenantsObserver::retrieved::141",
+        "Sprout\\Database\\Eloquent\\Observers\\BelongsToManyTenantsObserver::retrieved::155",
         // Optional-branch `return false` (no current tenant): the mutated
         // `return true` makes creating() call associate($tenancy->tenant()), but
         // tenant() is null here, so it sets the same null FK. Equivalent.
@@ -52,6 +60,16 @@
         // config('session.secure', false) fallback is dead: Laravel's session
         // config always defines the key, so the default is never reached.
         "Sprout\\Overrides\\Cookie\\CookieOverride::setup::36",
+      ],
+    },
+    // Provably-equivalent ReturnRemoval survivor.
+    "ReturnRemoval"      : {
+      "ignore": [
+        // `return $succeedOnMatch` for an already-correctly-tenanted model. The only
+        // reachable caller is retrieved(), which always passes $succeedOnMatch = true,
+        // so this is identical to the `return true` it falls through to. created()
+        // never reaches here (a freshly-inserted model has no pivot rows). Equivalent.
+        "Sprout\\Database\\Eloquent\\Observers\\BelongsToManyTenantsObserver::passesInitialChecks::278",
       ],
     },
   }
