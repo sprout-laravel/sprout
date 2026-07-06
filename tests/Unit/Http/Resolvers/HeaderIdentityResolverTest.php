@@ -137,6 +137,9 @@ class HeaderIdentityResolverTest extends UnitTestCase
         $this->assertSame('/test-route', $resolver->route('test-route', $tenancy, $tenant1, absolute: false));
         $this->assertSame('/test-route', $resolver->route('test-route', $tenancy, $tenant2, absolute: false));
         $this->assertSame('/test-route', $resolver->route('test-route', $tenancy, $tenant3, absolute: false));
+
+        // $absolute defaults to true.
+        $this->assertSame('http://localhost/test-route', $resolver->route('test-route', $tenancy, $tenant1));
     }
 
     protected function defineEnvironment($app): void

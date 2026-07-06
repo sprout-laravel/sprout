@@ -55,6 +55,15 @@ class PathIdentityResolverTest extends UnitTestCase
     }
 
     #[Test]
+    public function clampsTheSegmentToAMinimumOfOne(): void
+    {
+        // A segment below 1 is meaningless (request segments are 1-indexed), so the
+        // constructor floors it at 1.
+        $this->assertSame(1, (new PathIdentityResolver('path', 0))->getSegment());
+        $this->assertSame(1, (new PathIdentityResolver('path', -5))->getSegment());
+    }
+
+    #[Test]
     public function canGenerateTheRoutePrefixForATenancy(): void
     {
         $resolver = new PathIdentityResolver('path');

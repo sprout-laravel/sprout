@@ -161,6 +161,17 @@ class IdentityResolverManagerTest extends UnitTestCase
         $manager->get('path');
     }
 
+    #[Test]
+    public function defaultsThePathSegmentToOneWhenNotConfigured(): void
+    {
+        config()->set('multitenancy.resolvers.path', ['driver' => 'path']);
+
+        $resolver = sprout()->resolvers()->get('path');
+
+        $this->assertInstanceOf(PathIdentityResolver::class, $resolver);
+        $this->assertSame(1, $resolver->getSegment());
+    }
+
     #[Test, DefineEnvironment('withoutDefault')]
     public function errorsIfTheresNoDefault(): void
     {
