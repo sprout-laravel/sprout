@@ -183,6 +183,45 @@ class ConfigStoreManagerTest extends UnitTestCase
     }
 
     #[Test]
+    public function usesTheConfiguredCipherRatherThanTheAppDefault(): void
+    {
+        // A 16-byte key is valid for AES-128-CBC but not the 32-byte AES-256-CBC app
+        // default, so overwriting the provided cipher would break encrypter creation.
+        $key = Str::random(16);
+
+        $manager = $this->getConfigStoreManager($this->mockApplication(function (MockInterface $mock) use ($key) {
+            $mock->shouldReceive('make')
+                 ->with('config')
+                 ->andReturn($this->mockConfig(function (MockInterface $mock) use ($key) {
+                     $mock->shouldReceive('get')
+                          ->with('multitenancy.stores.filesystem')
+                          ->once()
+                          ->andReturn([
+                              'driver' => 'filesystem',
+                              'disk'   => 'my-favourite',
+                              'key'    => 'base64:' . base64_encode($key),
+                              'cipher' => 'AES-128-CBC',
+                          ]);
+                 }));
+
+            $mock->shouldReceive('make')
+                 ->with('filesystem')
+                 ->once()
+                 ->andReturn($this->mockFilesystem(function (MockInterface $mock) {
+                     $mock->shouldReceive('disk')
+                          ->with('my-favourite')
+                          ->once()
+                          ->andReturn(Mockery::mock(Filesystem::class));
+                 }));
+        }));
+
+        $store = $manager->get('filesystem');
+
+        $this->assertInstanceOf(FilesystemConfigStore::class, $store);
+        $this->assertSame($key, $store->getEncrypter()->getKey());
+    }
+
+    #[Test]
     public function throwsAnExceptionWhenThereIsNoDiskForTheFilesystemDriver(): void
     {
         $manager = $this->getConfigStoreManager($this->mockApplication(function (MockInterface $mock) {
