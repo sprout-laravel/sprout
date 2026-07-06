@@ -11,6 +11,7 @@ use Mockery;
 use Orchestra\Testbench\Attributes\DefineEnvironment;
 use PHPUnit\Framework\Attributes\Test;
 use Sprout\Contracts\Tenancy;
+use Sprout\Exceptions\MisconfigurationException;
 use Sprout\Sprout;
 use Sprout\Support\ResolutionHook;
 use Sprout\Support\Settings;
@@ -246,6 +247,20 @@ class SproutTest extends UnitTestCase
         $this->assertSame('http://localhost/session', $sprout->route('test.session', $tenant, 'session'));
         $this->assertSame('http://' . $tenant->getTenantIdentifier() . '.localhost/subdomain', $sprout->route('test.subdomain', $tenant, 'subdomain'));
         $this->assertSame('http://' . $tenant->getTenantIdentifier() . '.localhost/subdomain', $sprout->route('test.subdomain', $tenant));
+    }
+
+    #[Test]
+    public function routeUsesTheExplicitlyNamedTenancy(): void
+    {
+        $tenant = TenantModel::factory()->createOne();
+
+        $sprout = $this->app->make(Sprout::class);
+
+        // A named tenancy is looked up directly, so an unknown name must error rather
+        // than silently falling back to the current/default tenancy.
+        $this->expectException(MisconfigurationException::class);
+
+        $sprout->route('test.header', $tenant, 'header', 'does-not-exist');
     }
 
     protected function defineEnvironment($app): void
