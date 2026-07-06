@@ -220,6 +220,11 @@ class FilesystemOverrideTest extends UnitTestCase
         $this->assertNotEmpty($filesystemOverride->getDrivers());
         $this->assertContains('ondemand', $filesystemOverride->getDrivers());
 
+        // Proxy the resolved manager so cleanup is verified to forget the tracked disk.
+        $manager = Mockery::mock($app->make(FilesystemManager::class));
+        $manager->shouldReceive('forgetDisk')->with(['ondemand'])->once();
+        $app->instance(FilesystemManager::class, $manager);
+
         $override->cleanup($tenancy, $tenant);
 
         $this->assertEmpty($filesystemOverride->getDrivers());
@@ -273,6 +278,13 @@ class FilesystemOverrideTest extends UnitTestCase
 
         $this->assertNotEmpty($filesystemOverride->getDrivers());
         $this->assertContains('my-disk', $filesystemOverride->getDrivers());
+
+        // Proxy the resolved manager to verify cleanup forgets both the tracked disk
+        // and the preconfigured 'sprout' disk found by scanning the config.
+        $manager = Mockery::mock($app->make(FilesystemManager::class));
+        $manager->shouldReceive('forgetDisk')->with(['my-disk'])->once();
+        $manager->shouldReceive('forgetDisk')->with('my-disk')->once();
+        $app->instance(FilesystemManager::class, $manager);
 
         $override->cleanup($tenancy, $tenant);
 
