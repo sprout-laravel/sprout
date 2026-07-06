@@ -3,13 +3,17 @@ declare(strict_types=1);
 
 namespace Sprout\Tests\Unit\Managers;
 
+use Illuminate\Support\Facades\Event;
 use PHPUnit\Framework\Attributes\Test;
+use Sprout\Events\ServiceOverrideBooted;
+use Sprout\Events\ServiceOverrideRegistered;
 use Sprout\Exceptions\MisconfigurationException;
 use Sprout\Exceptions\TenancyMissingException;
 use Sprout\Managers\ServiceOverrideManager;
 use Sprout\Overrides\Cookie\CookieOverride;
 use Sprout\Overrides\Session\SessionOverride;
 use Sprout\TenancyOptions;
+use Sprout\Tests\Fixtures\RecordingServiceOverride;
 use Sprout\Tests\Unit\UnitTestCase;
 use stdClass;
 use Workbench\App\Models\TenantModel;
@@ -18,6 +22,75 @@ use function Sprout\sprout;
 
 class ServiceOverrideManagerTest extends UnitTestCase
 {
+    #[Test]
+    public function delegatesSetupAndCleanupToEnabledOverrides(): void
+    {
+        config()->set('sprout.overrides', [
+            'recording' => ['driver' => RecordingServiceOverride::class],
+        ]);
+        config()->set('multitenancy.tenancies.tenants.options', [TenancyOptions::allOverrides()]);
+
+        $tenancy = sprout()->tenancies()->get();
+
+        sprout()->setCurrentTenancy($tenancy);
+
+        $tenant = TenantModel::factory()->createOne();
+
+        $tenancy->setTenant($tenant);
+
+        $overrides = sprout()->overrides();
+
+        $overrides->registerOverrides();
+
+        /** @var RecordingServiceOverride $override */
+        $override = $overrides->get('recording');
+
+        $this->assertFalse($override->wasSetUp);
+        $this->assertFalse($override->wasCleanedUp);
+
+        $overrides->setupOverrides($tenancy, $tenant);
+
+        $this->assertTrue($override->wasSetUp);
+
+        $overrides->cleanupOverrides($tenancy, $tenant);
+
+        $this->assertTrue($override->wasCleanedUp);
+    }
+
+    #[Test]
+    public function dispatchesEventWhenAnOverrideIsRegistered(): void
+    {
+        Event::fake([ServiceOverrideRegistered::class]);
+
+        config()->set('sprout.overrides', [
+            'session' => ['driver' => SessionOverride::class],
+        ]);
+
+        sprout()->overrides()->registerOverrides();
+
+        Event::assertDispatched(
+            ServiceOverrideRegistered::class,
+            static fn (ServiceOverrideRegistered $event): bool => $event->service === 'session',
+        );
+    }
+
+    #[Test]
+    public function dispatchesEventWhenABootableOverrideIsBooted(): void
+    {
+        Event::fake([ServiceOverrideBooted::class]);
+
+        config()->set('sprout.overrides', [
+            'session' => ['driver' => SessionOverride::class],
+        ]);
+
+        sprout()->overrides()->registerOverrides();
+
+        Event::assertDispatched(
+            ServiceOverrideBooted::class,
+            static fn (ServiceOverrideBooted $event): bool => $event->service === 'session',
+        );
+    }
+
     #[Test]
     public function isRegisteredWithTheContainerAsSingleton(): void
     {

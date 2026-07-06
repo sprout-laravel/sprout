@@ -75,11 +75,9 @@ final class TenantConfigFilesystemDiskCreator extends BaseCreator
             $config['name'],
         );
 
-        return $this->manager->build(
-            array_merge([
-                'name' => $config['name'],
-            ], $config),
-        );
+        // build() forces the disk name to 'ondemand' inside resolve(), so
+        // passing a 'name' here would just be discarded.
+        return $this->manager->build($config);
     }
 
     /**

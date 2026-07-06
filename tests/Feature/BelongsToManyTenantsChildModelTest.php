@@ -21,6 +21,74 @@ class BelongsToManyTenantsChildModelTest extends FeatureTestCase
     use RefreshDatabase;
 
     #[Test]
+    public function persistsTheTenantAttachmentToThePivotTable(): void
+    {
+        $tenant = TenantModel::factory()->createOne();
+
+        /** @var DefaultTenancy $tenancy */
+        $tenancy = $this->app->make(TenancyManager::class)->get();
+
+        sprout()->setCurrentTenancy($tenancy);
+
+        $tenancy->setTenant($tenant);
+
+        $child = TenantChildren::create();
+
+        // tenants() runs a fresh pivot query, bypassing the in-memory relation the
+        // observer hydrates — so it only passes if attach() actually persisted the pivot
+        $this->assertTrue($child->tenants()->get()->contains($tenant));
+    }
+
+    #[Test]
+    public function hydratesTheTenantsRelationWhenRetrievingAModel(): void
+    {
+        $tenant = TenantModel::factory()->createOne();
+
+        /** @var DefaultTenancy $tenancy */
+        $tenancy = $this->app->make(TenancyManager::class)->get();
+
+        sprout()->setCurrentTenancy($tenancy);
+
+        $tenancy->setTenant($tenant);
+
+        $created = TenantChildren::create();
+
+        // A fresh query fires the retrieved observer, which hydrates the tenants relation
+        $retrieved = TenantChildren::query()->findOrFail($created->getKey());
+
+        $this->assertTrue($retrieved->relationLoaded('tenants'));
+        $this->assertTrue($retrieved->tenants->contains($tenant));
+    }
+
+    #[Test]
+    public function optionalTenantScopeAlsoMatchesUnownedRows(): void
+    {
+        /** @var DefaultTenancy $tenancy */
+        $tenancy = $this->app->make(TenancyManager::class)->get();
+
+        $tenant = TenantModel::factory()->createOne();
+        $other  = TenantModel::factory()->createOne();
+
+        TenantChildrenOptional::factory()->count(3)->afterCreating(function (TenantChildrenOptional $child) use ($tenant) {
+            $child->tenants()->attach($tenant);
+        })->create();
+
+        TenantChildrenOptional::factory()->count(4)->create();
+
+        TenantChildrenOptional::factory()->count(5)->afterCreating(function (TenantChildrenOptional $child) use ($other) {
+            $child->tenants()->attach($other);
+        })->create();
+
+        sprout()->setCurrentTenancy($tenancy);
+
+        $tenancy->setTenant($tenant);
+
+        // Optional models return the current tenant's rows (3) plus un-owned rows (4),
+        // but never another tenant's rows (5)
+        $this->assertCount(7, TenantChildrenOptional::all());
+    }
+
+    #[Test]
     public function automaticallyAssociatesChildModelWithCurrentTenant(): void
     {
         $tenant = TenantModel::factory()->createOne();

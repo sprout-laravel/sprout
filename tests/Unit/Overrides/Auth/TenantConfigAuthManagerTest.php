@@ -6,6 +6,7 @@ namespace Sprout\Tests\Unit\Overrides\Auth;
 use Illuminate\Auth\AuthManager;
 use Illuminate\Auth\EloquentUserProvider;
 use Illuminate\Config\Repository;
+use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Contracts\Auth\UserProvider;
 use Illuminate\Foundation\Application;
 use InvalidArgumentException;
@@ -26,6 +27,34 @@ class TenantConfigAuthManagerTest extends UnitTestCase
         $sprout = new TenantConfigAuthManager($app, $original);
 
         $this->assertTrue($sprout->wasSyncedFromOriginal());
+    }
+
+    #[Test]
+    public function syncsRegistrationsFromOriginal(): void
+    {
+        $original = new AuthManager($this->app);
+
+        // Seed every property syncOriginal() carries across.
+        $original->extend('original-driver', static fn () => Mockery::mock(Guard::class));
+        $original->provider('original-provider', static fn () => Mockery::mock(UserProvider::class));
+
+        $resolver = static fn () => null;
+        $original->resolveUsersUsing($resolver);
+
+        // guards is a resolved-instance cache with no public setter.
+        $guard = Mockery::mock(Guard::class);
+        (new \ReflectionProperty($original, 'guards'))->setValue($original, ['original-guard' => $guard]);
+
+        $manager = new TenantConfigAuthManager($this->app, $original);
+
+        $read = fn (string $property) => (new \ReflectionProperty($manager, $property))->getValue($manager);
+
+        $this->assertTrue($manager->wasSyncedFromOriginal());
+        $this->assertArrayHasKey('original-driver', $read('customCreators'));
+        $this->assertArrayHasKey('original-provider', $read('customProviderCreators'));
+        $this->assertArrayHasKey('original-guard', $read('guards'));
+        $this->assertSame($guard, $read('guards')['original-guard']);
+        $this->assertSame($resolver, $read('userResolver'));
     }
 
     #[Test]

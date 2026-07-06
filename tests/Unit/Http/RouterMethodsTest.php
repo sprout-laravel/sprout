@@ -3,14 +3,25 @@ declare(strict_types=1);
 
 namespace Sprout\Tests\Unit\Http;
 
+use Closure;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Route;
 use PHPUnit\Framework\Attributes\Test;
 use Sprout\Http\Middleware\SproutOptionalTenantContextMiddleware;
+use Sprout\Http\RouterMethods;
 use Sprout\Tests\Unit\UnitTestCase;
 
 class RouterMethodsTest extends UnitTestCase
 {
+    #[Test]
+    public function macroMethodsReturnClosures(): void
+    {
+        $methods = new RouterMethods();
+
+        $this->assertInstanceOf(Closure::class, $methods->tenanted());
+        $this->assertInstanceOf(Closure::class, $methods->possiblyTenanted());
+    }
+
     #[Test]
     public function possiblyTenantedRegistersTheOptionalMiddleware(): void
     {

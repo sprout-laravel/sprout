@@ -75,8 +75,10 @@ class SproutFilesystemManager extends FilesystemManager
      */
     private function syncOriginal(FilesystemManager $original): void
     {
-        $this->disks              = array_merge($original->disks, $this->disks);
-        $this->customCreators     = array_merge($original->customCreators, $this->customCreators);
+        // $this->* is always empty here (syncOriginal only runs from the
+        // constructor before anything can be registered), so these are copies.
+        $this->disks              = $original->disks;
+        $this->customCreators     = $original->customCreators;
         $this->syncedFromOriginal = true;
     }
 }

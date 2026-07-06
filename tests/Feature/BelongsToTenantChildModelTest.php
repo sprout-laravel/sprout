@@ -25,6 +25,55 @@ class BelongsToTenantChildModelTest extends FeatureTestCase
     use RefreshDatabase;
 
     #[Test]
+    public function hydratesTheTenantRelationWhenRetrievingAModel(): void
+    {
+        $tenant = TenantModel::factory()->createOne();
+
+        /** @var DefaultTenancy $tenancy */
+        $tenancy = $this->app->make(TenancyManager::class)->get();
+
+        sprout()->setCurrentTenancy($tenancy);
+
+        $tenancy->setTenant($tenant);
+
+        $created = TenantChild::create();
+
+        // A fresh query fires the retrieved observer, which hydrates the tenant relation
+        $retrieved = TenantChild::query()->findOrFail($created->getKey());
+
+        $this->assertTrue($retrieved->relationLoaded('tenant'));
+        $this->assertTrue($tenant->is($retrieved->tenant));
+    }
+
+    #[Test]
+    public function optionalTenantScopeAlsoMatchesUnownedRows(): void
+    {
+        /** @var DefaultTenancy $tenancy */
+        $tenancy = $this->app->make(TenancyManager::class)->get();
+
+        $tenant = TenantModel::factory()->createOne();
+        $other  = TenantModel::factory()->createOne();
+
+        TenantChildOptional::factory()->afterMaking(function (TenantChildOptional $child) use ($tenant) {
+            $child->tenant()->associate($tenant);
+        })->count(3)->create();
+
+        TenantChildOptional::factory()->count(4)->create();
+
+        TenantChildOptional::factory()->afterMaking(function (TenantChildOptional $child) use ($other) {
+            $child->tenant()->associate($other);
+        })->count(5)->create();
+
+        sprout()->setCurrentTenancy($tenancy);
+
+        $tenancy->setTenant($tenant);
+
+        // Optional models return the current tenant's rows (3) plus un-owned rows (4),
+        // but never another tenant's rows (5)
+        $this->assertCount(7, TenantChildOptional::all());
+    }
+
+    #[Test]
     public function automaticallyAssociatesChildModelWithCurrentTenant(): void
     {
         $tenant = TenantModel::factory()->createOne();

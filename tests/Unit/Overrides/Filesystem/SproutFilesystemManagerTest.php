@@ -29,6 +29,28 @@ class SproutFilesystemManagerTest extends UnitTestCase
     }
 
     #[Test]
+    public function syncsRegistrationsFromOriginal(): void
+    {
+        $original = new FilesystemManager($this->app);
+
+        // Seed every property syncOriginal() carries across.
+        $original->extend('original-driver', static fn () => Mockery::mock(Filesystem::class));
+
+        // disks is a resolved-instance cache with no public setter.
+        $disk = Mockery::mock(Filesystem::class);
+        (new \ReflectionProperty($original, 'disks'))->setValue($original, ['original-disk' => $disk]);
+
+        $manager = new SproutFilesystemManager($this->app, $original);
+
+        $read = fn (string $property) => (new \ReflectionProperty($manager, $property))->getValue($manager);
+
+        $this->assertTrue($manager->wasSyncedFromOriginal());
+        $this->assertArrayHasKey('original-driver', $read('customCreators'));
+        $this->assertArrayHasKey('original-disk', $read('disks'));
+        $this->assertSame($disk, $read('disks')['original-disk']);
+    }
+
+    #[Test]
     public function addsNameWhenResolvingDriver(): void
     {
         $app = Mockery::mock(Application::class, static function (Mockery\MockInterface $mock) {

@@ -20,6 +20,9 @@ class SproutFileSessionHandlerCreatorTest extends UnitTestCase
     #[Test]
     public function canCreateTheFileHandler(): void
     {
+        // A trailing slash so the creator's rtrim() is actually exercised
+        config()->set('session.files', '/tmp/sprout-sessions/');
+
         $creator = new SproutFileSessionHandlerCreator(
             $this->app,
             $this->app->make(Sprout::class),

@@ -16,5 +16,43 @@
   "mutators"                 : {
     "@default"           : true,
     "ProtectedVisibility": false,
+    // Making a public trait method protected almost always breaks consumers
+    // (caught elsewhere), so PublicVisibility survivors on traits are noise.
+    "PublicVisibility"   : {
+      "ignore": [
+        "Sprout\\Concerns\\*",
+        "Sprout\\Database\\Eloquent\\Concerns\\*",
+      ],
+    },
+    // ucfirst() when building a method name is a no-op (PHP method resolution
+    // is case-insensitive), so these are equivalent mutants, not real gaps.
+    "UnwrapUcFirst"      : {
+      "ignore": [
+        "Sprout\\Support\\BaseFactory::*",
+        "Sprout\\Overrides\\Broadcast\\TenantConfigBroadcastManager::*",
+        "Sprout\\Overrides\\Filesystem\\SproutFilesystemManager::*",
+      ],
+    },
+    // Provably-equivalent FalseValue survivors. Ignores are line-scoped so the
+    // real, already-killed guards in the same methods stay covered.
+    "FalseValue"         : {
+      "ignore": [
+        // Optional-branch `return false` (no current tenant): the mutated
+        // `return true` makes creating() call associate($tenancy->tenant()), but
+        // tenant() is null here, so it sets the same null FK. Equivalent.
+        "Sprout\\Database\\Eloquent\\Observers\\BelongsToTenantObserver::passesInitialChecks::186",
+        // `$succeedOnMatch = false` default: only reached when a model already
+        // holds the matching current tenant, where re-associating/attaching it is
+        // a no-op.
+        "Sprout\\Database\\Eloquent\\Observers\\BelongsToTenantObserver::passesInitialChecks::169",
+        "Sprout\\Database\\Eloquent\\Observers\\BelongsToManyTenantsObserver::passesInitialChecks::225",
+        // `$force = false` default mirrors Laravel's BroadcastManager signature;
+        // no Sprout caller relies on it.
+        "Sprout\\Overrides\\Broadcast\\TenantConfigBroadcastManager::connectUsing::42",
+        // config('session.secure', false) fallback is dead: Laravel's session
+        // config always defines the key, so the default is never reached.
+        "Sprout\\Overrides\\Cookie\\CookieOverride::setup::36",
+      ],
+    },
   }
 }

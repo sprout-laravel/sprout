@@ -111,8 +111,10 @@ class TenantConfigBroadcastManager extends BroadcastManager
      */
     private function syncOriginal(BroadcastManager $original): void
     {
-        $this->drivers            = array_merge($original->drivers, $this->drivers);
-        $this->customCreators     = array_merge($original->customCreators, $this->customCreators);
+        // $this->* is always empty here (syncOriginal only runs from the
+        // constructor before anything can be registered), so these are copies.
+        $this->drivers            = $original->drivers;
+        $this->customCreators     = $original->customCreators;
         $this->syncedFromOriginal = true;
     }
 }

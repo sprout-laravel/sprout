@@ -103,10 +103,13 @@ class TenantConfigAuthManager extends AuthManager
      */
     private function syncOriginal(AuthManager $original): void
     {
-        $this->customCreators         = array_merge($original->customCreators, $this->customCreators);
-        $this->guards                 = array_merge($original->guards, $this->guards);
+        // $this->* is always empty here (syncOriginal only runs from the
+        // constructor before anything can be registered), so these are copies,
+        // not merges.
+        $this->customCreators         = $original->customCreators;
+        $this->guards                 = $original->guards;
         $this->userResolver           = $original->userResolver;
-        $this->customProviderCreators = array_merge($original->customProviderCreators, $this->customProviderCreators);
+        $this->customProviderCreators = $original->customProviderCreators;
         $this->syncedFromOriginal     = true;
     }
 }

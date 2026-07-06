@@ -228,8 +228,12 @@ class SproutServiceProviderTest extends UnitTestCase
 
         $key = realpath(__DIR__ . '/../../src');
 
+        $this->assertArrayHasKey($key . '/../resources/config/core.php', $paths);
+        $this->assertContains(config_path('sprout/core.php'), $paths);
         $this->assertArrayHasKey($key . '/../resources/config/multitenancy.php', $paths);
         $this->assertContains(config_path('multitenancy.php'), $paths);
+        $this->assertArrayHasKey($key . '/../resources/config/overrides.php', $paths);
+        $this->assertContains(config_path('sprout/overrides.php'), $paths);
     }
 
     #[Test]

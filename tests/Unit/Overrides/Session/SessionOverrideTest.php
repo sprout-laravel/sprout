@@ -64,6 +64,10 @@ class SessionOverrideTest extends UnitTestCase
         $sprout = sprout();
 
         config()->set('session.driver', 'file');
+        config()->set('session.path', '/original-path');
+        config()->set('session.domain', 'original.test');
+        config()->set('session.secure', true);
+        config()->set('session.same_site', 'strict');
         config()->set('sprout.overrides', [
             'session' => [
                 'driver' => SessionOverride::class,
@@ -101,6 +105,21 @@ class SessionOverrideTest extends UnitTestCase
         $this->assertInstanceOf(SessionOverride::class, $override);
 
         $override->setup($tenancy, $tenant);
+
+        $this->assertSame(
+            $tenancy->getName() . '_' . $tenant->getTenantIdentifier() . '_session',
+            config('session.cookie'),
+        );
+
+        // setup() captured the original session config into settings...
+        $original = sprout()->settings()->array('original.session');
+        $this->assertSame('/original-path', $original['path']);
+        $this->assertSame('original.test', $original['domain']);
+        $this->assertTrue($original['secure']);
+        $this->assertSame('strict', $original['same_site']);
+
+        // ...and refreshed the session store, forgetting the loaded driver
+        $this->assertEmpty($session->getDrivers());
     }
 
     #[Test]
@@ -137,7 +156,32 @@ class SessionOverrideTest extends UnitTestCase
         $this->assertFalse($driver->getHandler()->hasTenancy());
         $this->assertInstanceOf(SessionOverride::class, $override);
 
+        // Seed the stored original config, plus a tenant-overridden current config
+        sprout()->settings()->set('original.session', [
+            'path'      => '/original-path',
+            'domain'    => 'original.test',
+            'secure'    => true,
+            'same_site' => 'strict',
+        ]);
+
+        config()->set('session.path', '/tenant-path');
+        config()->set('session.domain', 'tenant.test');
+        config()->set('session.secure', false);
+        config()->set('session.same_site', 'lax');
+
         $override->cleanup($tenancy, $tenant);
+
+        // cleanup() restored every original value from settings...
+        $this->assertSame('/original-path', config('session.path'));
+        $this->assertSame('original.test', config('session.domain'));
+        $this->assertTrue(config('session.secure'));
+        $this->assertSame('strict', config('session.same_site'));
+
+        // ...cleared the stored original...
+        $this->assertEmpty(sprout()->settings()->array('original.session'));
+
+        // ...and refreshed the session store, forgetting the loaded driver
+        $this->assertEmpty($session->getDrivers());
     }
 
     #[Test]

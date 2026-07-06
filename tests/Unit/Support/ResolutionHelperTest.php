@@ -128,7 +128,8 @@ class ResolutionHelperTest extends UnitTestCase
                  ->andReturn($tenant->getTenantIdentifier());
 
             $mock->shouldReceive('forgetParameter')
-                 ->with($parameterName);
+                 ->with($parameterName)
+                 ->twice();
         });
 
         /** @var Request $fakeRequest */
@@ -194,6 +195,44 @@ class ResolutionHelperTest extends UnitTestCase
         $this->expectExceptionMessage('No valid tenant [' . $tenancy->getName() . '] found [subdomain]');
 
         ResolutionHelper::handleResolution($fakeRequest, ResolutionHook::Routing, sprout());
+    }
+
+    #[Test]
+    public function throwsWhenNoIdentityIsResolvedAndResolutionIsNotOptional(): void
+    {
+        /** @var Tenancy<TenantModel> $tenancy */
+        $tenancy = tenancy();
+
+        /** @var IdentityResolver&IdentityResolverUsesParameters $resolver */
+        $resolver = resolver('path');
+
+        /** @var Route $fakeRoute */
+        $fakeRoute = $this->mock(Route::class, function (MockInterface $mock) use ($tenancy, $resolver) {
+            $parameterName = $resolver->getRouteParameterName($tenancy);
+
+            $mock->shouldReceive('hasParameter')
+                 ->with($parameterName)
+                 ->andReturn(true);
+
+            // A null parameter means no identity is resolved
+            $mock->shouldReceive('parameter')
+                 ->with($parameterName)
+                 ->andReturn(null);
+
+            $mock->shouldReceive('forgetParameter')
+                 ->with($parameterName);
+        });
+
+        /** @var Request $fakeRequest */
+        $fakeRequest = $this->mock(Request::class, function (MockInterface $mock) use ($fakeRoute) {
+            $mock->shouldReceive('route')->andReturn($fakeRoute);
+        });
+
+        $this->expectException(NoTenantFoundException::class);
+
+        // Called without the $optional argument (defaults to false), so a missing
+        // identity must throw rather than short-circuit as an optional resolution
+        ResolutionHelper::handleResolution($fakeRequest, ResolutionHook::Routing, sprout(), $resolver->getName(), $tenancy->getName());
     }
 
     #[Test]

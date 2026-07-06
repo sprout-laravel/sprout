@@ -24,6 +24,26 @@ use Sprout\Tests\Unit\UnitTestCase;
 class TenantConfigDatabaseConnectionCreatorTest extends UnitTestCase
 {
     #[Test]
+    public function getConfigRequiresATenancyContext(): void
+    {
+        $app          = $this->mockApplication();
+        $sprout       = $this->getSprout($app, false);
+        $tenantConfig = new TenantConfig($app, Mockery::mock(ConfigStoreManager::class));
+
+        $creator = new TenantConfigDatabaseConnectionCreator(
+            $this->mockManager(false),
+            $tenantConfig,
+            $sprout,
+            'fake-connection',
+            [],
+        );
+
+        $this->expectException(TenancyMissingException::class);
+
+        $creator->getConfig($sprout, $tenantConfig, [], 'fake-connection');
+    }
+
+    #[Test]
     public function canCreateTheDriver(): void
     {
         $app     = $this->mockApplication();

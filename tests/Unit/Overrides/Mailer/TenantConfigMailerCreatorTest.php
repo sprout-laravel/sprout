@@ -24,6 +24,26 @@ use Symfony\Component\Mailer\Transport\TransportInterface;
 class TenantConfigMailerCreatorTest extends UnitTestCase
 {
     #[Test]
+    public function getConfigRequiresATenancyContext(): void
+    {
+        $app          = $this->mockApplication();
+        $sprout       = $this->getSprout($app, false);
+        $tenantConfig = new TenantConfig($app, Mockery::mock(ConfigStoreManager::class));
+
+        $creator = new TenantConfigMailerTransportCreator(
+            $this->mockManager(false),
+            $tenantConfig,
+            $sprout,
+            'fake-mailer',
+            [],
+        );
+
+        $this->expectException(TenancyMissingException::class);
+
+        $creator->getConfig($sprout, $tenantConfig, [], 'fake-mailer');
+    }
+
+    #[Test]
     public function canCreateTheDriver(): void
     {
         $app     = $this->mockApplication();

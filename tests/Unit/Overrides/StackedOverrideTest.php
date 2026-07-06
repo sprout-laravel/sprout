@@ -223,6 +223,10 @@ class StackedOverrideTest extends UnitTestCase
         $this->assertInstanceOf(AuthGuardOverride::class, $overrides[AuthGuardOverride::class]);
         $this->assertSame(['test1' => 'value1'], $overrides[AuthPasswordOverride::class]->getConfig());
         $this->assertSame(['test2' => 'value2'], $overrides[AuthGuardOverride::class]->getConfig());
+
+        // The stack must propagate sprout down to each created child override
+        $this->assertSame($sprout, $overrides[AuthPasswordOverride::class]->getSprout());
+        $this->assertSame($sprout, $overrides[AuthGuardOverride::class]->getSprout());
     }
 
     #[Test]

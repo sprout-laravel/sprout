@@ -25,6 +25,25 @@ use Sprout\Tests\Unit\UnitTestCase;
 class TenantConfigFilesystemDiskCreatorTest extends UnitTestCase
 {
     #[Test]
+    public function getConfigRequiresATenancyContext(): void
+    {
+        $app          = $this->mockApplication();
+        $sprout       = $this->getSprout($app, false);
+        $tenantConfig = new TenantConfig($app, Mockery::mock(ConfigStoreManager::class));
+
+        $creator = new TenantConfigFilesystemDiskCreator(
+            $this->mockManager(false),
+            $tenantConfig,
+            $sprout,
+            [],
+        );
+
+        $this->expectException(TenancyMissingException::class);
+
+        $creator->getConfig($sprout, $tenantConfig, [], 'fake-disk');
+    }
+
+    #[Test]
     public function canCreateTheDriver(): void
     {
         $app     = $this->mockApplication();
