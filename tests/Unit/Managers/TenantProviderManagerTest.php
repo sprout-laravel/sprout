@@ -9,6 +9,7 @@ use Sprout\Exceptions\MisconfigurationException;
 use Sprout\Managers\TenantProviderManager;
 use Sprout\Providers\DatabaseTenantProvider;
 use Sprout\Providers\EloquentTenantProvider;
+use Sprout\Support\GenericTenant;
 use Sprout\Tests\Unit\UnitTestCase;
 use stdClass;
 use Workbench\App\Models\NoResourcesTenantModel;
@@ -147,6 +148,21 @@ class TenantProviderManagerTest extends UnitTestCase
 
         $this->expectException(MisconfigurationException::class);
         $this->expectExceptionMessage('The provided value for \'model\' [stdClass] is not valid for provider [tenants]');
+
+        $manager->get('tenants');
+    }
+
+    #[Test]
+    public function errorsIfTheEloquentModelIsATenantButNotAModel(): void
+    {
+        // GenericTenant implements the Tenant contract but is not an Eloquent model,
+        // so it must still be rejected — each clause of the validation is required.
+        config()->set('multitenancy.providers.tenants.model', GenericTenant::class);
+
+        $manager = sprout()->providers();
+
+        $this->expectException(MisconfigurationException::class);
+        $this->expectExceptionMessage('The provided value for \'model\' [' . GenericTenant::class . '] is not valid for provider [tenants]');
 
         $manager->get('tenants');
     }
