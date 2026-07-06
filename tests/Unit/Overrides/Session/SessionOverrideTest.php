@@ -12,6 +12,8 @@ use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use Sprout\Contracts\BootableServiceOverride;
+use Sprout\Contracts\Tenancy;
+use Sprout\Contracts\Tenant;
 use Sprout\Contracts\TenantAware;
 use Sprout\Overrides\Session\SessionOverride;
 use Sprout\Sprout;
@@ -296,6 +298,73 @@ class SessionOverrideTest extends UnitTestCase
         $override->boot($app, $sprout);
 
         $app->make('session');
+    }
+
+    #[Test]
+    public function doesNotOverrideTheDatabaseDriverByDefault(): void
+    {
+        // No 'database' config and no NO_DATABASE_OVERRIDE setting, so the `?? true`
+        // default decides: the database session driver must NOT be extended.
+        $override = new SessionOverride('session', []);
+
+        $app = Mockery::mock(Application::class, static function (MockInterface $mock) {
+            $mock->makePartial();
+        });
+
+        $app->singleton('session', static function () {
+            return Mockery::mock(SessionManager::class, static function (MockInterface $mock) {
+                $mock->shouldReceive('extend')
+                     ->withArgs([
+                         Mockery::on(static fn ($arg) => $arg === 'file' || $arg === 'native'),
+                         Mockery::on(static fn ($arg) => is_callable($arg) && $arg instanceof Closure),
+                     ])
+                     ->twice();
+
+                $mock->shouldNotReceive('extend')
+                     ->withArgs([
+                         'database',
+                         Mockery::on(static fn ($arg) => is_callable($arg) && $arg instanceof Closure),
+                     ]);
+            });
+        });
+
+        $sprout = new Sprout($app, new SettingsRepository());
+
+        $override->boot($app, $sprout);
+
+        $app->make('session');
+    }
+
+    #[Test]
+    public function doesNotForgetDriversWhenRefreshingWithNoLoadedDrivers(): void
+    {
+        $override = new SessionOverride('session', []);
+
+        // A resolved session manager with no loaded drivers: refresh must bail out
+        // early rather than forgetting drivers.
+        $manager = Mockery::mock(SessionManager::class, static function (MockInterface $mock) {
+            $mock->shouldReceive('getDrivers')->andReturn([])->once();
+            $mock->shouldNotReceive('forgetDrivers');
+        });
+
+        $app = Mockery::mock($this->app, static function (MockInterface $mock) use ($manager) {
+            $mock->makePartial();
+            $mock->shouldReceive('resolved')->with('session')->andReturnTrue();
+            $mock->shouldReceive('make')->with('session')->andReturn($manager);
+        });
+
+        $sprout = new Sprout($app, new SettingsRepository());
+
+        $override->setApp($app)->setSprout($sprout);
+
+        $tenant = Mockery::mock(Tenant::class, static function (MockInterface $mock) {
+            $mock->shouldReceive('getTenantIdentifier')->andReturn('acme');
+        });
+        $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) {
+            $mock->shouldReceive('getName')->andReturn('tenants');
+        });
+
+        $override->setup($tenancy, $tenant);
     }
 
     protected function defineEnvironment($app): void

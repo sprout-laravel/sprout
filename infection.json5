@@ -83,9 +83,14 @@
         "Sprout\\Support\\DefaultTenancy::__construct::73",
       ],
     },
-    // Provably-equivalent ReturnRemoval survivor.
+    // Provably-equivalent ReturnRemoval survivors.
     "ReturnRemoval"      : {
       "ignore": [
+        // `if (! $tenancy->check()) return $response;` — a no-tenant tenancy always
+        // has a null resolver (setTenant(null) clears it), so the instanceof check
+        // just below already returns $response header-less. The early return is
+        // redundant, so removing it changes nothing. Equivalent.
+        "Sprout\\Http\\Middleware\\AddTenantHeaderToResponse::handle::61",
         // `return $succeedOnMatch` for an already-correctly-tenanted model. The only
         // reachable caller is retrieved(), which always passes $succeedOnMatch = true,
         // so this is identical to the `return true` it falls through to. created()
