@@ -32,6 +32,29 @@ class TenantConfigBroadcastManagerTest extends UnitTestCase
     }
 
     #[Test]
+    public function forceReconnectsByPurgingTheCachedDriver(): void
+    {
+        $app = Mockery::mock($this->app, static function (Mockery\MockInterface $mock) {
+            $mock->makePartial();
+        });
+
+        $manager = new TenantConfigBroadcastManager($app);
+
+        $config = ['driver' => 'null'];
+
+        $first = $manager->connectUsing('test', $config);
+
+        // Without force, the cached driver is returned.
+        $this->assertSame($first, $manager->connectUsing('test', $config));
+
+        // With force, the cached driver is purged and a fresh one resolved.
+        $forced = $manager->connectUsing('test', $config, force: true);
+
+        $this->assertInstanceOf(Broadcaster::class, $forced);
+        $this->assertNotSame($first, $forced);
+    }
+
+    #[Test]
     public function canBeSyncedFromOriginal(): void
     {
         $original = Mockery::mock(BroadcastManager::class);
