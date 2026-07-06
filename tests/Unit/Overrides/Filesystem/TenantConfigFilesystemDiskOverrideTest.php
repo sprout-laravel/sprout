@@ -405,6 +405,11 @@ class TenantConfigFilesystemDiskOverrideTest extends UnitTestCase
         $this->assertNotEmpty($filesystemOverride->getOverrides());
         $this->assertContains('tenant-disk', $filesystemOverride->getOverrides());
 
+        // Proxy the resolved manager so cleanup is verified to purge the tracked disk.
+        $manager = Mockery::mock($app->make('filesystem'));
+        $manager->shouldReceive('purge')->with('tenant-disk')->once();
+        $app->instance('filesystem', $manager);
+
         $override->cleanup($tenancy, $tenant);
 
         $this->assertEmpty($filesystemOverride->getOverrides());

@@ -400,6 +400,11 @@ class TenantConfigBroadcastOverrideTest extends UnitTestCase
         $this->assertNotEmpty($broadcastOverride->getOverrides());
         $this->assertContains('tenant-connection', $broadcastOverride->getOverrides());
 
+        // Proxy the resolved manager so cleanup is verified to purge the connection.
+        $manager = Mockery::mock($app->make(BroadcastManager::class));
+        $manager->shouldReceive('purge')->with('tenant-connection')->once();
+        $app->instance(BroadcastManager::class, $manager);
+
         $override->cleanup($tenancy, $tenant);
 
         $this->assertEmpty($broadcastOverride->getOverrides());
