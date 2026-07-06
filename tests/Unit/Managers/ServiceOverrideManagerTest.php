@@ -58,6 +58,41 @@ class ServiceOverrideManagerTest extends UnitTestCase
     }
 
     #[Test]
+    public function cleansUpAnOverrideThatIsBothAllEnabledAndExplicitlyEnabled(): void
+    {
+        // Enable all overrides AND list the override explicitly. Both clauses of the
+        // "is enabled" check are true, so cleanup must proceed rather than treating it
+        // as set-up-but-not-enabled.
+        config()->set('sprout.overrides', [
+            'recording' => ['driver' => RecordingServiceOverride::class],
+        ]);
+        config()->set('multitenancy.tenancies.tenants.options', [
+            TenancyOptions::allOverrides(),
+            TenancyOptions::overrides(['recording']),
+        ]);
+
+        $tenancy = sprout()->tenancies()->get();
+
+        sprout()->setCurrentTenancy($tenancy);
+
+        $tenant = TenantModel::factory()->createOne();
+
+        $tenancy->setTenant($tenant);
+
+        $overrides = sprout()->overrides();
+
+        $overrides->registerOverrides();
+
+        /** @var RecordingServiceOverride $override */
+        $override = $overrides->get('recording');
+
+        $overrides->setupOverrides($tenancy, $tenant);
+        $overrides->cleanupOverrides($tenancy, $tenant);
+
+        $this->assertTrue($override->wasCleanedUp);
+    }
+
+    #[Test]
     public function dispatchesEventWhenAnOverrideIsRegistered(): void
     {
         Event::fake([ServiceOverrideRegistered::class]);
@@ -203,6 +238,16 @@ class ServiceOverrideManagerTest extends UnitTestCase
         $this->expectExceptionMessage('There is no current tenancy');
 
         sprout()->overrides()->hasOverrideBeenSetUp('session');
+    }
+
+    #[Test]
+    public function usesTheProvidedTenancyForTheSetupCheckOverTheCurrentOne(): void
+    {
+        // No current tenancy is set, but an explicit one is provided — the check must
+        // use it rather than falling back to (and failing on) the missing current one.
+        $tenancy = sprout()->tenancies()->get();
+
+        $this->assertFalse(sprout()->overrides()->hasOverrideBeenSetUp('session', $tenancy));
     }
 
     #[Test]
