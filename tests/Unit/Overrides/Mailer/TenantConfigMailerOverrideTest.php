@@ -224,6 +224,12 @@ class TenantConfigMailerOverrideTest extends UnitTestCase
             $mock->makePartial();
         });
 
+        // Proxy the real mail manager so extend()/mailer() pass through, but assert
+        // that cleanup purges the resolved tenant mailer.
+        $manager = Mockery::mock($app->make('mail.manager'));
+        $manager->shouldReceive('purge')->with('tenant-mailer')->once();
+        $app->instance('mail.manager', $manager);
+
         $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
         $app->make('config')->set('mail.mailers.tenant-mailer', [
             'transport' => 'sprout:config',
@@ -263,9 +269,6 @@ class TenantConfigMailerOverrideTest extends UnitTestCase
         $override->boot($app, $sprout);
 
         $this->assertEmpty($override->getOverrides());
-
-        /** @var MailManager $manager */
-        $manager = $app->make('mail.manager');
 
         $manager->mailer('tenant-mailer');
 
