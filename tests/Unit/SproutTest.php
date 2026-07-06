@@ -120,6 +120,38 @@ class SproutTest extends UnitTestCase
     }
 
     #[Test]
+    public function resetsTenanciesInReverseOrder(): void
+    {
+        $app = Mockery::mock(Application::class, static function (Mockery\MockInterface $mock) {
+            $mock->shouldReceive('forgetExtenders')->with(Tenancy::class);
+            $mock->shouldReceive('extend')->with(Tenancy::class, Mockery::on(fn ($arg) => $arg instanceof Closure));
+        });
+
+        $sprout = new Sprout($app, new SettingsRepository());
+
+        $tenancy1 = Mockery::mock(Tenancy::class);
+        $tenancy1->shouldReceive('check')->andReturn(true);
+
+        $tenancy2 = Mockery::mock(Tenancy::class);
+        $tenancy2->shouldReceive('check')->andReturn(true);
+
+        // Both tenancies are active; they must be torn down last-registered-first,
+        // so tenancy2 (registered last) must be reset before tenancy1.
+        $tenancy2->shouldReceive('setTenant')->with(null)->once()->globally()->ordered()->andReturnSelf();
+        $tenancy1->shouldReceive('setTenant')->with(null)->once()->globally()->ordered()->andReturnSelf();
+
+        Event::fake();
+
+        $sprout->setCurrentTenancy($tenancy1);
+        $sprout->setCurrentTenancy($tenancy2);
+
+        $sprout->resetTenancies();
+
+        // Reaching here with satisfied ordered expectations proves reverse teardown.
+        $this->assertEmpty($sprout->getAllCurrentTenancies());
+    }
+
+    #[Test]
     public function isAwareOfHooksToSupport(): void
     {
         $hooks = config('sprout.core.hooks');
