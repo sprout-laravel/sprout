@@ -83,6 +83,35 @@ class CookieOverrideTest extends UnitTestCase
         $override->setup($tenancy, $tenant);
     }
 
+    #[Test]
+    public function usesTheConfiguredSessionPathWhenNoUrlPathSettingIsSet(): void
+    {
+        $override = new CookieOverride('cookie', []);
+
+        $app = Mockery::mock(Application::class, static function (MockInterface $mock) {
+            $mock->shouldReceive('make')
+                 ->with(CookieJar::class)
+                 ->andReturn(
+                     Mockery::mock(CookieJar::class, static function (MockInterface $mock) {
+                         // With no URL path setting, the configured session path is the
+                         // default — not the '/' fallback.
+                         $mock->shouldReceive('setDefaultPathAndDomain')
+                              ->with('/custom-path', Mockery::any(), Mockery::any(), Mockery::any())
+                              ->once();
+                     }),
+                 )
+                 ->once();
+        });
+
+        config()->set('session.path', '/custom-path');
+
+        $sprout = new Sprout($app, new SettingsRepository());
+
+        $override->setApp($app)->setSprout($sprout);
+
+        $override->setup(Mockery::mock(Tenancy::class), Mockery::mock(Tenant::class));
+    }
+
     protected function defineEnvironment($app): void
     {
         tap($app['config'], static function (Repository $config) {
