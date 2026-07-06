@@ -9,6 +9,7 @@ use Mockery;
 use PHPUnit\Framework\Attributes\Test;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\TenantProvider;
+use Sprout\Events\CurrentTenantChanged;
 use Sprout\Events\TenantIdentified;
 use Sprout\Events\TenantLoaded;
 use Sprout\Providers\EloquentTenantProvider;
@@ -97,6 +98,21 @@ class DefaultTenancyTest extends UnitTestCase
         $this->assertTrue($tenancy->load($tenant->getTenantKey()));
 
         Event::assertDispatched(TenantLoaded::class);
+    }
+
+    #[Test]
+    public function dispatchesAnEventWhenTheCurrentTenantChanges(): void
+    {
+        /** @var Tenancy $tenancy */
+        $tenancy = sprout()->tenancies()->get();
+
+        $tenant = TenantModel::factory()->createOne();
+
+        Event::fake([CurrentTenantChanged::class]);
+
+        $tenancy->setTenant($tenant);
+
+        Event::assertDispatched(CurrentTenantChanged::class);
     }
 
     #[Test]

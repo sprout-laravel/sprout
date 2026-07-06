@@ -62,6 +62,15 @@
         "Sprout\\Overrides\\Cookie\\CookieOverride::setup::36",
       ],
     },
+    // Provably-equivalent UnwrapArrayValues survivor.
+    "UnwrapArrayValues"  : {
+      "ignore": [
+        // The foreach that follows reads only values ($value), never the keys of
+        // $options, and rebuilds $this->options via [] appends, so re-indexing the
+        // array with array_values() has no observable effect. Equivalent.
+        "Sprout\\Support\\DefaultTenancy::__construct::73",
+      ],
+    },
     // Provably-equivalent ReturnRemoval survivor.
     "ReturnRemoval"      : {
       "ignore": [
