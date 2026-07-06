@@ -407,6 +407,85 @@ class BelongsToTenantChildModelTest extends FeatureTestCase
         $this->assertFalse($newChild->relationLoaded('tenant'));
     }
 
+    #[Test]
+    public function doesNotOverwriteAMismatchedTenantOnCreateWhenNotThrowing(): void
+    {
+        $tenant1 = TenantModel::factory()->createOne();
+        $tenant2 = TenantModel::factory()->createOne();
+
+        /** @var DefaultTenancy $tenancy */
+        $tenancy = $this->app->make(TenancyManager::class)->get();
+
+        $tenancy->removeOption(TenancyOptions::throwIfNotRelated());
+
+        sprout()->setCurrentTenancy($tenancy);
+
+        $tenancy->setTenant($tenant2);
+
+        // The model already points at tenant1 while tenant2 is current. With throwing
+        // off the observer bails out of the checks and must NOT associate the current
+        // tenant over the top — the foreign key stays tenant1.
+        $child = new TenantChild();
+        $child->tenant()->associate($tenant1);
+        $child->save();
+
+        $this->assertSame($tenant1->getKey(), $child->getAttribute('tenant_id'));
+    }
+
+    #[Test]
+    public function hydratesTheCurrentTenantWhenRetrievingWithTenantRestrictionsBypassed(): void
+    {
+        $tenant1 = TenantModel::factory()->createOne();
+        $tenant2 = TenantModel::factory()->createOne();
+
+        $child = TenantChild::factory()->afterMaking(function (TenantChild $child) use ($tenant1) {
+            $child->tenant()->associate($tenant1);
+        })->createOne();
+
+        /** @var DefaultTenancy $tenancy */
+        $tenancy = $this->app->make(TenancyManager::class)->get();
+
+        sprout()->setCurrentTenancy($tenancy);
+
+        $tenancy->setTenant($tenant2);
+
+        // The child belongs to tenant1, but with restrictions bypassed the observer
+        // skips the mismatch check (returns early as "passed") and still hydrates the
+        // relation to the current tenant.
+        $retrieved = TenantChild::withoutTenantRestrictions(static function () use ($child) {
+            return TenantChild::query()->whereKey($child->getKey())->first();
+        });
+
+        $this->assertNotNull($retrieved);
+        $this->assertTrue($retrieved->relationLoaded('tenant'));
+        $this->assertTrue($tenant2->is($retrieved->tenant));
+    }
+
+    #[Test]
+    public function doesNotReloadTheRelationOnCreateWhenTheForeignKeyAlreadyMatches(): void
+    {
+        $tenant = TenantModel::factory()->createOne();
+
+        /** @var DefaultTenancy $tenancy */
+        $tenancy = $this->app->make(TenancyManager::class)->get();
+
+        sprout()->setCurrentTenancy($tenancy);
+
+        $tenancy->setTenant($tenant);
+
+        // Set only the foreign key (not the relation) to the current tenant, so the
+        // observer sees an already-correct model. It must return early without
+        // re-associating, leaving the relation unloaded.
+        $child = new TenantChild();
+        $child->setAttribute('tenant_id', $tenant->getKey());
+
+        $this->assertFalse($child->relationLoaded('tenant'));
+
+        $child->save();
+
+        $this->assertFalse($child->relationLoaded('tenant'));
+    }
+
     protected function defineEnvironment($app): void
     {
         tap($app['config'], static function ($config) {
