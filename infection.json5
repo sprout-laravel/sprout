@@ -62,6 +62,18 @@
         "Sprout\\Overrides\\Cookie\\CookieOverride::setup::36",
       ],
     },
+    // Provably-equivalent DecrementInteger survivors.
+    "DecrementInteger"   : {
+      "ignore": [
+        // DatabaseConfigStore::set()/add() compare a successful write result
+        // against 0. insert() returns bool true (`true !== 0` is always true, as
+        // PHPStan flags), and upsert() returns an affected-row count that is never 0
+        // or -1 for a write that happened, so changing the literal to -1 leaves the
+        // comparison always-true. Equivalent.
+        "Sprout\\Stores\\DatabaseConfigStore::set::121",
+        "Sprout\\Stores\\DatabaseConfigStore::add::161",
+      ],
+    },
     // Provably-equivalent UnwrapArrayValues survivor.
     "UnwrapArrayValues"  : {
       "ignore": [

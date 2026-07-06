@@ -46,7 +46,7 @@ class FilesystemConfigStoreTest extends UnitTestCase
                      . DIRECTORY_SEPARATOR
                      . Str::slug($name),
                  )
-                 ->once()
+                 ->twice()
                  ->andReturn($encryptedConfig);
         });
 
@@ -55,6 +55,9 @@ class FilesystemConfigStoreTest extends UnitTestCase
         $storedConfig = $store->get($tenancy, $tenant, $service, $name);
 
         $this->assertSame($config, $storedConfig);
+
+        // A stored value must win over a supplied default.
+        $this->assertSame($config, $store->get($tenancy, $tenant, $service, $name, ['a' => 'default']));
     }
 
     #[Test]
