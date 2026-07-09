@@ -1,0 +1,102 @@
+{
+  "$schema"                  : "vendor/infection/infection/resources/schema.json",
+  "source"                   : {
+    "directories": [
+      "src"
+    ]
+  },
+  "threads"                  : "max",
+  "timeout"                  : 60,
+  "staticAnalysisTool"       : "phpstan",
+  "staticAnalysisToolOptions": "--memory-limit=2G",
+  "logs"                     : {
+    "text": "build/infection.txt",
+    "html": "build/infection.html"
+  },
+  "mutators"                 : {
+    "@default"           : true,
+    "ProtectedVisibility": false,
+    // Making a public trait method protected almost always breaks consumers
+    // (caught elsewhere), so PublicVisibility survivors on traits are noise.
+    "PublicVisibility"   : {
+      "ignore": [
+        "Sprout\\Concerns\\*",
+        "Sprout\\Database\\Eloquent\\Concerns\\*",
+      ],
+    },
+    // ucfirst() when building a method name is a no-op (PHP method resolution
+    // is case-insensitive), so these are equivalent mutants, not real gaps.
+    "UnwrapUcFirst"      : {
+      "ignore": [
+        "Sprout\\Support\\BaseFactory::*",
+        "Sprout\\Overrides\\Broadcast\\TenantConfigBroadcastManager::*",
+        "Sprout\\Overrides\\Filesystem\\SproutFilesystemManager::*",
+      ],
+    },
+    // Provably-equivalent FalseValue survivors. Ignores are line-scoped so the
+    // real, already-killed guards in the same methods stay covered.
+    "FalseValue"         : {
+      "ignore": [
+        // The `$loadedRelation = false` resets in created()/retrieved(). Laravel
+        // registers observers by class name (resolveObserverClassName), so a fresh
+        // observer is resolved per event and $loadedRelation never outlives a single
+        // event. The flag is not read again after any of these resets, so `= true`
+        // vs `= false` is unobservable. Equivalent.
+        "Sprout\\Database\\Eloquent\\Observers\\BelongsToManyTenantsObserver::created::76",
+        "Sprout\\Database\\Eloquent\\Observers\\BelongsToManyTenantsObserver::retrieved::141",
+        "Sprout\\Database\\Eloquent\\Observers\\BelongsToManyTenantsObserver::retrieved::155",
+        // Optional-branch `return false` (no current tenant): the mutated
+        // `return true` makes creating() call associate($tenancy->tenant()), but
+        // tenant() is null here, so it sets the same null FK. Equivalent.
+        "Sprout\\Database\\Eloquent\\Observers\\BelongsToTenantObserver::passesInitialChecks::186",
+        // `$succeedOnMatch = false` default: only reached when a model already
+        // holds the matching current tenant, where re-associating/attaching it is
+        // a no-op.
+        "Sprout\\Database\\Eloquent\\Observers\\BelongsToTenantObserver::passesInitialChecks::169",
+        "Sprout\\Database\\Eloquent\\Observers\\BelongsToManyTenantsObserver::passesInitialChecks::225",
+        // `$force = false` default mirrors Laravel's BroadcastManager signature;
+        // no Sprout caller relies on it.
+        "Sprout\\Overrides\\Broadcast\\TenantConfigBroadcastManager::connectUsing::42",
+        // config('session.secure', false) fallback is dead: Laravel's session
+        // config always defines the key, so the default is never reached.
+        "Sprout\\Overrides\\Cookie\\CookieOverride::setup::36",
+      ],
+    },
+    // Provably-equivalent DecrementInteger survivors.
+    "DecrementInteger"   : {
+      "ignore": [
+        // DatabaseConfigStore::set()/add() compare a successful write result
+        // against 0. insert() returns bool true (`true !== 0` is always true, as
+        // PHPStan flags), and upsert() returns an affected-row count that is never 0
+        // or -1 for a write that happened, so changing the literal to -1 leaves the
+        // comparison always-true. Equivalent.
+        "Sprout\\Stores\\DatabaseConfigStore::set::121",
+        "Sprout\\Stores\\DatabaseConfigStore::add::161",
+      ],
+    },
+    // Provably-equivalent UnwrapArrayValues survivor.
+    "UnwrapArrayValues"  : {
+      "ignore": [
+        // The foreach that follows reads only values ($value), never the keys of
+        // $options, and rebuilds $this->options via [] appends, so re-indexing the
+        // array with array_values() has no observable effect. Equivalent.
+        "Sprout\\Support\\DefaultTenancy::__construct::73",
+      ],
+    },
+    // Provably-equivalent ReturnRemoval survivors.
+    "ReturnRemoval"      : {
+      "ignore": [
+        // `if (! $tenancy->check()) return $response;` — a no-tenant tenancy always
+        // has a null resolver (setTenant(null) clears it), so the instanceof check
+        // just below already returns $response header-less. The early return is
+        // redundant, so removing it changes nothing. Equivalent.
+        "Sprout\\Http\\Middleware\\AddTenantHeaderToResponse::handle::61",
+        // `return $succeedOnMatch` for an already-correctly-tenanted model. The only
+        // reachable caller is retrieved(), which always passes $succeedOnMatch = true,
+        // so this is identical to the `return true` it falls through to. created()
+        // never reaches here (a freshly-inserted model has no pivot rows). Equivalent.
+        "Sprout\\Database\\Eloquent\\Observers\\BelongsToManyTenantsObserver::passesInitialChecks::278",
+      ],
+    },
+  }
+}

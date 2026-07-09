@@ -14,27 +14,6 @@ class SproutOptionalTenantContextMiddlewareTest extends FeatureTestCase
 {
     use RefreshDatabase;
 
-    protected function defineEnvironment($app): void
-    {
-        tap($app['config'], static function ($config) {
-            $config->set('multitenancy.providers.tenants.model', TenantModel::class);
-        });
-    }
-
-    protected function defineRoutes($router): void
-    {
-        $router->middleware('web')
-               ->group(function ($router) {
-                   $router->possiblyTenanted(function ($router) {
-                       $router->get('/optional-header-test', function () {
-                           $tenant = app(Sprout::class)->getCurrentTenancy()?->tenant();
-
-                           return $tenant?->getTenantIdentifier() ?? 'no-tenant';
-                       })->name('optional-header-test');
-                   }, 'header');
-               });
-    }
-
     #[Test]
     public function resolvesTheTenantWhenIdentifierIsPresent(): void
     {
@@ -69,5 +48,26 @@ class SproutOptionalTenantContextMiddlewareTest extends FeatureTestCase
              ->assertSee('no-tenant');
 
         Exceptions::assertNotReported(NoTenantFoundException::class);
+    }
+
+    protected function defineEnvironment($app): void
+    {
+        tap($app['config'], static function ($config) {
+            $config->set('multitenancy.providers.tenants.model', TenantModel::class);
+        });
+    }
+
+    protected function defineRoutes($router): void
+    {
+        $router->middleware('web')
+               ->group(function ($router) {
+                   $router->possiblyTenanted(function ($router) {
+                       $router->get('/optional-header-test', function () {
+                           $tenant = app(Sprout::class)->getCurrentTenancy()?->tenant();
+
+                           return $tenant?->getTenantIdentifier() ?? 'no-tenant';
+                       })->name('optional-header-test');
+                   }, 'header');
+               });
     }
 }

@@ -241,7 +241,7 @@ final class ServiceOverrideManager
      * @param Tenancy<TenantClass> $tenancy
      * @param Tenant               $tenant
      *
-     * @phpstan-param TenantClass                         $tenant
+     * @phpstan-param TenantClass  $tenant
      *
      * @return void
      */
@@ -273,7 +273,7 @@ final class ServiceOverrideManager
      * @param Tenancy<TenantClass> $tenancy
      * @param Tenant               $tenant
      *
-     * @phpstan-param TenantClass                         $tenant
+     * @phpstan-param TenantClass  $tenant
      *
      * @return void
      *

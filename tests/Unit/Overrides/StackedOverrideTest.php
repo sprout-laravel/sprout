@@ -5,6 +5,7 @@ namespace Sprout\Tests\Unit\Overrides;
 
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\Facades\Event;
+use Mockery;
 use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\Test;
 use Sprout\Events\ServiceOverrideBooted;
@@ -32,7 +33,7 @@ class StackedOverrideTest extends UnitTestCase
     #[Test]
     public function errorsIfProvidedOverrideIsNotASubclassOfTheCorrectClass(): void
     {
-        $app = \Mockery::mock(Application::class);
+        $app = Mockery::mock(Application::class);
 
         $sprout = new Sprout($app, new SettingsRepository());
 
@@ -51,7 +52,7 @@ class StackedOverrideTest extends UnitTestCase
     #[Test]
     public function errorsIfProvidedOverrideConfigIsMissingTheDriver(): void
     {
-        $app = \Mockery::mock(Application::class);
+        $app = Mockery::mock(Application::class);
 
         $sprout = new Sprout($app, new SettingsRepository());
 
@@ -72,7 +73,7 @@ class StackedOverrideTest extends UnitTestCase
     #[Test]
     public function errorsIfProvidedOverrideConfigIsHasAnInvalidDriver(): void
     {
-        $app = \Mockery::mock(Application::class);
+        $app = Mockery::mock(Application::class);
 
         $sprout = new Sprout($app, new SettingsRepository());
 
@@ -95,7 +96,7 @@ class StackedOverrideTest extends UnitTestCase
     #[Test]
     public function errorsIfProvidedOverrideIsNotStringOrArray(): void
     {
-        $app = \Mockery::mock(Application::class);
+        $app = Mockery::mock(Application::class);
 
         $sprout = new Sprout($app, new SettingsRepository());
 
@@ -116,7 +117,7 @@ class StackedOverrideTest extends UnitTestCase
     #[Test]
     public function acceptsFullInstancesForOverrides(): void
     {
-        $app = \Mockery::mock(Application::class, static function (MockInterface $mock) {
+        $app = Mockery::mock(Application::class, static function (MockInterface $mock) {
             $mock->shouldNotReceive('make');
             $mock->shouldIgnoreMissing();
         });
@@ -137,14 +138,14 @@ class StackedOverrideTest extends UnitTestCase
     #[Test]
     public function willCreateSubOverridesUsingTheContainer(): void
     {
-        $app = \Mockery::mock(Application::class, static function (MockInterface $mock) {
+        $app = Mockery::mock(Application::class, static function (MockInterface $mock) {
             $mock->shouldReceive('make')
                  ->with(
                      AuthPasswordOverride::class,
                      [
                          'service' => 'test',
                          'config'  => [],
-                     ]
+                     ],
                  )
                  ->atLeast()
                  ->once()
@@ -169,14 +170,14 @@ class StackedOverrideTest extends UnitTestCase
     #[Test]
     public function passesConfigToSubOverrides(): void
     {
-        $app = \Mockery::mock(Application::class, static function (MockInterface $mock) {
+        $app = Mockery::mock(Application::class, static function (MockInterface $mock) {
             $mock->shouldReceive('make')
                  ->with(
                      AuthPasswordOverride::class,
                      [
                          'service' => 'test',
                          'config'  => ['test1' => 'value1'],
-                     ]
+                     ],
                  )
                  ->atLeast()
                  ->once()
@@ -188,7 +189,7 @@ class StackedOverrideTest extends UnitTestCase
                      [
                          'service' => 'test',
                          'config'  => ['test2' => 'value2'],
-                     ]
+                     ],
                  )
                  ->atLeast()
                  ->once()
@@ -222,6 +223,10 @@ class StackedOverrideTest extends UnitTestCase
         $this->assertInstanceOf(AuthGuardOverride::class, $overrides[AuthGuardOverride::class]);
         $this->assertSame(['test1' => 'value1'], $overrides[AuthPasswordOverride::class]->getConfig());
         $this->assertSame(['test2' => 'value2'], $overrides[AuthGuardOverride::class]->getConfig());
+
+        // The stack must propagate sprout down to each created child override
+        $this->assertSame($sprout, $overrides[AuthPasswordOverride::class]->getSprout());
+        $this->assertSame($sprout, $overrides[AuthGuardOverride::class]->getSprout());
     }
 
     #[Test]
@@ -229,7 +234,7 @@ class StackedOverrideTest extends UnitTestCase
     {
         Event::fake([ServiceOverrideBooted::class]);
 
-        $app = \Mockery::mock(Application::class, static function (MockInterface $mock) {
+        $app = Mockery::mock(Application::class, static function (MockInterface $mock) {
             $mock->shouldNotReceive('make');
             $mock->shouldIgnoreMissing();
         });
@@ -261,20 +266,20 @@ class StackedOverrideTest extends UnitTestCase
 
         Event::assertDispatched(
             ServiceOverrideBooted::class,
-            static fn (ServiceOverrideBooted $event): bool => $event->service === 'test'
-                && $event->override === $password
+            static fn (ServiceOverrideBooted $event): bool => $event->service     === 'test'
+                                                              && $event->override === $password,
         );
 
         Event::assertDispatched(
             ServiceOverrideBooted::class,
-            static fn (ServiceOverrideBooted $event): bool => $event->service === 'test'
-                && $event->override === $authManager
+            static fn (ServiceOverrideBooted $event): bool => $event->service     === 'test'
+                                                              && $event->override === $authManager,
         );
 
         // ...but never for the child that isn't bootable
         Event::assertNotDispatched(
             ServiceOverrideBooted::class,
-            static fn (ServiceOverrideBooted $event): bool => $event->override === $guard
+            static fn (ServiceOverrideBooted $event): bool => $event->override === $guard,
         );
     }
 }

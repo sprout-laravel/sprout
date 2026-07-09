@@ -17,64 +17,6 @@ class TenantIdentificationTest extends FeatureTestCase
 {
     use RefreshDatabase;
 
-    protected function defineEnvironment($app): void
-    {
-        tap($app['config'], static function ($config) {
-            $config->set('session.driver', 'array');
-            $config->set('multitenancy.providers.tenants.model', TenantModel::class);
-            $config->set('multitenancy.resolvers.subdomain.domain', 'localhost');
-            $config->set('multitenancy.tenancies.tenants.options', [
-                TenancyOptions::overrides(['auth', 'cache', 'filesystem', 'job']),
-            ]);
-        });
-    }
-
-    protected function defineRoutes($router): void
-    {
-        $router->middleware('web')
-               ->group(function ($router) {
-                   $router->tenanted(function ($router) {
-                       $router->get('/cookie-test', function (Tenant $tenant) {
-                           return $tenant->getTenantIdentifier();
-                       })->name('cookie-test');
-                   }, 'cookie');
-
-                   $router->tenanted(function ($router) {
-                       $router->get('/header-test', function (Tenant $tenant) {
-                           return $tenant->getTenantIdentifier();
-                       })->name('header-test');
-                   }, 'header');
-
-                   $router->get('/fake-header-route', function () {
-                       return 'fake-header-route';
-                   })->middleware(AddTenantHeaderToResponse::class)->name('fake-header-route');
-
-                   $router->tenanted(function ($router) {
-                       $router->get('/path-test', function (Tenant $tenant) {
-                           return $tenant->getTenantIdentifier();
-                       })->name('path-test');
-                   }, 'path');
-
-                   $router->tenanted(function ($router) {
-                       $router->get('/session-test', function (Tenant $tenant) {
-                           return $tenant->getTenantIdentifier();
-                       })->name('session-test');
-                   }, 'session');
-
-                   $router->tenanted(function ($router) {
-                       $router->get('/subdomain-test', function (Tenant $tenant) {
-                           return $tenant->getTenantIdentifier();
-                       })->name('subdomain-test');
-                   }, 'subdomain');
-
-                   $router->tenanted(function ($router) {
-                       $router->get('/subdomain-header-test', function (Tenant $tenant) {
-                           return $tenant->getTenantIdentifier();
-                       })->middleware(AddTenantHeaderToResponse::class)->name('subdomain-with-header-middleware-test');
-                   }, 'subdomain');
-               });
-    }
-
     #[Test]
     public function canIdentifyViaCookie(): void
     {
@@ -184,5 +126,63 @@ class TenantIdentificationTest extends FeatureTestCase
         Exceptions::assertReported(function (NoTenantFoundException $exception) {
             return $exception->getMessage() === 'No valid tenant [tenants] found [subdomain]';
         });
+    }
+
+    protected function defineEnvironment($app): void
+    {
+        tap($app['config'], static function ($config) {
+            $config->set('session.driver', 'array');
+            $config->set('multitenancy.providers.tenants.model', TenantModel::class);
+            $config->set('multitenancy.resolvers.subdomain.domain', 'localhost');
+            $config->set('multitenancy.tenancies.tenants.options', [
+                TenancyOptions::overrides(['auth', 'cache', 'filesystem', 'job']),
+            ]);
+        });
+    }
+
+    protected function defineRoutes($router): void
+    {
+        $router->middleware('web')
+               ->group(function ($router) {
+                   $router->tenanted(function ($router) {
+                       $router->get('/cookie-test', function (Tenant $tenant) {
+                           return $tenant->getTenantIdentifier();
+                       })->name('cookie-test');
+                   }, 'cookie');
+
+                   $router->tenanted(function ($router) {
+                       $router->get('/header-test', function (Tenant $tenant) {
+                           return $tenant->getTenantIdentifier();
+                       })->name('header-test');
+                   }, 'header');
+
+                   $router->get('/fake-header-route', function () {
+                       return 'fake-header-route';
+                   })->middleware(AddTenantHeaderToResponse::class)->name('fake-header-route');
+
+                   $router->tenanted(function ($router) {
+                       $router->get('/path-test', function (Tenant $tenant) {
+                           return $tenant->getTenantIdentifier();
+                       })->name('path-test');
+                   }, 'path');
+
+                   $router->tenanted(function ($router) {
+                       $router->get('/session-test', function (Tenant $tenant) {
+                           return $tenant->getTenantIdentifier();
+                       })->name('session-test');
+                   }, 'session');
+
+                   $router->tenanted(function ($router) {
+                       $router->get('/subdomain-test', function (Tenant $tenant) {
+                           return $tenant->getTenantIdentifier();
+                       })->name('subdomain-test');
+                   }, 'subdomain');
+
+                   $router->tenanted(function ($router) {
+                       $router->get('/subdomain-header-test', function (Tenant $tenant) {
+                           return $tenant->getTenantIdentifier();
+                       })->middleware(AddTenantHeaderToResponse::class)->name('subdomain-with-header-middleware-test');
+                   }, 'subdomain');
+               });
     }
 }

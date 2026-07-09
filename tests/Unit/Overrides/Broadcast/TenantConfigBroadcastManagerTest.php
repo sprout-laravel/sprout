@@ -17,6 +17,44 @@ use Sprout\Tests\Unit\UnitTestCase;
 class TenantConfigBroadcastManagerTest extends UnitTestCase
 {
     #[Test]
+    public function resolvesABroadcasterDirectly(): void
+    {
+        $app = Mockery::mock($this->app, static function (Mockery\MockInterface $mock) {
+            $mock->makePartial();
+        });
+
+        $manager = new TenantConfigBroadcastManager($app);
+
+        $this->assertInstanceOf(
+            NullBroadcaster::class,
+            $manager->resolveUsing(['driver' => 'null', 'name' => 'test']),
+        );
+    }
+
+    #[Test]
+    public function forceReconnectsByPurgingTheCachedDriver(): void
+    {
+        $app = Mockery::mock($this->app, static function (Mockery\MockInterface $mock) {
+            $mock->makePartial();
+        });
+
+        $manager = new TenantConfigBroadcastManager($app);
+
+        $config = ['driver' => 'null'];
+
+        $first = $manager->connectUsing('test', $config);
+
+        // Without force, the cached driver is returned.
+        $this->assertSame($first, $manager->connectUsing('test', $config));
+
+        // With force, the cached driver is purged and a fresh one resolved.
+        $forced = $manager->connectUsing('test', $config, force: true);
+
+        $this->assertInstanceOf(Broadcaster::class, $forced);
+        $this->assertNotSame($first, $forced);
+    }
+
+    #[Test]
     public function canBeSyncedFromOriginal(): void
     {
         $original = Mockery::mock(BroadcastManager::class);
@@ -26,6 +64,28 @@ class TenantConfigBroadcastManagerTest extends UnitTestCase
         $sprout = new TenantConfigBroadcastManager($app, $original);
 
         $this->assertTrue($sprout->wasSyncedFromOriginal());
+    }
+
+    #[Test]
+    public function syncsRegistrationsFromOriginal(): void
+    {
+        $original = new BroadcastManager($this->app);
+
+        // Seed every property syncOriginal() carries across.
+        $original->extend('original-driver', static fn () => Mockery::mock(Broadcaster::class));
+
+        // drivers is a resolved-instance cache with no public setter.
+        $broadcaster = Mockery::mock(Broadcaster::class);
+        (new \ReflectionProperty($original, 'drivers'))->setValue($original, ['original-connection' => $broadcaster]);
+
+        $manager = new TenantConfigBroadcastManager($this->app, $original);
+
+        $read = fn (string $property) => (new \ReflectionProperty($manager, $property))->getValue($manager);
+
+        $this->assertTrue($manager->wasSyncedFromOriginal());
+        $this->assertArrayHasKey('original-driver', $read('customCreators'));
+        $this->assertArrayHasKey('original-connection', $read('drivers'));
+        $this->assertSame($broadcaster, $read('drivers')['original-connection']);
     }
 
     #[Test]
@@ -42,7 +102,7 @@ class TenantConfigBroadcastManagerTest extends UnitTestCase
                                   'driver' => 'fake',
                               ])
                               ->once();
-                     })
+                     }),
                  )
                  ->once();
         });
@@ -74,7 +134,7 @@ class TenantConfigBroadcastManagerTest extends UnitTestCase
                                   'name' => 'hi',
                               ])
                               ->once();
-                     })
+                     }),
                  )
                  ->once();
         });
@@ -99,7 +159,7 @@ class TenantConfigBroadcastManagerTest extends UnitTestCase
                               ->with('broadcasting.connections.fake-connection')
                               ->andReturn(null)
                               ->once();
-                     })
+                     }),
                  )
                  ->once();
         });

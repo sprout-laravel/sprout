@@ -9,24 +9,11 @@ use Sprout\Exceptions\MisconfigurationException;
 use Sprout\Managers\TenancyManager;
 use Sprout\Support\DefaultTenancy;
 use Sprout\Tests\Unit\UnitTestCase;
+
 use function Sprout\sprout;
 
 class TenancyManagerTest extends UnitTestCase
 {
-    protected function withoutDefault($app): void
-    {
-        tap($app['config'], static function ($config) {
-            $config->set('multitenancy.defaults.tenancy', null);
-        });
-    }
-
-    protected function withoutConfig($app): void
-    {
-        tap($app['config'], static function ($config) {
-            $config->set('multitenancy.tenancies.fake', null);
-        });
-    }
-
     #[Test]
     public function isNamedCorrectly(): void
     {
@@ -111,5 +98,19 @@ class TenancyManagerTest extends UnitTestCase
         $this->assertSame('hello-there', $provider->getName());
         $this->assertTrue($manager->hasResolved('tenants'));
         $this->assertFalse($manager->hasResolved('false'));
+    }
+
+    protected function withoutDefault($app): void
+    {
+        tap($app['config'], static function ($config) {
+            $config->set('multitenancy.defaults.tenancy', null);
+        });
+    }
+
+    protected function withoutConfig($app): void
+    {
+        tap($app['config'], static function ($config) {
+            $config->set('multitenancy.tenancies.fake', null);
+        });
     }
 }

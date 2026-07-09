@@ -30,7 +30,7 @@ interface IdentityResolver
      * @param Tenancy<TenantClass> $tenancy
      * @param Tenant|null          $tenant
      *
-     * @phpstan-param TenantClass|null                    $tenant
+     * @phpstan-param TenantClass|null $tenant
      *
      * @return void
      */
@@ -105,7 +105,7 @@ interface IdentityResolver
      * @param array<string, mixed> $parameters
      * @param bool                 $absolute
      *
-     * @phpstan-param TenantClass                         $tenant
+     * @phpstan-param TenantClass  $tenant
      *
      * @return string
      */

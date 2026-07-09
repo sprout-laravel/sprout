@@ -7,7 +7,9 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Mockery;
 use PHPUnit\Framework\Attributes\Test;
+use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\TenantProvider;
+use Sprout\Events\CurrentTenantChanged;
 use Sprout\Events\TenantIdentified;
 use Sprout\Events\TenantLoaded;
 use Sprout\Providers\EloquentTenantProvider;
@@ -16,24 +18,17 @@ use Sprout\Support\ResolutionHook;
 use Sprout\TenancyOptions;
 use Sprout\Tests\Unit\UnitTestCase;
 use Workbench\App\Models\TenantModel;
+
 use function Sprout\sprout;
 
 class DefaultTenancyTest extends UnitTestCase
 {
     use RefreshDatabase;
 
-    protected function defineEnvironment($app): void
-    {
-        tap($app['config'], static function ($config) {
-            $config->set('multitenancy.defaults.resolver', 'path');
-            $config->set('multitenancy.providers.tenants.model', TenantModel::class);
-        });
-    }
-
     #[Test]
     public function hasName(): void
     {
-        /** @var \Sprout\Contracts\Tenancy $tenancy */
+        /** @var Tenancy $tenancy */
         $tenancy = sprout()->tenancies()->get();
 
         $this->assertInstanceOf(DefaultTenancy::class, $tenancy);
@@ -43,7 +38,7 @@ class DefaultTenancyTest extends UnitTestCase
     #[Test]
     public function hasNoCurrentTenantByDefault(): void
     {
-        /** @var \Sprout\Contracts\Tenancy $tenancy */
+        /** @var Tenancy $tenancy */
         $tenancy = sprout()->tenancies()->get();
 
         $this->assertFalse($tenancy->check());
@@ -52,7 +47,7 @@ class DefaultTenancyTest extends UnitTestCase
     #[Test]
     public function storesCurrentTenantForAccess(): void
     {
-        /** @var \Sprout\Contracts\Tenancy $tenancy */
+        /** @var Tenancy $tenancy */
         $tenancy = sprout()->tenancies()->get();
 
         $this->assertFalse($tenancy->check());
@@ -70,7 +65,7 @@ class DefaultTenancyTest extends UnitTestCase
     #[Test]
     public function identifiesTenant(): void
     {
-        /** @var \Sprout\Contracts\Tenancy $tenancy */
+        /** @var Tenancy $tenancy */
         $tenancy = sprout()->tenancies()->get();
 
         $this->assertFalse($tenancy->check());
@@ -89,7 +84,7 @@ class DefaultTenancyTest extends UnitTestCase
     #[Test]
     public function loadsTenant(): void
     {
-        /** @var \Sprout\Contracts\Tenancy $tenancy */
+        /** @var Tenancy $tenancy */
         $tenancy = sprout()->tenancies()->get();
 
         $this->assertFalse($tenancy->check());
@@ -106,9 +101,24 @@ class DefaultTenancyTest extends UnitTestCase
     }
 
     #[Test]
+    public function dispatchesAnEventWhenTheCurrentTenantChanges(): void
+    {
+        /** @var Tenancy $tenancy */
+        $tenancy = sprout()->tenancies()->get();
+
+        $tenant = TenantModel::factory()->createOne();
+
+        Event::fake([CurrentTenantChanged::class]);
+
+        $tenancy->setTenant($tenant);
+
+        Event::assertDispatched(CurrentTenantChanged::class);
+    }
+
+    #[Test]
     public function hasATenantProvider(): void
     {
-        /** @var \Sprout\Contracts\Tenancy $tenancy */
+        /** @var Tenancy $tenancy */
         $tenancy = sprout()->tenancies()->get();
 
         $provider = $tenancy->provider();
@@ -120,7 +130,7 @@ class DefaultTenancyTest extends UnitTestCase
     #[Test]
     public function storesHowAndWhenTheTenantWasResolved(): void
     {
-        /** @var \Sprout\Contracts\Tenancy $tenancy */
+        /** @var Tenancy $tenancy */
         $tenancy = sprout()->tenancies()->get();
 
         $this->assertFalse($tenancy->wasResolved());
@@ -157,7 +167,7 @@ class DefaultTenancyTest extends UnitTestCase
         $tenancy = new DefaultTenancy(
             'tenants',
             Mockery::mock(TenantProvider::class),
-            $options
+            $options,
         );
 
         $this->assertSame($options, $tenancy->options());
@@ -179,5 +189,13 @@ class DefaultTenancyTest extends UnitTestCase
 
         $this->assertTrue($tenancy->hasOption(TenancyOptions::hydrateTenantRelation()));
         $this->assertFalse($tenancy->hasOption(TenancyOptions::throwIfNotRelated()));
+    }
+
+    protected function defineEnvironment($app): void
+    {
+        tap($app['config'], static function ($config) {
+            $config->set('multitenancy.defaults.resolver', 'path');
+            $config->set('multitenancy.providers.tenants.model', TenantModel::class);
+        });
     }
 }

@@ -16,9 +16,9 @@ use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 use Sprout\Contracts\TenantAware;
 use Sprout\Events\CurrentTenantChanged;
-use Sprout\Managers\ConfigStoreManager;
 use Sprout\Http\Middleware\SproutTenantContextMiddleware;
 use Sprout\Listeners\IdentifyTenantOnRouting;
+use Sprout\Managers\ConfigStoreManager;
 use Sprout\Managers\IdentityResolverManager;
 use Sprout\Managers\ServiceOverrideManager;
 use Sprout\Managers\TenancyManager;
@@ -26,6 +26,7 @@ use Sprout\Managers\TenantProviderManager;
 use Sprout\Sprout;
 use Sprout\SproutServiceProvider;
 use Sprout\TenantConfig;
+
 use function Sprout\sprout;
 
 class SproutServiceProviderTest extends UnitTestCase
@@ -212,12 +213,12 @@ class SproutServiceProviderTest extends UnitTestCase
             $mock->shouldReceive('setTenancy')->once();
         });
 
-        $this->app->singleton(TenantAware::class, fn() => $tenantAware);
+        $this->app->singleton(TenantAware::class, fn () => $tenantAware);
 
         $this->app->make(TenantAware::class);
 
-        $this->app->extend(Tenancy::class, fn(?Tenancy $tenancy) => $tenancy);
-        $this->app->extend(Tenant::class, fn(?Tenant $tenant) => $tenant);
+        $this->app->extend(Tenancy::class, fn (?Tenancy $tenancy) => $tenancy);
+        $this->app->extend(Tenant::class, fn (?Tenant $tenant) => $tenant);
     }
 
     #[Test]
@@ -227,8 +228,12 @@ class SproutServiceProviderTest extends UnitTestCase
 
         $key = realpath(__DIR__ . '/../../src');
 
+        $this->assertArrayHasKey($key . '/../resources/config/core.php', $paths);
+        $this->assertContains(config_path('sprout/core.php'), $paths);
         $this->assertArrayHasKey($key . '/../resources/config/multitenancy.php', $paths);
         $this->assertContains(config_path('multitenancy.php'), $paths);
+        $this->assertArrayHasKey($key . '/../resources/config/overrides.php', $paths);
+        $this->assertContains(config_path('sprout/overrides.php'), $paths);
     }
 
     #[Test]

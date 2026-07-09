@@ -6,6 +6,7 @@ namespace Sprout\Tests\Unit\Http\Resolvers;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Router;
+use Illuminate\Session\SessionManager;
 use Illuminate\Session\Store;
 use Mockery;
 use Mockery\MockInterface;
@@ -21,40 +22,12 @@ use Sprout\Tests\Unit\UnitTestCase;
 
 class SessionIdentityResolverTest extends UnitTestCase
 {
-    protected function defineEnvironment($app): void
-    {
-        tap($app['config'], static function ($config) {
-            $config->set('multitenancy.defaults.resolver', 'session');
-        });
-    }
-
-    protected function defineRoutes($router)
-    {
-        $router->tenanted(function (Router $router) {
-            $router->get('/test-route', static function () {
-                return 'test';
-            })->name('test-route');
-        });
-    }
-
-    protected function mockApp(): Application&MockInterface
-    {
-        return Mockery::mock(Application::class, static function ($mock) {
-
-        });
-    }
-
-    protected function getSprout(Application $app): Sprout
-    {
-        return new Sprout($app, new SettingsRepository());
-    }
-
     #[Test]
     public function providesAccessToExpectedValues(): void
     {
         $resolver = new SessionIdentityResolver(
             'session',
-            '{Tenancy}-Session-Identifier'
+            '{Tenancy}-Session-Identifier',
         );
 
         $this->assertSame('session', $resolver->getName());
@@ -93,7 +66,7 @@ class SessionIdentityResolverTest extends UnitTestCase
             $mock->shouldReceive('getTenantIdentifier')->andReturn('my-identifier')->once();
         });
 
-        /** @var \Sprout\Contracts\Tenancy&MockInterface $tenancy */
+        /** @var Tenancy&MockInterface $tenancy */
         $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) {
             $mock->shouldReceive('getName')->andReturn('my-tenancy')->once();
             $mock->shouldReceive('check')->andReturn(true)->once();
@@ -102,11 +75,11 @@ class SessionIdentityResolverTest extends UnitTestCase
         $app = $this->mockApp();
 
         $app->shouldReceive('make')
-            ->with(\Illuminate\Session\SessionManager::class)
+            ->with(SessionManager::class)
             ->andReturn(
-                Mockery::mock(\Illuminate\Session\SessionManager::class, static function (MockInterface $mock) {
+                Mockery::mock(SessionManager::class, static function (MockInterface $mock) {
                     $mock->shouldReceive('put')->with('multitenancy.my-tenancy', 'my-identifier')->once();
-                })
+                }),
             )
             ->once();
 
@@ -120,7 +93,7 @@ class SessionIdentityResolverTest extends UnitTestCase
     {
         $resolver = new SessionIdentityResolver('session');
 
-        /** @var \Sprout\Contracts\Tenancy&MockInterface $tenancy */
+        /** @var Tenancy&MockInterface $tenancy */
         $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) {
             $mock->shouldReceive('getName')->andReturn('my-tenancy')->once();
         });
@@ -128,11 +101,11 @@ class SessionIdentityResolverTest extends UnitTestCase
         $app = $this->mockApp();
 
         $app->shouldReceive('make')
-            ->with(\Illuminate\Session\SessionManager::class)
+            ->with(SessionManager::class)
             ->andReturn(
-                Mockery::mock(\Illuminate\Session\SessionManager::class, static function (MockInterface $mock) {
+                Mockery::mock(SessionManager::class, static function (MockInterface $mock) {
                     $mock->shouldReceive('forget')->with('multitenancy.my-tenancy')->once();
-                })
+                }),
             )
             ->once();
 
@@ -146,7 +119,7 @@ class SessionIdentityResolverTest extends UnitTestCase
     {
         $resolver = new SessionIdentityResolver('session');
 
-        /** @var \Sprout\Contracts\Tenancy&MockInterface $tenancy */
+        /** @var Tenancy&MockInterface $tenancy */
         $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) {
             $mock->shouldReceive('hasOption')->with('overrides.all')->andReturn(false)->once();
             $mock->shouldReceive('optionConfig')->with('overrides')->andReturn([])->once();
@@ -161,7 +134,7 @@ class SessionIdentityResolverTest extends UnitTestCase
                               ->with('multitenancy.my-tenancy')
                               ->andReturn('my-identifier')
                               ->once();
-                     })
+                     }),
                  )
                  ->once();
         });
@@ -180,7 +153,7 @@ class SessionIdentityResolverTest extends UnitTestCase
     {
         $resolver = new SessionIdentityResolver('session');
 
-        /** @var \Sprout\Contracts\Tenancy&MockInterface $tenancy */
+        /** @var Tenancy&MockInterface $tenancy */
         $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) {
             $mock->shouldReceive('hasOption')->with('overrides.all')->andReturn(true)->once();
         });
@@ -198,7 +171,7 @@ class SessionIdentityResolverTest extends UnitTestCase
     {
         $resolver = new SessionIdentityResolver('session');
 
-        /** @var \Sprout\Contracts\Tenancy&MockInterface $tenancy */
+        /** @var Tenancy&MockInterface $tenancy */
         $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) {
             $mock->shouldReceive('hasOption')->with('overrides.all')->andReturn(false)->once();
             $mock->shouldReceive('optionConfig')->with('overrides')->andReturn(['session'])->once();
@@ -272,5 +245,32 @@ class SessionIdentityResolverTest extends UnitTestCase
         $this->assertSame('/test-route', $resolver->route('test-route', $tenancy, $tenant1, absolute: false));
         $this->assertSame('/test-route', $resolver->route('test-route', $tenancy, $tenant2, absolute: false));
         $this->assertSame('/test-route', $resolver->route('test-route', $tenancy, $tenant3, absolute: false));
+    }
+
+    protected function defineEnvironment($app): void
+    {
+        tap($app['config'], static function ($config) {
+            $config->set('multitenancy.defaults.resolver', 'session');
+        });
+    }
+
+    protected function defineRoutes($router)
+    {
+        $router->tenanted(function (Router $router) {
+            $router->get('/test-route', static function () {
+                return 'test';
+            })->name('test-route');
+        });
+    }
+
+    protected function mockApp(): Application&MockInterface
+    {
+        return Mockery::mock(Application::class, static function ($mock) {
+        });
+    }
+
+    protected function getSprout(Application $app): Sprout
+    {
+        return new Sprout($app, new SettingsRepository());
     }
 }

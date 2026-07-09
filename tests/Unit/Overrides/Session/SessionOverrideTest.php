@@ -12,6 +12,8 @@ use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use Sprout\Contracts\BootableServiceOverride;
+use Sprout\Contracts\Tenancy;
+use Sprout\Contracts\Tenant;
 use Sprout\Contracts\TenantAware;
 use Sprout\Overrides\Session\SessionOverride;
 use Sprout\Sprout;
@@ -19,55 +21,18 @@ use Sprout\Support\Settings;
 use Sprout\Support\SettingsRepository;
 use Sprout\Tests\Unit\UnitTestCase;
 use Workbench\App\Models\TenantModel;
+
 use function Sprout\settings;
 use function Sprout\sprout;
 
 class SessionOverrideTest extends UnitTestCase
 {
-    protected function defineEnvironment($app): void
+    public static function overrideDatabaseSetting(): array
     {
-        tap($app['config'], static function (Repository $config) {
-            $config->set('sprout.overrides', []);
-        });
-    }
-
-    protected function mockSessionManager(bool $database, bool $forget = true): SessionManager&MockInterface
-    {
-        return Mockery::mock(SessionManager::class, static function (MockInterface $mock) use ($database, $forget) {
-            $mock->shouldReceive('extend')
-                 ->withArgs([
-                     Mockery::on(static function ($arg) {
-                         return $arg === 'file' || $arg === 'native';
-                     }),
-                     Mockery::on(static function ($arg) {
-                         return is_callable($arg) && $arg instanceof Closure;
-                     }),
-                 ])
-                 ->twice();
-
-            if ($database) {
-                $mock->shouldNotReceive('extend')
-                     ->withArgs([
-                         'database',
-                         Mockery::on(static function ($arg) {
-                             return is_callable($arg) && $arg instanceof Closure;
-                         }),
-                     ]);
-            } else {
-                $mock->shouldReceive('extend')
-                     ->withArgs([
-                         'database',
-                         Mockery::on(static function ($arg) {
-                             return is_callable($arg) && $arg instanceof Closure;
-                         }),
-                     ])
-                     ->once();
-            }
-
-            if ($forget) {
-                $mock->shouldReceive('forgetDrivers')->once();
-            }
-        });
+        return [
+            'do not override the database' => [true],
+            'override the database'        => [false],
+        ];
     }
 
     #[Test]
@@ -101,6 +66,10 @@ class SessionOverrideTest extends UnitTestCase
         $sprout = sprout();
 
         config()->set('session.driver', 'file');
+        config()->set('session.path', '/original-path');
+        config()->set('session.domain', 'original.test');
+        config()->set('session.secure', true);
+        config()->set('session.same_site', 'strict');
         config()->set('sprout.overrides', [
             'session' => [
                 'driver' => SessionOverride::class,
@@ -138,6 +107,21 @@ class SessionOverrideTest extends UnitTestCase
         $this->assertInstanceOf(SessionOverride::class, $override);
 
         $override->setup($tenancy, $tenant);
+
+        $this->assertSame(
+            $tenancy->getName() . '_' . $tenant->getTenantIdentifier() . '_session',
+            config('session.cookie'),
+        );
+
+        // setup() captured the original session config into settings...
+        $original = sprout()->settings()->array('original.session');
+        $this->assertSame('/original-path', $original['path']);
+        $this->assertSame('original.test', $original['domain']);
+        $this->assertTrue($original['secure']);
+        $this->assertSame('strict', $original['same_site']);
+
+        // ...and refreshed the session store, forgetting the loaded driver
+        $this->assertEmpty($session->getDrivers());
     }
 
     #[Test]
@@ -174,7 +158,32 @@ class SessionOverrideTest extends UnitTestCase
         $this->assertFalse($driver->getHandler()->hasTenancy());
         $this->assertInstanceOf(SessionOverride::class, $override);
 
+        // Seed the stored original config, plus a tenant-overridden current config
+        sprout()->settings()->set('original.session', [
+            'path'      => '/original-path',
+            'domain'    => 'original.test',
+            'secure'    => true,
+            'same_site' => 'strict',
+        ]);
+
+        config()->set('session.path', '/tenant-path');
+        config()->set('session.domain', 'tenant.test');
+        config()->set('session.secure', false);
+        config()->set('session.same_site', 'lax');
+
         $override->cleanup($tenancy, $tenant);
+
+        // cleanup() restored every original value from settings...
+        $this->assertSame('/original-path', config('session.path'));
+        $this->assertSame('original.test', config('session.domain'));
+        $this->assertTrue(config('session.secure'));
+        $this->assertSame('strict', config('session.same_site'));
+
+        // ...cleared the stored original...
+        $this->assertEmpty(sprout()->settings()->array('original.session'));
+
+        // ...and refreshed the session store, forgetting the loaded driver
+        $this->assertEmpty($session->getDrivers());
     }
 
     #[Test]
@@ -225,7 +234,7 @@ class SessionOverrideTest extends UnitTestCase
     {
         $override = new SessionOverride('session', []);
 
-        /** @var \Illuminate\Foundation\Application&MockInterface $app */
+        /** @var Application&MockInterface $app */
         $app = Mockery::mock($this->app, static function (MockInterface $mock) {
             $mock->makePartial();
             $mock->shouldReceive('resolved')->withArgs(['session'])->andReturnFalse()->once();
@@ -291,11 +300,116 @@ class SessionOverrideTest extends UnitTestCase
         $app->make('session');
     }
 
-    public static function overrideDatabaseSetting(): array
+    #[Test]
+    public function doesNotOverrideTheDatabaseDriverByDefault(): void
     {
-        return [
-            'do not override the database' => [true],
-            'override the database' => [false],
-        ];
+        // No 'database' config and no NO_DATABASE_OVERRIDE setting, so the `?? true`
+        // default decides: the database session driver must NOT be extended.
+        $override = new SessionOverride('session', []);
+
+        $app = Mockery::mock(Application::class, static function (MockInterface $mock) {
+            $mock->makePartial();
+        });
+
+        $app->singleton('session', static function () {
+            return Mockery::mock(SessionManager::class, static function (MockInterface $mock) {
+                $mock->shouldReceive('extend')
+                     ->withArgs([
+                         Mockery::on(static fn ($arg) => $arg === 'file' || $arg === 'native'),
+                         Mockery::on(static fn ($arg) => is_callable($arg) && $arg instanceof Closure),
+                     ])
+                     ->twice();
+
+                $mock->shouldNotReceive('extend')
+                     ->withArgs([
+                         'database',
+                         Mockery::on(static fn ($arg) => is_callable($arg) && $arg instanceof Closure),
+                     ]);
+            });
+        });
+
+        $sprout = new Sprout($app, new SettingsRepository());
+
+        $override->boot($app, $sprout);
+
+        $app->make('session');
+    }
+
+    #[Test]
+    public function doesNotForgetDriversWhenRefreshingWithNoLoadedDrivers(): void
+    {
+        $override = new SessionOverride('session', []);
+
+        // A resolved session manager with no loaded drivers: refresh must bail out
+        // early rather than forgetting drivers.
+        $manager = Mockery::mock(SessionManager::class, static function (MockInterface $mock) {
+            $mock->shouldReceive('getDrivers')->andReturn([])->once();
+            $mock->shouldNotReceive('forgetDrivers');
+        });
+
+        $app = Mockery::mock($this->app, static function (MockInterface $mock) use ($manager) {
+            $mock->makePartial();
+            $mock->shouldReceive('resolved')->with('session')->andReturnTrue();
+            $mock->shouldReceive('make')->with('session')->andReturn($manager);
+        });
+
+        $sprout = new Sprout($app, new SettingsRepository());
+
+        $override->setApp($app)->setSprout($sprout);
+
+        $tenant = Mockery::mock(Tenant::class, static function (MockInterface $mock) {
+            $mock->shouldReceive('getTenantIdentifier')->andReturn('acme');
+        });
+        $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) {
+            $mock->shouldReceive('getName')->andReturn('tenants');
+        });
+
+        $override->setup($tenancy, $tenant);
+    }
+
+    protected function defineEnvironment($app): void
+    {
+        tap($app['config'], static function (Repository $config) {
+            $config->set('sprout.overrides', []);
+        });
+    }
+
+    protected function mockSessionManager(bool $database, bool $forget = true): SessionManager&MockInterface
+    {
+        return Mockery::mock(SessionManager::class, static function (MockInterface $mock) use ($database, $forget) {
+            $mock->shouldReceive('extend')
+                 ->withArgs([
+                     Mockery::on(static function ($arg) {
+                         return $arg === 'file' || $arg === 'native';
+                     }),
+                     Mockery::on(static function ($arg) {
+                         return is_callable($arg) && $arg instanceof Closure;
+                     }),
+                 ])
+                 ->twice();
+
+            if ($database) {
+                $mock->shouldNotReceive('extend')
+                     ->withArgs([
+                         'database',
+                         Mockery::on(static function ($arg) {
+                             return is_callable($arg) && $arg instanceof Closure;
+                         }),
+                     ]);
+            } else {
+                $mock->shouldReceive('extend')
+                     ->withArgs([
+                         'database',
+                         Mockery::on(static function ($arg) {
+                             return is_callable($arg) && $arg instanceof Closure;
+                         }),
+                     ])
+                     ->once();
+            }
+
+            if ($forget) {
+                $mock->shouldReceive('forgetDrivers')->once();
+            }
+        });
     }
 }

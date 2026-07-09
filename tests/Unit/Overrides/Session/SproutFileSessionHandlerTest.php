@@ -16,26 +16,17 @@ use Sprout\Tests\Unit\UnitTestCase;
 
 class SproutFileSessionHandlerTest extends UnitTestCase
 {
-    protected function defineEnvironment($app): void
+    public static function fileSessionDataProvider(): array
     {
-        tap($app['config'], static function (Repository $config) {
-            $config->set('sprout.overrides', []);
-        });
-    }
+        $defaultPath = '/default/path';
+        $tenancy     = Mockery::mock(Tenancy::class);
+        $tenant      = Mockery::mock(Tenant::class)->makePartial();
+        $tenant->shouldReceive('getTenantResourceKey')->andReturn('tenant-resource-key');
 
-    protected function createHandler(?Tenancy $tenancy = null, ?Tenant $tenant = null, ?Filesystem $files = null): SproutFileSessionHandler
-    {
-        $defaultPath = '/default/path' . ($tenancy !== null ? '/' : '');
-        $lifetime    = config('session.lifetime');
-        $files       ??= Mockery::mock(Filesystem::class);
-
-        $handler = new SproutFileSessionHandler($files, $defaultPath, $lifetime);
-
-        if ($tenancy && $tenant) {
-            $handler->setTenancy($tenancy)->setTenant($tenant);
-        }
-
-        return $handler;
+        return [
+            'outside of tenant context' => [null, null, $defaultPath],
+            'inside of tenant context'  => [$tenancy, $tenant, $defaultPath . DIRECTORY_SEPARATOR . 'tenant-resource-key'],
+        ];
     }
 
     #[Test]
@@ -81,6 +72,27 @@ class SproutFileSessionHandlerTest extends UnitTestCase
         $this->assertSame('my-session-data', $handler->read($sessionId));
     }
 
+    #[Test]
+    public function readsASessionModifiedExactlyAtTheExpiryBoundary(): void
+    {
+        $sessionId = 'my-session-id';
+
+        Carbon::setTestNow(Carbon::now());
+
+        // A file modified exactly at the cutoff is still valid: the check is inclusive.
+        $cutoff = Carbon::now()->subMinutes(config('session.lifetime'))->getTimestamp();
+
+        $handler = $this->createHandler(null, null, Mockery::mock(Filesystem::class, function (Mockery\MockInterface $mock) use ($cutoff) {
+            $mock->shouldReceive('isFile')->andReturn(true)->once();
+            $mock->shouldReceive('lastModified')->andReturn($cutoff)->once();
+            $mock->shouldReceive('sharedGet')->andReturn('my-session-data')->once();
+        }));
+
+        $this->assertSame('my-session-data', $handler->read($sessionId));
+
+        Carbon::setTestNow();
+    }
+
     #[Test, DataProvider('fileSessionDataProvider')]
     public function doesNotReadFromFilesystemWhenSessionIsInvalidOrTooOld(?Tenancy $tenancy, ?Tenant $tenant, string $expectedPath): void
     {
@@ -117,16 +129,25 @@ class SproutFileSessionHandlerTest extends UnitTestCase
         $this->assertTrue($handler->destroy($sessionId));
     }
 
-    public static function fileSessionDataProvider(): array
+    protected function defineEnvironment($app): void
     {
-        $defaultPath = '/default/path';
-        $tenancy     = Mockery::mock(Tenancy::class);
-        $tenant      = Mockery::mock(Tenant::class)->makePartial();
-        $tenant->shouldReceive('getTenantResourceKey')->andReturn('tenant-resource-key');
+        tap($app['config'], static function (Repository $config) {
+            $config->set('sprout.overrides', []);
+        });
+    }
 
-        return [
-            'outside of tenant context' => [null, null, $defaultPath],
-            'inside of tenant context'  => [$tenancy, $tenant, $defaultPath . DIRECTORY_SEPARATOR . 'tenant-resource-key'],
-        ];
+    protected function createHandler(?Tenancy $tenancy = null, ?Tenant $tenant = null, ?Filesystem $files = null): SproutFileSessionHandler
+    {
+        $defaultPath = '/default/path' . ($tenancy !== null ? '/' : '');
+        $lifetime    = config('session.lifetime');
+        $files ??= Mockery::mock(Filesystem::class);
+
+        $handler = new SproutFileSessionHandler($files, $defaultPath, $lifetime);
+
+        if ($tenancy && $tenant) {
+            $handler->setTenancy($tenancy)->setTenant($tenant);
+        }
+
+        return $handler;
     }
 }

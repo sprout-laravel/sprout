@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Sprout\Tests\Unit;
 
+use Closure;
 use Illuminate\Config\Repository;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Event;
@@ -10,60 +11,17 @@ use Mockery;
 use Orchestra\Testbench\Attributes\DefineEnvironment;
 use PHPUnit\Framework\Attributes\Test;
 use Sprout\Contracts\Tenancy;
+use Sprout\Exceptions\MisconfigurationException;
 use Sprout\Sprout;
 use Sprout\Support\ResolutionHook;
 use Sprout\Support\Settings;
 use Sprout\Support\SettingsRepository;
 use Workbench\App\Models\TenantModel;
+
 use function Sprout\sprout;
 
 class SproutTest extends UnitTestCase
 {
-    protected function defineEnvironment($app): void
-    {
-        tap($app['config'], static function ($config) {
-            $config->set('multitenancy.tenancies.tenants.model', TenantModel::class);
-            $config->set('multitenancy.resolvers.subdomain.domain', 'localhost');
-        });
-    }
-
-    protected function setupSecondTenancy($app): void
-    {
-        tap($app['config'], static function (Repository $config) {
-            $config->set('multitenancy.providers.backup', [
-                'driver' => 'database',
-                'table'  => 'tenants',
-            ]);
-
-            $config->set('multitenancy.tenancies.backup', [
-                'provider' => 'backup',
-            ]);
-        });
-    }
-
-    protected function defineRoutes($router): void
-    {
-        $router->tenanted(function ($router) {
-            $router->get('cookie', fn () => 'Test')->name('test.cookie');
-        }, 'cookie');
-
-        $router->tenanted(function ($router) {
-            $router->get('header', fn () => 'Test')->name('test.header');
-        }, 'header');
-
-        $router->tenanted(function ($router) {
-            $router->get('path', fn () => 'Test')->name('test.path');
-        }, 'path');
-
-        $router->tenanted(function ($router) {
-            $router->get('session', fn () => 'Test')->name('test.session');
-        }, 'session');
-
-        $router->tenanted(function ($router) {
-            $router->get('subdomain', fn () => 'Test')->name('test.subdomain');
-        }, 'subdomain');
-    }
-
     #[Test]
     public function allowsAccessToCoreConfig(): void
     {
@@ -133,7 +91,7 @@ class SproutTest extends UnitTestCase
     {
         $app = Mockery::mock(Application::class, static function (Mockery\MockInterface $mock) {
             $mock->shouldReceive('forgetExtenders')->with(Tenancy::class)->twice();
-            $mock->shouldReceive('extend')->with(Tenancy::class, Mockery::on(fn ($arg) => $arg instanceof \Closure))->twice();
+            $mock->shouldReceive('extend')->with(Tenancy::class, Mockery::on(fn ($arg) => $arg instanceof Closure))->twice();
         });
 
         $sprout = new Sprout($app, new SettingsRepository());
@@ -159,6 +117,38 @@ class SproutTest extends UnitTestCase
 
         $sprout->resetTenancies();
 
+        $this->assertEmpty($sprout->getAllCurrentTenancies());
+    }
+
+    #[Test]
+    public function resetsTenanciesInReverseOrder(): void
+    {
+        $app = Mockery::mock(Application::class, static function (Mockery\MockInterface $mock) {
+            $mock->shouldReceive('forgetExtenders')->with(Tenancy::class);
+            $mock->shouldReceive('extend')->with(Tenancy::class, Mockery::on(fn ($arg) => $arg instanceof Closure));
+        });
+
+        $sprout = new Sprout($app, new SettingsRepository());
+
+        $tenancy1 = Mockery::mock(Tenancy::class);
+        $tenancy1->shouldReceive('check')->andReturn(true);
+
+        $tenancy2 = Mockery::mock(Tenancy::class);
+        $tenancy2->shouldReceive('check')->andReturn(true);
+
+        // Both tenancies are active; they must be torn down last-registered-first,
+        // so tenancy2 (registered last) must be reset before tenancy1.
+        $tenancy2->shouldReceive('setTenant')->with(null)->once()->globally()->ordered()->andReturnSelf();
+        $tenancy1->shouldReceive('setTenant')->with(null)->once()->globally()->ordered()->andReturnSelf();
+
+        Event::fake();
+
+        $sprout->setCurrentTenancy($tenancy1);
+        $sprout->setCurrentTenancy($tenancy2);
+
+        $sprout->resetTenancies();
+
+        // Reaching here with satisfied ordered expectations proves reverse teardown.
         $this->assertEmpty($sprout->getAllCurrentTenancies());
     }
 
@@ -257,5 +247,64 @@ class SproutTest extends UnitTestCase
         $this->assertSame('http://localhost/session', $sprout->route('test.session', $tenant, 'session'));
         $this->assertSame('http://' . $tenant->getTenantIdentifier() . '.localhost/subdomain', $sprout->route('test.subdomain', $tenant, 'subdomain'));
         $this->assertSame('http://' . $tenant->getTenantIdentifier() . '.localhost/subdomain', $sprout->route('test.subdomain', $tenant));
+    }
+
+    #[Test]
+    public function routeUsesTheExplicitlyNamedTenancy(): void
+    {
+        $tenant = TenantModel::factory()->createOne();
+
+        $sprout = $this->app->make(Sprout::class);
+
+        // A named tenancy is looked up directly, so an unknown name must error rather
+        // than silently falling back to the current/default tenancy.
+        $this->expectException(MisconfigurationException::class);
+
+        $sprout->route('test.header', $tenant, 'header', 'does-not-exist');
+    }
+
+    protected function defineEnvironment($app): void
+    {
+        tap($app['config'], static function ($config) {
+            $config->set('multitenancy.tenancies.tenants.model', TenantModel::class);
+            $config->set('multitenancy.resolvers.subdomain.domain', 'localhost');
+        });
+    }
+
+    protected function setupSecondTenancy($app): void
+    {
+        tap($app['config'], static function (Repository $config) {
+            $config->set('multitenancy.providers.backup', [
+                'driver' => 'database',
+                'table'  => 'tenants',
+            ]);
+
+            $config->set('multitenancy.tenancies.backup', [
+                'provider' => 'backup',
+            ]);
+        });
+    }
+
+    protected function defineRoutes($router): void
+    {
+        $router->tenanted(function ($router) {
+            $router->get('cookie', fn () => 'Test')->name('test.cookie');
+        }, 'cookie');
+
+        $router->tenanted(function ($router) {
+            $router->get('header', fn () => 'Test')->name('test.header');
+        }, 'header');
+
+        $router->tenanted(function ($router) {
+            $router->get('path', fn () => 'Test')->name('test.path');
+        }, 'path');
+
+        $router->tenanted(function ($router) {
+            $router->get('session', fn () => 'Test')->name('test.session');
+        }, 'session');
+
+        $router->tenanted(function ($router) {
+            $router->get('subdomain', fn () => 'Test')->name('test.subdomain');
+        }, 'subdomain');
     }
 }

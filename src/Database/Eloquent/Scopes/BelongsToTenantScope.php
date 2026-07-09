@@ -35,7 +35,7 @@ final class BelongsToTenantScope extends TenantChildScope
      * @param Builder<covariant ModelClass> $builder
      * @param Model&BelongsToTenant         $model
      *
-     * @phpstan-param ModelClass                                                                          $model
+     * @phpstan-param ModelClass            $model
      *
      * @return void
      *
@@ -97,9 +97,9 @@ final class BelongsToTenantScope extends TenantChildScope
      *
      * @param Builder<covariant ModelClass> $builder
      * @param Model&BelongsToTenant         $model
-     * @param \Sprout\Contracts\Tenancy<*>                                                           $tenancy
+     * @param \Sprout\Contracts\Tenancy<*>  $tenancy
      *
-     * @phpstan-param ModelClass                                                                          $model
+     * @phpstan-param ModelClass            $model
      *
      * @return void
      */

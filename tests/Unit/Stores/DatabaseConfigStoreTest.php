@@ -11,50 +11,23 @@ use Illuminate\Support\Str;
 use Mockery;
 use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\Stores\DatabaseConfigStore;
-use Sprout\Tests\Unit\UnitTestCase;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
+use Sprout\Stores\DatabaseConfigStore;
+use Sprout\Tests\Unit\UnitTestCase;
 
 class DatabaseConfigStoreTest extends UnitTestCase
 {
-    protected function mockTenancy(string $name): Tenancy&MockInterface
-    {
-        return Mockery::mock(Tenancy::class, function (MockInterface $mock) use ($name) {
-            $mock->shouldReceive('getName')->andReturn($name);
-        });
-    }
-
-    protected function mockTenant(Tenancy $tenancy, int|string $key, ?Closure $callback = null): Tenant&MockInterface
-    {
-        return Mockery::mock(Tenant::class, static function (MockInterface $mock) use ($key, $tenancy, $callback) {
-            $mock->shouldReceive('getTenantKey')->andReturn($key);
-
-            if ($callback !== null) {
-                $callback($mock);
-            }
-        });
-    }
-
-    protected function mockConnection(?Closure $callback = null): ConnectionInterface&MockInterface
-    {
-        return Mockery::mock(ConnectionInterface::class, static function (MockInterface $mock) use ($callback) {
-            if ($callback !== null) {
-                $callback($mock);
-            }
-        });
-    }
-
     #[Test]
     public function canGetConfigForTenant(): void
     {
-        $tenancy         = $this->mockTenancy('my-tenants');
-        $key             = 12434;
-        $tenant          = $this->mockTenant($tenancy, $key);
-        $encrypter       = new Encrypter(Str::random(32), 'AES-256-CBC');
-        $service         = 'database';
-        $name            = 'custom-tenant-stuff';
-        $config          = [
+        $tenancy   = $this->mockTenancy('my-tenants');
+        $key       = 12434;
+        $tenant    = $this->mockTenant($tenancy, $key);
+        $encrypter = new Encrypter(Str::random(32), 'AES-256-CBC');
+        $service   = 'database';
+        $name      = 'custom-tenant-stuff';
+        $config    = [
             'host'     => 'localhost',
             'database' => 'my_database',
         ];
@@ -89,7 +62,7 @@ class DatabaseConfigStoreTest extends UnitTestCase
                               ->with('config')
                               ->once()
                               ->andReturn($encryptedConfig);
-                     })
+                     }),
                  );
         });
 
@@ -141,7 +114,7 @@ class DatabaseConfigStoreTest extends UnitTestCase
                               ->with('config')
                               ->once()
                               ->andReturn($encryptedConfig);
-                     })
+                     }),
                  );
         });
 
@@ -191,7 +164,7 @@ class DatabaseConfigStoreTest extends UnitTestCase
                               ->with('config')
                               ->once()
                               ->andReturn(null);
-                     })
+                     }),
                  );
         });
 
@@ -245,7 +218,7 @@ class DatabaseConfigStoreTest extends UnitTestCase
                          $mock->shouldReceive('exists')
                               ->once()
                               ->andReturn(true);
-                     })
+                     }),
                  );
         });
 
@@ -257,13 +230,13 @@ class DatabaseConfigStoreTest extends UnitTestCase
     #[Test]
     public function canSetConfigForTenant(): void
     {
-        $tenancy         = $this->mockTenancy('my-tenants');
-        $key             = 12434;
-        $tenant          = $this->mockTenant($tenancy, $key);
-        $encrypter       = new Encrypter(Str::random(32), 'AES-256-CBC');
-        $service         = 'database';
-        $name            = 'custom-tenant-stuff';
-        $config          = [
+        $tenancy   = $this->mockTenancy('my-tenants');
+        $key       = 12434;
+        $tenant    = $this->mockTenant($tenancy, $key);
+        $encrypter = new Encrypter(Str::random(32), 'AES-256-CBC');
+        $service   = 'database';
+        $name      = 'custom-tenant-stuff';
+        $config    = [
             'host'     => 'localhost',
             'database' => 'my_database',
         ];
@@ -281,17 +254,17 @@ class DatabaseConfigStoreTest extends UnitTestCase
                                           return false;
                                       }
 
-                                      return $v['tenancy'] === 'my-tenants'
-                                             && $v['tenant_id'] === $key
-                                             && $v['service'] === $service
-                                             && $v['name'] === $name
+                                      return $v['tenancy']                              === 'my-tenants'
+                                             && $v['tenant_id']                         === $key
+                                             && $v['service']                           === $service
+                                             && $v['name']                              === $name
                                              && $encrypter->decryptString($v['config']) === $encrypter->decryptString($encryptedConfig);
                                   }),
-                                  ['tenancy', 'tenant_id', 'service', 'name']
+                                  ['tenancy', 'tenant_id', 'service', 'name'],
                               )
                               ->once()
                               ->andReturn(1);
-                     })
+                     }),
                  );
         });
 
@@ -303,13 +276,13 @@ class DatabaseConfigStoreTest extends UnitTestCase
     #[Test]
     public function canAddConfigForTenant(): void
     {
-        $tenancy         = $this->mockTenancy('my-tenants');
-        $key             = 12434;
-        $tenant          = $this->mockTenant($tenancy, $key);
-        $encrypter       = new Encrypter(Str::random(32), 'AES-256-CBC');
-        $service         = 'database';
-        $name            = 'custom-tenant-stuff';
-        $config          = [
+        $tenancy   = $this->mockTenancy('my-tenants');
+        $key       = 12434;
+        $tenant    = $this->mockTenant($tenancy, $key);
+        $encrypter = new Encrypter(Str::random(32), 'AES-256-CBC');
+        $service   = 'database';
+        $name      = 'custom-tenant-stuff';
+        $config    = [
             'host'     => 'localhost',
             'database' => 'my_database',
         ];
@@ -365,16 +338,16 @@ class DatabaseConfigStoreTest extends UnitTestCase
                                           return false;
                                       }
 
-                                      return $v['tenancy'] === 'my-tenants'
-                                             && $v['tenant_id'] === $key
-                                             && $v['service'] === $service
-                                             && $v['name'] === $name
+                                      return $v['tenancy']                              === 'my-tenants'
+                                             && $v['tenant_id']                         === $key
+                                             && $v['service']                           === $service
+                                             && $v['name']                              === $name
                                              && $encrypter->decryptString($v['config']) === $encrypter->decryptString($encryptedConfig);
-                                  })
+                                  }),
                               )
                               ->once()
                               ->andReturn(1);
-                     })
+                     }),
                  );
         });
 
@@ -382,5 +355,32 @@ class DatabaseConfigStoreTest extends UnitTestCase
 
         $this->assertFalse($store->add($tenancy, $tenant, $service, $name . '-exists', $config));
         $this->assertTrue($store->add($tenancy, $tenant, $service, $name, $config));
+    }
+
+    protected function mockTenancy(string $name): Tenancy&MockInterface
+    {
+        return Mockery::mock(Tenancy::class, function (MockInterface $mock) use ($name) {
+            $mock->shouldReceive('getName')->andReturn($name);
+        });
+    }
+
+    protected function mockTenant(Tenancy $tenancy, int|string $key, ?Closure $callback = null): Tenant&MockInterface
+    {
+        return Mockery::mock(Tenant::class, static function (MockInterface $mock) use ($key, $callback) {
+            $mock->shouldReceive('getTenantKey')->andReturn($key);
+
+            if ($callback !== null) {
+                $callback($mock);
+            }
+        });
+    }
+
+    protected function mockConnection(?Closure $callback = null): ConnectionInterface&MockInterface
+    {
+        return Mockery::mock(ConnectionInterface::class, static function (MockInterface $mock) use ($callback) {
+            if ($callback !== null) {
+                $callback($mock);
+            }
+        });
     }
 }

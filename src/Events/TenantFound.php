@@ -54,7 +54,7 @@ abstract readonly class TenantFound
      * @param Tenant  $tenant
      * @param Tenancy $tenancy
      *
-     * @phpstan-param TenantClass                                 $tenant
+     * @phpstan-param TenantClass          $tenant
      * @phpstan-param Tenancy<TenantClass> $tenancy
      */
     public function __construct(

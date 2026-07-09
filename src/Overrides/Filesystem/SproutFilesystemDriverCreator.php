@@ -106,7 +106,7 @@ final readonly class SproutFilesystemDriverCreator
     /**
      * Make the disk config tenant-specific
      *
-     * @param \Sprout\Contracts\Tenancy<*>         $tenancy
+     * @param \Sprout\Contracts\Tenancy<*> $tenancy
      * @param TenantHasResources $tenant
      *
      * @return array<string, mixed>
@@ -132,7 +132,7 @@ final readonly class SproutFilesystemDriverCreator
     /**
      * Create a storage prefix using the current tenant
      *
-     * @param \Sprout\Contracts\Tenancy<*>         $tenancy
+     * @param \Sprout\Contracts\Tenancy<*> $tenancy
      * @param TenantHasResources $tenant
      * @param string             $pathPrefix
      *

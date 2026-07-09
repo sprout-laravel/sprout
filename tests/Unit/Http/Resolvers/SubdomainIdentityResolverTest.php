@@ -22,35 +22,6 @@ use Sprout\Tests\Unit\UnitTestCase;
 
 class SubdomainIdentityResolverTest extends UnitTestCase
 {
-    protected function defineEnvironment($app): void
-    {
-        tap($app['config'], static function ($config) {
-            $config->set('multitenancy.defaults.resolver', 'subdomain');
-            $config->set('multitenancy.resolvers.subdomain.domain', 'localhost');
-        });
-    }
-
-    protected function defineRoutes($router)
-    {
-        $router->tenanted(function (Router $router) {
-            $router->get('/test-route', static function () {
-                return 'test';
-            })->name('test-route');
-        });
-    }
-
-    protected function mockApp(): Application&MockInterface
-    {
-        return Mockery::mock(Application::class, static function ($mock) {
-
-        });
-    }
-
-    protected function getSprout(Application $app): Sprout
-    {
-        return new Sprout($app, new SettingsRepository());
-    }
-
     #[Test]
     public function providesAccessToExpectedValues(): void
     {
@@ -59,7 +30,7 @@ class SubdomainIdentityResolverTest extends UnitTestCase
             'my-app.com',
             '.*',
             'yeah-boi-{tenancy}',
-            [ResolutionHook::Middleware]
+            [ResolutionHook::Middleware],
         );
 
         $this->assertSame('subdomain', $resolver->getName());
@@ -107,7 +78,7 @@ class SubdomainIdentityResolverTest extends UnitTestCase
             $mock->shouldReceive('getName')->andReturn('my-tenancy')->once();
         });
 
-        /** @var \Illuminate\Routing\RouteRegistrar&\Mockery\MockInterface $route */
+        /** @var RouteRegistrar&MockInterface $route */
         $route = Mockery::mock(RouteRegistrar::class, static function (MockInterface $mock) {
             $mock->shouldReceive('domain')
                  ->with('{my_tenancy_subdomain}.my-app.com')
@@ -129,7 +100,7 @@ class SubdomainIdentityResolverTest extends UnitTestCase
             $mock->shouldReceive('getName')->andReturn('my-tenancy')->twice();
         });
 
-        /** @var \Illuminate\Routing\RouteRegistrar&\Mockery\MockInterface $route */
+        /** @var RouteRegistrar&MockInterface $route */
         $route = Mockery::mock(RouteRegistrar::class, static function (MockInterface $mock) {
             $mock->shouldReceive('domain')
                  ->with('{my_tenancy_subdomain}.my-app.com')
@@ -154,7 +125,7 @@ class SubdomainIdentityResolverTest extends UnitTestCase
             $mock->shouldReceive('getTenantIdentifier')->andReturn('my-identifier')->once();
         });
 
-        /** @var \Sprout\Contracts\Tenancy&MockInterface $tenancy */
+        /** @var Tenancy&MockInterface $tenancy */
         $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) {
             $mock->shouldReceive('getName')->andReturn('my-tenancy')->times(3);
             $mock->shouldReceive('check')->andReturn(true)->once();
@@ -181,7 +152,7 @@ class SubdomainIdentityResolverTest extends UnitTestCase
     {
         $resolver = new SubdomainIdentityResolver('subdomain', 'my-app.com');
 
-        /** @var \Sprout\Contracts\Tenancy&MockInterface $tenancy */
+        /** @var Tenancy&MockInterface $tenancy */
         $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) {
             $mock->shouldReceive('getName')->andReturn('my-tenancy')->once();
         });
@@ -206,7 +177,7 @@ class SubdomainIdentityResolverTest extends UnitTestCase
     {
         $resolver = new SubdomainIdentityResolver('subdomain', 'my-app.com');
 
-        /** @var \Sprout\Contracts\Tenancy&MockInterface $tenancy */
+        /** @var Tenancy&MockInterface $tenancy */
         $tenancy = Mockery::mock(Tenancy::class);
 
         $request = Mockery::mock(Request::class, static function (MockInterface $mock) {
@@ -223,7 +194,7 @@ class SubdomainIdentityResolverTest extends UnitTestCase
     {
         $resolver = new SubdomainIdentityResolver('subdomain', 'my-app.com');
 
-        /** @var \Sprout\Contracts\Tenancy&MockInterface $tenancy */
+        /** @var Tenancy&MockInterface $tenancy */
         $tenancy = Mockery::mock(Tenancy::class);
 
         $request = Mockery::mock(Request::class, static function (MockInterface $mock) {
@@ -240,7 +211,7 @@ class SubdomainIdentityResolverTest extends UnitTestCase
     {
         $resolver = new SubdomainIdentityResolver('subdomain', 'my-app.com');
 
-        /** @var \Sprout\Contracts\Tenancy&MockInterface $tenancy */
+        /** @var Tenancy&MockInterface $tenancy */
         $tenancy = Mockery::mock(Tenancy::class);
 
         $request = Mockery::mock(Request::class, static function (MockInterface $mock) {
@@ -257,7 +228,7 @@ class SubdomainIdentityResolverTest extends UnitTestCase
     {
         $resolver = new SubdomainIdentityResolver('subdomain', 'my-app.com');
 
-        /** @var \Sprout\Contracts\Tenancy&MockInterface $tenancy */
+        /** @var Tenancy&MockInterface $tenancy */
         $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) {
             $mock->shouldReceive('getName')->andReturn('my-tenancy')->once();
         });
@@ -266,9 +237,9 @@ class SubdomainIdentityResolverTest extends UnitTestCase
 
         $route = Mockery::mock(Route::class, static function (MockInterface $mock) {
             $mock->shouldReceive('hasParameter')
-                ->with('my_tenancy_subdomain')
-                ->andReturn(true)
-                ->once();
+                 ->with('my_tenancy_subdomain')
+                 ->andReturn(true)
+                 ->once();
 
             $mock->shouldReceive('parameter')
                  ->with('my_tenancy_subdomain')
@@ -319,5 +290,33 @@ class SubdomainIdentityResolverTest extends UnitTestCase
         $this->assertSame('http://my-identifier-1.localhost/test-route', $resolver->route('test-route', $tenancy, $tenant1));
         $this->assertSame('http://my-identifier-2.localhost/test-route', $resolver->route('test-route', $tenancy, $tenant2));
         $this->assertSame('http://my-identifier-3.localhost/test-route', $resolver->route('test-route', $tenancy, $tenant3));
+    }
+
+    protected function defineEnvironment($app): void
+    {
+        tap($app['config'], static function ($config) {
+            $config->set('multitenancy.defaults.resolver', 'subdomain');
+            $config->set('multitenancy.resolvers.subdomain.domain', 'localhost');
+        });
+    }
+
+    protected function defineRoutes($router)
+    {
+        $router->tenanted(function (Router $router) {
+            $router->get('/test-route', static function () {
+                return 'test';
+            })->name('test-route');
+        });
+    }
+
+    protected function mockApp(): Application&MockInterface
+    {
+        return Mockery::mock(Application::class, static function ($mock) {
+        });
+    }
+
+    protected function getSprout(Application $app): Sprout
+    {
+        return new Sprout($app, new SettingsRepository());
     }
 }

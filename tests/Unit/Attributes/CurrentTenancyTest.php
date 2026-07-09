@@ -14,22 +14,16 @@ use Sprout\Sprout;
 use Sprout\Support\SettingsRepository;
 use Sprout\Tests\Unit\UnitTestCase;
 use Workbench\App\Models\TenantModel;
+
 use function Sprout\sprout;
 use function Sprout\tenancy;
 
 class CurrentTenancyTest extends UnitTestCase
 {
-    protected function setsUpTenancy($app)
-    {
-        tap($app['config'], function ($config) {
-            $config->set('multitenancy.providers.tenants.model', TenantModel::class);
-        });
-    }
-
     #[Test]
     public function resolvesCurrentTenant(): void
     {
-        /** @var \Sprout\Contracts\Tenancy $tenancy */
+        /** @var Tenancy $tenancy */
         $tenancy = tenancy('tenants');
 
         sprout()->setCurrentTenancy($tenancy);
@@ -66,5 +60,12 @@ class CurrentTenancyTest extends UnitTestCase
         $attribute = new CurrentTenancy();
 
         $this->assertSame($expected, $attribute->resolve($attribute, $container));
+    }
+
+    protected function setsUpTenancy($app)
+    {
+        tap($app['config'], function ($config) {
+            $config->set('multitenancy.providers.tenants.model', TenantModel::class);
+        });
     }
 }

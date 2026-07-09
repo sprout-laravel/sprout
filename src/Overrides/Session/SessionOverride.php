@@ -35,7 +35,7 @@ final class SessionOverride extends BaseOverride implements BootableServiceOverr
      * @param Tenancy<TenantClass> $tenancy
      * @param Tenant               $tenant
      *
-     * @phpstan-param TenantClass                         $tenant
+     * @phpstan-param TenantClass  $tenant
      *
      * @return void
      */
@@ -119,7 +119,7 @@ final class SessionOverride extends BaseOverride implements BootableServiceOverr
      * @param Tenancy<TenantClass> $tenancy
      * @param Tenant               $tenant
      *
-     * @phpstan-param TenantClass                         $tenant
+     * @phpstan-param TenantClass  $tenant
      *
      * @return void
      */

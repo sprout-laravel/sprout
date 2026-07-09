@@ -10,52 +10,25 @@ use Illuminate\Support\Str;
 use Mockery;
 use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\Stores\FilesystemConfigStore;
-use Sprout\Tests\Unit\UnitTestCase;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
 use Sprout\Contracts\TenantHasResources;
 use Sprout\Exceptions\MisconfigurationException;
+use Sprout\Stores\FilesystemConfigStore;
+use Sprout\Tests\Unit\UnitTestCase;
 
 class FilesystemConfigStoreTest extends UnitTestCase
 {
-    protected function mockTenancy(string $name): Tenancy&MockInterface
-    {
-        return Mockery::mock(Tenancy::class, function (MockInterface $mock) use ($name) {
-            $mock->shouldReceive('getName')->andReturn($name);
-        });
-    }
-
-    protected function mockTenant(Tenancy $tenancy, string $resourceKey, bool $resources = true, ?Closure $callback = null): Tenant&MockInterface
-    {
-        $callback = static function (MockInterface $mock) use ($resourceKey, $tenancy, $callback) {
-            $mock->shouldReceive('getTenantResourceKey')->andReturn($resourceKey);
-
-            if ($callback !== null) {
-                $callback($mock);
-            }
-        };
-
-        return Mockery::mock(
-            ...($resources ? [Tenant::class, TenantHasResources::class, $callback] : [Tenant::class, $callback])
-        );
-    }
-
-    protected function mockFilesystem(?Closure $callback = null): Filesystem&MockInterface
-    {
-        return Mockery::mock(Filesystem::class, $callback ?? fn() => null);
-    }
-
     #[Test]
     public function canGetConfigForTenant(): void
     {
-        $tenancy         = $this->mockTenancy('my-tenants');
-        $resourceKey     = Str::uuid7()->toString();
-        $tenant          = $this->mockTenant($tenancy, $resourceKey);
-        $encrypter       = new Encrypter(Str::random(32), 'AES-256-CBC');
-        $service         = 'database';
-        $name            = 'custom-tenant-stuff';
-        $config          = [
+        $tenancy     = $this->mockTenancy('my-tenants');
+        $resourceKey = Str::uuid7()->toString();
+        $tenant      = $this->mockTenant($tenancy, $resourceKey);
+        $encrypter   = new Encrypter(Str::random(32), 'AES-256-CBC');
+        $service     = 'database';
+        $name        = 'custom-tenant-stuff';
+        $config      = [
             'host'     => 'localhost',
             'database' => 'my_database',
         ];
@@ -71,9 +44,9 @@ class FilesystemConfigStoreTest extends UnitTestCase
                      . DIRECTORY_SEPARATOR
                      . Str::slug($service)
                      . DIRECTORY_SEPARATOR
-                     . Str::slug($name)
+                     . Str::slug($name),
                  )
-                 ->once()
+                 ->twice()
                  ->andReturn($encryptedConfig);
         });
 
@@ -82,6 +55,9 @@ class FilesystemConfigStoreTest extends UnitTestCase
         $storedConfig = $store->get($tenancy, $tenant, $service, $name);
 
         $this->assertSame($config, $storedConfig);
+
+        // A stored value must win over a supplied default.
+        $this->assertSame($config, $store->get($tenancy, $tenant, $service, $name, ['a' => 'default']));
     }
 
     #[Test]
@@ -106,7 +82,7 @@ class FilesystemConfigStoreTest extends UnitTestCase
                      . DIRECTORY_SEPARATOR
                      . Str::slug($service)
                      . DIRECTORY_SEPARATOR
-                     . Str::slug($name)
+                     . Str::slug($name),
                  )
                  ->once()
                  ->andReturn($encryptedConfig);
@@ -139,7 +115,7 @@ class FilesystemConfigStoreTest extends UnitTestCase
                      . DIRECTORY_SEPARATOR
                      . Str::slug($service)
                      . DIRECTORY_SEPARATOR
-                     . Str::slug($name)
+                     . Str::slug($name),
                  )
                  ->once()
                  ->andReturn(null);
@@ -172,7 +148,7 @@ class FilesystemConfigStoreTest extends UnitTestCase
                      . DIRECTORY_SEPARATOR
                      . Str::slug($service)
                      . DIRECTORY_SEPARATOR
-                     . Str::slug($name)
+                     . Str::slug($name),
                  )
                  ->once()
                  ->andReturn(true);
@@ -187,7 +163,7 @@ class FilesystemConfigStoreTest extends UnitTestCase
                      . DIRECTORY_SEPARATOR
                      . Str::slug($service)
                      . DIRECTORY_SEPARATOR
-                     . Str::slug($name . '-not-found')
+                     . Str::slug($name . '-not-found'),
                  )
                  ->once()
                  ->andReturn(false);
@@ -202,13 +178,13 @@ class FilesystemConfigStoreTest extends UnitTestCase
     #[Test]
     public function canSetConfigForTenant(): void
     {
-        $tenancy         = $this->mockTenancy('my-tenants');
-        $resourceKey     = Str::uuid7()->toString();
-        $tenant          = $this->mockTenant($tenancy, $resourceKey);
-        $encrypter       = new Encrypter(Str::random(32), 'AES-256-CBC');
-        $service         = 'database';
-        $name            = 'custom-tenant-stuff';
-        $config          = [
+        $tenancy     = $this->mockTenancy('my-tenants');
+        $resourceKey = Str::uuid7()->toString();
+        $tenant      = $this->mockTenant($tenancy, $resourceKey);
+        $encrypter   = new Encrypter(Str::random(32), 'AES-256-CBC');
+        $service     = 'database';
+        $name        = 'custom-tenant-stuff';
+        $config      = [
             'host'     => 'localhost',
             'database' => 'my_database',
         ];
@@ -216,20 +192,18 @@ class FilesystemConfigStoreTest extends UnitTestCase
         $filesystem      = $this->mockFilesystem(function (MockInterface $mock) use ($encrypter, $encryptedConfig, $name, $service, $resourceKey) {
             $mock->shouldReceive('put')
                  ->with(
-                     (
-                         'my-tenants'
-                         . DIRECTORY_SEPARATOR
-                         . Str::substr($resourceKey, 0, 2)
-                         . DIRECTORY_SEPARATOR
-                         . Str::substr($resourceKey, 2)
-                         . DIRECTORY_SEPARATOR
-                         . Str::slug($service)
-                         . DIRECTORY_SEPARATOR
-                         . Str::slug($name)
-                     ),
+                     'my-tenants'
+                     . DIRECTORY_SEPARATOR
+                     . Str::substr($resourceKey, 0, 2)
+                     . DIRECTORY_SEPARATOR
+                     . Str::substr($resourceKey, 2)
+                     . DIRECTORY_SEPARATOR
+                     . Str::slug($service)
+                     . DIRECTORY_SEPARATOR
+                     . Str::slug($name),
                      Mockery::on(static function (string $value) use ($encryptedConfig, $encrypter) {
                          return $encrypter->decrypt($value, false) === $encrypter->decrypt($encryptedConfig, false);
-                     })
+                     }),
                  )
                  ->once()
                  ->andReturn(true);
@@ -243,13 +217,13 @@ class FilesystemConfigStoreTest extends UnitTestCase
     #[Test]
     public function canAddConfigForTenant(): void
     {
-        $tenancy         = $this->mockTenancy('my-tenants');
-        $resourceKey     = Str::uuid7()->toString();
-        $tenant          = $this->mockTenant($tenancy, $resourceKey);
-        $encrypter       = new Encrypter(Str::random(32), 'AES-256-CBC');
-        $service         = 'database';
-        $name            = 'custom-tenant-stuff';
-        $config          = [
+        $tenancy     = $this->mockTenancy('my-tenants');
+        $resourceKey = Str::uuid7()->toString();
+        $tenant      = $this->mockTenant($tenancy, $resourceKey);
+        $encrypter   = new Encrypter(Str::random(32), 'AES-256-CBC');
+        $service     = 'database';
+        $name        = 'custom-tenant-stuff';
+        $config      = [
             'host'     => 'localhost',
             'database' => 'my_database',
         ];
@@ -265,7 +239,7 @@ class FilesystemConfigStoreTest extends UnitTestCase
                      . DIRECTORY_SEPARATOR
                      . Str::slug($service)
                      . DIRECTORY_SEPARATOR
-                     . Str::slug($name)
+                     . Str::slug($name),
                  )
                  ->once()
                  ->andReturn(false);
@@ -280,27 +254,25 @@ class FilesystemConfigStoreTest extends UnitTestCase
                      . DIRECTORY_SEPARATOR
                      . Str::slug($service)
                      . DIRECTORY_SEPARATOR
-                     . Str::slug($name . '-exists')
+                     . Str::slug($name . '-exists'),
                  )
                  ->once()
                  ->andReturn(true);
 
             $mock->shouldReceive('put')
                  ->with(
-                     (
-                         'my-tenants'
-                         . DIRECTORY_SEPARATOR
-                         . Str::substr($resourceKey, 0, 2)
-                         . DIRECTORY_SEPARATOR
-                         . Str::substr($resourceKey, 2)
-                         . DIRECTORY_SEPARATOR
-                         . Str::slug($service)
-                         . DIRECTORY_SEPARATOR
-                         . Str::slug($name)
-                     ),
+                     'my-tenants'
+                     . DIRECTORY_SEPARATOR
+                     . Str::substr($resourceKey, 0, 2)
+                     . DIRECTORY_SEPARATOR
+                     . Str::substr($resourceKey, 2)
+                     . DIRECTORY_SEPARATOR
+                     . Str::slug($service)
+                     . DIRECTORY_SEPARATOR
+                     . Str::slug($name),
                      Mockery::on(static function (string $value) use ($encryptedConfig, $encrypter) {
                          return $encrypter->decryptString($value) === $encrypter->decryptString($encryptedConfig);
-                     })
+                     }),
                  )
                  ->once()
                  ->andReturn(true);
@@ -315,13 +287,13 @@ class FilesystemConfigStoreTest extends UnitTestCase
     #[Test]
     public function throwsAnExceptionIfTheTenantIsNotConfiguredForResources(): void
     {
-        $tenancy         = $this->mockTenancy('my-tenants');
-        $resourceKey     = Str::uuid7()->toString();
-        $tenant          = $this->mockTenant($tenancy, $resourceKey, false, function (MockInterface $mock) {
+        $tenancy     = $this->mockTenancy('my-tenants');
+        $resourceKey = Str::uuid7()->toString();
+        $tenant      = $this->mockTenant($tenancy, $resourceKey, false, function (MockInterface $mock) {
             $mock->shouldReceive('getTenantKey')->andReturn(7898);
         });
-        $encrypter       = new Encrypter(Str::random(32), 'AES-256-CBC');
-        $filesystem      = $this->mockFilesystem();
+        $encrypter  = new Encrypter(Str::random(32), 'AES-256-CBC');
+        $filesystem = $this->mockFilesystem();
 
         $store = new FilesystemConfigStore('filesystem', $encrypter, $filesystem);
 
@@ -329,5 +301,32 @@ class FilesystemConfigStoreTest extends UnitTestCase
         $this->expectExceptionMessage('The current tenant [7898] is not configured correctly for resources');
 
         $store->get($tenancy, $tenant, 'made-up', 'does-not-exist');
+    }
+
+    protected function mockTenancy(string $name): Tenancy&MockInterface
+    {
+        return Mockery::mock(Tenancy::class, function (MockInterface $mock) use ($name) {
+            $mock->shouldReceive('getName')->andReturn($name);
+        });
+    }
+
+    protected function mockTenant(Tenancy $tenancy, string $resourceKey, bool $resources = true, ?Closure $callback = null): Tenant&MockInterface
+    {
+        $callback = static function (MockInterface $mock) use ($resourceKey, $callback) {
+            $mock->shouldReceive('getTenantResourceKey')->andReturn($resourceKey);
+
+            if ($callback !== null) {
+                $callback($mock);
+            }
+        };
+
+        return Mockery::mock(
+            ...($resources ? [Tenant::class, TenantHasResources::class, $callback] : [Tenant::class, $callback]),
+        );
+    }
+
+    protected function mockFilesystem(?Closure $callback = null): Filesystem&MockInterface
+    {
+        return Mockery::mock(Filesystem::class, $callback ?? fn () => null);
     }
 }

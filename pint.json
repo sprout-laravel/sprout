@@ -2,8 +2,7 @@
   "preset" : "symfony",
   "exclude": [
     "build/",
-    "resources/",
-    "tests/"
+    "resources/"
   ],
   "rules"  : {
     "braces_position"                    : {
@@ -14,9 +13,9 @@
       "control_structures_opening_brace" : "same_line"
     },
     "fully_qualified_strict_types"       : {
-      "import_symbols"                     : true,
+      "import_symbols"                       : true,
       "leading_backslash_in_global_namespace": false,
-      "phpdoc_tags"                        : [
+      "phpdoc_tags"                          : [
         "param",
         "return",
         "var",

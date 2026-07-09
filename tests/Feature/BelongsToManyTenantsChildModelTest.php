@@ -8,21 +8,84 @@ use PHPUnit\Framework\Attributes\Test;
 use Sprout\Exceptions\TenantMismatchException;
 use Sprout\Exceptions\TenantMissingException;
 use Sprout\Managers\TenancyManager;
+use Sprout\Support\DefaultTenancy;
 use Sprout\TenancyOptions;
 use Workbench\App\Models\TenantChildren;
 use Workbench\App\Models\TenantChildrenOptional;
 use Workbench\App\Models\TenantModel;
+
 use function Sprout\sprout;
 
 class BelongsToManyTenantsChildModelTest extends FeatureTestCase
 {
     use RefreshDatabase;
 
-    protected function defineEnvironment($app): void
+    #[Test]
+    public function persistsTheTenantAttachmentToThePivotTable(): void
     {
-        tap($app['config'], static function ($config) {
-            $config->set('multitenancy.providers.tenants.model', TenantModel::class);
-        });
+        $tenant = TenantModel::factory()->createOne();
+
+        /** @var DefaultTenancy $tenancy */
+        $tenancy = $this->app->make(TenancyManager::class)->get();
+
+        sprout()->setCurrentTenancy($tenancy);
+
+        $tenancy->setTenant($tenant);
+
+        $child = TenantChildren::create();
+
+        // tenants() runs a fresh pivot query, bypassing the in-memory relation the
+        // observer hydrates — so it only passes if attach() actually persisted the pivot
+        $this->assertTrue($child->tenants()->get()->contains($tenant));
+    }
+
+    #[Test]
+    public function hydratesTheTenantsRelationWhenRetrievingAModel(): void
+    {
+        $tenant = TenantModel::factory()->createOne();
+
+        /** @var DefaultTenancy $tenancy */
+        $tenancy = $this->app->make(TenancyManager::class)->get();
+
+        sprout()->setCurrentTenancy($tenancy);
+
+        $tenancy->setTenant($tenant);
+
+        $created = TenantChildren::create();
+
+        // A fresh query fires the retrieved observer, which hydrates the tenants relation
+        $retrieved = TenantChildren::query()->findOrFail($created->getKey());
+
+        $this->assertTrue($retrieved->relationLoaded('tenants'));
+        $this->assertTrue($retrieved->tenants->contains($tenant));
+    }
+
+    #[Test]
+    public function optionalTenantScopeAlsoMatchesUnownedRows(): void
+    {
+        /** @var DefaultTenancy $tenancy */
+        $tenancy = $this->app->make(TenancyManager::class)->get();
+
+        $tenant = TenantModel::factory()->createOne();
+        $other  = TenantModel::factory()->createOne();
+
+        TenantChildrenOptional::factory()->count(3)->afterCreating(function (TenantChildrenOptional $child) use ($tenant) {
+            $child->tenants()->attach($tenant);
+        })->create();
+
+        TenantChildrenOptional::factory()->count(4)->create();
+
+        TenantChildrenOptional::factory()->count(5)->afterCreating(function (TenantChildrenOptional $child) use ($other) {
+            $child->tenants()->attach($other);
+        })->create();
+
+        sprout()->setCurrentTenancy($tenancy);
+
+        $tenancy->setTenant($tenant);
+
+        // Optional models return the current tenant's rows (3) plus un-owned rows (4),
+        // but never another tenant's rows (5)
+        $this->assertCount(7, TenantChildrenOptional::all());
     }
 
     #[Test]
@@ -30,7 +93,7 @@ class BelongsToManyTenantsChildModelTest extends FeatureTestCase
     {
         $tenant = TenantModel::factory()->createOne();
 
-        /** @var \Sprout\Support\DefaultTenancy $tenancy */
+        /** @var DefaultTenancy $tenancy */
         $tenancy = $this->app->make(TenancyManager::class)->get();
 
         sprout()->setCurrentTenancy($tenancy);
@@ -62,7 +125,7 @@ class BelongsToManyTenantsChildModelTest extends FeatureTestCase
             $child->tenants()->attach($tenant3);
         })->create();
 
-        /** @var \Sprout\Support\DefaultTenancy $tenancy */
+        /** @var DefaultTenancy $tenancy */
         $tenancy = $this->app->make(TenancyManager::class)->get();
 
         sprout()->setCurrentTenancy($tenancy);
@@ -99,7 +162,7 @@ class BelongsToManyTenantsChildModelTest extends FeatureTestCase
             $child->tenants()->attach($tenant1);
         })->createOne();
 
-        /** @var \Sprout\Support\DefaultTenancy $tenancy */
+        /** @var DefaultTenancy $tenancy */
         $tenancy = $this->app->make(TenancyManager::class)->get();
 
         sprout()->setCurrentTenancy($tenancy);
@@ -121,7 +184,7 @@ class BelongsToManyTenantsChildModelTest extends FeatureTestCase
             $child->tenants()->attach($tenant1);
         })->createOne();
 
-        /** @var \Sprout\Support\DefaultTenancy $tenancy */
+        /** @var DefaultTenancy $tenancy */
         $tenancy = $this->app->make(TenancyManager::class)->get();
 
         sprout()->setCurrentTenancy($tenancy);
@@ -143,7 +206,7 @@ class BelongsToManyTenantsChildModelTest extends FeatureTestCase
     #[Test]
     public function errorsOutWhenTheresNoTenantButThereIsATenancyWhenQuerying(): void
     {
-        /** @var \Sprout\Support\DefaultTenancy $tenancy */
+        /** @var DefaultTenancy $tenancy */
         $tenancy = $this->app->make(TenancyManager::class)->get();
 
         sprout()->setCurrentTenancy($tenancy);
@@ -157,7 +220,7 @@ class BelongsToManyTenantsChildModelTest extends FeatureTestCase
     #[Test]
     public function doesNotErrorOutWhenTheresNoTenantButThereIsATenancyWhenQueryingIfTenantIsOptional(): void
     {
-        /** @var \Sprout\Support\DefaultTenancy $tenancy */
+        /** @var DefaultTenancy $tenancy */
         $tenancy = $this->app->make(TenancyManager::class)->get();
 
         $tenant = TenantModel::factory()->createOne();
@@ -185,7 +248,7 @@ class BelongsToManyTenantsChildModelTest extends FeatureTestCase
     #[Test]
     public function errorsOutWhenTheresNoTenantButThereIsATenancyWhenCreating(): void
     {
-        /** @var \Sprout\Support\DefaultTenancy $tenancy */
+        /** @var DefaultTenancy $tenancy */
         $tenancy = $this->app->make(TenancyManager::class)->get();
 
         sprout()->setCurrentTenancy($tenancy);
@@ -199,7 +262,7 @@ class BelongsToManyTenantsChildModelTest extends FeatureTestCase
     #[Test]
     public function doesNotErrorOutWhenTheresNoTenantButThereIsATenancyWhenCreatingIfTenantIsOptional(): void
     {
-        /** @var \Sprout\Support\DefaultTenancy $tenancy */
+        /** @var DefaultTenancy $tenancy */
         $tenancy = $this->app->make(TenancyManager::class)->get();
 
         sprout()->setCurrentTenancy($tenancy);
@@ -221,7 +284,7 @@ class BelongsToManyTenantsChildModelTest extends FeatureTestCase
 
         $child2 = TenantChildrenOptional::factory()->createOne();
 
-        /** @var \Sprout\Support\DefaultTenancy $tenancy */
+        /** @var DefaultTenancy $tenancy */
         $tenancy = $this->app->make(TenancyManager::class)->get();
 
         sprout()->setCurrentTenancy($tenancy);
@@ -245,7 +308,7 @@ class BelongsToManyTenantsChildModelTest extends FeatureTestCase
             $child->tenants()->attach($tenant1);
         })->createOne();
 
-        /** @var \Sprout\Support\DefaultTenancy $tenancy */
+        /** @var DefaultTenancy $tenancy */
         $tenancy = $this->app->make(TenancyManager::class)->get();
 
         sprout()->setCurrentTenancy($tenancy);
@@ -268,7 +331,7 @@ class BelongsToManyTenantsChildModelTest extends FeatureTestCase
             $child->tenants()->attach($tenant1);
         })->createOne();
 
-        /** @var \Sprout\Support\DefaultTenancy $tenancy */
+        /** @var DefaultTenancy $tenancy */
         $tenancy = $this->app->make(TenancyManager::class)->get();
 
         $tenancy->removeOption(TenancyOptions::throwIfNotRelated());
@@ -308,7 +371,7 @@ class BelongsToManyTenantsChildModelTest extends FeatureTestCase
             $child->tenants()->attach($tenant);
         })->createOne();
 
-        /** @var \Sprout\Support\DefaultTenancy $tenancy */
+        /** @var DefaultTenancy $tenancy */
         $tenancy = $this->app->make(TenancyManager::class)->get();
 
         sprout()->setCurrentTenancy($tenancy);
@@ -328,7 +391,7 @@ class BelongsToManyTenantsChildModelTest extends FeatureTestCase
     {
         $tenant = TenantModel::factory()->createOne();
 
-        /** @var \Sprout\Support\DefaultTenancy $tenancy */
+        /** @var DefaultTenancy $tenancy */
         $tenancy = $this->app->make(TenancyManager::class)->get();
 
         sprout()->setCurrentTenancy($tenancy);
@@ -341,5 +404,103 @@ class BelongsToManyTenantsChildModelTest extends FeatureTestCase
 
         $this->assertTrue($child->exists);
         $this->assertFalse($child->relationLoaded('tenants'));
+    }
+
+    #[Test]
+    public function hydratesTheCurrentTenantWhenRetrievingWithTenantRestrictionsBypassed(): void
+    {
+        $tenant = TenantModel::factory()->createOne();
+        $other  = TenantModel::factory()->createOne();
+
+        // The child belongs to $other, so under normal restrictions it would be a
+        // mismatch for the current tenant ($tenant).
+        $child = TenantChildren::factory()->afterCreating(function (TenantChildren $child) use ($other) {
+            $child->tenants()->attach($other);
+        })->createOne();
+
+        /** @var DefaultTenancy $tenancy */
+        $tenancy = $this->app->make(TenancyManager::class)->get();
+
+        sprout()->setCurrentTenancy($tenancy);
+
+        $tenancy->setTenant($tenant);
+
+        // With restrictions bypassed, the observer skips the tenant/mismatch checks
+        // (returns early as "passed") but still hydrates the relation to the current
+        // tenant.
+        $retrieved = TenantChildren::withoutTenantRestrictions(static function () use ($child) {
+            return TenantChildren::query()->whereKey($child->getKey())->first();
+        });
+
+        $this->assertNotNull($retrieved);
+        $this->assertTrue($retrieved->relationLoaded('tenants'));
+        $this->assertTrue($retrieved->tenants->contains($tenant));
+    }
+
+    #[Test]
+    public function preservesAllTenantsWhenRetrievingAModelBelongingToMultipleTenants(): void
+    {
+        $tenant = TenantModel::factory()->createOne();
+        $other  = TenantModel::factory()->createOne();
+
+        // The child legitimately belongs to both the current tenant and another.
+        $child = TenantChildren::factory()->afterCreating(function (TenantChildren $child) use ($tenant, $other) {
+            $child->tenants()->attach([$tenant->getKey(), $other->getKey()]);
+        })->createOne();
+
+        /** @var DefaultTenancy $tenancy */
+        $tenancy = $this->app->make(TenancyManager::class)->get();
+
+        sprout()->setCurrentTenancy($tenancy);
+
+        $tenancy->setTenant($tenant);
+
+        $retrieved = TenantChildren::query()->whereKey($child->getKey())->first();
+
+        // The observer loaded the real relation to run its checks; because the model
+        // already belongs to the current tenant it returns early, keeping the actual
+        // related tenants rather than overwriting them with just the current one.
+        $this->assertTrue($retrieved->relationLoaded('tenants'));
+        $this->assertCount(2, $retrieved->tenants);
+        $this->assertTrue($retrieved->tenants->contains($tenant));
+        $this->assertTrue($retrieved->tenants->contains($other));
+    }
+
+    #[Test]
+    public function keepsTheLoadedRelationForAMismatchedModelWhenNotThrowingOrHydrating(): void
+    {
+        $tenant1 = TenantModel::factory()->createOne();
+        $tenant2 = TenantModel::factory()->createOne();
+
+        $child = TenantChildren::factory()->afterCreating(function (TenantChildren $child) use ($tenant1) {
+            $child->tenants()->attach($tenant1);
+        })->createOne();
+
+        /** @var DefaultTenancy $tenancy */
+        $tenancy = $this->app->make(TenancyManager::class)->get();
+
+        $tenancy->removeOption(TenancyOptions::throwIfNotRelated());
+        $tenancy->removeOption(TenancyOptions::hydrateTenantRelation());
+
+        sprout()->setCurrentTenancy($tenancy);
+
+        $tenancy->setTenant($tenant2);
+
+        // The model belongs to tenant1 while tenant2 is current (a mismatch). With
+        // throwing off, the observer bails out as "not passed" *before* the hydrate
+        // branch, so the relation it loaded during the check must be left intact —
+        // not unset like the non-mismatch no-hydrate path does.
+        $newChild = TenantChildren::query()->withoutTenants()->whereKey($child->getKey())->first();
+
+        $this->assertTrue($newChild->relationLoaded('tenants'));
+        $this->assertTrue($newChild->tenants->contains($tenant1));
+        $this->assertFalse($newChild->tenants->contains($tenant2));
+    }
+
+    protected function defineEnvironment($app): void
+    {
+        tap($app['config'], static function ($config) {
+            $config->set('multitenancy.providers.tenants.model', TenantModel::class);
+        });
     }
 }

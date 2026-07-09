@@ -41,7 +41,7 @@ abstract class ServiceOverrideEvent
      * @param string          $service
      * @param ServiceOverride $override
      *
-     * @phpstan-param OverrideClass                  $override
+     * @phpstan-param OverrideClass $override
      */
     public function __construct(string $service, ServiceOverride $override)
     {

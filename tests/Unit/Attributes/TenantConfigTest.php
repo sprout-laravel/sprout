@@ -10,30 +10,24 @@ use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\Test;
 use Sprout\Attributes\TenantConfig as TenantConfigAttribute;
 use Sprout\Contracts\ConfigStore;
+use Sprout\Contracts\Tenancy;
 use Sprout\Managers\ConfigStoreManager;
 use Sprout\TenantConfig as TenantConfigService;
 use Sprout\Tests\Unit\UnitTestCase;
 use Workbench\App\Models\TenantModel;
+
 use function Sprout\tenancy;
 
 class TenantConfigTest extends UnitTestCase
 {
-    protected function defineEnvironment($app): void
-    {
-        tap($app['config'], function ($config) {
-            $config->set('multitenancy.providers.tenants.model', TenantModel::class);
-        });
-    }
-
     /**
      * Integration tests (sibling-pattern): exercise the real container's
      * contextual-attribute resolution via $this->app->call().
      */
-
     #[Test]
     public function resolvesConfigDataFromTheCurrentTenancyAndTenant(): void
     {
-        /** @var \Sprout\Contracts\Tenancy $tenancy */
+        /** @var Tenancy $tenancy */
         $tenancy = tenancy('tenants');
         $tenant  = TenantModel::factory()->createOne();
         $tenancy->setTenant($tenant);
@@ -67,7 +61,7 @@ class TenantConfigTest extends UnitTestCase
     #[Test]
     public function resolvesConfigDataWithAnExplicitStore(): void
     {
-        /** @var \Sprout\Contracts\Tenancy $tenancy */
+        /** @var Tenancy $tenancy */
         $tenancy = tenancy('tenants');
         $tenant  = TenantModel::factory()->createOne();
         $tenancy->setTenant($tenant);
@@ -98,7 +92,7 @@ class TenantConfigTest extends UnitTestCase
     #[Test]
     public function returnsNullWhenStoreReturnsNull(): void
     {
-        /** @var \Sprout\Contracts\Tenancy $tenancy */
+        /** @var Tenancy $tenancy */
         $tenancy = tenancy('tenants');
         $tenant  = TenantModel::factory()->createOne();
         $tenancy->setTenant($tenant);
@@ -130,7 +124,6 @@ class TenantConfigTest extends UnitTestCase
      * lock the delegation contract independently of Laravel's contextual-
      * attribute machinery.
      */
-
     #[Test]
     public function resolveDelegatesToTheTenantConfigServiceWithProvidedStore(): void
     {
@@ -188,6 +181,13 @@ class TenantConfigTest extends UnitTestCase
         $attribute = new TenantConfigAttribute('cache', 'default');
 
         $this->assertNull($attribute->resolve($attribute, $container));
+    }
+
+    protected function defineEnvironment($app): void
+    {
+        tap($app['config'], function ($config) {
+            $config->set('multitenancy.providers.tenants.model', TenantModel::class);
+        });
     }
 
     /**

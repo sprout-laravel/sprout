@@ -23,34 +23,6 @@ use Sprout\Tests\Unit\UnitTestCase;
 
 class CookieIdentityResolverTest extends UnitTestCase
 {
-    protected function defineEnvironment($app): void
-    {
-        tap($app['config'], static function ($config) {
-            $config->set('multitenancy.defaults.resolver', 'cookie');
-        });
-    }
-
-    protected function defineRoutes($router)
-    {
-        $router->tenanted(function (Router $router) {
-            $router->get('/test-route', static function () {
-                return 'test';
-            })->name('test-route');
-        });
-    }
-
-    protected function mockApp(): Application&MockInterface
-    {
-        return Mockery::mock(Application::class, static function ($mock) {
-
-        });
-    }
-
-    protected function getSprout(Application $app): Sprout
-    {
-        return new Sprout($app, new SettingsRepository());
-    }
-
     #[Test]
     public function providesAccessToExpectedValues(): void
     {
@@ -58,7 +30,7 @@ class CookieIdentityResolverTest extends UnitTestCase
             'cookie',
             '{Tenancy}-Cookie-Identifier',
             ['minutes' => 3600],
-            [ResolutionHook::Middleware]
+            [ResolutionHook::Middleware],
         );
 
         $this->assertSame('cookie', $resolver->getName());
@@ -97,7 +69,7 @@ class CookieIdentityResolverTest extends UnitTestCase
 
         $tenant = Mockery::mock(Tenant::class);
 
-        /** @var \Sprout\Contracts\Tenancy&MockInterface $tenancy */
+        /** @var Tenancy&MockInterface $tenancy */
         $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) {
             $mock->shouldReceive('getName')->andReturn('my-tenancy')->once();
             $mock->shouldReceive('check')->andReturn(true)->once();
@@ -111,7 +83,7 @@ class CookieIdentityResolverTest extends UnitTestCase
             ->andReturn(
                 Mockery::mock(CookieJar::class, static function (MockInterface $mock) {
                     $mock->shouldReceive('queue')->once();
-                })
+                }),
             )
             ->once();
 
@@ -129,7 +101,7 @@ class CookieIdentityResolverTest extends UnitTestCase
     {
         $resolver = new CookieIdentityResolver('cookie');
 
-        /** @var \Sprout\Contracts\Tenancy&MockInterface $tenancy */
+        /** @var Tenancy&MockInterface $tenancy */
         $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) {
             $mock->shouldReceive('getName')->andReturn('my-tenancy')->once();
         });
@@ -141,7 +113,7 @@ class CookieIdentityResolverTest extends UnitTestCase
             ->andReturn(
                 Mockery::mock(CookieJar::class, static function (MockInterface $mock) {
                     $mock->shouldReceive('expire')->with('My-tenancy-Identifier')->once();
-                })
+                }),
             )
             ->once();
 
@@ -155,7 +127,7 @@ class CookieIdentityResolverTest extends UnitTestCase
     {
         $resolver = new CookieIdentityResolver('cookie');
 
-        /** @var \Sprout\Contracts\Tenancy&MockInterface $tenancy */
+        /** @var Tenancy&MockInterface $tenancy */
         $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) {
             $mock->shouldReceive('hasOption')->with('overrides.all')->andReturn(false)->once();
             $mock->shouldReceive('optionConfig')->with('overrides')->andReturn([])->once();
@@ -179,7 +151,7 @@ class CookieIdentityResolverTest extends UnitTestCase
     {
         $resolver = new CookieIdentityResolver('cookie');
 
-        /** @var \Sprout\Contracts\Tenancy&MockInterface $tenancy */
+        /** @var Tenancy&MockInterface $tenancy */
         $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) {
             $mock->shouldReceive('hasOption')->with('overrides.all')->andReturn(true)->once();
         });
@@ -197,7 +169,7 @@ class CookieIdentityResolverTest extends UnitTestCase
     {
         $resolver = new CookieIdentityResolver('cookie');
 
-        /** @var \Sprout\Contracts\Tenancy&MockInterface $tenancy */
+        /** @var Tenancy&MockInterface $tenancy */
         $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) {
             $mock->shouldReceive('hasOption')->with('overrides.all')->andReturn(false)->once();
             $mock->shouldReceive('optionConfig')->with('overrides')->andReturn(['cookie'])->once();
@@ -263,7 +235,7 @@ class CookieIdentityResolverTest extends UnitTestCase
         // back to the raw cookie value.
         $cookieValue = base64_encode('{"iv":"x","value":"y","mac":"z","tag":""}');
 
-        /** @var \Sprout\Contracts\Tenancy&MockInterface $tenancy */
+        /** @var Tenancy&MockInterface $tenancy */
         $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) {
             $mock->shouldReceive('hasOption')->with('overrides.all')->andReturn(false)->atLeast()->once();
             $mock->shouldReceive('optionConfig')->with('overrides')->andReturn([])->atLeast()->once();
@@ -298,5 +270,32 @@ class CookieIdentityResolverTest extends UnitTestCase
         $resolver->setApp($app)->setSprout($sprout);
 
         $this->assertNull($resolver->resolveFromRequest($request, $tenancy));
+    }
+
+    protected function defineEnvironment($app): void
+    {
+        tap($app['config'], static function ($config) {
+            $config->set('multitenancy.defaults.resolver', 'cookie');
+        });
+    }
+
+    protected function defineRoutes($router)
+    {
+        $router->tenanted(function (Router $router) {
+            $router->get('/test-route', static function () {
+                return 'test';
+            })->name('test-route');
+        });
+    }
+
+    protected function mockApp(): Application&MockInterface
+    {
+        return Mockery::mock(Application::class, static function ($mock) {
+        });
+    }
+
+    protected function getSprout(Application $app): Sprout
+    {
+        return new Sprout($app, new SettingsRepository());
     }
 }

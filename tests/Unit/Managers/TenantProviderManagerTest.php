@@ -9,36 +9,16 @@ use Sprout\Exceptions\MisconfigurationException;
 use Sprout\Managers\TenantProviderManager;
 use Sprout\Providers\DatabaseTenantProvider;
 use Sprout\Providers\EloquentTenantProvider;
+use Sprout\Support\GenericTenant;
 use Sprout\Tests\Unit\UnitTestCase;
 use stdClass;
 use Workbench\App\Models\NoResourcesTenantModel;
 use Workbench\App\Models\TenantModel;
+
 use function Sprout\sprout;
 
 class TenantProviderManagerTest extends UnitTestCase
 {
-    protected function defineEnvironment($app): void
-    {
-        tap($app['config'], static function ($config) {
-            $config->set('multitenancy.providers.tenants.model', TenantModel::class);
-            $config->set('multitenancy.providers.backup', ['driver' => 'database', 'table' => 'tenants']);
-        });
-    }
-
-    protected function withoutDefault($app): void
-    {
-        tap($app['config'], static function ($config) {
-            $config->set('multitenancy.defaults.provider', null);
-        });
-    }
-
-    protected function withoutConfig($app): void
-    {
-        tap($app['config'], static function ($config) {
-            $config->set('multitenancy.providers.database', null);
-        });
-    }
-
     #[Test]
     public function isNamedCorrectly(): void
     {
@@ -173,6 +153,21 @@ class TenantProviderManagerTest extends UnitTestCase
     }
 
     #[Test]
+    public function errorsIfTheEloquentModelIsATenantButNotAModel(): void
+    {
+        // GenericTenant implements the Tenant contract but is not an Eloquent model,
+        // so it must still be rejected — each clause of the validation is required.
+        config()->set('multitenancy.providers.tenants.model', GenericTenant::class);
+
+        $manager = sprout()->providers();
+
+        $this->expectException(MisconfigurationException::class);
+        $this->expectExceptionMessage('The provided value for \'model\' [' . GenericTenant::class . '] is not valid for provider [tenants]');
+
+        $manager->get('tenants');
+    }
+
+    #[Test]
     public function errorsIfTheDatabaseEntityConfigIsInvalid(): void
     {
         config()->set('multitenancy.providers.backup.entity', stdClass::class);
@@ -243,5 +238,27 @@ class TenantProviderManagerTest extends UnitTestCase
         $this->assertSame(NoResourcesTenantModel::class, $provider->getModelClass());
         $this->assertTrue($manager->hasResolved('eloquent'));
         $this->assertFalse($manager->hasResolved('database'));
+    }
+
+    protected function defineEnvironment($app): void
+    {
+        tap($app['config'], static function ($config) {
+            $config->set('multitenancy.providers.tenants.model', TenantModel::class);
+            $config->set('multitenancy.providers.backup', ['driver' => 'database', 'table' => 'tenants']);
+        });
+    }
+
+    protected function withoutDefault($app): void
+    {
+        tap($app['config'], static function ($config) {
+            $config->set('multitenancy.defaults.provider', null);
+        });
+    }
+
+    protected function withoutConfig($app): void
+    {
+        tap($app['config'], static function ($config) {
+            $config->set('multitenancy.providers.database', null);
+        });
     }
 }

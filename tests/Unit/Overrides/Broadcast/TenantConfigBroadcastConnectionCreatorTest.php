@@ -8,7 +8,6 @@ use Illuminate\Foundation\Application;
 use InvalidArgumentException;
 use Mockery;
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\TenantConfig;
 use Sprout\Contracts\ConfigStore;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
@@ -20,13 +19,163 @@ use Sprout\Overrides\Broadcast\TenantConfigBroadcastConnectionCreator;
 use Sprout\Overrides\Broadcast\TenantConfigBroadcastManager;
 use Sprout\Sprout;
 use Sprout\Support\SettingsRepository;
+use Sprout\TenantConfig;
 use Sprout\Tests\Unit\UnitTestCase;
 
 class TenantConfigBroadcastConnectionCreatorTest extends UnitTestCase
 {
+    #[Test]
+    public function getConfigRequiresATenancyContext(): void
+    {
+        $app          = $this->mockApplication();
+        $sprout       = $this->getSprout($app, false);
+        $tenantConfig = new TenantConfig($app, Mockery::mock(ConfigStoreManager::class));
+
+        $creator = new TenantConfigBroadcastConnectionCreator(
+            $this->mockManager(false),
+            $tenantConfig,
+            $sprout,
+            [],
+        );
+
+        $this->expectException(TenancyMissingException::class);
+
+        $creator->getConfig($sprout, $tenantConfig, [], 'fake-connection');
+    }
+
+    #[Test]
+    public function canCreateTheDriver(): void
+    {
+        $app     = $this->mockApplication();
+        $manager = $this->mockManager();
+        $config  = [
+            'name'   => 'fake-connection',
+            'driver' => 'fake-driver',
+        ];
+        $sprout       = $this->getSprout($app);
+        $tenantConfig = $this->getTenantConfig($app, $this->mockConfigStoreManager($sprout->getCurrentTenancy(), $sprout->getCurrentTenancy()->tenant()));
+
+        $creator = new TenantConfigBroadcastConnectionCreator(
+            $manager,
+            $tenantConfig,
+            $sprout,
+            $config,
+        );
+
+        $creator();
+    }
+
+    #[Test]
+    public function throwsAnExceptionWhenConfigIsMissingName(): void
+    {
+        $app          = $this->mockApplication();
+        $manager      = $this->mockManager(false);
+        $config       = [];
+        $sprout       = $this->getSprout($app, false, false);
+        $tenantConfig = $this->getTenantConfig($app, $this->mockConfigStoreManager());
+
+        $sprout->markAsOutsideContext();
+
+        $this->assertFalse($sprout->withinContext());
+
+        $creator = new TenantConfigBroadcastConnectionCreator(
+            $manager,
+            $tenantConfig,
+            $sprout,
+            $config,
+        );
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Broadcast connection name must be provided');
+
+        $creator();
+    }
+
+    #[Test]
+    public function throwsAnExceptionWhenOutsideOfContext(): void
+    {
+        $app     = $this->mockApplication();
+        $manager = $this->mockManager(false);
+        $config  = [
+            'name' => 'fake-connection',
+        ];
+        $sprout       = $this->getSprout($app, false, false);
+        $tenantConfig = $this->getTenantConfig($app, $this->mockConfigStoreManager());
+
+        $sprout->markAsOutsideContext();
+
+        $this->assertFalse($sprout->withinContext());
+
+        $creator = new TenantConfigBroadcastConnectionCreator(
+            $manager,
+            $tenantConfig,
+            $sprout,
+            $config,
+        );
+
+        $this->expectException(TenancyMissingException::class);
+        $this->expectExceptionMessage('There is no current tenancy');
+
+        $creator();
+    }
+
+    #[Test]
+    public function throwsAnExceptionWhenThereIsNoTenancy(): void
+    {
+        $app     = $this->mockApplication();
+        $manager = $this->mockManager(false);
+        $config  = [
+            'name' => 'fake-connection',
+        ];
+        $sprout       = $this->getSprout($app, false, false);
+        $tenantConfig = $this->getTenantConfig($app, $this->mockConfigStoreManager());
+
+        $sprout->markAsInContext();
+
+        $this->assertTrue($sprout->withinContext());
+
+        $creator = new TenantConfigBroadcastConnectionCreator(
+            $manager,
+            $tenantConfig,
+            $sprout,
+            $config,
+        );
+
+        $this->expectException(TenancyMissingException::class);
+        $this->expectExceptionMessage('There is no current tenancy');
+
+        $creator();
+    }
+
+    #[Test]
+    public function throwsAnExceptionWhenThereIsNoTenant(): void
+    {
+        $app     = $this->mockApplication();
+        $manager = $this->mockManager(false);
+        $config  = [
+            'name' => 'fake-connection',
+        ];
+        $sprout       = $this->getSprout($app, true, false);
+        $tenantConfig = $this->getTenantConfig($app, $this->mockConfigStoreManager());
+
+        $this->assertTrue($sprout->withinContext());
+
+        $creator = new TenantConfigBroadcastConnectionCreator(
+            $manager,
+            $tenantConfig,
+            $sprout,
+            $config,
+        );
+
+        $this->expectException(TenantMissingException::class);
+        $this->expectExceptionMessage('There is no current tenant for tenancy [my-tenancy]');
+
+        $creator();
+    }
+
     private function mockApplication(bool $default = false): Application&Mockery\MockInterface
     {
-        return Mockery::mock(Application::class, static function (Mockery\MockInterface $mock) use ($default) {
+        return Mockery::mock(Application::class, static function (Mockery\MockInterface $mock) {
             $mock->shouldIgnoreMissing();
         });
     }
@@ -39,7 +188,7 @@ class TenantConfigBroadcastConnectionCreatorTest extends UnitTestCase
                      ->with(
                          'fake-connection',
                          ['name' => 'fake-connection', 'driver' => 'null'],
-                         true
+                         true,
                      )
                      ->andReturn(Mockery::mock(Broadcaster::class))
                      ->once();
@@ -59,7 +208,7 @@ class TenantConfigBroadcastConnectionCreatorTest extends UnitTestCase
                                   $tenancy,
                                   $tenant,
                                   'broadcast',
-                                  'fake-connection'
+                                  'fake-connection',
                               )
                               ->andReturn([
                                   'driver' => 'null',
@@ -104,135 +253,5 @@ class TenantConfigBroadcastConnectionCreatorTest extends UnitTestCase
     private function getTenantConfig(Application $app, ConfigStoreManager $manager): TenantConfig
     {
         return new TenantConfig($app, $manager);
-    }
-
-    #[Test]
-    public function canCreateTheDriver(): void
-    {
-        $app     = $this->mockApplication();
-        $manager = $this->mockManager();
-        $config  = [
-            'name'   => 'fake-connection',
-            'driver' => 'fake-driver',
-        ];
-        $sprout  = $this->getSprout($app);
-        $tenantConfig     = $this->getTenantConfig($app, $this->mockConfigStoreManager($sprout->getCurrentTenancy(), $sprout->getCurrentTenancy()->tenant()));
-
-        $creator = new TenantConfigBroadcastConnectionCreator(
-            $manager,
-            $tenantConfig,
-            $sprout,
-            $config,
-        );
-
-        $creator();
-    }
-
-    #[Test]
-    public function throwsAnExceptionWhenConfigIsMissingName(): void
-    {
-        $app     = $this->mockApplication();
-        $manager = $this->mockManager(false);
-        $config  = [];
-        $sprout  = $this->getSprout($app, false, false);
-        $tenantConfig     = $this->getTenantConfig($app, $this->mockConfigStoreManager());
-
-        $sprout->markAsOutsideContext();
-
-        $this->assertFalse($sprout->withinContext());
-
-        $creator = new TenantConfigBroadcastConnectionCreator(
-            $manager,
-            $tenantConfig,
-            $sprout,
-            $config
-        );
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Broadcast connection name must be provided');
-
-        $creator();
-    }
-
-    #[Test]
-    public function throwsAnExceptionWhenOutsideOfContext(): void
-    {
-        $app     = $this->mockApplication();
-        $manager = $this->mockManager(false);
-        $config  = [
-            'name' => 'fake-connection',
-        ];
-        $sprout  = $this->getSprout($app, false, false);
-        $tenantConfig     = $this->getTenantConfig($app, $this->mockConfigStoreManager());
-
-        $sprout->markAsOutsideContext();
-
-        $this->assertFalse($sprout->withinContext());
-
-        $creator = new TenantConfigBroadcastConnectionCreator(
-            $manager,
-            $tenantConfig,
-            $sprout,
-            $config
-        );
-
-        $this->expectException(TenancyMissingException::class);
-        $this->expectExceptionMessage('There is no current tenancy');
-
-        $creator();
-    }
-
-    #[Test]
-    public function throwsAnExceptionWhenThereIsNoTenancy(): void
-    {
-        $app     = $this->mockApplication();
-        $manager = $this->mockManager(false);
-        $config  = [
-            'name' => 'fake-connection',
-        ];
-        $sprout  = $this->getSprout($app, false, false);
-        $tenantConfig     = $this->getTenantConfig($app, $this->mockConfigStoreManager());
-
-        $sprout->markAsInContext();
-
-        $this->assertTrue($sprout->withinContext());
-
-        $creator = new TenantConfigBroadcastConnectionCreator(
-            $manager,
-            $tenantConfig,
-            $sprout,
-            $config
-        );
-
-        $this->expectException(TenancyMissingException::class);
-        $this->expectExceptionMessage('There is no current tenancy');
-
-        $creator();
-    }
-
-    #[Test]
-    public function throwsAnExceptionWhenThereIsNoTenant(): void
-    {
-        $app     = $this->mockApplication();
-        $manager = $this->mockManager(false);
-        $config  = [
-            'name' => 'fake-connection',
-        ];
-        $sprout  = $this->getSprout($app, true, false);
-        $tenantConfig     = $this->getTenantConfig($app, $this->mockConfigStoreManager());
-
-        $this->assertTrue($sprout->withinContext());
-
-        $creator = new TenantConfigBroadcastConnectionCreator(
-            $manager,
-            $tenantConfig,
-            $sprout,
-            $config
-        );
-
-        $this->expectException(TenantMissingException::class);
-        $this->expectExceptionMessage('There is no current tenant for tenancy [my-tenancy]');
-
-        $creator();
     }
 }

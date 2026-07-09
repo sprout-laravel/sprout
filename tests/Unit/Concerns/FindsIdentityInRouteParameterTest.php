@@ -21,7 +21,7 @@ class FindsIdentityInRouteParameterTest extends UnitTestCase
         // Passing a custom $parameter triggers setParameter() inside
         // initialiseRouteParameter().
         $resolver = new PathIdentityResolver(
-            name: 'path',
+            name     : 'path',
             parameter: 'custom_param',
         );
 

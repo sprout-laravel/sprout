@@ -50,7 +50,7 @@ trait FindsIdentityInRouteParameter
      * @param Tenancy<TenantClass> $tenancy
      * @param Tenant|null          $tenant
      *
-     * @phpstan-param Tenant|null                         $tenant
+     * @phpstan-param Tenant|null  $tenant
      *
      * @return void
      */
@@ -215,7 +215,7 @@ trait FindsIdentityInRouteParameter
      * @param array<string, mixed> $parameters
      * @param bool                 $absolute
      *
-     * @phpstan-param TenantClass                         $tenant
+     * @phpstan-param TenantClass  $tenant
      *
      * @return string
      */

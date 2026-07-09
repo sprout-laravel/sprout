@@ -6,6 +6,7 @@ namespace Sprout\Tests\Unit\Overrides\Auth;
 use Closure;
 use Illuminate\Auth\AuthManager;
 use Illuminate\Config\Repository;
+use Illuminate\Contracts\Auth\UserProvider;
 use Illuminate\Contracts\Foundation\Application;
 use LogicException;
 use Mockery;
@@ -13,7 +14,6 @@ use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use RuntimeException;
-use Sprout\TenantConfig;
 use Sprout\Contracts\BootableServiceOverride;
 use Sprout\Contracts\ConfigStore;
 use Sprout\Contracts\Tenancy;
@@ -27,33 +27,19 @@ use Sprout\Overrides\Auth\TenantConfigAuthProviderOverride;
 use Sprout\Overrides\StackedOverride;
 use Sprout\Sprout;
 use Sprout\Support\SettingsRepository;
+use Sprout\TenantConfig;
 use Sprout\Tests\Unit\UnitTestCase;
+
 use function Sprout\sprout;
 
 class TenantConfigAuthOverrideTest extends UnitTestCase
 {
-    protected function defineEnvironment($app): void
+    public static function authResolvedDataProvider(): array
     {
-        tap($app['config'], static function (Repository $config) {
-            $config->set('sprout.overrides', []);
-        });
-    }
-
-    private function mockTenantConfigAuthManager(bool $extends = true, ?Closure $callback = null): TenantConfigAuthManager&MockInterface
-    {
-        return Mockery::mock(TenantConfigAuthManager::class, static function (MockInterface $mock) use ($extends, $callback) {
-            if ($extends) {
-                $mock->shouldReceive('provider')
-                     ->with('sprout:config', Mockery::on(static function ($arg) {
-                         return is_callable($arg) && $arg instanceof Closure;
-                     }))
-                     ->once();
-            }
-
-            if ($callback) {
-                $callback($mock);
-            }
-        });
+        return [
+            'auth resolved'     => [true],
+            'auth not resolved' => [false],
+        ];
     }
 
     #[Test]
@@ -98,6 +84,8 @@ class TenantConfigAuthOverrideTest extends UnitTestCase
             ],
         ]);
 
+        $authManager = null;
+
         /** @var \Illuminate\Foundation\Application&MockInterface $app */
         $app = Mockery::mock($this->app, function (MockInterface $mock) use ($return) {
             $mock->makePartial();
@@ -120,7 +108,7 @@ class TenantConfigAuthOverrideTest extends UnitTestCase
             if ($return) {
                 $mock->shouldReceive('make')
                      ->with('auth')
-                     ->andReturn($this->mockTenantConfigAuthManager())
+                     ->andReturn($authManager = $this->mockTenantConfigAuthManager())
                      ->times(2);
             } else {
                 $mock->shouldReceive('afterResolving')
@@ -144,6 +132,14 @@ class TenantConfigAuthOverrideTest extends UnitTestCase
         // corresponding setters were not called
         $this->assertInstanceOf(Application::class, $override->getApp());
         $this->assertInstanceOf(Sprout::class, $override->getSprout());
+
+        // If we're using a mocked auth manager, ensure that the provider
+        // is actually created.
+        if ($return && $authManager) {
+            $provider = $authManager->createUserProvider('sprout:config');
+
+            $this->assertNotNull($provider);
+        }
     }
 
     #[Test]
@@ -198,7 +194,7 @@ class TenantConfigAuthOverrideTest extends UnitTestCase
         });
 
         /** @var \Illuminate\Foundation\Application&MockInterface $app */
-        $app = Mockery::mock($this->app, static function (MockInterface $mock) use ($tenancy, $tenant) {
+        $app = Mockery::mock($this->app, static function (MockInterface $mock) {
             $mock->makePartial();
         });
 
@@ -212,7 +208,7 @@ class TenantConfigAuthOverrideTest extends UnitTestCase
                               $tenancy,
                               $tenant,
                               'auth',
-                              'bud-provider',
+                              'tenant-provider',
                           )->andReturn(null);
                  }));
         })));
@@ -225,13 +221,13 @@ class TenantConfigAuthOverrideTest extends UnitTestCase
 
         $override->boot($app, $sprout);
 
-        /** @var \Sprout\Overrides\Auth\TenantConfigAuthManager $manager */
+        /** @var TenantConfigAuthManager $manager */
         $manager = $app->make('auth');
 
         $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('Unable to find configuration for [auth.bud-provider] for tenant [my-tenant] on tenancy [my-tenancy]');
+        $this->expectExceptionMessage('Unable to find configuration for [auth.tenant-provider] for tenant [my-tenant] on tenancy [my-tenancy]');
 
-        $manager->createUserProviderFromConfig(['driver' => 'sprout:config', 'provider' => 'bud-provider']);
+        $manager->createUserProviderFromConfig(['driver' => 'sprout:config', 'provider' => 'tenant-provider']);
     }
 
     #[Test]
@@ -244,7 +240,7 @@ class TenantConfigAuthOverrideTest extends UnitTestCase
             ],
         ]);
 
-        $tenant  = Mockery::mock(Tenant::class, TenantHasResources::class, static function (MockInterface $mock) {
+        $tenant = Mockery::mock(Tenant::class, TenantHasResources::class, static function (MockInterface $mock) {
         });
         $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) use ($tenant) {
             $mock->shouldReceive('check')->andReturnTrue()->once();
@@ -252,7 +248,7 @@ class TenantConfigAuthOverrideTest extends UnitTestCase
         });
 
         /** @var \Illuminate\Foundation\Application&MockInterface $app */
-        $app = Mockery::mock($this->app, static function (MockInterface $mock) use ($tenancy, $tenant) {
+        $app = Mockery::mock($this->app, static function (MockInterface $mock) {
             $mock->makePartial();
         });
 
@@ -266,10 +262,10 @@ class TenantConfigAuthOverrideTest extends UnitTestCase
                               $tenancy,
                               $tenant,
                               'auth',
-                              'bud-provider',
+                              'tenant-provider',
                           )->andReturn([
-                             'driver' => 'sprout:config',
-                         ]);
+                              'driver' => 'sprout:config',
+                          ]);
                  }));
         })));
 
@@ -281,15 +277,15 @@ class TenantConfigAuthOverrideTest extends UnitTestCase
 
         $override->boot($app, $sprout);
 
-        /** @var \Sprout\Overrides\Auth\TenantConfigAuthManager $manager */
+        /** @var TenantConfigAuthManager $manager */
         $manager = $app->make('auth');
 
         $this->expectException(CyclicOverrideException::class);
-        $this->expectExceptionMessage('Attempt to create cyclic config auth provider [bud-provider] detected');
+        $this->expectExceptionMessage('Attempt to create cyclic config auth provider [tenant-provider] detected');
 
         $manager->createUserProviderFromConfig([
-            'driver' => 'sprout:config',
-            'provider' => 'bud-provider',
+            'driver'   => 'sprout:config',
+            'provider' => 'tenant-provider',
         ]);
     }
 
@@ -303,7 +299,7 @@ class TenantConfigAuthOverrideTest extends UnitTestCase
             ],
         ]);
 
-        $tenant  = Mockery::mock(Tenant::class, TenantHasResources::class, static function (MockInterface $mock) {
+        $tenant = Mockery::mock(Tenant::class, TenantHasResources::class, static function (MockInterface $mock) {
         });
         $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) use ($tenant) {
             $mock->shouldReceive('check')->andReturnTrue()->once();
@@ -311,7 +307,7 @@ class TenantConfigAuthOverrideTest extends UnitTestCase
         });
 
         /** @var \Illuminate\Foundation\Application&MockInterface $app */
-        $app = Mockery::mock($this->app, static function (MockInterface $mock) use ($tenancy, $tenant) {
+        $app = Mockery::mock($this->app, static function (MockInterface $mock) {
             $mock->makePartial();
         });
 
@@ -325,11 +321,11 @@ class TenantConfigAuthOverrideTest extends UnitTestCase
                               $tenancy,
                               $tenant,
                               'auth',
-                              'bud-provider',
+                              'tenant-provider',
                           )->andReturn([
-                             'driver' => 'database',
-                             'table'  => 'fake-table',
-                         ]);
+                              'driver' => 'database',
+                              'table'  => 'fake-table',
+                          ]);
                  }));
         })));
 
@@ -341,13 +337,16 @@ class TenantConfigAuthOverrideTest extends UnitTestCase
 
         $override->boot($app, $sprout);
 
-        /** @var \Sprout\Overrides\Auth\TenantConfigAuthManager $manager */
+        /** @var TenantConfigAuthManager $manager */
         $manager = $app->make('auth');
 
-        $manager->createUserProviderFromConfig(['provider' => 'bud-provider', 'driver' => 'sprout:config']);
+        $provider = $manager->createUserProviderFromConfig(['provider' => 'tenant-provider', 'driver' => 'sprout:config']);
+
+        // The provider closure must actually return the created provider
+        $this->assertInstanceOf(UserProvider::class, $provider);
 
         $this->assertNotEmpty($override->getOverrides()[TenantConfigAuthProviderOverride::class]->getOverrides());
-        $this->assertContains('bud-provider', $override->getOverrides()[TenantConfigAuthProviderOverride::class]->getOverrides());
+        $this->assertContains('tenant-provider', $override->getOverrides()[TenantConfigAuthProviderOverride::class]->getOverrides());
     }
 
     #[Test]
@@ -387,11 +386,11 @@ class TenantConfigAuthOverrideTest extends UnitTestCase
                               $tenancy,
                               $tenant,
                               'auth',
-                              'bud-provider',
+                              'tenant-provider',
                           )->andReturn([
-                             'driver' => 'database',
-                             'table'  => 'fake-table',
-                         ]);
+                              'driver' => 'database',
+                              'table'  => 'fake-table',
+                          ]);
                  }));
         })));
 
@@ -405,13 +404,19 @@ class TenantConfigAuthOverrideTest extends UnitTestCase
 
         $this->assertEmpty($authOverride->getOverrides());
 
-        /** @var \Sprout\Overrides\Auth\TenantConfigAuthManager $manager */
-        $manager = $app->make('auth');
+        // Ensure that forgetGuards is called on the auth manager!
+        $authManager = Mockery::mock($app->make('auth'), static function (MockInterface $mock) {
+            $mock->makePartial();
+            $mock->shouldReceive('forgetGuards')->once();
+        });
 
-        $manager->createUserProviderFromConfig(['provider' => 'bud-provider', 'driver' => 'sprout:config']);
+        $app->instance('auth', $authManager);
+
+        /** @var TenantConfigAuthManager $authManager */
+        $authManager->createUserProviderFromConfig(['provider' => 'tenant-provider', 'driver' => 'sprout:config']);
 
         $this->assertNotEmpty($authOverride->getOverrides());
-        $this->assertContains('bud-provider', $authOverride->getOverrides());
+        $this->assertContains('tenant-provider', $authOverride->getOverrides());
 
         $override->cleanup($tenancy, $tenant);
 
@@ -437,7 +442,7 @@ class TenantConfigAuthOverrideTest extends UnitTestCase
 
         $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
 
-        $app->make('config')->set('auth.providers.bud-provider', [
+        $app->make('config')->set('auth.providers.tenant-provider', [
             'driver' => 'sprout:config',
         ]);
 
@@ -459,11 +464,11 @@ class TenantConfigAuthOverrideTest extends UnitTestCase
                               $tenancy,
                               $tenant,
                               'auth',
-                              'bud-provider',
+                              'tenant-provider',
                           )->andReturn([
-                             'driver' => 'database',
-                             'table'  => 'fake-table',
-                         ]);
+                              'driver' => 'database',
+                              'table'  => 'fake-table',
+                          ]);
                  }));
         })));
 
@@ -477,13 +482,13 @@ class TenantConfigAuthOverrideTest extends UnitTestCase
 
         $this->assertEmpty($authOverride->getOverrides());
 
-        /** @var \Sprout\Overrides\Auth\TenantConfigAuthManager $manager */
+        /** @var TenantConfigAuthManager $manager */
         $manager = $app->make('auth');
 
-        $manager->createUserProvider('bud-provider');
+        $manager->createUserProvider('tenant-provider');
 
         $this->assertNotEmpty($authOverride->getOverrides());
-        $this->assertContains('bud-provider', $authOverride->getOverrides());
+        $this->assertContains('tenant-provider', $authOverride->getOverrides());
 
         $override->cleanup($tenancy, $tenant);
 
@@ -509,7 +514,7 @@ class TenantConfigAuthOverrideTest extends UnitTestCase
 
         $app->make('config')->set('multitenancy.defaults.config', 'filesystem');
 
-        $app->make('config')->set('auth.providers.bud-provider', [
+        $app->make('config')->set('auth.providers.tenant-provider', [
             'driver' => 'sprout:config',
         ]);
 
@@ -518,7 +523,7 @@ class TenantConfigAuthOverrideTest extends UnitTestCase
         $tenant = Mockery::mock(Tenant::class, TenantHasResources::class, static function (MockInterface $mock) {
         });
 
-        $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) use ($tenant) {
+        $tenancy = Mockery::mock(Tenancy::class, static function (MockInterface $mock) {
         });
 
         $sprout->setCurrentTenancy($tenancy);
@@ -536,11 +541,27 @@ class TenantConfigAuthOverrideTest extends UnitTestCase
         $this->assertEmpty($authOverride->getOverrides());
     }
 
-    public static function authResolvedDataProvider(): array
+    protected function defineEnvironment($app): void
     {
-        return [
-            'auth resolved'     => [true],
-            'auth not resolved' => [false],
-        ];
+        tap($app['config'], static function (Repository $config) {
+            $config->set('sprout.overrides', []);
+        });
+    }
+
+    private function mockTenantConfigAuthManager(bool $extends = true, ?Closure $callback = null): TenantConfigAuthManager&MockInterface
+    {
+        return Mockery::mock(TenantConfigAuthManager::class, static function (MockInterface $mock) use ($extends, $callback) {
+            if ($extends) {
+                $mock->shouldReceive('provider')
+                     ->with('sprout:config', Mockery::on(static function ($arg) {
+                         return is_callable($arg) && $arg instanceof Closure;
+                     }))
+                     ->once();
+            }
+
+            if ($callback) {
+                $callback($mock);
+            }
+        });
     }
 }

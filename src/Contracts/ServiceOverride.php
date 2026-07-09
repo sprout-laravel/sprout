@@ -30,7 +30,7 @@ interface ServiceOverride
      * @param Tenancy<TenantClass> $tenancy
      * @param Tenant               $tenant
      *
-     * @phpstan-param TenantClass                         $tenant
+     * @phpstan-param TenantClass  $tenant
      *
      * @return void
      */
@@ -52,7 +52,7 @@ interface ServiceOverride
      * @param Tenancy<TenantClass> $tenancy
      * @param Tenant               $tenant
      *
-     * @phpstan-param TenantClass                         $tenant
+     * @phpstan-param TenantClass  $tenant
      *
      * @return void
      */

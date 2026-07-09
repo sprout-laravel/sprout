@@ -18,36 +18,16 @@ use Sprout\Managers\TenantProviderManager;
 use Sprout\Support\GenericTenant;
 use Sprout\Tests\Unit\UnitTestCase;
 use Workbench\App\Models\TenantModel;
+
 use function Sprout\sprout;
 use function Sprout\tenancy;
 
 class CurrentTenantTest extends UnitTestCase
 {
-    protected function setsUpTenancy($app)
-    {
-        tap($app['config'], function ($config) {
-            $config->set('multitenancy.providers.tenants.model', TenantModel::class);
-        });
-    }
-
-    protected function setupSecondTenancy($app): void
-    {
-        tap($app['config'], static function (Repository $config) {
-            $config->set('multitenancy.providers.backup', [
-                'driver' => 'database',
-                'table'  => 'tenants',
-            ]);
-
-            $config->set('multitenancy.tenancies.backup', [
-                'provider' => 'backup',
-            ]);
-        });
-    }
-
     #[Test]
     public function resolvesCurrentTenant(): void
     {
-        /** @var \Sprout\Contracts\Tenancy $tenancy */
+        /** @var Tenancy $tenancy */
         $tenancy = tenancy('tenants');
 
         sprout()->setCurrentTenancy($tenancy);
@@ -69,7 +49,7 @@ class CurrentTenantTest extends UnitTestCase
     #[Test, DefineEnvironment('setupSecondTenancy')]
     public function resolvesCurrentTenantForSpecificTenancy(): void
     {
-        /** @var \Sprout\Contracts\Tenancy $tenancy */
+        /** @var Tenancy $tenancy */
         $tenancy = tenancy('backup');
 
         sprout()->setCurrentTenancy($tenancy);
@@ -112,5 +92,26 @@ class CurrentTenantTest extends UnitTestCase
         $attribute = new CurrentTenant('backup');
 
         $this->assertSame($expected, $attribute->resolve($attribute, $container));
+    }
+
+    protected function setsUpTenancy($app)
+    {
+        tap($app['config'], function ($config) {
+            $config->set('multitenancy.providers.tenants.model', TenantModel::class);
+        });
+    }
+
+    protected function setupSecondTenancy($app): void
+    {
+        tap($app['config'], static function (Repository $config) {
+            $config->set('multitenancy.providers.backup', [
+                'driver' => 'database',
+                'table'  => 'tenants',
+            ]);
+
+            $config->set('multitenancy.tenancies.backup', [
+                'provider' => 'backup',
+            ]);
+        });
     }
 }

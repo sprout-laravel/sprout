@@ -85,7 +85,7 @@ abstract class TenantConfigBaseOverride extends SproutBaseOverride implements Bo
      * @param Tenancy<TenantClass> $tenancy
      * @param Tenant               $tenant
      *
-     * @phpstan-param TenantClass                         $tenant
+     * @phpstan-param TenantClass  $tenant
      *
      * @return void
      *

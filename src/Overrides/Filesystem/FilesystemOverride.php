@@ -75,7 +75,7 @@ final class FilesystemOverride extends BaseOverride implements BootableServiceOv
      * @param Tenancy<TenantClass> $tenancy
      * @param Tenant               $tenant
      *
-     * @phpstan-param TenantClass                         $tenant
+     * @phpstan-param TenantClass  $tenant
      *
      * @return void
      */

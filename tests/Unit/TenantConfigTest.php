@@ -13,16 +13,10 @@ use Sprout\Contracts\Tenant;
 use Sprout\Exceptions\TenancyMissingException;
 use Sprout\Exceptions\TenantMissingException;
 use Sprout\Managers\ConfigStoreManager;
-use Sprout\TenancyOptions;
 use Sprout\TenantConfig;
 
 class TenantConfigTest extends UnitTestCase
 {
-    protected function mockApp(): Application&MockInterface
-    {
-        return Mockery::mock(Application::class);
-    }
-
     #[Test]
     public function constructorAcceptsAnExplicitConfigStoreManager(): void
     {
@@ -219,5 +213,10 @@ class TenantConfigTest extends UnitTestCase
         $config->setTenant($tenant);
 
         $this->assertSame($expectedConfig, $config->config('cache', 'default'));
+    }
+
+    protected function mockApp(): Application&MockInterface
+    {
+        return Mockery::mock(Application::class);
     }
 }

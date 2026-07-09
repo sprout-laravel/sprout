@@ -36,7 +36,7 @@ class BelongsToTenantObserver
      *
      * @param Model&BelongsToTenant $model
      *
-     * @phpstan-param ChildModel                                                                          $model
+     * @phpstan-param ChildModel    $model
      *
      * @return bool
      *
@@ -83,7 +83,7 @@ class BelongsToTenantObserver
      *
      * @param Model&BelongsToTenant $model
      *
-     * @phpstan-param ChildModel                                                                          $model
+     * @phpstan-param ChildModel    $model
      *
      * @return void
      *
@@ -159,7 +159,7 @@ class BelongsToTenantObserver
      * @param BelongsTo<ChildModel, TenantModel> $relation
      * @param bool                               $succeedOnMatch
      *
-     * @phpstan-param ChildModel                                                                          $model
+     * @phpstan-param ChildModel                 $model
      *
      * @return bool
      *
@@ -194,7 +194,7 @@ class BelongsToTenantObserver
         /**
          * @var Model&Tenant $tenant
          *
-         * @phpstan-var TenantModel                                               $tenant
+         * @phpstan-var TenantModel $tenant
          */
         $tenant = $tenancy->tenant();
 

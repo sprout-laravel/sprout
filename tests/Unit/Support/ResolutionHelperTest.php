@@ -10,6 +10,9 @@ use Illuminate\Routing\Route;
 use Mockery;
 use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\Test;
+use Sprout\Contracts\IdentityResolver;
+use Sprout\Contracts\IdentityResolverUsesParameters;
+use Sprout\Contracts\Tenancy;
 use Sprout\Exceptions\MisconfigurationException;
 use Sprout\Exceptions\NoTenantFoundException;
 use Sprout\Sprout;
@@ -18,6 +21,7 @@ use Sprout\Support\ResolutionHook;
 use Sprout\Support\SettingsRepository;
 use Sprout\Tests\Unit\UnitTestCase;
 use Workbench\App\Models\TenantModel;
+
 use function Sprout\resolver;
 use function Sprout\sprout;
 use function Sprout\tenancy;
@@ -25,27 +29,6 @@ use function Sprout\tenancy;
 class ResolutionHelperTest extends UnitTestCase
 {
     use RefreshDatabase;
-
-    protected function defineEnvironment($app): void
-    {
-        tap($app['config'], static function ($config) {
-            $config->set('multitenancy.defaults.resolver', 'path');
-            $config->set('multitenancy.providers.tenants.model', TenantModel::class);
-            $config->set('multitenancy.resolvers.subdomain.domain', 'localhost');
-        });
-    }
-
-    protected function mockApp(): Application&MockInterface
-    {
-        return Mockery::mock(Application::class, static function ($mock) {
-
-        });
-    }
-
-    protected function getSprout(Application $app): Sprout
-    {
-        return new Sprout($app, new SettingsRepository());
-    }
 
     #[Test]
     public function parsesMiddlewareOptions(): void
@@ -75,7 +58,7 @@ class ResolutionHelperTest extends UnitTestCase
         $this->expectException(MisconfigurationException::class);
         $this->expectExceptionMessage('The resolution hook [Booting] is not supported');
 
-        /** @var \Illuminate\Http\Request $fakeRequest */
+        /** @var Request $fakeRequest */
         $fakeRequest = Mockery::mock(Request::class);
 
         ResolutionHelper::handleResolution($fakeRequest, ResolutionHook::Booting, sprout());
@@ -84,15 +67,15 @@ class ResolutionHelperTest extends UnitTestCase
     #[Test]
     public function returnsFalseIfThereIsAlreadyATenant(): void
     {
-        /** @var \Sprout\Contracts\Tenancy<TenantModel> $tenancy */
+        /** @var Tenancy<TenantModel> $tenancy */
         $tenancy = tenancy();
 
         $tenancy->setTenant(TenantModel::factory()->createOne());
 
-        /** @var \Sprout\Contracts\IdentityResolver $resolver */
+        /** @var IdentityResolver $resolver */
         $resolver = resolver('path');
 
-        /** @var \Illuminate\Http\Request $fakeRequest */
+        /** @var Request $fakeRequest */
         $fakeRequest = $this->mock(Request::class);
 
         $this->assertTrue($tenancy->check());
@@ -103,17 +86,17 @@ class ResolutionHelperTest extends UnitTestCase
     #[Test]
     public function returnsFalseIfTheResolverCannotResolve(): void
     {
-        /** @var \Sprout\Contracts\Tenancy<TenantModel> $tenancy */
+        /** @var Tenancy<TenantModel> $tenancy */
         $tenancy = tenancy();
 
-        /** @var \Sprout\Contracts\IdentityResolver $resolver */
+        /** @var IdentityResolver $resolver */
         $resolver = resolver('path');
 
         $tenancy->setTenant(TenantModel::factory()->createOne())
                 ->resolvedVia($resolver)
                 ->resolvedAt(ResolutionHook::Routing);
 
-        /** @var \Illuminate\Http\Request $fakeRequest */
+        /** @var Request $fakeRequest */
         $fakeRequest = $this->mock(Request::class);
 
         $this->assertTrue($tenancy->check());
@@ -126,13 +109,13 @@ class ResolutionHelperTest extends UnitTestCase
     {
         $tenant = TenantModel::factory()->createOne();
 
-        /** @var \Sprout\Contracts\Tenancy<TenantModel> $tenancy */
+        /** @var Tenancy<TenantModel> $tenancy */
         $tenancy = tenancy();
 
-        /** @var \Sprout\Contracts\IdentityResolver&\Sprout\Contracts\IdentityResolverUsesParameters $resolver */
+        /** @var IdentityResolver&IdentityResolverUsesParameters $resolver */
         $resolver = resolver('path');
 
-        /** @var \Illuminate\Routing\Route $fakeRoute */
+        /** @var Route $fakeRoute */
         $fakeRoute = $this->mock(Route::class, function (MockInterface $mock) use ($tenant, $tenancy, $resolver) {
             $parameterName = $resolver->getRouteParameterName($tenancy);
 
@@ -145,10 +128,11 @@ class ResolutionHelperTest extends UnitTestCase
                  ->andReturn($tenant->getTenantIdentifier());
 
             $mock->shouldReceive('forgetParameter')
-                 ->with($parameterName);
+                 ->with($parameterName)
+                 ->twice();
         });
 
-        /** @var \Illuminate\Http\Request $fakeRequest */
+        /** @var Request $fakeRequest */
         $fakeRequest = $this->mock(Request::class, function (MockInterface $mock) use ($fakeRoute) {
             $mock->shouldReceive('route')->andReturn($fakeRoute);
         });
@@ -175,13 +159,13 @@ class ResolutionHelperTest extends UnitTestCase
     #[Test]
     public function throwsAnExceptionWhenUnableToIdentifyATenantFromTheRoute(): void
     {
-        /** @var \Sprout\Contracts\Tenancy<TenantModel> $tenancy */
+        /** @var Tenancy<TenantModel> $tenancy */
         $tenancy = tenancy();
 
-        /** @var \Sprout\Contracts\IdentityResolver&\Sprout\Contracts\IdentityResolverUsesParameters $resolver */
+        /** @var IdentityResolver&IdentityResolverUsesParameters $resolver */
         $resolver = resolver('path');
 
-        /** @var \Illuminate\Routing\Route $fakeRoute */
+        /** @var Route $fakeRoute */
         $fakeRoute = $this->mock(Route::class, function (MockInterface $mock) use ($tenancy, $resolver) {
             $parameterName = $resolver->getRouteParameterName($tenancy);
 
@@ -197,7 +181,7 @@ class ResolutionHelperTest extends UnitTestCase
                  ->with($parameterName);
         });
 
-        /** @var \Illuminate\Http\Request $fakeRequest */
+        /** @var Request $fakeRequest */
         $fakeRequest = $this->mock(Request::class, function (MockInterface $mock) use ($fakeRoute) {
             $mock->shouldReceive('route')->andReturn($fakeRoute);
         });
@@ -214,15 +198,53 @@ class ResolutionHelperTest extends UnitTestCase
     }
 
     #[Test]
-    public function returnsFalseWhenUnableToIdentifyATenantFromTheRouteAndToldNotToThrow(): void
+    public function throwsWhenNoIdentityIsResolvedAndResolutionIsNotOptional(): void
     {
-        /** @var \Sprout\Contracts\Tenancy<TenantModel> $tenancy */
+        /** @var Tenancy<TenantModel> $tenancy */
         $tenancy = tenancy();
 
-        /** @var \Sprout\Contracts\IdentityResolver&\Sprout\Contracts\IdentityResolverUsesParameters $resolver */
+        /** @var IdentityResolver&IdentityResolverUsesParameters $resolver */
         $resolver = resolver('path');
 
-        /** @var \Illuminate\Routing\Route $fakeRoute */
+        /** @var Route $fakeRoute */
+        $fakeRoute = $this->mock(Route::class, function (MockInterface $mock) use ($tenancy, $resolver) {
+            $parameterName = $resolver->getRouteParameterName($tenancy);
+
+            $mock->shouldReceive('hasParameter')
+                 ->with($parameterName)
+                 ->andReturn(true);
+
+            // A null parameter means no identity is resolved
+            $mock->shouldReceive('parameter')
+                 ->with($parameterName)
+                 ->andReturn(null);
+
+            $mock->shouldReceive('forgetParameter')
+                 ->with($parameterName);
+        });
+
+        /** @var Request $fakeRequest */
+        $fakeRequest = $this->mock(Request::class, function (MockInterface $mock) use ($fakeRoute) {
+            $mock->shouldReceive('route')->andReturn($fakeRoute);
+        });
+
+        $this->expectException(NoTenantFoundException::class);
+
+        // Called without the $optional argument (defaults to false), so a missing
+        // identity must throw rather than short-circuit as an optional resolution
+        ResolutionHelper::handleResolution($fakeRequest, ResolutionHook::Routing, sprout(), $resolver->getName(), $tenancy->getName());
+    }
+
+    #[Test]
+    public function returnsFalseWhenUnableToIdentifyATenantFromTheRouteAndToldNotToThrow(): void
+    {
+        /** @var Tenancy<TenantModel> $tenancy */
+        $tenancy = tenancy();
+
+        /** @var IdentityResolver&IdentityResolverUsesParameters $resolver */
+        $resolver = resolver('path');
+
+        /** @var Route $fakeRoute */
         $fakeRoute = $this->mock(Route::class, function (MockInterface $mock) use ($tenancy, $resolver) {
             $parameterName = $resolver->getRouteParameterName($tenancy);
 
@@ -238,7 +260,7 @@ class ResolutionHelperTest extends UnitTestCase
                  ->with($parameterName);
         });
 
-        /** @var \Illuminate\Http\Request $fakeRequest */
+        /** @var Request $fakeRequest */
         $fakeRequest = $this->mock(Request::class, function (MockInterface $mock) use ($fakeRoute) {
             $mock->shouldReceive('route')->andReturn($fakeRoute);
         });
@@ -263,13 +285,13 @@ class ResolutionHelperTest extends UnitTestCase
     {
         $tenant = TenantModel::factory()->createOne();
 
-        /** @var \Sprout\Contracts\Tenancy<TenantModel> $tenancy */
+        /** @var Tenancy<TenantModel> $tenancy */
         $tenancy = tenancy();
 
-        /** @var \Sprout\Contracts\IdentityResolver&\Sprout\Contracts\IdentityResolverUsesParameters $resolver */
+        /** @var IdentityResolver&IdentityResolverUsesParameters $resolver */
         $resolver = resolver('path');
 
-        /** @var \Illuminate\Http\Request $fakeRequest */
+        /** @var Request $fakeRequest */
         $fakeRequest = $this->mock(Request::class, function (MockInterface $mock) use ($tenant) {
             $mock->shouldReceive('route')->andReturnNull();
 
@@ -300,13 +322,13 @@ class ResolutionHelperTest extends UnitTestCase
     #[Test]
     public function throwsAnExceptionWhenUnableToIdentifyATenantFromTheRequest(): void
     {
-        /** @var \Sprout\Contracts\Tenancy<TenantModel> $tenancy */
+        /** @var Tenancy<TenantModel> $tenancy */
         $tenancy = tenancy();
 
-        /** @var \Sprout\Contracts\IdentityResolver&\Sprout\Contracts\IdentityResolverUsesParameters $resolver */
+        /** @var IdentityResolver&IdentityResolverUsesParameters $resolver */
         $resolver = resolver('path');
 
-        /** @var \Illuminate\Http\Request $fakeRequest */
+        /** @var Request $fakeRequest */
         $fakeRequest = $this->mock(Request::class, function (MockInterface $mock) {
             $mock->shouldReceive('route')->andReturnNull();
 
@@ -329,13 +351,13 @@ class ResolutionHelperTest extends UnitTestCase
     #[Test]
     public function returnsFalseWhenUnableToIdentifyATenantFromTheRequestAndToldNotToThrow(): void
     {
-        /** @var \Sprout\Contracts\Tenancy<TenantModel> $tenancy */
+        /** @var Tenancy<TenantModel> $tenancy */
         $tenancy = tenancy();
 
-        /** @var \Sprout\Contracts\IdentityResolver&\Sprout\Contracts\IdentityResolverUsesParameters $resolver */
+        /** @var IdentityResolver&IdentityResolverUsesParameters $resolver */
         $resolver = resolver('path');
 
-        /** @var \Illuminate\Http\Request $fakeRequest */
+        /** @var Request $fakeRequest */
         $fakeRequest = $this->mock(Request::class, function (MockInterface $mock) {
             $mock->shouldReceive('route')->andReturnNull();
 
@@ -364,13 +386,13 @@ class ResolutionHelperTest extends UnitTestCase
     #[Test]
     public function returnsFalseEarlyWhenIdentityIsNullInOptionalMode(): void
     {
-        /** @var \Sprout\Contracts\Tenancy<TenantModel> $tenancy */
+        /** @var Tenancy<TenantModel> $tenancy */
         $tenancy = tenancy();
 
-        /** @var \Sprout\Contracts\IdentityResolver&\Sprout\Contracts\IdentityResolverUsesParameters $resolver */
+        /** @var IdentityResolver&IdentityResolverUsesParameters $resolver */
         $resolver = resolver('path');
 
-        /** @var \Illuminate\Http\Request $fakeRequest */
+        /** @var Request $fakeRequest */
         $fakeRequest = $this->mock(Request::class, function (MockInterface $mock) {
             $mock->shouldReceive('route')->andReturnNull();
             $mock->shouldReceive('segment')->with(1)->andReturnNull();
@@ -384,12 +406,32 @@ class ResolutionHelperTest extends UnitTestCase
                 sprout(),
                 $resolver->getName(),
                 $tenancy->getName(),
-                throw: true,
+                throw   : true,
                 optional: true,
-            )
+            ),
         );
 
         $this->assertFalse($tenancy->check());
         $this->assertFalse($tenancy->wasResolved());
+    }
+
+    protected function defineEnvironment($app): void
+    {
+        tap($app['config'], static function ($config) {
+            $config->set('multitenancy.defaults.resolver', 'path');
+            $config->set('multitenancy.providers.tenants.model', TenantModel::class);
+            $config->set('multitenancy.resolvers.subdomain.domain', 'localhost');
+        });
+    }
+
+    protected function mockApp(): Application&MockInterface
+    {
+        return Mockery::mock(Application::class, static function ($mock) {
+        });
+    }
+
+    protected function getSprout(Application $app): Sprout
+    {
+        return new Sprout($app, new SettingsRepository());
     }
 }

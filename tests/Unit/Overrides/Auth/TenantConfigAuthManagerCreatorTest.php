@@ -7,7 +7,6 @@ use Illuminate\Contracts\Auth\UserProvider;
 use Illuminate\Foundation\Application;
 use Mockery;
 use PHPUnit\Framework\Attributes\Test;
-use Sprout\TenantConfig;
 use Sprout\Contracts\ConfigStore;
 use Sprout\Contracts\Tenancy;
 use Sprout\Contracts\Tenant;
@@ -19,13 +18,142 @@ use Sprout\Overrides\Auth\TenantConfigAuthManager;
 use Sprout\Overrides\Auth\TenantConfigAuthProviderCreator;
 use Sprout\Sprout;
 use Sprout\Support\SettingsRepository;
+use Sprout\TenantConfig;
 use Sprout\Tests\Unit\UnitTestCase;
 
 class TenantConfigAuthManagerCreatorTest extends UnitTestCase
 {
+    #[Test]
+    public function getConfigRequiresATenancyContext(): void
+    {
+        $app          = $this->mockApplication();
+        $sprout       = $this->getSprout($app, false);
+        $tenantConfig = new TenantConfig($app, Mockery::mock(ConfigStoreManager::class));
+
+        $creator = new TenantConfigAuthProviderCreator(
+            $this->mockManager(false),
+            $tenantConfig,
+            $sprout,
+            'fake-provider',
+            [],
+        );
+
+        $this->expectException(TenancyMissingException::class);
+
+        $creator->getConfig($sprout, $tenantConfig, [], 'fake-provider');
+    }
+
+    #[Test]
+    public function canCreateTheDriver(): void
+    {
+        $app     = $this->mockApplication();
+        $manager = $this->mockManager();
+        $config  = [
+            'provider' => 'fake-provider',
+            'driver'   => 'fake-driver',
+        ];
+        $sprout       = $this->getSprout($app);
+        $tenantConfig = $this->getTenantConfig($app, $this->mockConfigStoreManager($sprout->getCurrentTenancy(), $sprout->getCurrentTenancy()->tenant()));
+
+        $creator = new TenantConfigAuthProviderCreator(
+            $manager,
+            $tenantConfig,
+            $sprout,
+            'fake-provider',
+            $config,
+        );
+
+        $creator();
+    }
+
+    #[Test]
+    public function throwsAnExceptionWhenOutsideOfContext(): void
+    {
+        $app     = $this->mockApplication();
+        $manager = $this->mockManager(false);
+        $config  = [
+            'provider' => 'fake-provider',
+        ];
+        $sprout       = $this->getSprout($app, false, false);
+        $tenantConfig = $this->getTenantConfig($app, $this->mockConfigStoreManager());
+
+        $sprout->markAsOutsideContext();
+
+        $this->assertFalse($sprout->withinContext());
+
+        $creator = new TenantConfigAuthProviderCreator(
+            $manager,
+            $tenantConfig,
+            $sprout,
+            'fake-provider',
+            $config,
+        );
+
+        $this->expectException(TenancyMissingException::class);
+        $this->expectExceptionMessage('There is no current tenancy');
+
+        $creator();
+    }
+
+    #[Test]
+    public function throwsAnExceptionWhenThereIsNoTenancy(): void
+    {
+        $app     = $this->mockApplication();
+        $manager = $this->mockManager(false);
+        $config  = [
+            'provider' => 'fake-provider',
+        ];
+        $sprout       = $this->getSprout($app, false, false);
+        $tenantConfig = $this->getTenantConfig($app, $this->mockConfigStoreManager());
+
+        $sprout->markAsInContext();
+
+        $this->assertTrue($sprout->withinContext());
+
+        $creator = new TenantConfigAuthProviderCreator(
+            $manager,
+            $tenantConfig,
+            $sprout,
+            'fake-provider',
+            $config,
+        );
+
+        $this->expectException(TenancyMissingException::class);
+        $this->expectExceptionMessage('There is no current tenancy');
+
+        $creator();
+    }
+
+    #[Test]
+    public function throwsAnExceptionWhenThereIsNoTenant(): void
+    {
+        $app     = $this->mockApplication();
+        $manager = $this->mockManager(false);
+        $config  = [
+            'provider' => 'fake-provider',
+        ];
+        $sprout       = $this->getSprout($app, true, false);
+        $tenantConfig = $this->getTenantConfig($app, $this->mockConfigStoreManager());
+
+        $this->assertTrue($sprout->withinContext());
+
+        $creator = new TenantConfigAuthProviderCreator(
+            $manager,
+            $tenantConfig,
+            $sprout,
+            'fake-provider',
+            $config,
+        );
+
+        $this->expectException(TenantMissingException::class);
+        $this->expectExceptionMessage('There is no current tenant for tenancy [my-tenancy]');
+
+        $creator();
+    }
+
     private function mockApplication(bool $default = false): Application&Mockery\MockInterface
     {
-        return Mockery::mock(Application::class, static function (Mockery\MockInterface $mock) use ($default) {
+        return Mockery::mock(Application::class, static function (Mockery\MockInterface $mock) {
             $mock->shouldIgnoreMissing();
         });
     }
@@ -56,7 +184,7 @@ class TenantConfigAuthManagerCreatorTest extends UnitTestCase
                                   $tenancy,
                                   $tenant,
                                   'auth',
-                                  'fake-provider'
+                                  'fake-provider',
                               )
                               ->andReturn([
                                   'driver' => 'null',
@@ -101,113 +229,5 @@ class TenantConfigAuthManagerCreatorTest extends UnitTestCase
     private function getTenantConfig(Application $app, ConfigStoreManager $manager): TenantConfig
     {
         return new TenantConfig($app, $manager);
-    }
-
-    #[Test]
-    public function canCreateTheDriver(): void
-    {
-        $app     = $this->mockApplication();
-        $manager = $this->mockManager();
-        $config  = [
-            'provider' => 'fake-provider',
-            'driver'   => 'fake-driver',
-        ];
-        $sprout  = $this->getSprout($app);
-        $tenantConfig     = $this->getTenantConfig($app, $this->mockConfigStoreManager($sprout->getCurrentTenancy(), $sprout->getCurrentTenancy()->tenant()));
-
-        $creator = new TenantConfigAuthProviderCreator(
-            $manager,
-            $tenantConfig,
-            $sprout,
-            'fake-provider',
-            $config,
-        );
-
-        $creator();
-    }
-
-    #[Test]
-    public function throwsAnExceptionWhenOutsideOfContext(): void
-    {
-        $app     = $this->mockApplication();
-        $manager = $this->mockManager(false);
-        $config  = [
-            'provider' => 'fake-provider',
-        ];
-        $sprout  = $this->getSprout($app, false, false);
-        $tenantConfig     = $this->getTenantConfig($app, $this->mockConfigStoreManager());
-
-        $sprout->markAsOutsideContext();
-
-        $this->assertFalse($sprout->withinContext());
-
-        $creator = new TenantConfigAuthProviderCreator(
-            $manager,
-            $tenantConfig,
-            $sprout,
-            'fake-provider',
-            $config
-        );
-
-        $this->expectException(TenancyMissingException::class);
-        $this->expectExceptionMessage('There is no current tenancy');
-
-        $creator();
-    }
-
-    #[Test]
-    public function throwsAnExceptionWhenThereIsNoTenancy(): void
-    {
-        $app     = $this->mockApplication();
-        $manager = $this->mockManager(false);
-        $config  = [
-            'provider' => 'fake-provider',
-        ];
-        $sprout  = $this->getSprout($app, false, false);
-        $tenantConfig     = $this->getTenantConfig($app, $this->mockConfigStoreManager());
-
-        $sprout->markAsInContext();
-
-        $this->assertTrue($sprout->withinContext());
-
-        $creator = new TenantConfigAuthProviderCreator(
-            $manager,
-            $tenantConfig,
-            $sprout,
-            'fake-provider',
-            $config
-        );
-
-        $this->expectException(TenancyMissingException::class);
-        $this->expectExceptionMessage('There is no current tenancy');
-
-        $creator();
-    }
-
-    #[Test]
-    public function throwsAnExceptionWhenThereIsNoTenant(): void
-    {
-        $app     = $this->mockApplication();
-        $manager = $this->mockManager(false);
-        $config  = [
-            'provider' => 'fake-provider',
-        ];
-        $sprout  = $this->getSprout($app, true, false);
-        $tenantConfig     = $this->getTenantConfig($app, $this->mockConfigStoreManager());
-
-        $this->assertTrue($sprout->withinContext());
-
-        $creator = new TenantConfigAuthProviderCreator(
-            $manager,
-            $tenantConfig,
-            $sprout,
-            'fake-provider',
-            $config
-        );
-
-        $this->expectException(TenantMissingException::class);
-        $this->expectExceptionMessage('There is no current tenant for tenancy [my-tenancy]');
-
-        $creator();
     }
 }
