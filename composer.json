@@ -74,6 +74,12 @@
     "tidy"              : [
       "Composer\\Config::disableProcessTimeout",
       "@php vendor/bin/pint --ansi"
+    ],
+    "suite"             : [
+      "@tidy",
+      "@analyse",
+      "@test",
+      "@infection"
     ]
   },
   "extra"            : {
