@@ -7,6 +7,4 @@ parameters:
     - resources/config
   paths:
     - src
-  ignoreErrors:
-    - identifier: larastan.noEnvCallsOutsideOfConfig
-      path: resources/config
+  ignoreErrors: [ ]
