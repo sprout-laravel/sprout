@@ -1,5 +1,4 @@
-providers:
-  - Sprout\SproutServiceProvider
+providers: [ ]
 
 migrations:
   - workbench/database/migrations
@@ -21,6 +20,5 @@ workbench:
     - asset-publish
     - create-sqlite-db
     - migrate:refresh
-  assets:
-    - sprout-config
-  sync: []
+  assets: [ ]
+  sync: [ ]

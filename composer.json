@@ -20,9 +20,7 @@
     "psr-4": {
       "Sprout\\": "src/"
     },
-    "files": [
-      "src/helpers.php"
-    ]
+    "files": []
   },
   "autoload-dev"     : {
     "psr-4": {
@@ -84,16 +82,7 @@
   },
   "extra"            : {
     "laravel"     : {
-      "providers": [
-        "Sprout\\SproutServiceProvider"
-      ],
-      "facades"  : [
-        "Sprout\\Facades\\Overrides",
-        "Sprout\\Facades\\Providers",
-        "Sprout\\Facades\\Resolvers",
-        "Sprout\\Facades\\Sprout",
-        "Sprout\\Facades\\Tenancies"
-      ]
+      "providers": []
     },
     "branch-alias": {
       "dev-main": "2.x-dev"
